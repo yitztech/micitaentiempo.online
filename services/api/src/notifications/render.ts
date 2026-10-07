@@ -17,6 +17,7 @@ export interface NoticeParams {
   timezone?: string;
   reason?: string | null;
   channel?: string;
+  days?: number;
 }
 
 export function when(lang: Lang, iso: string | undefined, tz: string): string {
@@ -42,6 +43,7 @@ export function staffText(lang: Lang, p: NoticeParams, tz: string): string {
     title: p.title || p.customer || t.untitled,
     when: when(lang, p.start, tz),
     channel: (t.channels as Record<string, string>)[p.channel ?? ""] ?? p.channel ?? "",
+    days: p.days ?? "",
   });
 }
 

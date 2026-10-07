@@ -33,6 +33,8 @@ services:
       WHATSAPP_TOKEN: token-de-prueba
       WHATSAPP_PHONE_NUMBER_ID: "000000000000000"
       WHATSAPP_API_URL: http://captura:4010/whatsapp
+      # Stripe queda apagado (como producción); los escenarios lo encienden contra la captura.
+      STRIPE_FAKE_URL: http://captura:4010
     depends_on:
       captura: { condition: service_healthy }
   calendar:

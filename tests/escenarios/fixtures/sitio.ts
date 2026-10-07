@@ -18,4 +18,4 @@ export const test = base.extend<{ estado: Record<string, unknown> }>({
   estado: async ({}, use) => use({}),
 });
 
-export const { Given, When, Then } = createBdd(test);
+export const { Given, When, Then, After } = createBdd(test);

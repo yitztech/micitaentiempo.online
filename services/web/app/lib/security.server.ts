@@ -14,16 +14,25 @@ function originOf(url: string | undefined): string {
 }
 
 /** CSP de las páginas HTML. El embed y la facturación la amplían en sus rutas. */
-export function contentSecurityPolicy(nonce: string, opts: { frameAncestors?: string } = {}): string {
+export function contentSecurityPolicy(
+  nonce: string,
+  opts: { frameAncestors?: string; stripe?: boolean } = {},
+): string {
   const umami = originOf(process.env.UMAMI_SCRIPT_URL);
   const extra = umami ? ` ${umami}` : "";
+  // Solo en facturación y con Stripe activo (07-frontend.md §7.10).
+  const stripeScript = opts.stripe ? " https://js.stripe.com" : "";
+  const stripeConnect = opts.stripe ? " https://api.stripe.com" : "";
   return [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}'${extra}`,
+    `script-src 'self' 'nonce-${nonce}'${extra}${stripeScript}`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https:",
     "font-src 'self' data:",
-    `connect-src 'self'${extra}`,
+    `connect-src 'self'${extra}${stripeConnect}`,
+    ...(opts.stripe
+      ? ["frame-src https://js.stripe.com https://checkout.stripe.com https://hooks.stripe.com"]
+      : []),
     `frame-ancestors ${opts.frameAncestors ?? "'none'"}`,
     "base-uri 'self'",
     "form-action 'self'",

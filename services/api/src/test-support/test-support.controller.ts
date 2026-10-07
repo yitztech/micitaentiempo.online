@@ -4,6 +4,8 @@ import { TestingService } from "@mcet/contracts/mcet/calendar/v1/testing_pb";
 import { BadRequestException, Body, Controller, Get, Inject, Post } from "@nestjs/common";
 import { z } from "zod";
 import { Public } from "../auth/auth.guard.js";
+import { BillingService } from "../billing/billing.service.js";
+import { setBillingOverride } from "../billing/stripe.config.js";
 import { AppClock } from "../common/clock.js";
 import { asActor, type CalendarClients } from "../internal-rpc/calendar-client.js";
 import { CALENDAR } from "../internal-rpc/internal-rpc.module.js";
@@ -19,6 +21,7 @@ export class TestSupportController {
     @Inject(CALENDAR) private readonly calendar: CalendarClients,
     private readonly clock: AppClock,
     private readonly worker: DeliveryWorker,
+    private readonly billing: BillingService,
   ) {}
 
   /** Comprueba api → calendar con un actor de prueba y devuelve lo que ve el motor. */
@@ -43,9 +46,19 @@ export class TestSupportController {
     return { now: res.now ? timestampDate(res.now).toISOString() : null };
   }
 
-  /** Ejecuta ya el worker de avisos (entregas y recordatorios) con el reloj actual. */
+  /** Ejecuta ya los workers (facturación, recordatorios y entregas) con el reloj actual. */
   @Post("tick")
   async tick() {
+    await this.billing.sweep();
     return this.worker.tick();
+  }
+
+  /** Facturación en pruebas: «fake» (servidor que imita Stripe) u «off» (como producción hoy). */
+  @Post("billing")
+  async billingMode(@Body() body: unknown) {
+    const mode = (body as { mode?: string } | null)?.mode;
+    if (mode !== "fake" && mode !== "off") throw new BadRequestException("mode: fake|off");
+    setBillingOverride(mode);
+    return { mode, enabled: this.billing.config.enabled };
   }
 }

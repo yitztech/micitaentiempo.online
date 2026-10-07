@@ -15,7 +15,12 @@
     "block.created": "{{when}} at “{{calendar}}” was blocked: {{title}}.",
     "block.updated": "The time block on {{when}} at “{{calendar}}” was changed.",
     "block.rescheduled": "The time block at “{{calendar}}” moved to {{when}}.",
-    "block.cancelled": "The time block on {{when}} at “{{calendar}}” was removed."
+    "block.cancelled": "The time block on {{when}} at “{{calendar}}” was removed.",
+    "billing.trial_ending": "Your free trial ends in {{days}} days. Choose a plan to keep taking bookings.",
+    "billing.trial_ended": "Your free trial ended. Your account is read-only until you choose a plan.",
+    "billing.payment_failed": "We couldn't charge your subscription. Update your payment method so you don't lose bookings.",
+    "billing.read_only": "Your account is now read-only. Choose a plan to take bookings again.",
+    "billing.active": "Your subscription is active. Thank you!"
   },
   "customer": {
     "booking.created": "Your {{service}} appointment at “{{calendar}}” is set for {{when}}.",
@@ -28,7 +33,8 @@
     "booking.created": "Your appointment is confirmed",
     "booking.cancelled": "Your appointment was canceled",
     "booking.rescheduled": "Your appointment time changed",
-    "reminder": "Appointment reminder: {{when}}"
+    "reminder": "Appointment reminder: {{when}}",
+    "billing": "Your My Appointment On Time account"
   },
   "preview": "Updates to your schedule on My Appointment On Time",
   "address": "Address: {{address}}",

@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { LoggerModule } from "nestjs-pino";
 import { AuthModule } from "./auth/auth.module.js";
+import { BillingModule } from "./billing/billing.module.js";
 import { CalendarsModule } from "./calendars/calendars.module.js";
 import { ConfigModule } from "./config/config.module.js";
 import { DbModule } from "./db/db.module.js";
@@ -31,6 +32,7 @@ const testControllers = process.env.TEST_MODE ? [TestSupportController] : [];
     CalendarsModule,
     EventsModule,
     NotificationsModule,
+    BillingModule,
   ],
   controllers: [HealthController, SiteController, ...testControllers],
 })

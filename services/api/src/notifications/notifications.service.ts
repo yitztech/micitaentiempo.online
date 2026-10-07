@@ -365,6 +365,35 @@ export class NotificationsService implements OnModuleInit {
     }
   }
 
+  /** Aviso de facturación al propietario: panel, correo (esencial) y sus canales vinculados. */
+  async billingNotice(orgId: string, recipient: Recipient, type: string, days?: number): Promise<void> {
+    const params: NoticeParams = { type, days };
+    const id = `${type}:${orgId}:${this.clock.now().toISOString().slice(0, 10)}`;
+    if (recipient.userId) {
+      await this.db
+        .insert(notifications)
+        .values({
+          id: `${id}:${recipient.userId}`,
+          userId: recipient.userId,
+          orgId,
+          type,
+          params: params as unknown as Record<string, unknown>,
+        })
+        .onConflictDoNothing({ target: notifications.id });
+      this.bus.publish({ type: "notification", calendarId: "", userId: recipient.userId });
+    }
+    const channels = await this.channelsFor(recipient.userId, "billing", true);
+    for (const channel of channels) {
+      await this.enqueue(`${id}:${channel}`, orgId, channel, "billing", {
+        audience: "staff",
+        recipient,
+        params,
+        essential: true,
+        group: "billing",
+      });
+    }
+  }
+
   /** Activa un canal vinculado guardando sus datos cifrados. */
   async activateChannel(
     userId: string,

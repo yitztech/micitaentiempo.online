@@ -12,7 +12,8 @@ async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter({ trustProxy: (_address, hop) => hop < 1, bodyLimit: 256 * 1024 }),
-    { bufferLogs: true },
+    // rawBody: la firma de los webhooks de Stripe se verifica sobre el cuerpo tal cual llegó.
+    { bufferLogs: true, rawBody: true },
   );
   app.useLogger(app.get(Logger));
   app.setGlobalPrefix("api");

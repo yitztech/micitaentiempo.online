@@ -194,15 +194,15 @@ recordatorios con reloj controlado, sin aviso al autor y un solo aviso por cambi
 **Objetivo:** RF-03 y RF-04. Solo suscripción; Stripe implementado completo pero **sin configurar y sin
 valores reales** (decisión del 2026-10-06).
 
-- [ ] Script de Stripe por `lookup_key`; Embedded Checkout con días de prueba restantes; webhooks
+- [x] Script de Stripe por `lookup_key`; Embedded Checkout con días de prueba restantes; webhooks
       idempotentes que releen la suscripción.
-- [ ] Máquina de estados de la organización y efectos de `read_only` en `api`, `calendar` y `web`.
-- [ ] Cambio de plan (bajar exige un solo tablero activo), cancelar y reanudar, método de pago, facturas.
-- [ ] Avisos de fin de prueba (7 y 3 días) y de pago fallido; Stripe Tax con interruptor apagado.
-- [ ] CSP y `Permissions-Policy` de las rutas de facturación, aplicadas solo con Stripe activo.
-- [ ] Modo sin Stripe (`05-negocio-api.md` §5.5): «Disponible pronto», la prueba no vence, límites del plan
+- [x] Máquina de estados de la organización y efectos de `read_only` en `api`, `calendar` y `web`.
+- [x] Cambio de plan (bajar exige un solo tablero activo), cancelar y reanudar, método de pago, facturas.
+- [x] Avisos de fin de prueba (7 y 3 días) y de pago fallido; Stripe Tax con interruptor apagado.
+- [x] CSP y `Permissions-Policy` de las rutas de facturación, aplicadas solo con Stripe activo.
+- [x] Modo sin Stripe (`05-negocio-api.md` §5.5): «Disponible pronto», la prueba no vence, límites del plan
       aplicados, script `org:set-plan`.
-- [ ] Procedimiento «Activar Stripe» en `docs/operacion.md` y script `billing:activate`.
+- [x] Procedimiento «Activar Stripe» en `docs/operacion.md` y script `billing:activate`.
 
 **Aceptación:** escenario `@humo` sin Stripe (como producción); con `stripe-mock`, escenarios de contratar
 Personal, pago fallido → solo lectura, prueba vencida y bajada de plan; reenvío de webhooks sin efectos

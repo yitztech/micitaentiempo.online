@@ -15,7 +15,12 @@
     "block.created": "Se bloqueó el {{when}} en «{{calendar}}»: {{title}}.",
     "block.updated": "Se cambió el bloqueo del {{when}} en «{{calendar}}».",
     "block.rescheduled": "El bloqueo de «{{calendar}}» pasó al {{when}}.",
-    "block.cancelled": "Se quitó el bloqueo del {{when}} en «{{calendar}}»."
+    "block.cancelled": "Se quitó el bloqueo del {{when}} en «{{calendar}}».",
+    "billing.trial_ending": "Tu prueba gratuita termina en {{days}} días. Elige un plan para seguir recibiendo reservas.",
+    "billing.trial_ended": "Tu prueba gratuita terminó. Tu cuenta quedó en solo lectura hasta que elijas un plan.",
+    "billing.payment_failed": "No pudimos cobrar tu suscripción. Actualiza tu método de pago para no perder las reservas.",
+    "billing.read_only": "Tu cuenta quedó en solo lectura. Elige un plan para volver a recibir reservas.",
+    "billing.active": "Tu suscripción está activa. ¡Gracias!"
   },
   "customer": {
     "booking.created": "Tu cita de {{service}} en «{{calendar}}» quedó para el {{when}}.",
@@ -28,7 +33,8 @@
     "booking.created": "Tu cita está confirmada",
     "booking.cancelled": "Tu cita fue cancelada",
     "booking.rescheduled": "Tu cita cambió de hora",
-    "reminder": "Recordatorio de tu cita: {{when}}"
+    "reminder": "Recordatorio de tu cita: {{when}}",
+    "billing": "Tu cuenta de Mi Cita en Tiempo"
   },
   "preview": "Novedades de tu agenda en Mi Cita en Tiempo",
   "address": "Dirección: {{address}}",

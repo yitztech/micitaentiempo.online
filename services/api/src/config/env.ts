@@ -49,6 +49,14 @@ const EnvSchema = z.object({
   MS_CLIENT_ID: optional,
   MS_CLIENT_SECRET: optional,
   STRIPE_SECRET_KEY: optional,
+  STRIPE_WEBHOOK_SECRET: optional,
+  STRIPE_PUBLISHABLE_KEY: optional,
+  STRIPE_TAX_ENABLED: z
+    .string()
+    .default("false")
+    .transform((v) => v === "true" || v === "1"),
+  /** Solo pruebas: servidor que imita Stripe (TEST_MODE). */
+  STRIPE_FAKE_URL: optional,
   SLACK_CLIENT_ID: optional,
   TELEGRAM_BOT_TOKEN: optional,
   WHATSAPP_TOKEN: optional,
@@ -83,6 +91,15 @@ export function loadEnv(source: Record<string, string | undefined> = process.env
   }
   const env = parsed.data;
   const site = siteConfigFromEnv(source);
+  const stripeKeys = [env.STRIPE_SECRET_KEY, env.STRIPE_WEBHOOK_SECRET, env.STRIPE_PUBLISHABLE_KEY].filter(
+    Boolean,
+  ).length;
+  if (stripeKeys > 0 && stripeKeys < 3) {
+    // Configuración a medias: se podría cobrar sin recibir los webhooks (05-negocio-api.md §5.9).
+    throw new Error(
+      "Stripe a medias: define STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET y STRIPE_PUBLISHABLE_KEY juntas o ninguna",
+    );
+  }
   if (env.TEST_MODE) {
     const real = [...site.hosts.keys()].some((h) =>
       PRODUCTION_HOSTS.some((p) => h === p || h.endsWith(`.${p}`)),

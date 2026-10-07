@@ -168,6 +168,21 @@ export class DeliveryWorker implements OnModuleInit, OnModuleDestroy {
 
     if (channel === "email") {
       if (!r.email) throw new ChannelError("sin correo", true);
+      if (row.template === "billing") {
+        const url = `${this.siteUrl(r.lang)}${pathFor("billing", r.lang)}`;
+        await this.mail.send({
+          lang: r.lang,
+          to: r.email,
+          ...(await customerNoticeEmail(r.lang, {
+            subject: NOTICES[r.lang].subjects.billing,
+            text,
+            name: r.name,
+            manageUrl: url,
+            buttonLabel: NOTICES[r.lang].openPanel,
+          })),
+        });
+        return;
+      }
       if (p.audience === "staff") {
         const unsub = this.unsubscribeUrl(r.lang, r.userId, p.group, "email") ?? panelUrl;
         await this.mail.send({

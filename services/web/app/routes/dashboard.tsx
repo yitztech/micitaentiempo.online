@@ -41,7 +41,7 @@ export const meta = (args: Route.MetaArgs) =>
   metaFor(args, (t) => ({ title: t.panel.home.seoTitle, indexable: false }));
 
 export default function PanelHome({ loaderData }: Route.ComponentProps) {
-  const { site, t } = useRoot();
+  const { site, t, features } = useRoot();
   const p = t.panel.home;
   const { me, calendars, org } = usePanel();
   const byId = new Map(calendars.map((c) => [c.id, c]));
@@ -55,7 +55,7 @@ export default function PanelHome({ loaderData }: Route.ComponentProps) {
       </h1>
       {org?.status === "read_only" ? <Alert tone="warning">{p.readOnly}</Alert> : null}
       {org?.status === "trialing" ? (
-        <Alert tone="info">{days !== null ? fmt(p.trialDays, { days }) : p.trial}</Alert>
+        <Alert tone="info">{features.stripe && days !== null ? fmt(p.trialDays, { days }) : p.trial}</Alert>
       ) : null}
 
       <section aria-labelledby="proximas">

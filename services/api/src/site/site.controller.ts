@@ -16,6 +16,7 @@ import {
 } from "@nestjs/common";
 import type { FastifyRequest } from "fastify";
 import { Public } from "../auth/auth.guard.js";
+import { stripeConfig } from "../billing/stripe.config.js";
 import { requestLang } from "../common/request.js";
 import { ZodPipe } from "../common/zod.pipe.js";
 import { ENV } from "../config/config.module.js";
@@ -30,7 +31,7 @@ export function features(env: Env) {
   return {
     google: Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET),
     microsoft: Boolean(env.MS_CLIENT_ID && env.MS_CLIENT_SECRET),
-    stripe: Boolean(env.STRIPE_SECRET_KEY),
+    stripe: stripeConfig(env).enabled,
     slack: Boolean(env.SLACK_CLIENT_ID),
     telegram: Boolean(env.TELEGRAM_BOT_TOKEN),
     whatsapp: Boolean(env.WHATSAPP_TOKEN && env.WHATSAPP_PHONE_NUMBER_ID),

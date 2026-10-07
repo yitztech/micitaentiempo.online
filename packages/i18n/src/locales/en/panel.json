@@ -12,7 +12,8 @@
     "newCalendar": "New board",
     "menu": "Dashboard menu",
     "inbox": "Notifications",
-    "notificationSettings": "Notification preferences"
+    "notificationSettings": "Notification preferences",
+    "billing": "Billing"
   },
   "bell": {
     "label": "Notifications",
@@ -319,5 +320,45 @@
     "slackOk": "Slack is connected.",
     "slackError": "Couldn't connect Slack.",
     "whatsappOk": "WhatsApp is connected."
+  },
+  "billing": {
+    "seoTitle": "Billing",
+    "title": "Billing",
+    "plan": "Plan",
+    "status": "Status",
+    "statuses": {
+      "trialing": "Free trial",
+      "active": "Active",
+      "past_due": "Payment due",
+      "read_only": "Read-only",
+      "suspended": "Suspended"
+    },
+    "trialDays": "Your trial ends on {{date}}.",
+    "trialNoEnd": "You're on the free trial. Online payment is coming soon; until then your trial doesn't expire.",
+    "subscribe": "Subscribe",
+    "soon": "Coming soon",
+    "changeTo": "Switch to {{plan}}",
+    "current": "Current plan",
+    "downgradeHint": "To move to Personal, keep only one active board (archive the others).",
+    "cancel": "Cancel subscription",
+    "cancelHint": "You'll keep access until {{date}}.",
+    "resume": "Resume subscription",
+    "cancelScheduled": "It will be canceled on {{date}}.",
+    "renews": "Renews on {{date}}.",
+    "paymentMethod": "Payment method",
+    "updatePayment": "Change payment method",
+    "savePayment": "Save payment method",
+    "paymentSaved": "Payment method saved.",
+    "invoices": "Invoices",
+    "noInvoices": "No invoices yet.",
+    "download": "Download PDF",
+    "checkoutTitle": "Complete payment",
+    "limits": "{{calendars}} board(s) · up to {{members}} people per board",
+    "errors": {
+      "too_many_calendars": "Archive boards until only one is active to move to Personal.",
+      "already_subscribed": "You already have an active subscription.",
+      "billing_disabled": "Online payment is coming soon.",
+      "generic": "Couldn't complete it. Please try again."
+    }
   }
 }

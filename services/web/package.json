@@ -17,6 +17,7 @@
     "@mcet/schemas": "workspace:*",
     "@react-router/node": "8.4.0",
     "@react-router/serve": "8.4.0",
+    "@stripe/stripe-js": "10.0.0",
     "altcha-lib": "2.6.0",
     "isbot": "5.2.2",
     "lucide-react": "1.52.0",

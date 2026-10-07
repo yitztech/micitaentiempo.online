@@ -40,6 +40,7 @@ export default [
     ...page("customers", "routes/customers.tsx"),
     ...page("inbox", "routes/inbox.tsx"),
     ...page("notificationSettings", "routes/notification-settings.tsx"),
+    ...page("billing", "routes/billing.tsx"),
   ]),
   ...page("booking", "routes/booking.tsx"),
   ...page("myAppointments", "routes/my-appointments.tsx"),

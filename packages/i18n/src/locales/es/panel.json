@@ -12,7 +12,8 @@
     "newCalendar": "Nuevo tablero",
     "menu": "Menú del panel",
     "inbox": "Avisos",
-    "notificationSettings": "Preferencias de avisos"
+    "notificationSettings": "Preferencias de avisos",
+    "billing": "Facturación"
   },
   "bell": {
     "label": "Avisos",
@@ -319,5 +320,45 @@
     "slackOk": "Slack quedó conectado.",
     "slackError": "No se pudo conectar Slack.",
     "whatsappOk": "WhatsApp quedó conectado."
+  },
+  "billing": {
+    "seoTitle": "Facturación",
+    "title": "Facturación",
+    "plan": "Plan",
+    "status": "Estado",
+    "statuses": {
+      "trialing": "Periodo de prueba",
+      "active": "Activa",
+      "past_due": "Pago pendiente",
+      "read_only": "Solo lectura",
+      "suspended": "Suspendida"
+    },
+    "trialDays": "La prueba termina el {{date}}.",
+    "trialNoEnd": "Estás en el periodo de prueba. El pago en línea estará disponible pronto; mientras tanto la prueba no vence.",
+    "subscribe": "Contratar",
+    "soon": "Disponible pronto",
+    "changeTo": "Cambiar a {{plan}}",
+    "current": "Plan actual",
+    "downgradeHint": "Para bajar a Personal deja un solo tablero activo (archiva los demás).",
+    "cancel": "Cancelar la suscripción",
+    "cancelHint": "Seguirás teniendo acceso hasta el {{date}}.",
+    "resume": "Reanudar la suscripción",
+    "cancelScheduled": "Se cancelará el {{date}}.",
+    "renews": "Se renueva el {{date}}.",
+    "paymentMethod": "Método de pago",
+    "updatePayment": "Cambiar método de pago",
+    "savePayment": "Guardar método de pago",
+    "paymentSaved": "Método de pago guardado.",
+    "invoices": "Facturas",
+    "noInvoices": "Aún no hay facturas.",
+    "download": "Descargar PDF",
+    "checkoutTitle": "Completa el pago",
+    "limits": "{{calendars}} tablero(s) · hasta {{members}} personas por tablero",
+    "errors": {
+      "too_many_calendars": "Archiva tableros hasta dejar uno activo para bajar a Personal.",
+      "already_subscribed": "Ya tienes una suscripción activa.",
+      "billing_disabled": "El pago en línea estará disponible pronto.",
+      "generic": "No se pudo completar. Inténtalo de nuevo."
+    }
   }
 }

@@ -140,6 +140,7 @@ export async function customerNoticeEmail(
     reason?: string | null;
     manageUrl: string;
     unsubscribeUrl?: string;
+    buttonLabel?: string;
   },
 ) {
   const n = NOTICES_EMAIL[lang];
@@ -152,7 +153,7 @@ export async function customerNoticeEmail(
       {p.address ? <Text style={styles.muted}>{interpolate(n.address, { address: p.address })}</Text> : null}
       {p.reason ? <Text style={styles.muted}>{interpolate(n.reason, { reason: p.reason })}</Text> : null}
       <Button href={p.manageUrl} style={styles.button}>
-        {n.manage}
+        {p.buttonLabel ?? n.manage}
       </Button>
       {p.unsubscribeUrl ? (
         <Text style={styles.muted}>

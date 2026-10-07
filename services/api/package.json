@@ -9,7 +9,10 @@
     "start": "node --enable-source-maps dist/main.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
-    "db:generate": "drizzle-kit generate"
+    "db:generate": "drizzle-kit generate",
+    "stripe:setup": "node dist/scripts/stripe-setup.js",
+    "org:set-plan": "node dist/scripts/org-set-plan.js",
+    "billing:activate": "node dist/scripts/billing-activate.js"
   },
   "dependencies": {
     "@bufbuild/protobuf": "2.16.0",
@@ -40,6 +43,7 @@
     "react-dom": "19.3.0",
     "reflect-metadata": "0.2.2",
     "rxjs": "7.8.2",
+    "stripe": "23.0.0",
     "zod": "4.6.5"
   },
   "devDependencies": {

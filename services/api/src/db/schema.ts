@@ -157,6 +157,11 @@ export const organizations = app.table(
     stripeSubscriptionId: text("stripe_subscription_id"),
     currentPeriodEnd: timestamp("current_period_end", { withTimezone: true }),
     cancelAtPeriodEnd: boolean("cancel_at_period_end").notNull().default(false),
+    /** Desde cuándo está en past_due (a los 7 días pasa a solo lectura). */
+    pastDueSince: timestamp("past_due_since", { withTimezone: true }),
+    /** Avisos de fin de prueba ya enviados (7 y 3 días antes). */
+    trialNotice7At: timestamp("trial_notice7_at", { withTimezone: true }),
+    trialNotice3At: timestamp("trial_notice3_at", { withTimezone: true }),
     country: text("country"),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
@@ -356,3 +361,11 @@ export const reminders = app.table(
   },
   (t) => [primaryKey({ columns: [t.eventId, t.offsetMin] }), index("reminders_due").on(t.dueAt)],
 );
+
+/** Webhooks de Stripe recibidos (id único: un reenvío no tiene efectos dobles). */
+export const billingEvents = app.table("billing_events", {
+  id: text("id").primaryKey(),
+  type: text("type").notNull(),
+  receivedAt: timestamp("received_at", { withTimezone: true }).notNull().defaultNow(),
+  processedAt: timestamp("processed_at", { withTimezone: true }),
+});
