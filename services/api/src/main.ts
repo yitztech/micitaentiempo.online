@@ -16,6 +16,14 @@ async function bootstrap(): Promise<void> {
     { bufferLogs: true, rawBody: true },
   );
   app.useLogger(app.get(Logger));
+  // Respuestas con datos de cuenta: sin caché salvo que la ruta diga otra cosa (metadatos públicos).
+  app
+    .getHttpAdapter()
+    .getInstance()
+    .addHook("onSend", async (_req, reply, payload) => {
+      if (!reply.hasHeader("cache-control")) reply.header("cache-control", "no-store");
+      return payload;
+    });
   app.setGlobalPrefix("api");
   app.useGlobalFilters(new ProblemFilter());
   app.enableShutdownHooks();

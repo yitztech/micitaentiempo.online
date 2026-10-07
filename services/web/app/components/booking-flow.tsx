@@ -262,6 +262,7 @@ export function BookingFlow({
             {b.change}
           </button>
           <form
+            method="post"
             onSubmit={submitDetails}
             onFocus={() => void altcha.start().catch(() => undefined)}
             className="mt-4 space-y-4"

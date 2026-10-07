@@ -47,7 +47,7 @@ export default function VerifyEmail() {
       {resent ? (
         <Alert tone="success">{s.resent}</Alert>
       ) : (
-        <form onSubmit={onSubmit} className="space-y-5">
+        <form method="post" onSubmit={onSubmit} className="space-y-5">
           <Field
             label={t.auth.fields.email}
             name="email"

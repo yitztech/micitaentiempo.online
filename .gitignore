@@ -17,3 +17,4 @@ tests/escenarios/.features-gen/
 /services/calendar/calendar
 cucumber-report*/
 .cc-writes/
+tests/carga/resultados/

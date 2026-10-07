@@ -58,6 +58,7 @@ export default function ForgotPassword() {
         <Alert tone="success">{s.sent}</Alert>
       ) : (
         <form
+          method="post"
           onSubmit={onSubmit}
           onFocus={() => void altcha.start().catch(() => undefined)}
           className="space-y-5"

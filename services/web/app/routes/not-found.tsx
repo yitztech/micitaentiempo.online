@@ -1,7 +1,7 @@
 import { data } from "react-router";
 
 export function loader() {
-  throw data(null, { status: 404 });
+  throw data(null, { status: 404, statusText: "Not Found" });
 }
 
 export default function NotFound() {

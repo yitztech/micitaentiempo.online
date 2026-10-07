@@ -188,6 +188,7 @@ export function EventEditor({
   return (
     <Dialog open onClose={onClose} title={heading}>
       <form
+        method="post"
         onSubmit={(x: FormEvent) => {
           x.preventDefault();
           void save();

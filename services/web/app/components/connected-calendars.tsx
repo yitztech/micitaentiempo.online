@@ -212,7 +212,7 @@ export function ConnectedCalendars({
           </div>
         ) : null}
         {icloud ? (
-          <form onSubmit={connectICloud} className="grid gap-4 sm:grid-cols-2">
+          <form method="post" onSubmit={connectICloud} className="grid gap-4 sm:grid-cols-2">
             <Field label={s.appleId} name="appleId" type="email" autoComplete="username" required />
             <Field
               label={s.appPassword}

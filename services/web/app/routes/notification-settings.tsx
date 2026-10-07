@@ -214,7 +214,11 @@ export default function NotificationSettings({ loaderData }: Route.ComponentProp
                   </Alert>
                 ) : null}
                 {c === "whatsapp" && st.status !== "active" ? (
-                  <form onSubmit={whatsapp} className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+                  <form
+                    method="post"
+                    onSubmit={whatsapp}
+                    className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end"
+                  >
                     {waSent ? (
                       <Field
                         label={p.code}

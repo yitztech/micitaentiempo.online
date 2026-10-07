@@ -52,7 +52,7 @@ export function ServiceForm({
     }
   }
   return (
-    <form onSubmit={submit} className="grid gap-4 sm:grid-cols-2">
+    <form method="post" onSubmit={submit} className="grid gap-4 sm:grid-cols-2">
       <Field
         label={s.serviceName}
         name="name"

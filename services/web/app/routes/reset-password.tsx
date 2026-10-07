@@ -57,7 +57,7 @@ export default function ResetPassword() {
           </LinkButton>
         </>
       ) : (
-        <form onSubmit={onSubmit} className="space-y-5">
+        <form method="post" onSubmit={onSubmit} className="space-y-5">
           <Field
             label={t.auth.fields.newPassword}
             name="password"

@@ -22,8 +22,8 @@ export async function panelGet<T>(
   if (res.status === 403 && (res.body as { code?: string } | null)?.code === "email_not_verified") {
     throw redirect(pathFor("verifyEmail", context.get(siteContext).lang));
   }
-  if (res.status === 404 || res.status === 403) throw data(null, { status: 404 });
-  if (res.status >= 400 || res.body === null) throw data(null, { status: 502 });
+  if (res.status === 404 || res.status === 403) throw data(null, { status: 404, statusText: "Not Found" });
+  if (res.status >= 400 || res.body === null) throw data(null, { status: 502, statusText: "Bad Gateway" });
   return res.body;
 }
 

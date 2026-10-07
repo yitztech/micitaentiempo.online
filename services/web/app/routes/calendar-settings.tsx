@@ -94,7 +94,7 @@ export default function CalendarSettings({ loaderData }: Route.ComponentProps) {
 
       <Card className="p-6">
         <h2 className="text-lg font-semibold">{s.general}</h2>
-        <form onSubmit={general} className="mt-4 grid gap-4 sm:grid-cols-2">
+        <form method="post" onSubmit={general} className="mt-4 grid gap-4 sm:grid-cols-2">
           <Field label={s.name} name="name" required maxLength={120} defaultValue={board.name} />
           <Select label={s.timezone} name="timezone" defaultValue={board.timezone}>
             {allTimeZones().map((z) => (

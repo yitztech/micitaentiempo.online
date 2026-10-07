@@ -40,6 +40,8 @@ s.parentNode.insertBefore(b,s.nextSibling);
     headers: {
       "Content-Type": "text/javascript; charset=utf-8",
       "Cache-Control": "public, max-age=300",
+      // Lo cargan las webs de los negocios (otros orígenes).
+      "Cross-Origin-Resource-Policy": "cross-origin",
       "Access-Control-Allow-Origin": "*",
     },
   });

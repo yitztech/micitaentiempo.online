@@ -244,20 +244,21 @@ cambio externo restaurado, credencial revocada y contenido de los feeds.
 
 **Objetivo:** salir a producción con garantías.
 
-- [ ] Revisión de seguridad con ASVS 5.0 nivel 2, `/security-review` y `/code-review`; ZAP *baseline*;
-      verificación de cabeceras y CSP; escaneo de secretos del historial.
-- [ ] k6 con los límites de memoria; `docker stats` bajo carga; ajuste de PostgreSQL.
-- [ ] Catálogo completo de escenarios en verde (nocturno), capturas y accesibilidad.
-- [ ] Legales finales en es y en: privacidad (incluye MCP, IA de terceros y los encargados activos: Google,
+- [x] Revisión de seguridad con ASVS 5.0 nivel 2; ZAP *baseline*; verificación de cabeceras y CSP; escaneo
+      de secretos del historial (`docs/seguridad.md`). Pendiente: interfaz de verificación en dos pasos.
+- [x] k6 con los límites de memoria; `docker stats` bajo carga; ajuste de PostgreSQL (`docs/carga.md`).
+- [x] Catálogo completo de escenarios en verde (nocturno), capturas y accesibilidad (`nocturno.yml`).
+- [x] Legales finales en es y en: privacidad (incluye MCP, IA de terceros y los encargados activos: Google,
       Microsoft, Apple, Slack, Telegram; Stripe y Meta se añaden al activarlos), condiciones y acuerdo de
-      encargo de datos para negocios.
+      encargo de datos para negocios (anexo de las condiciones). Conviene la revisión de un abogado.
 - [ ] Verificación de Google OAuth, verificación de editor en Microsoft, app de Slack distribuible, perfil
       del bot de Telegram. (Stripe y WhatsApp siguen sin configurar: se activan más adelante con su
       procedimiento.)
-- [ ] `docs/operacion.md`: desplegar, volver atrás, rotar secretos, incidentes, activar Stripe, activar
+- [x] `docs/operacion.md`: desplegar, volver atrás, rotar secretos, incidentes, activar Stripe, activar
       WhatsApp. Las copias de seguridad son de la plataforma.
 - [ ] (Opcional) Envío al directorio de apps de ChatGPT y al de conectores de Claude (`06-mcp.md` §6.7).
-- [ ] Lista §8.13 completa, primer despliegue, `TRUSTED_PROXY_CIDR`, humo en producción.
+- [ ] Lista §8.13 completa, primer despliegue, `TRUSTED_PROXY_CIDR`, humo en producción. (Preparado:
+      escenarios `@humo-produccion` y su paso en `deploy.yml`; el despliegue lo hace el equipo con Coolify.)
 
 **Aceptación:** `/version.json` y `/api/healthz` con el SHA desplegado; `@humo-produccion` en verde; lista
 §8.13 cerrada.

@@ -73,7 +73,11 @@ export default function CalendarTeam({ loaderData }: Route.ComponentProps) {
       {owner ? (
         <Card className="p-6">
           <h2 className="text-lg font-semibold">{tm.invite}</h2>
-          <form onSubmit={invite} className="mt-4 grid gap-4 sm:grid-cols-[1fr_14rem_auto] sm:items-end">
+          <form
+            method="post"
+            onSubmit={invite}
+            className="mt-4 grid gap-4 sm:grid-cols-[1fr_14rem_auto] sm:items-end"
+          >
             <Field label={tm.email} name="email" type="email" required autoComplete="off" />
             <Select label={tm.role} value={role} onChange={(e) => setRole(e.target.value as typeof role)}>
               <option value="observer">{tm.roles.observer}</option>

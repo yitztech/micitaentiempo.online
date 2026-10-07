@@ -53,6 +53,7 @@ export default function Contact() {
         </Alert>
       ) : (
         <form
+          method="post"
           onSubmit={onSubmit}
           onFocus={() => void altcha.start().catch(() => undefined)}
           className="mt-8 space-y-5"

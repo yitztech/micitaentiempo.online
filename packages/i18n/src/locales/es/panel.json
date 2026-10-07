@@ -14,7 +14,8 @@
     "inbox": "Avisos",
     "notificationSettings": "Preferencias de avisos",
     "billing": "Facturación",
-    "ai": "IA"
+    "ai": "IA",
+    "account": "Cuenta"
   },
   "bell": {
     "label": "Avisos",
@@ -433,5 +434,45 @@
       "«Cierra el negocio el 24 de diciembre.»"
     ],
     "keep": "Mantener"
+  },
+  "account": {
+    "seoTitle": "Cuenta",
+    "title": "Tu cuenta",
+    "profile": "Perfil",
+    "name": "Nombre",
+    "language": "Idioma de los correos",
+    "languages": {
+      "es": "Español",
+      "en": "Inglés"
+    },
+    "timezone": "Zona horaria",
+    "timeFormat": "Formato de hora",
+    "timeFormats": {
+      "24h": "24 horas (14:30)",
+      "12h": "12 horas (2:30 p. m.)"
+    },
+    "weekStart": "La semana empieza el",
+    "weekStarts": {
+      "1": "lunes",
+      "7": "domingo"
+    },
+    "save": "Guardar",
+    "saved": "Cambios guardados.",
+    "password": "Contraseña",
+    "currentPassword": "Contraseña actual",
+    "newPassword": "Contraseña nueva",
+    "newPasswordHint": "Al menos 12 caracteres. Se cerrarán tus otras sesiones.",
+    "changePassword": "Cambiar contraseña",
+    "passwordChanged": "Contraseña cambiada.",
+    "data": "Tus datos",
+    "exportLead": "Descarga una copia de los datos de tu cuenta en formato JSON.",
+    "export": "Exportar mis datos",
+    "deleteTitle": "Borrar la cuenta",
+    "deleteLead": "Se borran tu cuenta y tus datos personales. No se puede deshacer.",
+    "delete": "Borrar mi cuenta",
+    "deleteConfirm": "¿Seguro? Escribe BORRAR para confirmar.",
+    "deleteWord": "BORRAR",
+    "keep": "Cancelar",
+    "ownerHasOrg": "Eres propietario de un negocio: para cerrarlo y borrar la cuenta, escríbenos desde la página de contacto."
   }
 }

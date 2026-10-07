@@ -199,7 +199,7 @@ export default function AiPage({ loaderData }: Route.ComponentProps) {
                 ))}
               </ul>
             ) : null}
-            <form onSubmit={onCreate} className="flex flex-col gap-3 sm:flex-row sm:items-end">
+            <form method="post" onSubmit={onCreate} className="flex flex-col gap-3 sm:flex-row sm:items-end">
               <Field
                 label={a.geminiName}
                 name="name"

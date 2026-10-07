@@ -7,9 +7,9 @@ services:
     ports: ["8080:80"]
     environment:
       # Las pruebas hacen muchas altas desde la misma IP.
-      RATE_AUTH: 600r/m
-      RATE_PUBLIC: 6000r/m
-      RATE_MCP: 6000r/m
+      RATE_AUTH: ${RATE_AUTH:-600r/m}
+      RATE_PUBLIC: ${RATE_PUBLIC:-6000r/m}
+      RATE_MCP: ${RATE_MCP:-6000r/m}
       RATE_ICS: 600r/m
       BURST_AUTH: "500"
       BURST_PUBLIC: "2000"

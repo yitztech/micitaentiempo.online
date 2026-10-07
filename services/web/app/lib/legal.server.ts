@@ -10,7 +10,7 @@ import termsEs from "~/content/es/terms.md?raw";
 export type LegalDoc = "privacy" | "terms" | "credits";
 
 /** Fecha de la última revisión de los textos legales (se actualiza al cambiarlos). */
-export const LEGAL_UPDATED = "2026-10-06";
+export const LEGAL_UPDATED = "2026-10-07";
 
 const SOURCES: Record<Lang, Record<LegalDoc, string>> = {
   es: { privacy: privacyEs, terms: termsEs, credits: creditsEs },

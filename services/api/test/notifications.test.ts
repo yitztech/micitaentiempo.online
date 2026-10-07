@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { open, seal, sign, verify } from "../src/common/crypto.js";
+import { redactUrl } from "../src/common/log-redact.js";
 import { groupOf } from "../src/notifications/groups.js";
 import { customerText, staffText } from "../src/notifications/render.js";
 
@@ -47,5 +48,17 @@ describe("grupos y textos de avisos", () => {
     expect(customerText("es", { ...p, type: "reminder" }, "America/Mexico_City").subject).toBe(
       "Recordatorio de tu cita: martes, 15 de septiembre, 10:00 a.m.",
     );
+  });
+});
+
+describe("registros sin secretos", () => {
+  it("oculta tokens, códigos y firmas de la consulta", () => {
+    expect(redactUrl("/api/auth/verify-email?token=abc&callbackURL=%2Fpanel")).toBe(
+      "/api/auth/verify-email?token=%5Boculto%5D&callbackURL=%2Fpanel",
+    );
+    expect(redactUrl("/oauth/consent?client_id=x&sig=zzz")).toBe(
+      "/oauth/consent?client_id=x&sig=%5Boculto%5D",
+    );
+    expect(redactUrl("/api/healthz")).toBe("/api/healthz");
   });
 });

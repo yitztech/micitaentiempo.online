@@ -40,6 +40,7 @@ export default [
     ...page("calendarTeam", "routes/calendar-team.tsx"),
     ...page("customers", "routes/customers.tsx"),
     ...page("inbox", "routes/inbox.tsx"),
+    ...page("account", "routes/account.tsx"),
     ...page("notificationSettings", "routes/notification-settings.tsx"),
     ...page("billing", "routes/billing.tsx"),
     ...page("ai", "routes/ai.tsx"),

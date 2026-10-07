@@ -14,7 +14,8 @@
     "inbox": "Notifications",
     "notificationSettings": "Notification preferences",
     "billing": "Billing",
-    "ai": "AI"
+    "ai": "AI",
+    "account": "Account"
   },
   "bell": {
     "label": "Notifications",
@@ -433,5 +434,45 @@
       "“Close the business on December 24.”"
     ],
     "keep": "Keep"
+  },
+  "account": {
+    "seoTitle": "Account",
+    "title": "Your account",
+    "profile": "Profile",
+    "name": "Name",
+    "language": "Email language",
+    "languages": {
+      "es": "Spanish",
+      "en": "English"
+    },
+    "timezone": "Time zone",
+    "timeFormat": "Time format",
+    "timeFormats": {
+      "24h": "24-hour (14:30)",
+      "12h": "12-hour (2:30 PM)"
+    },
+    "weekStart": "Week starts on",
+    "weekStarts": {
+      "1": "Monday",
+      "7": "Sunday"
+    },
+    "save": "Save",
+    "saved": "Changes saved.",
+    "password": "Password",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "newPasswordHint": "At least 12 characters. Your other sessions will be signed out.",
+    "changePassword": "Change password",
+    "passwordChanged": "Password changed.",
+    "data": "Your data",
+    "exportLead": "Download a copy of your account data as JSON.",
+    "export": "Export my data",
+    "deleteTitle": "Delete account",
+    "deleteLead": "Your account and personal data are deleted. This can't be undone.",
+    "delete": "Delete my account",
+    "deleteConfirm": "Are you sure? Type DELETE to confirm.",
+    "deleteWord": "DELETE",
+    "keep": "Cancel",
+    "ownerHasOrg": "You own a business: to close it and delete your account, write to us from the contact page."
   }
 }

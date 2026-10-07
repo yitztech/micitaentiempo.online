@@ -2,7 +2,7 @@
 #
 #   pruebas (ci.yml) → publicar (5 imágenes) → desplegar (webhook de Coolify) → comprobar
 #
-# El entorno `production` (secretos COOLIFY_WEBHOOK y COOLIFY_TOKEN, variable SITE_URL)
+# El entorno `production` (secretos COOLIFY_WEBHOOK y COOLIFY_TOKEN, variables SITE_URL y SITE_URL_EN)
 # lo rellena el alta del cliente. Mientras no exista, se publican las imágenes pero no se despliega.
 name: Desplegar
 
@@ -114,3 +114,23 @@ jobs:
             fi
             sleep 10
           done
+
+      # Humo de solo lectura en los dos dominios (features/humo/produccion.feature).
+      - uses: actions/checkout@v7
+        if: steps.coolify.outputs.listo == 'true'
+      - uses: pnpm/action-setup@v6
+        if: steps.coolify.outputs.listo == 'true'
+      - uses: actions/setup-node@v7
+        if: steps.coolify.outputs.listo == 'true'
+        with:
+          node-version: 24
+          cache: pnpm
+      - name: Humo en producción
+        if: steps.coolify.outputs.listo == 'true'
+        env:
+          ES_URL: ${{ vars.SITE_URL }}
+          EN_URL: ${{ vars.SITE_URL_EN }}
+          EXPECTED_SHA: ${{ github.sha }}
+        run: |
+          pnpm install --frozen-lockfile --filter @mcet/escenarios...
+          pnpm --filter @mcet/escenarios exec sh -c 'bddgen && playwright test --project escritorio --grep @humo-produccion'

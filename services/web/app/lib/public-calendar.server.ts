@@ -7,7 +7,7 @@ export async function loadPublicCalendar(
   request: Request,
   slug: string | undefined,
 ): Promise<PublicCalendar> {
-  if (!slug || !/^[a-z0-9-]{3,70}$/.test(slug)) throw data(null, { status: 404 });
+  if (!slug || !/^[a-z0-9-]{3,70}$/.test(slug)) throw data(null, { status: 404, statusText: "Not Found" });
   const res = await apiGet<PublicCalendar>(request, `/api/public/v1/calendars/${slug}`);
   if (res.status !== 200 || !res.body) throw data(null, { status: res.status === 404 ? 404 : 502 });
   return res.body;

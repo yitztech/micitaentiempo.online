@@ -27,7 +27,7 @@ export function contentSecurityPolicy(
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}'${extra}${stripeScript}`,
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: https:",
+    "img-src 'self' data: blob:",
     "font-src 'self' data:",
     `connect-src 'self'${extra}${stripeConnect}`,
     ...(opts.stripe
@@ -48,4 +48,8 @@ export function applyPageHeaders(headers: Headers, nonce: string, pathname: stri
   if (!isEmbed) headers.set("X-Frame-Options", "DENY");
   headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()");
   headers.set("Cross-Origin-Opener-Policy", isEmbed ? "same-origin-allow-popups" : "same-origin");
+  // Lo que no es público (panel, acceso, reservas) no se guarda en cachés compartidas ni del navegador.
+  if (!headers.has("Cache-Control")) headers.set("Cache-Control", "private, no-store");
+  // Las páginas solo se cargan desde su propio origen; el iframe del embed vive en webs de terceros.
+  headers.set("Cross-Origin-Resource-Policy", isEmbed ? "cross-origin" : "same-origin");
 }

@@ -120,7 +120,7 @@ export default function OAuthConsent({ loaderData }: Route.ComponentProps) {
           : undefined
       }
     >
-      <form onSubmit={onSubmit} className="space-y-6">
+      <form method="post" onSubmit={onSubmit} className="space-y-6">
         <fieldset>
           <legend className="mb-2 font-medium">{s.permissions}</legend>
           <ul className="space-y-1">

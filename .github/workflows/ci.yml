@@ -80,6 +80,18 @@ jobs:
             echo "main aún no tiene contratos: nada que comparar"
           fi
 
+  secretos:
+    name: Secretos en el historial (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      # Imagen oficial (la acción exige licencia en organizaciones). Excepciones revisadas en .gitleaksignore.
+      - run: >-
+          docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:v8.30.1 git /repo
+          --no-banner --redact --gitleaks-ignore-path /repo/.gitleaksignore
+
   gateway:
     name: Configuración de nginx
     runs-on: ubuntu-latest

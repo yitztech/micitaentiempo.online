@@ -3,6 +3,7 @@ import { LoggerModule } from "nestjs-pino";
 import { AuthModule } from "./auth/auth.module.js";
 import { BillingModule } from "./billing/billing.module.js";
 import { CalendarsModule } from "./calendars/calendars.module.js";
+import { requestSerializer } from "./common/log-redact.js";
 import { ConfigModule } from "./config/config.module.js";
 import { DbModule } from "./db/db.module.js";
 import { EventsModule } from "./events/events.module.js";
@@ -24,6 +25,8 @@ const testControllers = process.env.TEST_MODE ? [TestSupportController] : [];
       pinoHttp: {
         level: process.env.LOG_LEVEL ?? "info",
         redact: ["req.headers.authorization", "req.headers.cookie", 'res.headers["set-cookie"]'],
+        // Sin cabeceras ni consulta en claro: los enlaces de correo y OAuth llevan tokens en la URL.
+        serializers: { req: requestSerializer },
         genReqId: (req) => (req.headers["x-request-id"] as string | undefined) ?? crypto.randomUUID(),
         autoLogging: { ignore: (req) => req.url === "/api/healthz" },
       },

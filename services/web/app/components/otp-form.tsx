@@ -77,6 +77,7 @@ export function OtpForm({
   if (!sent) {
     return (
       <form
+        method="post"
         onSubmit={(e) => {
           e.preventDefault();
           void send(email.trim());
@@ -103,7 +104,7 @@ export function OtpForm({
     );
   }
   return (
-    <form onSubmit={verify} className="space-y-4">
+    <form method="post" onSubmit={verify} className="space-y-4">
       <Alert tone="info">{fmt(b.verify.sent, { email })}</Alert>
       <Field
         label={b.verify.code}

@@ -88,6 +88,7 @@ export default function SignUp() {
     >
       <GoogleButton callbackURL={callbackURL} />
       <form
+        method="post"
         onSubmit={onSubmit}
         onFocus={() => void altcha.start().catch(() => undefined)}
         className="space-y-5"

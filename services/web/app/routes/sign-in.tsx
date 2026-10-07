@@ -65,7 +65,7 @@ export default function SignIn() {
       }
     >
       <GoogleButton callbackURL={next} />
-      <form onSubmit={onSubmit} className="space-y-5">
+      <form method="post" onSubmit={onSubmit} className="space-y-5">
         <Field label={t.auth.fields.email} name="email" type="email" autoComplete="email" required />
         <Field
           label={t.auth.fields.password}

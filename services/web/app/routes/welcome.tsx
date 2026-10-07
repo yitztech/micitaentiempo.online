@@ -112,6 +112,7 @@ export default function Welcome({ loaderData }: Route.ComponentProps) {
 
         {step === 0 ? (
           <form
+            method="post"
             onSubmit={(e) => {
               e.preventDefault();
               const name = val(e, "org");
@@ -169,6 +170,7 @@ export default function Welcome({ loaderData }: Route.ComponentProps) {
 
         {step === 1 ? (
           <form
+            method="post"
             onSubmit={(e) => {
               e.preventDefault();
               const body = {
@@ -302,6 +304,7 @@ export default function Welcome({ loaderData }: Route.ComponentProps) {
 
         {step === 4 && board ? (
           <form
+            method="post"
             onSubmit={(e) => {
               e.preventDefault();
               const name = val(e, "service");

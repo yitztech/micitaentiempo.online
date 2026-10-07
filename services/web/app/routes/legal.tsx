@@ -13,7 +13,7 @@ export function loader({ request, context }: Route.LoaderArgs) {
   const { lang } = context.get(siteContext);
   const id = matchRoute(new URL(request.url).pathname)?.id ?? "";
   const doc = DOCS[id];
-  if (!doc) throw data(null, { status: 404 });
+  if (!doc) throw data(null, { status: 404, statusText: "Not Found" });
   return { doc, html: legalHtml(lang, doc), updated: LEGAL_UPDATED };
 }
 

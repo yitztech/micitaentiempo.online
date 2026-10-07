@@ -9,6 +9,7 @@ import {
   LogOut,
   Menu,
   Plus,
+  UserRound,
   Users,
   X,
 } from "lucide-react";
@@ -84,6 +85,10 @@ export default function PanelLayout({ loaderData }: Route.ComponentProps) {
       <NavLink to={pathFor("inbox", site.lang)} className={(a) => cx("mt-4", item(a))}>
         <Bell aria-hidden className="size-5" />
         {p.nav.inbox}
+      </NavLink>
+      <NavLink to={pathFor("account", site.lang)} end className={item}>
+        <UserRound aria-hidden className="size-5" />
+        {p.nav.account}
       </NavLink>
       <NavLink to={pathFor("notificationSettings", site.lang)} className={item}>
         <BellRing aria-hidden className="size-5" />
