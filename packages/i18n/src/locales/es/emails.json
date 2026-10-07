@@ -41,5 +41,11 @@
     "intro": "{{name}} ({{email}}) escribió desde el formulario de contacto:",
     "newsletterYes": "Pidió recibir novedades por correo.",
     "replyHint": "Responde a este correo para contestarle."
+  },
+  "aiConnected": {
+    "subject": "Nueva aplicación de IA conectada: {{app}}",
+    "preview": "Una aplicación de IA puede acceder a tu cuenta.",
+    "body": "{{app}} ({{domain}}) se conectó a tu cuenta con estos permisos: {{scopes}}. Si no fuiste tú, revócala ahora.",
+    "button": "Ver aplicaciones conectadas"
   }
 }

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { postJson } from "~/lib/api-client";
 import { useRoot } from "~/lib/i18n";
+import { signedOAuthQuery } from "~/lib/oauth";
 import { Button, Card, OrDivider } from "./ui";
 
 /** Tarjeta de las páginas de acceso: título, entradilla y una acción principal. */
@@ -52,9 +53,11 @@ export function GoogleButton({ callbackURL, divider = true }: { callbackURL: str
   const { t, features } = useRoot();
   if (!features.google) return null;
   async function go() {
+    const oauthQuery = signedOAuthQuery(window.location.search);
     const res = await postJson<{ url?: string }>("/api/auth/sign-in/social", {
       provider: "google",
       callbackURL,
+      ...(oauthQuery ? { oauth_query: oauthQuery } : {}),
     });
     if (res.url) window.location.assign(res.url);
   }

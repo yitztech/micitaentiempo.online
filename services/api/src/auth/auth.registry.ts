@@ -16,6 +16,10 @@ export interface SessionUser {
   emailVerified: boolean;
   locale: Lang;
   timezone: string;
+  /** Canal de la petición; por defecto, el panel. Las herramientas MCP usan "mcp". */
+  via?: "panel" | "mcp";
+  /** Tableros a los que se limita la petición (aplicación de IA con tableros elegidos). */
+  calendarIds?: readonly string[];
 }
 
 /** Una instancia de Better Auth por dominio; se elige por el Host de la petición. */

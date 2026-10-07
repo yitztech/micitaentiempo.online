@@ -1,5 +1,17 @@
 import { pathFor } from "@mcet/i18n";
-import { Bell, BellRing, CalendarDays, CreditCard, Home, LogOut, Menu, Plus, Users, X } from "lucide-react";
+import {
+  Bell,
+  BellRing,
+  Bot,
+  CalendarDays,
+  CreditCard,
+  Home,
+  LogOut,
+  Menu,
+  Plus,
+  Users,
+  X,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation, useRouteLoaderData } from "react-router";
 import { LanguageLink } from "~/components/language-link";
@@ -83,6 +95,10 @@ export default function PanelLayout({ loaderData }: Route.ComponentProps) {
           {p.nav.billing}
         </NavLink>
       ) : null}
+      <NavLink to={pathFor("ai", site.lang)} className={item}>
+        <Bot aria-hidden className="size-5" />
+        {p.nav.ai}
+      </NavLink>
       {staff ? (
         <NavLink to={pathFor("customers", site.lang)} className={item}>
           <Users aria-hidden className="size-5" />

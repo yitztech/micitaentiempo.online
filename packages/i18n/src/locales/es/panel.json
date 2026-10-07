@@ -13,7 +13,8 @@
     "menu": "Menú del panel",
     "inbox": "Avisos",
     "notificationSettings": "Preferencias de avisos",
-    "billing": "Facturación"
+    "billing": "Facturación",
+    "ai": "IA"
   },
   "bell": {
     "label": "Avisos",
@@ -397,5 +398,40 @@
     },
     "revoke": "Revocar",
     "howTo": "Google: Otros calendarios → Desde URL. Outlook: Agregar calendario → Suscribirse desde la web. Apple: Archivo → Nueva suscripción a calendario."
+  },
+  "ai": {
+    "seoTitle": "IA",
+    "title": "Tu IA",
+    "lead": "Conecta Claude, ChatGPT o Gemini para consultar y gestionar tu agenda en lenguaje natural.",
+    "serverUrl": "URL del servidor MCP",
+    "howTo": "Ver pasos por aplicación",
+    "connected": "Aplicaciones conectadas",
+    "none": "Aún no conectaste ninguna aplicación.",
+    "verified": "verificado",
+    "lastUsed": "Último uso: {{when}}",
+    "never": "Sin uso todavía",
+    "allBoards": "Todos los tableros",
+    "boardsCount": "{{count}} tablero(s)",
+    "revoke": "Revocar",
+    "revokeConfirm": "¿Revocar el acceso de {{app}}? Dejará de funcionar al momento.",
+    "revoked": "Acceso revocado.",
+    "gemini": "Credenciales para Gemini Enterprise",
+    "geminiLead": "Gemini Enterprise necesita un cliente OAuth registrado a mano. Crea uno y pega los datos en Team → Connected Apps → Add MCP Server.",
+    "geminiName": "Nombre",
+    "geminiCreate": "Crear credenciales",
+    "geminiOnce": "Copia el secreto ahora: no se volverá a mostrar.",
+    "clientId": "Client ID",
+    "clientSecret": "Client secret",
+    "redirectUri": "URL de retorno",
+    "delete": "Borrar",
+    "ownerOnly": "Solo el propietario de la organización puede crear credenciales.",
+    "examples": "Prueba a preguntarle",
+    "exampleList": [
+      "«¿Qué citas tengo mañana?»",
+      "«Bloquea el viernes de 15:00 a 18:00.»",
+      "«¿Cuántas cancelaciones hubo el mes pasado?»",
+      "«Cierra el negocio el 24 de diciembre.»"
+    ],
+    "keep": "Mantener"
   }
 }

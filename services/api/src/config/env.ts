@@ -57,6 +57,8 @@ const EnvSchema = z.object({
     .transform((v) => v === "true" || v === "1"),
   /** Solo pruebas: servidor que imita Stripe (TEST_MODE). */
   STRIPE_FAKE_URL: optional,
+  /** Solo pruebas: sirve los documentos CIMD de los dominios `.example` (TEST_MODE). */
+  CIMD_FAKE_URL: optional,
   SLACK_CLIENT_ID: optional,
   TELEGRAM_BOT_TOKEN: optional,
   WHATSAPP_TOKEN: optional,

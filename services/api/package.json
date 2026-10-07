@@ -15,6 +15,8 @@
     "billing:activate": "node dist/scripts/billing-activate.js"
   },
   "dependencies": {
+    "@better-auth/cimd": "1.7.7",
+    "@better-auth/oauth-provider": "1.7.7",
     "@bufbuild/protobuf": "2.16.0",
     "@connectrpc/connect": "2.2.0",
     "@connectrpc/connect-fastify": "2.2.0",
@@ -22,6 +24,7 @@
     "@mcet/contracts": "workspace:*",
     "@mcet/i18n": "workspace:*",
     "@mcet/schemas": "workspace:*",
+    "@modelcontextprotocol/server": "2.3.1",
     "@nestjs/common": "12.1.2",
     "@nestjs/core": "12.1.2",
     "@nestjs/platform-fastify": "12.1.2",
@@ -48,6 +51,7 @@
   },
   "devDependencies": {
     "@mcet/tsconfig": "workspace:*",
+    "@modelcontextprotocol/client": "2.3.1",
     "@nestjs/testing": "12.1.2",
     "@testcontainers/postgresql": "12.2.0",
     "@types/node": "24.19.1",

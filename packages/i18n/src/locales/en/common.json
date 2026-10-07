@@ -57,5 +57,18 @@
     "serverBody": "Please try again in a few minutes.",
     "backHome": "Back to home",
     "errorCode": "Code {{code}}"
+  },
+  "aiScopes": {
+    "openid": "Know it's you",
+    "profile": "See who you are, your organization, plan and roles",
+    "email": "See your email",
+    "offline_access": "Stay connected without signing in again",
+    "calendar:read": "See boards, settings, events, free slots and holidays",
+    "calendar:write": "Create, change and cancel events and blocks",
+    "customers:read": "See your customers' contact details (hidden without this)",
+    "stats:read": "See statistics",
+    "settings:write": "Change hours, breaks and exceptions (owner only)",
+    "billing:read": "See plan, trial and invoices (owner only)",
+    "notifications:read": "See recent notifications"
   }
 }

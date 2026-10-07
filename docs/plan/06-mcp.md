@@ -22,15 +22,16 @@ Estado verificado entre julio y octubre de 2026; revisar en cada fuente al imple
 
 - **Endpoint:** `POST https://micitaentiempo.online/mcp` y `POST https://myappointmentontime.online/mcp`. El
   dominio fija el idioma de los textos; las fechas salen en la zona del usuario.
-- **SDK:** `@modelcontextprotocol/server` 2.3.1 con `@modelcontextprotocol/fastify` 2.0.1, registrado en la
-  instancia Fastify de NestJS. Las herramientas son providers de NestJS que llaman a los mismos servicios
+- **SDK:** `@modelcontextprotocol/server` 2.3.1 (`createMcpHandler`), montado con rutas propias en la
+  instancia Fastify de NestJS (ADR 0018). Las herramientas son providers de NestJS que llaman a los mismos servicios
   que la API REST: ninguna lógica duplicada. (`@rekog/mcp-nest` 2.0.7 es la alternativa si se prefieren
   decoradores.)
 - **Protocolo:** especificación 2026-07-28 (sin estado: sin `Mcp-Session-Id`, con `server/discover`) y, con
   el mismo servidor, clientes de la era 2025 atendidos sin estado (comportamiento por defecto del SDK v2).
   **No** activar el modo que rechaza clientes antiguos: Claude sigue la autorización 2025-11-25.
-- **Servidor de autorización:** Better Auth con `@better-auth/oauth-provider`, `@better-auth/mcp`,
-  `@better-auth/cimd` y el plugin `jwt`, uno por dominio (emisor propio).
+- **Servidor de autorización:** Better Auth con `@better-auth/oauth-provider`, `@better-auth/cimd` y el
+  plugin `jwt`, uno por dominio (emisor `https://<dominio>/api/auth`). Los metadatos RFC 9728 y la
+  verificación de tokens son propios (ADR 0018).
 - **Metadatos:** `/.well-known/oauth-protected-resource/mcp` (RFC 9728) y los del servidor de autorización
   (RFC 8414). JWKS publicado.
 - **Consentimiento:** pantalla en `web` (`/oauth/consentimiento` ↔ `/oauth/consent`) con el nombre y el

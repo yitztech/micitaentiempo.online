@@ -81,7 +81,7 @@ otro (p. ej., `@nestjs/swagger` a TypeScript 6), usa la última compatible y an�
 | `@fastify/helmet` · `@fastify/cookie` · `@fastify/rate-limit` · `@fastify/cors` | 13.1.1 · 11.1.2 · 11.2.0 · 11.3.0 | |
 | `typescript` (solo `services/api`) | **6.0.3** | Atado: la CLI de NestJS 12 aún no funciona con TypeScript 7 (falta la API programática de 7.1) y `@nestjs/swagger` declara `^5.5 \|\| ^6`. Subir a 7 cuando NestJS lo soporte |
 | `@types/node` | 24.19.1 | Igual a la mayor de Node |
-| `better-auth` · `@better-auth/oauth-provider` · `@better-auth/mcp` · `@better-auth/cimd` | 1.7.7 | Identidad y servidor OAuth 2.1 para MCP |
+| `better-auth` · `@better-auth/oauth-provider` · `@better-auth/cimd` | 1.7.7 | Identidad y servidor OAuth 2.1 para MCP (`@better-auth/mcp` no se usa: ADR 0018) |
 | `@thallesp/nestjs-better-auth` | 2.8.0 | Integración con NestJS 12 y Fastify |
 | `drizzle-orm` · `drizzle-kit` · `drizzle-zod` | 0.45.3 · 0.31.11 · 0.8.3 | |
 | `pg` | 8.23.1 | |
@@ -109,7 +109,6 @@ otro (p. ej., `@nestjs/swagger` a TypeScript 6), usa la última compatible y an�
 |---|---|---|
 | Especificación MCP | 2026-07-28 | Sin sesiones de protocolo; DCR obsoleto en favor de CIMD; `iss` (RFC 9207) |
 | `@modelcontextprotocol/server` | 2.3.1 | SDK v2; atiende también a clientes de la era 2025 sin estado |
-| `@modelcontextprotocol/fastify` | 2.0.1 | Adaptador para Fastify 5 |
 | `@modelcontextprotocol/client` | 2.3.1 | Solo pruebas |
 | `@modelcontextprotocol/ext-apps` | 2.0.3 | MCP Apps (interfaz interactiva), post-lanzamiento |
 

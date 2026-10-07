@@ -36,6 +36,13 @@
       "when": 1791360953103,
       "tag": "0004_facturacion",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791362800805,
+      "tag": "0005_mcp",
+      "breakpoints": true
     }
   ]
 }

@@ -1,13 +1,16 @@
-import type { Lang } from "@mcet/i18n";
+import { cimd } from "@better-auth/cimd";
+import { oauthProvider } from "@better-auth/oauth-provider";
+import { type Lang, pathFor } from "@mcet/i18n";
 import { APIError, betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { createAuthMiddleware } from "better-auth/api";
-import { bearer, emailOTP, haveIBeenPwned, twoFactor } from "better-auth/plugins";
+import { bearer, emailOTP, haveIBeenPwned, jwt, twoFactor } from "better-auth/plugins";
 import type { Env } from "../config/env.js";
 import type { Database } from "../db/db.module.js";
 import * as schema from "../db/schema.js";
 import type { MailService } from "../mail/mail.service.js";
 import { otpEmail, resetPasswordEmail, verifyEmail } from "../mail/templates/emails.js";
+import { cimdFetch, MCP_DEFAULT_SCOPES, MCP_SCOPES, mcpResource } from "../mcp/mcp.config.js";
 import { checkEmail, type EmailProblem } from "../security/email-validation.js";
 import { uuidv7 } from "./ids.js";
 import { hashPassword, verifyPassword } from "./password.js";
@@ -53,6 +56,26 @@ const ALTCHA_PATHS = new Set([
 
 /** Rutas de Better Auth que reciben un correo nuevo y deben validarlo (RF-02). */
 const EMAIL_PATHS = new Set(["/sign-up/email", "/email-otp/send-verification-otp", "/sign-in/email-otp"]);
+
+/**
+ * Muchos clientes MCP de escritorio y CLI se registran (DCR) con retorno loopback o esquema propio
+ * sin declarar `application_type`; para OAuth eso es «native» (RFC 8252), no «web».
+ */
+export function inferNativeClient(body: unknown): void {
+  const b = body as { application_type?: unknown; redirect_uris?: unknown } | undefined;
+  if (!b || b.application_type !== undefined || !Array.isArray(b.redirect_uris) || !b.redirect_uris.length)
+    return;
+  const native = b.redirect_uris.every((u) => {
+    try {
+      const url = new URL(String(u));
+      if (url.protocol === "http:") return ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname);
+      return url.protocol !== "https:";
+    } catch {
+      return false;
+    }
+  });
+  if (native) b.application_type = "native";
+}
 
 function userLang(user: { locale?: unknown }, fallback: Lang): Lang {
   return user.locale === "en" || user.locale === "es" ? user.locale : fallback;
@@ -151,6 +174,8 @@ export function createAuth(lang: Lang, { env, db, mail, verifyAltcha }: AuthDeps
         "/forget-password": { window: 60 * 60, max: 5 },
         "/request-password-reset": { window: 60 * 60, max: 5 },
         "/send-verification-email": { window: 60 * 60, max: 5 },
+        // Registro dinámico de clientes OAuth (DCR): abierto, pero con tope por IP (06-mcp.md §6.3).
+        "/oauth2/register": { window: 60 * 60, max: 10 },
       },
     },
     hooks: {
@@ -158,6 +183,7 @@ export function createAuth(lang: Lang, { env, db, mail, verifyAltcha }: AuthDeps
         if (ALTCHA_PATHS.has(ctx.path) && !(await verifyAltcha(ctx.headers?.get("x-altcha") ?? undefined))) {
           throw new APIError("FORBIDDEN", { code: "ALTCHA_REQUIRED", message: ALTCHA_MESSAGE[lang] });
         }
+        if (ctx.path === "/oauth2/register") inferNativeClient(ctx.body);
         if (!EMAIL_PATHS.has(ctx.path)) return;
         const body = ctx.body as { email?: unknown } | undefined;
         if (typeof body?.email !== "string") return;
@@ -184,6 +210,31 @@ export function createAuth(lang: Lang, { env, db, mail, verifyAltcha }: AuthDeps
       twoFactor({ issuer: lang === "es" ? "Mi Cita en Tiempo" : "My Appointment On Time" }),
       // Contraseñas filtradas (k-anonimato: solo viajan 5 caracteres del SHA-1). Sin red en pruebas.
       ...(testMode ? [] : [haveIBeenPwned({ customPasswordCompromisedMessage: PWNED_MESSAGE[lang] })]),
+      // Servidor de autorización OAuth 2.1 para MCP (ADR 0018). Access tokens JWT firmados con el
+      // JWKS y ligados (aud) al recurso /mcp de este dominio.
+      jwt({ disableSettingJwtHeader: true }),
+      oauthProvider({
+        loginPage: pathFor("signIn", lang),
+        consentPage: pathFor("oauthConsent", lang),
+        scopes: [...MCP_SCOPES],
+        resources: [mcpResource(env, lang)],
+        clientRegistrationDefaultResources: [mcpResource(env, lang)],
+        enforcePerClientResources: false,
+        allowDynamicClientRegistration: true,
+        allowUnauthenticatedClientRegistration: true,
+        clientRegistrationDefaultScopes: [...MCP_DEFAULT_SCOPES],
+        clientRegistrationAllowedScopes: [...MCP_SCOPES],
+        accessTokenExpiresIn: 15 * 60,
+        refreshTokenExpiresIn: 30 * 24 * 60 * 60,
+        refreshTokenReuseInterval: 30,
+        // Crear equivale al registro dinámico (abierto); leer, cambiar o borrar clientes con la sesión,
+        // nunca: las conexiones se gestionan en Panel → IA.
+        clientPrivileges: ({ action }) => action === "create",
+      }),
+      cimd({
+        fetchClientMetadataResource: cimdFetch(env),
+        metadataProfile: "mcp-2026-07-28",
+      }),
     ],
   });
 }

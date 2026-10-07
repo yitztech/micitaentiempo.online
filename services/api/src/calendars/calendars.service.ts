@@ -99,7 +99,7 @@ export class CalendarsService {
 
   /** Tableros a los que el usuario tiene acceso (como propietario, editor u observador). */
   async list(user: SessionUser) {
-    const ms = await this.access.memberships(user.id);
+    const ms = await this.access.memberships(user.id, user.calendarIds);
     const out = [];
     for (const m of ms) {
       const c = await rpc(

@@ -229,15 +229,46 @@
     "assistants": [
       {
         "name": "Claude",
-        "body": "Agrega Mi Cita en Tiempo como conector personalizado y autoriza el acceso con tu cuenta."
+        "body": "Claude.ai, Claude Desktop y móvil: conector personalizado.",
+        "steps": [
+          "Abre Ajustes → Conectores → Añadir conector personalizado.",
+          "Pega la URL del servidor y guarda.",
+          "Pulsa «Conectar», entra con tu cuenta de Mi Cita en Tiempo y elige permisos y tableros."
+        ]
+      },
+      {
+        "name": "Claude Code",
+        "body": "Desde la terminal.",
+        "steps": [
+          "Ejecuta: claude mcp add --transport http mi-cita {{url}}",
+          "Dentro de Claude Code, usa /mcp y elige «Autenticar»."
+        ]
       },
       {
         "name": "ChatGPT",
-        "body": "Agrégalo como app con conector MCP y autoriza el acceso con tu cuenta."
+        "body": "Modo desarrollador (Business, Enterprise y Edu) o, cuando esté publicada, desde el directorio de apps.",
+        "steps": [
+          "Activa el modo desarrollador en Ajustes → Apps y conectores → Avanzado.",
+          "Crea una app con la URL del servidor y autenticación OAuth.",
+          "Autoriza con tu cuenta y elige permisos y tableros."
+        ]
       },
       {
-        "name": "Gemini",
-        "body": "Disponible en Gemini Enterprise y Gemini CLI como servidor MCP."
+        "name": "Gemini Enterprise",
+        "body": "Lo añade el administrador de tu espacio de trabajo.",
+        "steps": [
+          "En tu panel, abre IA → Credenciales para Gemini Enterprise y crea unas.",
+          "En Gemini Enterprise: Team → Connected Apps → Add MCP Server.",
+          "Pega la URL del servidor, el Client ID y el Client secret."
+        ]
+      },
+      {
+        "name": "Gemini CLI",
+        "body": "Desde la terminal.",
+        "steps": [
+          "Añade a settings.json: \"mcpServers\": { \"mi-cita\": { \"httpUrl\": \"{{url}}\" } }",
+          "Ejecuta /mcp auth mi-cita y autoriza con tu cuenta."
+        ]
       }
     ],
     "examplesTitle": "Lo que puedes pedirle",
@@ -249,7 +280,8 @@
     ],
     "safetyTitle": "Tú decides qué puede hacer",
     "safety": "La IA actúa con los permisos de tu rol. Antes de cambiar o cancelar algo te pide confirmación, y puedes desconectarla desde tu panel.",
-    "soon": "Las instrucciones paso a paso se publican con el lanzamiento."
+    "serverUrl": "URL del servidor MCP",
+    "geminiApp": "La app de Gemini para consumidores aún no admite servidores MCP propios."
   },
   "contact": {
     "seoTitle": "Contacto",

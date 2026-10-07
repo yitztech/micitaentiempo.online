@@ -229,15 +229,46 @@
     "assistants": [
       {
         "name": "Claude",
-        "body": "Add My Appointment On Time as a custom connector and authorize access with your account."
+        "body": "Claude.ai, Claude Desktop and mobile: custom connector.",
+        "steps": [
+          "Open Settings → Connectors → Add custom connector.",
+          "Paste the server URL and save.",
+          "Click “Connect”, sign in with your My Appointment On Time account and choose permissions and boards."
+        ]
+      },
+      {
+        "name": "Claude Code",
+        "body": "From the terminal.",
+        "steps": [
+          "Run: claude mcp add --transport http my-appointment {{url}}",
+          "Inside Claude Code, use /mcp and choose “Authenticate”."
+        ]
       },
       {
         "name": "ChatGPT",
-        "body": "Add it as an app with an MCP connector and authorize access with your account."
+        "body": "Developer mode (Business, Enterprise and Edu) or, once published, from the app directory.",
+        "steps": [
+          "Turn on developer mode in Settings → Apps & Connectors → Advanced.",
+          "Create an app with the server URL and OAuth authentication.",
+          "Authorize with your account and choose permissions and boards."
+        ]
       },
       {
-        "name": "Gemini",
-        "body": "Available in Gemini Enterprise and Gemini CLI as an MCP server."
+        "name": "Gemini Enterprise",
+        "body": "Your workspace admin adds it.",
+        "steps": [
+          "In your dashboard, open AI → Gemini Enterprise credentials and create some.",
+          "In Gemini Enterprise: Team → Connected Apps → Add MCP Server.",
+          "Paste the server URL, the Client ID and the Client secret."
+        ]
+      },
+      {
+        "name": "Gemini CLI",
+        "body": "From the terminal.",
+        "steps": [
+          "Add to settings.json: \"mcpServers\": { \"my-appointment\": { \"httpUrl\": \"{{url}}\" } }",
+          "Run /mcp auth my-appointment and authorize with your account."
+        ]
       }
     ],
     "examplesTitle": "What you can ask",
@@ -249,7 +280,8 @@
     ],
     "safetyTitle": "You decide what it can do",
     "safety": "The AI acts with your role's permissions. It asks you to confirm before changing or canceling anything, and you can disconnect it from your dashboard.",
-    "soon": "Step-by-step instructions will be published at launch."
+    "serverUrl": "MCP server URL",
+    "geminiApp": "The consumer Gemini app doesn't support custom MCP servers yet."
   },
   "contact": {
     "seoTitle": "Contact",

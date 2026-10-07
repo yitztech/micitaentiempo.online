@@ -34,7 +34,17 @@ const PUBLICAS: RouteId[] = [
 ];
 
 /** Nombres propios que se escriben igual en los dos idiomas. */
-const IGUALES = new Set(["Claude", "ChatGPT", "Gemini", "Personal", "Inter", "Lucide"]);
+const IGUALES = new Set([
+  "Claude",
+  "Claude Code",
+  "ChatGPT",
+  "Gemini",
+  "Gemini Enterprise",
+  "Gemini CLI",
+  "Personal",
+  "Inter",
+  "Lucide",
+]);
 
 Then("las páginas públicas no repiten frases entre los dos idiomas", async ({ page }) => {
   const textos = async (url: string) => {

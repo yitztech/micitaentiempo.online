@@ -40,7 +40,7 @@ tests/escenarios/
     avisos/canales.feature
     sincronizacion/google-outlook-icloud.feature
     facturacion/prueba-y-planes.feature
-    mcp/conecta-tu-ia.feature
+    mcp/mcp.feature
     idiomas/dominios-y-seo.feature
   steps/            # definiciones de pasos (TypeScript), agrupadas por dominio
   fixtures/         # actores, reloj, correo (Mailpit), dobles, semillas

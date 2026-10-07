@@ -30,6 +30,7 @@ export default [
     ...page("resetPassword", "routes/reset-password.tsx"),
     ...page("verifyEmail", "routes/verify-email.tsx"),
     ...page("invitation", "routes/invitation.tsx"),
+    ...page("oauthConsent", "routes/oauth-consent.tsx"),
   ]),
   layout("routes/_panel.tsx", [
     ...page("dashboard", "routes/dashboard.tsx"),
@@ -41,6 +42,7 @@ export default [
     ...page("inbox", "routes/inbox.tsx"),
     ...page("notificationSettings", "routes/notification-settings.tsx"),
     ...page("billing", "routes/billing.tsx"),
+    ...page("ai", "routes/ai.tsx"),
   ]),
   ...page("booking", "routes/booking.tsx"),
   ...page("myAppointments", "routes/my-appointments.tsx"),

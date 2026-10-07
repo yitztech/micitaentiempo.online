@@ -115,7 +115,7 @@ riesgo (F0, F1, F6, F7 y F8). Se fija con `/model` y `/effort xhigh` (o `high`) 
 - [x] F8 · Avisos multicanal y recordatorios
 - [x] F9 · Planes, prueba gratuita y facturación (Stripe listo, sin configurar)
 - [x] F10 · Sincronización con Google, Outlook y Apple (el vídeo de verificación de Google lo graba el equipo)
-- [ ] F11 · MCP: conecta tu IA
+- [x] F11 · MCP: conecta tu IA (la prueba con Claude, ChatGPT y Gemini espera al despliegue público)
 - [ ] F12 · Endurecimiento y lanzamiento
 - [ ] F13 · Post-lanzamiento (opcional)
 

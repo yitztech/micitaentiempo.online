@@ -13,7 +13,8 @@
     "menu": "Dashboard menu",
     "inbox": "Notifications",
     "notificationSettings": "Notification preferences",
-    "billing": "Billing"
+    "billing": "Billing",
+    "ai": "AI"
   },
   "bell": {
     "label": "Notifications",
@@ -397,5 +398,40 @@
     },
     "revoke": "Revoke",
     "howTo": "Google: Other calendars → From URL. Outlook: Add calendar → Subscribe from web. Apple: File → New Calendar Subscription."
+  },
+  "ai": {
+    "seoTitle": "AI",
+    "title": "Your AI",
+    "lead": "Connect Claude, ChatGPT or Gemini to check and manage your schedule in natural language.",
+    "serverUrl": "MCP server URL",
+    "howTo": "See steps for each app",
+    "connected": "Connected apps",
+    "none": "You haven't connected any app yet.",
+    "verified": "verified",
+    "lastUsed": "Last used: {{when}}",
+    "never": "Not used yet",
+    "allBoards": "All boards",
+    "boardsCount": "{{count}} board(s)",
+    "revoke": "Revoke",
+    "revokeConfirm": "Revoke access for {{app}}? It stops working right away.",
+    "revoked": "Access revoked.",
+    "gemini": "Gemini Enterprise credentials",
+    "geminiLead": "Gemini Enterprise needs a manually registered OAuth client. Create one and paste the details in Team → Connected Apps → Add MCP Server.",
+    "geminiName": "Name",
+    "geminiCreate": "Create credentials",
+    "geminiOnce": "Copy the secret now: it won't be shown again.",
+    "clientId": "Client ID",
+    "clientSecret": "Client secret",
+    "redirectUri": "Redirect URL",
+    "delete": "Delete",
+    "ownerOnly": "Only the organization owner can create credentials.",
+    "examples": "Try asking",
+    "exampleList": [
+      "“What appointments do I have tomorrow?”",
+      "“Block Friday from 3 pm to 6 pm.”",
+      "“How many cancellations were there last month?”",
+      "“Close the business on December 24.”"
+    ],
+    "keep": "Keep"
   }
 }

@@ -2,6 +2,7 @@
 //   GET    /__requests?path=<prefijo>  → peticiones recibidas
 //   DELETE /__requests                 → vaciar
 //   POST   /__fail {"path": "...", "status": 403} → la siguiente petición a ese prefijo falla
+//   GET    /__cimd/<dominio>/<ruta>    → documento CIMD de una «aplicación de IA» de prueba (MCP)
 import { createServer } from "node:http";
 
 const PORT = Number(process.env.PORT ?? 4010);
@@ -291,6 +292,19 @@ createServer((req, res) => {
       return json(res, 204, {});
     }
     if (url.pathname === "/healthz") return json(res, 200, { ok: true });
+    if (url.pathname.startsWith("/__cimd/")) {
+      // client_id = https://<dominio>/<ruta>; retorno loopback como una app de escritorio.
+      const [host, ...rest] = url.pathname.slice("/__cimd/".length).split("/");
+      return json(res, 200, {
+        client_id: `https://${host}/${rest.join("/")}`,
+        client_name: "Asistente de prueba",
+        client_uri: `https://${host}`,
+        redirect_uris: ["http://127.0.0.1:33418/callback"],
+        grant_types: ["authorization_code", "refresh_token"],
+        response_types: ["code"],
+        token_endpoint_auth_method: "none",
+      });
+    }
     if (url.pathname === "/__stripe/subscriptions" && req.method === "POST")
       return json(res, 200, subscription(JSON.parse(raw || "{}")));
     if (url.pathname === "/__stripe/customers") return json(res, 200, [...stripe.customers.values()]);

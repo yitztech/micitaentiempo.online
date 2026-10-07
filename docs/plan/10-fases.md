@@ -228,13 +228,15 @@ cambio externo restaurado, credencial revocada y contenido de los feeds.
 
 **Objetivo:** RF-18 (`06-mcp.md`).
 
-- [ ] Better Auth `oauth-provider` + `mcp` + `cimd` + `jwt` por dominio; metadatos RFC 9728 y RFC 8414;
-      DCR con límites; clientes estáticos para Gemini Enterprise; consentimiento en `web`.
-- [ ] Endpoint `/mcp` con el SDK v2 y el adaptador de Fastify; todas las herramientas de §6.4 con
+- [x] Better Auth `oauth-provider` + `cimd` + `jwt` por dominio (sin `@better-auth/mcp`, ADR 0018); metadatos
+      RFC 9728 y RFC 8414; DCR con límites; clientes estáticos para Gemini Enterprise; consentimiento en `web`.
+- [x] Endpoint `/mcp` con el SDK v2 (rutas Fastify propias); todas las herramientas de §6.4 con
       anotaciones, `outputSchema`, `securitySchemes`, contenido no confiable marcado y enmascarado de datos.
-- [ ] Recursos, prompts, límites y auditoría.
-- [ ] Panel → IA y página «Conecta tu IA» con pasos por cliente; correo al conectar.
-- [ ] Pruebas de §6.6; verificación manual con Claude, ChatGPT y Gemini CLI.
+- [x] Recursos, prompts, límites y auditoría.
+- [x] Panel → IA y página «Conecta tu IA» con pasos por cliente; correo al conectar.
+- [x] Pruebas de §6.6 (unitarias rol × herramienta, cliente MCP en las dos eras, escenarios de OAuth).
+- [ ] Verificación manual con Claude, ChatGPT y Gemini CLI: necesita el despliegue público
+      (`docs/mcp-verificacion.md`).
 
 **Aceptación:** escenarios de MCP en verde; lista de verificación manual firmada; MCP Inspector sin errores.
 

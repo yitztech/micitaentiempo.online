@@ -41,5 +41,11 @@
     "intro": "{{name}} ({{email}}) wrote from the contact form:",
     "newsletterYes": "They asked to receive product news by email.",
     "replyHint": "Reply to this email to answer them."
+  },
+  "aiConnected": {
+    "subject": "New AI app connected: {{app}}",
+    "preview": "An AI app can access your account.",
+    "body": "{{app}} ({{domain}}) connected to your account with these permissions: {{scopes}}. If this wasn't you, revoke it now.",
+    "button": "See connected apps"
   }
 }

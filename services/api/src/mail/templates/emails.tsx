@@ -163,3 +163,20 @@ export async function customerNoticeEmail(
     </Layout>,
   );
 }
+
+/** Aviso de seguridad: una aplicación de IA nueva se conectó a la cuenta (06-mcp.md §6.5). */
+export async function aiConnectedEmail(
+  lang: Lang,
+  p: { app: string; domain: string; scopes: string; url: string },
+) {
+  const t = CATALOG[lang];
+  return finish(
+    interpolate(t.aiConnected.subject, { app: p.app }),
+    <Layout lang={lang} brand={BRAND[lang]} preview={t.aiConnected.preview} footer={t.footer}>
+      <Text style={styles.text}>{interpolate(t.aiConnected.body, p)}</Text>
+      <Button href={p.url} style={styles.button}>
+        {t.aiConnected.button}
+      </Button>
+    </Layout>,
+  );
+}

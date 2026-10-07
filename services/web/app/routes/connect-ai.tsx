@@ -1,7 +1,8 @@
 import { pathFor } from "@mcet/i18n";
 import { Bot, MessageSquareText, ShieldCheck } from "lucide-react";
+import { CopyField } from "~/components/copy-field";
 import { Card, Container, LinkButton } from "~/components/ui";
-import { useRoot } from "~/lib/i18n";
+import { fmt, useRoot } from "~/lib/i18n";
 import { metaFor, publicCacheHeaders } from "~/lib/seo";
 import type { Route } from "./+types/connect-ai";
 
@@ -16,27 +17,39 @@ export const headers = () => publicCacheHeaders;
 export default function ConnectAi() {
   const { site, t } = useRoot();
   const c = t.public.connectAi;
+  const url = `${site.siteUrl}/mcp`;
   return (
     <Container className="py-14 sm:py-20">
       <header className="max-w-2xl">
         <h1 className="text-4xl font-semibold tracking-tight">{c.title}</h1>
         <p className="mt-4 text-lg text-muted">{c.lead}</p>
+        <div className="mt-8">
+          <CopyField label={c.serverUrl} value={url} event="ai-copy-url" />
+        </div>
       </header>
       <section aria-labelledby="asistentes" className="mt-12">
         <h2 id="asistentes" className="text-2xl font-semibold">
           {c.assistantsTitle}
         </h2>
-        <ul className="mt-6 grid gap-5 md:grid-cols-3">
+        <ul className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {c.assistants.map((a) => (
             <li key={a.name}>
               <Card className="h-full p-6">
                 <Bot aria-hidden className="size-6 text-primary" />
                 <h3 className="mt-3 text-lg font-semibold">{a.name}</h3>
                 <p className="mt-2 text-muted">{a.body}</p>
+                <ol className="mt-4 list-decimal space-y-2 pl-5 text-[15px]">
+                  {a.steps.map((step) => (
+                    <li key={step} className="break-words">
+                      {fmt(step, { url })}
+                    </li>
+                  ))}
+                </ol>
               </Card>
             </li>
           ))}
         </ul>
+        <p className="mt-4 text-sm text-muted">{c.geminiApp}</p>
       </section>
       <div className="mt-12 grid gap-6 lg:grid-cols-2">
         <section
@@ -64,7 +77,6 @@ export default function ConnectAi() {
             {c.safetyTitle}
           </h2>
           <p className="mt-4 text-muted">{c.safety}</p>
-          <p className="mt-4 text-sm text-muted">{c.soon}</p>
           <LinkButton to={pathFor("signUp", site.lang)} className="mt-6" data-umami-event="sign_up_started">
             {t.public.home.ctaPrimary}
           </LinkButton>

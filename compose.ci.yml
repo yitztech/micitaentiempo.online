@@ -35,6 +35,8 @@ services:
       WHATSAPP_API_URL: http://captura:4010/whatsapp
       # Stripe queda apagado (como producción); los escenarios lo encienden contra la captura.
       STRIPE_FAKE_URL: http://captura:4010
+      # MCP: los documentos CIMD de clientes *.example los sirve la captura.
+      CIMD_FAKE_URL: http://captura:4010
       # Google y Microsoft contra la captura (OAuth y API); el navegador va a localhost:4010.
       GOOGLE_CLIENT_ID: cliente-google-de-prueba
       GOOGLE_CLIENT_SECRET: secreto-google-de-prueba

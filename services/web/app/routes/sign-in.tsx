@@ -5,6 +5,7 @@ import { AuthCard, GoogleButton } from "~/components/auth";
 import { Alert, Button, Field } from "~/components/ui";
 import { type ApiError, errorText, postJson, safeNext } from "~/lib/api-client";
 import { useRoot } from "~/lib/i18n";
+import { type OAuthRedirect, oauthNext, signedOAuthQuery } from "~/lib/oauth";
 import { metaFor } from "~/lib/seo";
 import type { Route } from "./+types/sign-in";
 
@@ -26,8 +27,14 @@ export default function SignIn() {
     setBusy(true);
     setError(null);
     try {
-      await postJson("/api/auth/sign-in/email", { email, password: String(form.get("password") ?? "") });
-      window.location.assign(next);
+      // Si la entrada viene de conectar una aplicación de IA, el servidor devuelve dónde seguir.
+      const oauthQuery = signedOAuthQuery(window.location.search);
+      const res = await postJson<OAuthRedirect>("/api/auth/sign-in/email", {
+        email,
+        password: String(form.get("password") ?? ""),
+        ...(oauthQuery ? { oauth_query: oauthQuery } : {}),
+      });
+      window.location.assign((oauthQuery && oauthNext(res)) || next);
     } catch (err) {
       if ((err as ApiError).code === "email_not_verified") {
         await postJson("/api/auth/send-verification-email", { email, callbackURL: next }).catch(

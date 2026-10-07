@@ -22,7 +22,7 @@ export class PanelController {
   async customers(@CurrentUser() user: SessionUser, @Query("q") q?: string) {
     const orgs = [
       ...new Set(
-        (await this.access.memberships(user.id))
+        (await this.access.memberships(user.id, user.calendarIds))
           .filter((m) => m.role === "owner" || m.role === "editor")
           .map((m) => m.orgId),
       ),

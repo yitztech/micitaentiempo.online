@@ -18,7 +18,12 @@ export interface Membership {
 export class CalendarAccess {
   constructor(@Inject(DB) private readonly db: Database) {}
 
-  async membership(userId: string, calendarId: string): Promise<Membership | undefined> {
+  async membership(
+    userId: string,
+    calendarId: string,
+    only?: readonly string[],
+  ): Promise<Membership | undefined> {
+    if (only && !only.includes(calendarId)) return undefined;
     const [m] = await this.db
       .select()
       .from(calendarMembers)
@@ -26,14 +31,16 @@ export class CalendarAccess {
     return m ? { calendarId: m.calendarId, orgId: m.orgId, role: m.role, notify: m.notify } : undefined;
   }
 
-  async memberships(userId: string): Promise<Membership[]> {
+  async memberships(userId: string, only?: readonly string[]): Promise<Membership[]> {
     const rows = await this.db.select().from(calendarMembers).where(eq(calendarMembers.userId, userId));
-    return rows.map((m) => ({ calendarId: m.calendarId, orgId: m.orgId, role: m.role, notify: m.notify }));
+    return rows
+      .filter((m) => !only || only.includes(m.calendarId))
+      .map((m) => ({ calendarId: m.calendarId, orgId: m.orgId, role: m.role, notify: m.notify }));
   }
 
   /** Exige que el usuario pueda hacer `action` en el tablero; 404 si no es miembro (no se revela su existencia). */
   async require(user: SessionUser, calendarId: string, action: Action): Promise<Membership> {
-    const m = await this.membership(user.id, calendarId);
+    const m = await this.membership(user.id, calendarId, user.calendarIds);
     if (!m) throw new NotFoundException({ code: "calendar_not_found", message: "Tablero no encontrado" });
     if (!can(m.role, action))
       throw new ForbiddenException({ code: "permission_denied", message: "Sin permiso" });
@@ -47,7 +54,7 @@ export class CalendarAccess {
       org: m.orgId,
       cal: m.calendarId,
       role: m.role,
-      via: "panel",
+      via: user.via ?? "panel",
       loc: user.locale,
       tz: user.timezone,
     };
