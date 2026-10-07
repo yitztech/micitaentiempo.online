@@ -345,6 +345,7 @@ func (s EventServer) HoldSlot(ctx context.Context, req *calendarv1.HoldSlotReque
 		return nil, fail(connect.CodeInvalidArgument, "too_long", "notas demasiado largas")
 	}
 	start := req.GetStart().AsTime().UTC()
+	s.freshBusy(ctx, c.ID, true)
 	in, err := s.BuildInput(ctx, c, sv, start, start.Add(time.Minute), nil)
 	if err != nil {
 		return nil, err
@@ -430,6 +431,7 @@ func (s EventServer) ConfirmHold(ctx context.Context, req *calendarv1.ConfirmHol
 	if err != nil {
 		return nil, err
 	}
+	s.freshBusy(ctx, c.ID, true)
 	// Lo necesario para revalidar se lee fuera de la transacción (ver slotAvailable).
 	var in *availability.Input
 	if sv, err := s.Store.GetService(ctx, c.ID, held.ServiceID); err == nil && sv.Active && c.Status == "active" {
@@ -456,6 +458,12 @@ func (s EventServer) ConfirmHold(ctx context.Context, req *calendarv1.ConfirmHol
 			return fail(connect.CodeNotFound, "hold_not_found", "hold")
 		}
 		now := s.Clock.Now()
+		// Consulta en vivo: si en los minutos del hold el calendario externo se ocupó, no se confirma.
+		if ext, err := store.ExternalBusy(ctx, tx, c.ID, ev.Start, ev.End); err != nil {
+			return err
+		} else if len(ext) > 0 {
+			return fail(connect.CodeAborted, "slot_taken", "el horario se ocupó en un calendario conectado")
+		}
 		status, customer := "confirmed", a.UserID
 		ch := store.EventChange{Status: &status, ClearHold: true, CustomerUserID: &customer}
 		if revivable || expiredHold(ev, now) {

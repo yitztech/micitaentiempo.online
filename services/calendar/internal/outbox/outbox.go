@@ -133,6 +133,8 @@ func NewClient(pool *pgxpool.Pool, cfg Config) (*river.Client[pgx.Tx], error) {
 		Queues: map[string]river.QueueConfig{
 			river.QueueDefault: {MaxWorkers: 10},
 			QueueOutbox:        {MaxWorkers: 5},
+			// Sincronización con proveedores externos: concurrencia limitada (memoria).
+			"sync": {MaxWorkers: 5},
 		},
 		Workers:      workers,
 		PeriodicJobs: cfg.Periodic,

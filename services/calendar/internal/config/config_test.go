@@ -6,6 +6,7 @@ func setSecrets(t *testing.T) {
 	t.Helper()
 	t.Setenv("RPC_SECRET_API_TO_CALENDAR", "a-secret-of-at-least-thirty-two-chars-1")
 	t.Setenv("RPC_SECRET_CALENDAR_TO_API", "a-secret-of-at-least-thirty-two-chars-2")
+	t.Setenv("CALENDAR_TOKEN_ENC_KEY", "a-secret-of-at-least-thirty-two-chars-3")
 }
 
 func TestLoadRechazaTestModeEnDominiosReales(t *testing.T) {

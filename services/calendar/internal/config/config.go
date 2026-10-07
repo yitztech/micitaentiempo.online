@@ -29,6 +29,26 @@ type Config struct {
 	RPCSecretCalendarToAPI string
 	// URL del RPC interno de api (eventos de dominio).
 	APIRPCURL string
+	// Sincronización externa (04-motor-calendario.md §4.9).
+	Sync SyncConfig
+}
+
+// SyncConfig son las credenciales y URLs base de los proveedores (configurables para dobles en pruebas).
+type SyncConfig struct {
+	TokenEncKey         string
+	GoogleChannelSecret string
+	MSClientState       string
+	GoogleClientID      string
+	GoogleClientSecret  string
+	MSClientID          string
+	MSClientSecret      string
+	GoogleAPIURL        string
+	GoogleTokenURL      string
+	MSGraphURL          string
+	MSTokenURL          string
+	ICloudCalDAVURL     string
+	// HooksURL es la URL pública donde Google y Microsoft avisan de cambios.
+	HooksURL string
 }
 
 // productionHosts nunca pueden usarse con TEST_MODE.
@@ -68,10 +88,28 @@ func Load() (Config, error) {
 		RPCSecretAPIToCalendar: os.Getenv("RPC_SECRET_API_TO_CALENDAR"),
 		RPCSecretCalendarToAPI: os.Getenv("RPC_SECRET_CALENDAR_TO_API"),
 		APIRPCURL:              env("API_RPC_URL", "http://api:3001"),
+		Sync: SyncConfig{
+			TokenEncKey:         os.Getenv("CALENDAR_TOKEN_ENC_KEY"),
+			GoogleChannelSecret: os.Getenv("GOOGLE_CHANNEL_SECRET"),
+			MSClientState:       os.Getenv("MS_CLIENT_STATE_SECRET"),
+			GoogleClientID:      os.Getenv("GOOGLE_CLIENT_ID"),
+			GoogleClientSecret:  os.Getenv("GOOGLE_CLIENT_SECRET"),
+			MSClientID:          os.Getenv("MS_CLIENT_ID"),
+			MSClientSecret:      os.Getenv("MS_CLIENT_SECRET"),
+			GoogleAPIURL:        env("GOOGLE_API_URL", "https://www.googleapis.com"),
+			GoogleTokenURL:      env("GOOGLE_TOKEN_URL", "https://oauth2.googleapis.com/token"),
+			MSGraphURL:          env("MS_GRAPH_URL", "https://graph.microsoft.com/v1.0"),
+			MSTokenURL:          env("MS_TOKEN_URL", "https://login.microsoftonline.com/common/oauth2/v2.0/token"),
+			ICloudCalDAVURL:     env("ICLOUD_CALDAV_URL", "https://caldav.icloud.com"),
+			HooksURL:            env("HOOKS_URL", env("PUBLIC_URL_ES", "")),
+		},
 	}
 	var errs []error
 	if c.DBPassword == "" {
 		errs = append(errs, errors.New("falta DB_PASSWORD"))
+	}
+	if len(c.Sync.TokenEncKey) < 32 {
+		errs = append(errs, errors.New("CALENDAR_TOKEN_ENC_KEY debe tener al menos 32 caracteres"))
 	}
 	if len(c.RPCSecretAPIToCalendar) < 32 || len(c.RPCSecretCalendarToAPI) < 32 {
 		errs = append(errs, errors.New("RPC_SECRET_API_TO_CALENDAR y RPC_SECRET_CALENDAR_TO_API deben tener al menos 32 caracteres"))

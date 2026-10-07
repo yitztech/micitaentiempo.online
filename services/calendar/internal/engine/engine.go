@@ -13,6 +13,7 @@ import (
 	"github.com/riverqueue/river"
 	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/auth"
 	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/clock"
+	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/extsync"
 	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/holidays"
 	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/store"
 )
@@ -26,6 +27,8 @@ type Engine struct {
 	Occupancy Occupancy
 	// Jobs encola eventos de dominio en la misma transacción (outbox); nil = no se emiten.
 	Jobs *river.Client[pgx.Tx]
+	// Sync aporta el ocupado externo y escribe nuestros eventos fuera; nil = sin sincronización.
+	Sync *extsync.Syncer
 }
 
 // fail crea un error Connect con un motivo estable ("motivo: detalle") que api traduce a problem+json.

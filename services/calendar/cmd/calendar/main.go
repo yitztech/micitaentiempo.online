@@ -22,6 +22,7 @@ import (
 	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/config"
 	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/db"
 	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/engine"
+	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/extsync"
 	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/holidays"
 	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/httpapi"
 	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/outbox"
@@ -124,22 +125,35 @@ func serve() error {
 	}
 	eng := &engine.Engine{Store: store.New(pool), Holidays: catalog, Clock: clk}
 	eng.Occupancy = eng.DefaultOccupancy()
+	sealer, err := extsync.NewSealer(cfg.Sync.TokenEncKey)
+	if err != nil {
+		return err
+	}
+	syncer := &extsync.Syncer{Store: eng.Store, Sealer: sealer, Cfg: cfg.Sync, Clock: clk, Log: log}
+	eng.Sync = syncer
 	jobs, err := outbox.NewClient(pool, outbox.Config{
 		APIURL: cfg.APIRPCURL, Signer: signer, Logger: log,
-		Register: func(w *river.Workers) { engine.RegisterWorkers(w, eng) },
-		Periodic: engine.PeriodicJobs(),
+		Register: func(w *river.Workers) {
+			engine.RegisterWorkers(w, eng)
+			extsync.RegisterWorkers(w, syncer)
+		},
+		Periodic: append(engine.PeriodicJobs(), extsync.PeriodicJobs()...),
 	})
 	if err != nil {
 		return err
 	}
-	eng.Jobs = jobs
+	eng.Jobs, syncer.Jobs = jobs, jobs
 	if err := jobs.Start(ctx); err != nil {
 		return fmt.Errorf("arranque de River: %w", err)
 	}
 	rpcOpts.Engine = eng
 	rpc.Mount(internalMux, rpcOpts)
 
-	public := httpapi.NewServer(cfg.PublicAddr, httpapi.PublicMux(revision))
+	publicMux := httpapi.PublicMux(revision)
+	// Feeds ICS y avisos de Google/Microsoft (el gateway enruta /ics y /hooks al motor).
+	publicMux.Handle("/ics/", syncer.Handler())
+	publicMux.Handle("/hooks/", syncer.Handler())
+	public := httpapi.NewServer(cfg.PublicAddr, publicMux)
 	internal := httpapi.NewServer(cfg.InternalAddr, internalMux)
 	g, gctx := errgroup.WithContext(ctx)
 	for _, srv := range []*http.Server{public, internal} {

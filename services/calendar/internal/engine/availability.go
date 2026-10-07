@@ -113,6 +113,7 @@ func (s AvailabilityServer) GetSlots(ctx context.Context, req *calendarv1.GetSlo
 	if !to.After(from) || to.Sub(from) > availability.MaxWindow {
 		return nil, fail(connect.CodeInvalidArgument, "invalid_range", "rango de 1 minuto a 62 días")
 	}
+	s.freshBusy(ctx, c.ID, false)
 	in, err := s.BuildInput(ctx, c, sv, from, to, s.Occupancy)
 	if err != nil {
 		return nil, err

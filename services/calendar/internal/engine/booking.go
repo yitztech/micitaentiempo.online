@@ -25,7 +25,12 @@ const SeriesHorizon = 18 * 30 * 24 * time.Hour
 type poolOccupancy struct{ e *Engine }
 
 func (o poolOccupancy) Load(ctx context.Context, calendarID string, from, to time.Time) ([]availability.Appointment, []domain.Interval, error) {
-	return store.LoadOccupancy(ctx, o.e.Store.Pool, calendarID, from, to, o.e.Clock.Now())
+	appts, blocks, err := store.LoadOccupancy(ctx, o.e.Store.Pool, calendarID, from, to, o.e.Clock.Now())
+	if err != nil {
+		return nil, nil, err
+	}
+	ext, err := store.ExternalBusy(ctx, o.e.Store.Pool, calendarID, from, to)
+	return appts, append(blocks, ext...), err
 }
 
 // txOccupancy lee la ocupación dentro de la transacción que escribe (ve sus propios cambios).
@@ -37,10 +42,23 @@ type txOccupancy struct {
 
 func (o txOccupancy) Load(ctx context.Context, calendarID string, from, to time.Time) ([]availability.Appointment, []domain.Interval, error) {
 	appts, blocks, err := store.LoadOccupancy(ctx, o.tx, calendarID, from, to, o.now)
+	if err != nil {
+		return nil, nil, err
+	}
+	// El ocupado de Google, Outlook o iCloud ocupa todos los asientos.
+	ext, err := store.ExternalBusy(ctx, o.tx, calendarID, from, to)
+	blocks = append(blocks, ext...)
 	if o.exclude != "" {
 		appts = slices.DeleteFunc(appts, func(a availability.Appointment) bool { return a.ID == o.exclude })
 	}
 	return appts, blocks, err
+}
+
+// freshBusy refresca el ocupado externo del tablero (live: consulta en vivo antes de apartar o confirmar).
+func (e *Engine) freshBusy(ctx context.Context, calendarID string, live bool) {
+	if e.Sync != nil {
+		e.Sync.EnsureFresh(ctx, calendarID, live)
+	}
 }
 
 // DefaultOccupancy devuelve la ocupación real del motor (citas, holds y bloqueos).
@@ -84,6 +102,9 @@ func (e *Engine) emit(ctx context.Context, tx pgx.Tx, typ string, c store.Calend
 	}
 	if previous != nil {
 		subject["previous"] = map[string]any{"start": previous.Start.Format(time.RFC3339), "end": previous.End.Format(time.RFC3339)}
+	}
+	if err := e.Sync.EnqueuePush(ctx, tx, c.ID, ev.ID); err != nil {
+		return err
 	}
 	return outbox.Enqueue(ctx, e.Jobs, tx, outbox.Event{
 		EventID: newEventID(), Type: typ, OccurredAt: e.Clock.Now(), OrgID: c.OrgID, CalendarID: c.ID,
