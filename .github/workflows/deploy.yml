@@ -133,4 +133,5 @@ jobs:
           EXPECTED_SHA: ${{ github.sha }}
         run: |
           pnpm install --frozen-lockfile --filter @mcet/escenarios...
+          pnpm --filter "@mcet/escenarios^..." build
           pnpm --filter @mcet/escenarios exec sh -c 'bddgen && playwright test --project escritorio --grep @humo-produccion'
