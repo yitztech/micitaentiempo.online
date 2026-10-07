@@ -15,6 +15,13 @@
       "when": 1791341698252,
       "tag": "0001_eventos_entrantes",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791342525934,
+      "tag": "0002_identidad",
+      "breakpoints": true
     }
   ]
 }

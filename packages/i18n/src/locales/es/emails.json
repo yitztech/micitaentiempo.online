@@ -1,0 +1,35 @@
+{
+  "footer": "Recibes este correo porque se usó esta dirección en Mi Cita en Tiempo.",
+  "greeting": "Hola, {{name}}:",
+  "greetingNoName": "Hola:",
+  "verify": {
+    "subject": "Confirma tu correo",
+    "preview": "Confirma tu correo para empezar a usar Mi Cita en Tiempo",
+    "body": "Confirma que este correo es tuyo para activar tu cuenta.",
+    "button": "Confirmar mi correo",
+    "code": "O escribe este código: {{code}}",
+    "expires": "El enlace caduca en 24 horas. Si no creaste una cuenta, ignora este mensaje."
+  },
+  "otp": {
+    "subject": "Tu código de verificación: {{code}}",
+    "preview": "Tu código de verificación",
+    "body": "Usa este código para continuar. Caduca en 10 minutos.",
+    "ignore": "Si no lo pediste, ignora este mensaje."
+  },
+  "reset": {
+    "subject": "Restablece tu contraseña",
+    "preview": "Restablece tu contraseña de Mi Cita en Tiempo",
+    "body": "Recibimos una solicitud para cambiar tu contraseña.",
+    "button": "Elegir una contraseña nueva",
+    "expires": "El enlace caduca en 1 hora. Si no lo pediste, ignora este mensaje: tu contraseña no cambia."
+  },
+  "invitation": {
+    "subject": "{{inviter}} te invita a «{{calendar}}»",
+    "preview": "Te invitaron a un calendario de Mi Cita en Tiempo",
+    "body": "{{inviter}} te invitó a «{{calendar}}» como {{role}}.",
+    "googleNote": "Para aceptar, entra con la cuenta de Google de {{email}}.",
+    "button": "Aceptar la invitación",
+    "expires": "La invitación caduca en 7 días.",
+    "roles": { "editor": "editor", "observer": "observador" }
+  }
+}

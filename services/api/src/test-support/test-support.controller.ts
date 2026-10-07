@@ -3,12 +3,14 @@ import { SystemService } from "@mcet/contracts/mcet/calendar/v1/system_pb";
 import { TestingService } from "@mcet/contracts/mcet/calendar/v1/testing_pb";
 import { BadRequestException, Body, Controller, Get, Inject, Post } from "@nestjs/common";
 import { z } from "zod";
+import { Public } from "../auth/auth.guard.js";
 import { asActor, type CalendarClients } from "../internal-rpc/calendar-client.js";
 import { CALENDAR } from "../internal-rpc/internal-rpc.module.js";
 
 const ClockBody = z.object({ now: z.iso.datetime({ offset: true }).nullable().optional() });
 
 /** Solo existe con TEST_MODE (docs/plan/09-pruebas.md §9.2). */
+@Public()
 @Controller("__test")
 export class TestSupportController {
   constructor(@Inject(CALENDAR) private readonly calendar: CalendarClients) {}

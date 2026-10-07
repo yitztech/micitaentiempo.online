@@ -1,5 +1,6 @@
 import { Controller, Get, Header, Inject, ServiceUnavailableException } from "@nestjs/common";
 import type pg from "pg";
+import { Public } from "../auth/auth.guard.js";
 import { ENV } from "../config/config.module.js";
 import type { Env } from "../config/env.js";
 import { PG_POOL } from "../db/db.module.js";
@@ -12,6 +13,7 @@ export class HealthController {
   ) {}
 
   /** Vida: el workflow de despliegue comprueba aquí la revisión servida. */
+  @Public()
   @Get("healthz")
   @Header("Cache-Control", "no-store")
   health() {
@@ -19,6 +21,7 @@ export class HealthController {
   }
 
   /** Preparado: base de datos accesible y migraciones aplicadas. */
+  @Public()
   @Get("readyz")
   @Header("Cache-Control", "no-store")
   async ready() {

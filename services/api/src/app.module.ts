@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { LoggerModule } from "nestjs-pino";
+import { AuthModule } from "./auth/auth.module.js";
 import { ConfigModule } from "./config/config.module.js";
 import { DbModule } from "./db/db.module.js";
 import { HealthController } from "./health/health.controller.js";
@@ -22,6 +23,7 @@ const testControllers = process.env.TEST_MODE ? [TestSupportController] : [];
     }),
     DbModule,
     InternalRpcModule,
+    AuthModule,
   ],
   controllers: [HealthController, ...testControllers],
 })

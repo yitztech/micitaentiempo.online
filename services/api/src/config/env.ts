@@ -25,6 +25,26 @@ const EnvSchema = z.object({
   CALENDAR_RPC_URL: z.url().default("http://calendar:8081"),
   RPC_SECRET_API_TO_CALENDAR: z.string().min(32, "debe tener al menos 32 caracteres"),
   RPC_SECRET_CALENDAR_TO_API: z.string().min(32, "debe tener al menos 32 caracteres"),
+  SMTP_HOST: z.string().min(1),
+  SMTP_PORT: z.coerce.number().int(),
+  SMTP_SECURE: z
+    .string()
+    .default("true")
+    .transform((v) => v === "true" || v === "1"),
+  SMTP_USER: z.string().min(1),
+  SMTP_PASSWORD: z.string().min(1),
+  MAIL_FROM: z.string().min(3),
+  SMTP_USER_ES: optional,
+  SMTP_PASSWORD_ES: optional,
+  MAIL_FROM_ES: optional,
+  SMTP_USER_EN: z.string().min(1),
+  SMTP_PASSWORD_EN: z.string().min(1),
+  MAIL_FROM_EN: z.string().min(3),
+  BETTER_AUTH_SECRET: z.string().min(32, "debe tener al menos 32 caracteres"),
+  APP_ENC_KEY: z.string().min(32, "debe tener al menos 32 caracteres"),
+  ALTCHA_HMAC_KEY: z.string().min(32, "debe tener al menos 32 caracteres"),
+  GOOGLE_CLIENT_ID: optional,
+  GOOGLE_CLIENT_SECRET: optional,
   TEST_MODE: optional,
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
 });

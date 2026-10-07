@@ -7,6 +7,18 @@ const base = {
   DB_PASSWORD: "x",
   RPC_SECRET_API_TO_CALENDAR: "a".repeat(32),
   RPC_SECRET_CALENDAR_TO_API: "b".repeat(32),
+  SMTP_HOST: "mailpit",
+  SMTP_PORT: "1025",
+  SMTP_SECURE: "false",
+  SMTP_USER: "u",
+  SMTP_PASSWORD: "p",
+  MAIL_FROM: "Mi Cita <no-reply@a.localhost>",
+  SMTP_USER_EN: "u",
+  SMTP_PASSWORD_EN: "p",
+  MAIL_FROM_EN: "My Appointment <no-reply@b.localhost>",
+  BETTER_AUTH_SECRET: "c".repeat(32),
+  APP_ENC_KEY: "d".repeat(32),
+  ALTCHA_HMAC_KEY: "e".repeat(32),
 };
 
 describe("loadEnv", () => {

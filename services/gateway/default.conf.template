@@ -17,10 +17,11 @@ real_ip_recursive on;
 map $http_x_forwarded_proto $forwarded_proto { default $scheme; https https; }
 
 # ── Límites de peticiones por IP real (los finos los aplica api) ──
-limit_req_zone $binary_remote_addr zone=auth:10m   rate=10r/m;
-limit_req_zone $binary_remote_addr zone=public:10m rate=120r/m;
-limit_req_zone $binary_remote_addr zone=mcp:10m    rate=120r/m;
-limit_req_zone $binary_remote_addr zone=ics:10m    rate=30r/m;
+# Valores por defecto en el Dockerfile; las pruebas por escenarios los amplían.
+limit_req_zone $binary_remote_addr zone=auth:10m   rate=${RATE_AUTH};
+limit_req_zone $binary_remote_addr zone=public:10m rate=${RATE_PUBLIC};
+limit_req_zone $binary_remote_addr zone=mcp:10m    rate=${RATE_MCP};
+limit_req_zone $binary_remote_addr zone=ics:10m    rate=${RATE_ICS};
 limit_req_status 429;
 
 server {
@@ -42,8 +43,15 @@ server {
     }
 
     # ── api (NestJS) ──
-    location /api/auth/ {
+    # Rutas sensibles de identidad: entrar, registrarse, recuperar contraseña, códigos.
+    location ~ ^/api/auth/(sign-in|sign-up|forget-password|reset-password|email-otp|two-factor)/ {
         limit_req zone=auth burst=10 nodelay;
+        include /etc/nginx/snippets/proxy-headers.conf;
+        include /etc/nginx/snippets/security-headers.conf;
+        proxy_pass http://api_upstream;
+    }
+    location /api/auth/ {
+        limit_req zone=public burst=40 nodelay;
         include /etc/nginx/snippets/proxy-headers.conf;
         include /etc/nginx/snippets/security-headers.conf;
         proxy_pass http://api_upstream;

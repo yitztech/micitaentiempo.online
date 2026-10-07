@@ -5,6 +5,12 @@ services:
   gateway:
     build: { context: ., dockerfile: services/gateway/Dockerfile, args: { RELEASE_SHA: "${RELEASE_SHA:-ci}" } }
     ports: ["8080:80"]
+    environment:
+      # Las pruebas hacen muchas altas desde la misma IP.
+      RATE_AUTH: 600r/m
+      RATE_PUBLIC: 6000r/m
+      RATE_MCP: 6000r/m
+      RATE_ICS: 600r/m
   web:
     build: { context: ., dockerfile: services/web/Dockerfile, args: { RELEASE_SHA: "${RELEASE_SHA:-ci}" } }
     environment:
@@ -23,5 +29,8 @@ services:
   mailpit:
     image: axllent/mailpit:v1.31.4
     mem_limit: 64m
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: "1"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "1"
     ports: ["8025:8025"]
     networks: [frontend]

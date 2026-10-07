@@ -17,6 +17,8 @@ services:
     ports: ["8080:80"]
     environment:
       TRUSTED_PROXY_CIDR: 0.0.0.0/0
+      RATE_AUTH: 120r/m
+      RATE_PUBLIC: 1200r/m
     depends_on: [web, api, calendar]
     develop:
       watch:
@@ -108,6 +110,9 @@ services:
   mailpit:
     image: axllent/mailpit:v1.31.4
     ports: ["8025:8025"]
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: "1"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "1"
 
 volumes:
   postgres-dev:
