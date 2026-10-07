@@ -33,6 +33,7 @@ jobs:
       - name: Construir y levantar la topología de producción
         run: docker compose -f compose.prod.yml -f compose.ci.yml --env-file .env.ci -p ci up -d --build --wait
       - run: pnpm --filter @mcet/escenarios exec playwright install --with-deps chromium webkit
+      - run: pnpm --filter "@mcet/escenarios^..." build
       - name: Catálogo completo de escenarios
         run: pnpm --filter @mcet/escenarios exec ./correr.sh
       - name: ZAP baseline (excepciones revisadas en tests/seguridad/zap-reglas.tsv)
