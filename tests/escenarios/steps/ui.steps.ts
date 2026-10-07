@@ -168,6 +168,10 @@ When("elige el primer día y la primera hora libres", async ({ page }) => {
   await expect(dia).toBeVisible({ timeout: 15_000 });
   await dia.click();
   await page.locator('[aria-labelledby="titulo-hora"] ul button').first().click();
+  const continuar = page.getByRole("button", { name: /Continuar con este horario|Continue with this time/ });
+  if (await continuar.isVisible({ timeout: 2000 }).catch(() => false)) {
+    await continuar.click();
+  }
 });
 
 When("escribe sus datos y aparta el horario", async ({ page, estado }) => {

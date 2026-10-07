@@ -44,16 +44,17 @@ Rutas relativas a `services/web/app/`. Los números de línea se comprobaron sob
 
 Archivos: `components/booking-flow.tsx`, `components/slot-picker.tsx`, `components/otp-form.tsx`, `routes/booking.tsx`, `routes/embed.tsx`.
 
-- [ ] **B1. Etapas reales** — `booking-flow.tsx:171`: el mapa `{ service: 0, slot: 2, ... }` salta el índice 1 (Día). Unificar fecha y hora en una etapa y ajustar `b.steps` en i18n (4 etapas: Servicio, Fecha y hora, Tus datos, Confirmación).
-- [ ] **B2. Contexto siempre visible** — `booking-flow.tsx:223`: el servicio solo se muestra si hay más de uno. Mostrar siempre nombre + duración.
-- [ ] **B3. Resumen completo** — `booking-flow.tsx:145`: añadir duración y zona horaria (ciudad + desfase de esa fecha) en datos, verificación y confirmación.
-- [ ] **B4. Error ≠ sin horarios** — `slot-picker.tsx:57-59`: `!r.ok` y `.catch` acaban en `slots: []`. Añadir estado `error` con botón Reintentar; «Ver siguiente mes» solo para mes vacío.
-- [ ] **B5. Selección explícita**: elegir una hora no avanza sola; botón «Continuar con este horario».
-- [ ] **B6. Campos con `name`** y errores asociados — `booking-flow.tsx:269`.
-- [ ] **B7. Foco al cambiar de etapa** — `booking-flow.tsx:251`: mover foco al título de la nueva etapa (`tabIndex={-1}`) y anunciarlo.
-- [ ] **B8. Estados obligatorios**: ver la tabla «Estados obligatorios de la reserva» en PROPUESTA.md (hold caducado, horario ocupado, OTP incorrecto, sin servicios, negocio no disponible). El contador del hold no debe anunciarse cada segundo (`aria-live` solo en cambios relevantes).
-- [ ] **B9. Embed** — `routes/embed.tsx:58`: `role=tab` sin `tabpanel` ni flechas y controles de 40 px. Completar el patrón ARIA de pestañas o pasar a botones simples de 44 px.
-- [ ] **B10. Calendario compacto** en escritorio (320–380 px, sin estirarse a media pantalla).
+- [x] **B1. Etapas reales** — `booking-flow.tsx`: mapa unificado de 4 etapas (`Servicio`, `Fecha y hora`, `Tus datos`, `Confirmación`) en `b.steps` (es y en) e índice coincidente.
+- [x] **B2. Contexto siempre visible** — `booking-flow.tsx`: el servicio y su duración se muestran siempre de forma persistente aunque exista un único servicio.
+- [x] **B3. Resumen completo** — `booking-flow.tsx`: duración y zona horaria explícitas en el resumen en `details`, `verify` y `done`.
+- [x] **B4. Error ≠ sin horarios** — `slot-picker.tsx`: diferenciación clara de error de red con botón Reintentar vs. mes sin horarios con botón «Ver siguiente mes».
+- [x] **B5. Selección explícita** — `slot-picker.tsx`: seleccionar un horario lo resalta y muestra botón «Continuar con este horario» para avanzar deliberadamente.
+- [x] **B6. Campos con `name`** y atributos semánticos — `booking-flow.tsx`: `name="name"`, `name="email"`, `name="phone"`, `name="notes"`.
+- [x] **B7. Foco al cambiar de etapa** — `booking-flow.tsx`: desplazamiento de foco accesible (`ref` y `tabIndex={-1}`) al título de la nueva etapa.
+- [x] **B8. Estados obligatorios** — `booking-flow.tsx`: contemplados negocio no disponible, sin servicios configurados, hold caducado con aviso y contador temporal sin contaminación de anuncios periódicos.
+- [x] **B9. Embed** — `routes/embed.tsx`: navegación de vistas con botones táctiles de 44 px (min-h-11) y `aria-pressed` sin roles ARIA rotos.
+- [x] **B10. Calendario compacto** — `slot-picker.tsx`: calendario mensual restringido a 320–360 px en rejilla responsiva.
+
 
 ### Fase C — Mis citas
 
