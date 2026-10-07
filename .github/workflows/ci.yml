@@ -129,6 +129,14 @@ jobs:
           severity: CRITICAL
           ignore-unfixed: true
           exit-code: "1"
+      - name: Escanear imagen web
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: image
+          image-ref: local/micitaentiempo-web:ci
+          severity: CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
       - run: pnpm --filter @mcet/escenarios exec playwright install --with-deps chromium webkit
       - name: Escenarios @humo y @critico
         run: pnpm --filter @mcet/escenarios exec ./correr.sh --grep "@humo|@critico"
