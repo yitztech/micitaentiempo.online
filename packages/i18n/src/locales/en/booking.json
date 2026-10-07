@@ -1,7 +1,10 @@
 {
   "seoTitle": "Book with {{name}}",
   "steps": ["Service", "Day", "Time", "Your details", "Confirmation"],
-  "service": { "title": "Choose a service", "minutes": "{{n}} min" },
+  "service": {
+    "title": "Choose a service",
+    "minutes": "{{n}} min"
+  },
   "date": {
     "title": "Choose a day",
     "prev": "Previous month",
@@ -67,7 +70,9 @@
     "rescheduled": "Your appointment was changed.",
     "addToCalendar": "Add to calendar",
     "signOut": "Sign out",
-    "noticeRule": "You can change or cancel it up to {{hours}} h before."
+    "noticeRule": "You can change or cancel it up to {{hours}} h before.",
+    "subscribe": "Subscribe to my appointments",
+    "subscribeHelp": "Add this link to your calendar (Google: From URL; Apple: New Calendar Subscription)."
   },
   "embed": {
     "poweredBy": "Bookings by My Appointment On Time",

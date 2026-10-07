@@ -360,5 +360,42 @@
       "billing_disabled": "El pago en línea estará disponible pronto.",
       "generic": "No se pudo completar. Inténtalo de nuevo."
     }
+  },
+  "sync": {
+    "title": "Calendarios conectados",
+    "lead": "Conecta tu calendario para que tus otros compromisos bloqueen la agenda y tus citas aparezcan allí.",
+    "connectGoogle": "Conectar Google Calendar",
+    "connectOutlook": "Conectar Outlook",
+    "connectIcloud": "Conectar iCloud",
+    "appleId": "Apple ID",
+    "appPassword": "Contraseña específica de app",
+    "appPasswordHint": "Créala en appleid.apple.com → Inicio de sesión y seguridad → Contraseñas de app.",
+    "status": {
+      "active": "Conectado",
+      "revoked": "Desconectado: vuelve a conectarlo",
+      "error": "Con errores"
+    },
+    "lastSync": "Última sincronización: {{date}}",
+    "never": "Aún sin sincronizar",
+    "lastError": "Último error: {{error}}",
+    "useAsBusy": "Bloquea mi agenda",
+    "writeTarget": "Aquí se escriben mis citas",
+    "resync": "Sincronizar ahora",
+    "disconnect": "Desconectar",
+    "reconnect": "Reconectar",
+    "ok": "Calendario conectado.",
+    "error": "No se pudo conectar el calendario.",
+    "sourceOfTruth": "Los cambios se hacen en Mi Cita en Tiempo: si mueves una cita en el otro calendario, la restauramos.",
+    "feedsTitle": "Suscripción ICS",
+    "feedsLead": "Para ver el tablero en cualquier calendario sin conectar la cuenta. Google actualiza las suscripciones con retraso (horas).",
+    "feedFull": "Crear enlace con detalles",
+    "feedBusy": "Crear enlace solo «Ocupado»",
+    "feedCreated": "Copia el enlace ahora: no se volverá a mostrar.",
+    "scopes": {
+      "full": "Con detalles",
+      "busy": "Solo «Ocupado»"
+    },
+    "revoke": "Revocar",
+    "howTo": "Google: Otros calendarios → Desde URL. Outlook: Agregar calendario → Suscribirse desde la web. Apple: Archivo → Nueva suscripción a calendario."
   }
 }

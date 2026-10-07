@@ -35,12 +35,33 @@ services:
       WHATSAPP_API_URL: http://captura:4010/whatsapp
       # Stripe queda apagado (como producción); los escenarios lo encienden contra la captura.
       STRIPE_FAKE_URL: http://captura:4010
+      # Google y Microsoft contra la captura (OAuth y API); el navegador va a localhost:4010.
+      GOOGLE_CLIENT_ID: cliente-google-de-prueba
+      GOOGLE_CLIENT_SECRET: secreto-google-de-prueba
+      GOOGLE_AUTHORIZE_URL: http://localhost:4010/google/authorize
+      GOOGLE_TOKEN_URL: http://captura:4010/google/token
+      MS_CLIENT_ID: cliente-ms-de-prueba
+      MS_CLIENT_SECRET: secreto-ms-de-prueba
+      MS_AUTHORIZE_URL: http://localhost:4010/ms/authorize
+      MS_TOKEN_URL: http://captura:4010/ms/token
     depends_on:
       captura: { condition: service_healthy }
   calendar:
     build: { context: ., dockerfile: services/calendar/Dockerfile, args: { RELEASE_SHA: "${RELEASE_SHA:-ci}" } }
     environment:
       TEST_MODE: ${TEST_MODE:-}
+      GOOGLE_CLIENT_ID: cliente-google-de-prueba
+      GOOGLE_CLIENT_SECRET: secreto-google-de-prueba
+      GOOGLE_API_URL: http://captura:4010/google
+      GOOGLE_TOKEN_URL: http://captura:4010/google/token
+      MS_CLIENT_ID: cliente-ms-de-prueba
+      MS_CLIENT_SECRET: secreto-ms-de-prueba
+      MS_GRAPH_URL: http://captura:4010/graph
+      MS_TOKEN_URL: http://captura:4010/ms/token
+      ICLOUD_CALDAV_URL: http://radicale:5232/
+    depends_on:
+      captura: { condition: service_healthy }
+      radicale: { condition: service_healthy }
   postgres:
     build: { context: ., dockerfile: services/postgres/Dockerfile }
   mailpit:
@@ -63,3 +84,15 @@ services:
       interval: 5s
       retries: 10
     networks: [frontend]
+  # Doble de iCloud (CalDAV real): tests/fakes/radicale.conf.
+  radicale:
+    image: tomsquest/docker-radicale:3.8.1.1
+    mem_limit: 96m
+    volumes: ["./tests/fakes/radicale.conf:/config/config:ro"]
+    tmpfs: [/data]
+    ports: ["5232:5232"]
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, "http://127.0.0.1:5232/.web/"]
+      interval: 5s
+      retries: 12
+    networks: [frontend, backend]

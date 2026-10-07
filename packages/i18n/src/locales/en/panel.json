@@ -360,5 +360,42 @@
       "billing_disabled": "Online payment is coming soon.",
       "generic": "Couldn't complete it. Please try again."
     }
+  },
+  "sync": {
+    "title": "Connected calendars",
+    "lead": "Connect your calendar so your other commitments block the schedule and your appointments show up there.",
+    "connectGoogle": "Connect Google Calendar",
+    "connectOutlook": "Connect Outlook",
+    "connectIcloud": "Connect iCloud",
+    "appleId": "Apple ID",
+    "appPassword": "App-specific password",
+    "appPasswordHint": "Create it at appleid.apple.com → Sign-In and Security → App-Specific Passwords.",
+    "status": {
+      "active": "Connected",
+      "revoked": "Disconnected: connect it again",
+      "error": "With errors"
+    },
+    "lastSync": "Last sync: {{date}}",
+    "never": "Not synced yet",
+    "lastError": "Last error: {{error}}",
+    "useAsBusy": "Blocks my schedule",
+    "writeTarget": "My appointments are written here",
+    "resync": "Sync now",
+    "disconnect": "Disconnect",
+    "reconnect": "Reconnect",
+    "ok": "Calendar connected.",
+    "error": "Couldn't connect the calendar.",
+    "sourceOfTruth": "Changes are made in My Appointment On Time: if you move an appointment in the other calendar, we restore it.",
+    "feedsTitle": "ICS subscription",
+    "feedsLead": "To see the board in any calendar without connecting your account. Google refreshes subscriptions with a delay (hours).",
+    "feedFull": "Create link with details",
+    "feedBusy": "Create “Busy”-only link",
+    "feedCreated": "Copy the link now: it won't be shown again.",
+    "scopes": {
+      "full": "With details",
+      "busy": "“Busy” only"
+    },
+    "revoke": "Revoke",
+    "howTo": "Google: Other calendars → From URL. Outlook: Add calendar → Subscribe from web. Apple: File → New Calendar Subscription."
   }
 }

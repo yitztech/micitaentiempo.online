@@ -3,6 +3,7 @@ import { AvailabilityService } from "@mcet/contracts/mcet/calendar/v1/availabili
 import { type Calendar, CalendarService } from "@mcet/contracts/mcet/calendar/v1/calendar_pb";
 import { EventService } from "@mcet/contracts/mcet/calendar/v1/events_pb";
 import { ServiceCatalogService } from "@mcet/contracts/mcet/calendar/v1/services_pb";
+import { SyncService } from "@mcet/contracts/mcet/calendar/v1/sync_pb";
 import type { Lang } from "@mcet/i18n";
 import {
   AvailabilityQuery,
@@ -369,6 +370,23 @@ export class PublicBookingController {
         ),
     );
     return bookingView(ev);
+  }
+
+  /** Feed personal del cliente final: solo sus citas en ese negocio (webcal://). */
+  @Post("my/feeds")
+  async myFeed(@Req() req: FastifyRequest, @Body() body: { slug?: string }) {
+    const u = await this.customer(req);
+    const c = await this.calendar(req, String(body?.slug ?? ""));
+    const res = await rpc(
+      this.rpcClients
+        .client(SyncService)
+        .createFeed(
+          { scope: "personal", orgId: c.orgId, locale: requestLang(req, this.env) },
+          this.customerActor(req, u),
+        ),
+    );
+    const https = `${this.env.site.siteUrl[requestLang(req, this.env)]}/ics/${res.token}.ics`;
+    return { url: https, webcal: https.replace(/^https?:/, "webcal:") };
   }
 
   @Get("my/bookings/:id/ics")

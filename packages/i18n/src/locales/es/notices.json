@@ -20,7 +20,9 @@
     "billing.trial_ended": "Tu prueba gratuita terminó. Tu cuenta quedó en solo lectura hasta que elijas un plan.",
     "billing.payment_failed": "No pudimos cobrar tu suscripción. Actualiza tu método de pago para no perder las reservas.",
     "billing.read_only": "Tu cuenta quedó en solo lectura. Elige un plan para volver a recibir reservas.",
-    "billing.active": "Tu suscripción está activa. ¡Gracias!"
+    "billing.active": "Tu suscripción está activa. ¡Gracias!",
+    "sync.revoked": "Se desconectó tu calendario de {{provider}} ({{account}}) en «{{calendar}}». Vuelve a conectarlo en los ajustes del tablero.",
+    "sync.restored": "Restauramos en tu calendario de {{provider}} {{count}} cita(s) de «{{calendar}}» que se cambiaron allí. Los cambios se hacen en Mi Cita en Tiempo."
   },
   "customer": {
     "booking.created": "Tu cita de {{service}} en «{{calendar}}» quedó para el {{when}}.",
@@ -54,5 +56,10 @@
     "panel": "panel"
   },
   "telegramLinked": "Listo: recibirás aquí los avisos de Mi Cita en Tiempo.",
-  "whatsappCode": "Tu código de Mi Cita en Tiempo es {{code}}."
+  "whatsappCode": "Tu código de Mi Cita en Tiempo es {{code}}.",
+  "providers": {
+    "google": "Google",
+    "microsoft": "Outlook",
+    "icloud": "iCloud"
+  }
 }

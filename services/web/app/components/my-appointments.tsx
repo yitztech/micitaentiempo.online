@@ -5,6 +5,7 @@ import type { MyBooking } from "~/lib/booking-types";
 import { customerRequest, customerSession, downloadIcs, setCustomerSession } from "~/lib/customer";
 import { fmt, useRoot } from "~/lib/i18n";
 import { browserTz, formatDateTime } from "~/lib/time";
+import { CopyField } from "./copy-field";
 import { OtpForm } from "./otp-form";
 import { SlotPicker } from "./slot-picker";
 import { Alert, Button, Card } from "./ui";
@@ -19,6 +20,7 @@ export function MyAppointments() {
   const [notice, setNotice] = useState<{ tone: "success" | "danger"; text: string } | null>(null);
   const [moving, setMoving] = useState<string | null>(null);
   const [tz, setTz] = useState("UTC");
+  const [feed, setFeed] = useState<{ slug: string; webcal: string } | null>(null);
   useEffect(() => setTz(browserTz()), []);
 
   const load = useCallback(async () => {
@@ -154,6 +156,12 @@ export function MyAppointments() {
                     </>
                   ) : null}
                 </div>
+                {feed && feed.slug === b.calendar?.slug ? (
+                  <div className="mt-4 space-y-2">
+                    <CopyField label="webcal://" value={feed.webcal} />
+                    <p className="text-sm text-muted">{m.subscribeHelp}</p>
+                  </div>
+                ) : null}
                 {moving === b.id && b.calendar && b.serviceId ? (
                   <div className="mt-5 border-t border-border pt-5">
                     <SlotPicker

@@ -12,7 +12,7 @@ export function groupOf(type: string): Group | null {
     return "changes";
   if (type === "reminder") return "reminders";
   if (type.startsWith("billing.")) return "billing";
-  if (type.startsWith("channel.")) return "system";
+  if (type.startsWith("channel.") || type.startsWith("sync.")) return "system";
   return null;
 }
 

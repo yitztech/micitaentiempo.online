@@ -18,6 +18,9 @@ export interface NoticeParams {
   reason?: string | null;
   channel?: string;
   days?: number;
+  provider?: string;
+  account?: string;
+  count?: number;
 }
 
 export function when(lang: Lang, iso: string | undefined, tz: string): string {
@@ -44,6 +47,9 @@ export function staffText(lang: Lang, p: NoticeParams, tz: string): string {
     when: when(lang, p.start, tz),
     channel: (t.channels as Record<string, string>)[p.channel ?? ""] ?? p.channel ?? "",
     days: p.days ?? "",
+    provider: (t.providers as Record<string, string>)[p.provider ?? ""] ?? p.provider ?? "",
+    account: p.account ?? "",
+    count: p.count ?? "",
   });
 }
 

@@ -58,7 +58,7 @@ otro (p. ej., `@nestjs/swagger` a TypeScript 6), usa la última compatible y an�
 | RPC interno | `connectrpc.com/connect` | v1.21.0 |
 | Trazas en RPC | `connectrpc.com/otelconnect` | v0.10.0 |
 | Protobuf | `google.golang.org/protobuf` · `buf` | v1.36.12 · v1.73.0 |
-| Google Calendar | `google.golang.org/api` (`calendar/v3`) | v0.300.0 |
+| Google Calendar | REST directo sobre `net/http` (ADR 0017; se descarta `google.golang.org/api` v0.300.0 por tamaño y memoria) | — |
 | OAuth (refresco de tokens) | `golang.org/x/oauth2` | v0.37.0 |
 | Microsoft Graph | Cliente REST propio sobre `net/http` | — (se descarta `msgraph-sdk-go` v1.104.0 por tamaño de binario y memoria) |
 | CalDAV (iCloud) | `github.com/emersion/go-webdav` | v0.7.0 |

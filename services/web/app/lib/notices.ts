@@ -13,6 +13,10 @@ export interface NoticeItem {
     start?: string;
     timezone?: string;
     channel?: string;
+    days?: number;
+    provider?: string;
+    account?: string;
+    count?: number;
   };
   readAt: string | null;
   createdAt: string;
@@ -30,5 +34,9 @@ export function noticeText(t: RootData["t"], lang: Lang, n: NoticeItem, tz: stri
     title: p.title || p.customer || c.untitled,
     when: p.start ? formatDateTime(p.start, lang, p.timezone || tz) : "",
     channel: (c.channels as Record<string, string>)[p.channel ?? ""] ?? p.channel ?? "",
+    days: p.days ?? "",
+    provider: (c.providers as Record<string, string>)[p.provider ?? ""] ?? p.provider ?? "",
+    account: p.account ?? "",
+    count: p.count ?? "",
   });
 }

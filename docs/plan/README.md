@@ -114,7 +114,7 @@ riesgo (F0, F1, F6, F7 y F8). Se fija con `/model` y `/effort xhigh` (o `high`) 
 - [x] F7 · Panel, reserva, «Mis citas» y embed (capturas por aprobar; Google para clientes finales pendiente)
 - [x] F8 · Avisos multicanal y recordatorios
 - [x] F9 · Planes, prueba gratuita y facturación (Stripe listo, sin configurar)
-- [ ] F10 · Sincronización con Google, Outlook y Apple
+- [x] F10 · Sincronización con Google, Outlook y Apple (el vídeo de verificación de Google lo graba el equipo)
 - [ ] F11 · MCP: conecta tu IA
 - [ ] F12 · Endurecimiento y lanzamiento
 - [ ] F13 · Post-lanzamiento (opcional)

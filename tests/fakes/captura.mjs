@@ -64,6 +64,144 @@ function subscription({
   stripe.subs.set(sub.id, sub);
   return sub;
 }
+// ── Google Calendar y Microsoft Graph (con estado por cuenta) ──
+const prov = { n: 0, codes: new Map(), tokens: new Map(), refresh: new Map(), accounts: new Map() };
+function account(name) {
+  let a = prov.accounts.get(name);
+  if (!a) {
+    a = { name, busy: [], events: new Map(), revoked: false };
+    prov.accounts.set(name, a);
+  }
+  return a;
+}
+const fakeJwt = (email) =>
+  `e30.${Buffer.from(JSON.stringify({ email, preferred_username: email })).toString("base64url")}.x`;
+function authorize(url, res, prefix) {
+  const name =
+    url.searchParams.get("login_hint") || `${prefix}-${++prov.n}${Date.now().toString(36)}@example.com`;
+  account(name);
+  const code = `codigo-${++prov.n}`;
+  prov.codes.set(code, name);
+  const back = new URL(url.searchParams.get("redirect_uri") ?? "http://localhost/");
+  back.searchParams.set("code", code);
+  back.searchParams.set("state", url.searchParams.get("state") ?? "");
+  res.writeHead(302, { location: back.toString() });
+  res.end();
+}
+function tokenEndpoint(form, res) {
+  let name;
+  if (form.grant_type === "authorization_code") name = prov.codes.get(form.code);
+  else if (form.grant_type === "refresh_token") name = prov.refresh.get(form.refresh_token);
+  const a = name ? account(name) : null;
+  if (!a || a.revoked) return json(res, 400, { error: "invalid_grant" });
+  const access = `acceso-${++prov.n}`;
+  const refresh = form.refresh_token ?? `renovar-${++prov.n}`;
+  prov.tokens.set(access, a.name);
+  prov.refresh.set(refresh, a.name);
+  return json(res, 200, {
+    access_token: access,
+    refresh_token: refresh,
+    expires_in: 3600,
+    token_type: "Bearer",
+    id_token: fakeJwt(a.name),
+  });
+}
+function bearer(req) {
+  const name = prov.tokens.get(String(req.headers.authorization ?? "").replace("Bearer ", ""));
+  const a = name ? account(name) : null;
+  return a && !a.revoked ? a : null;
+}
+function fakeGoogle(req, url, body, res) {
+  const p = url.pathname.replace("/google", "");
+  if (p === "/authorize") return authorize(url, res, "google");
+  if (p === "/token") return tokenEndpoint(body, res);
+  const a = bearer(req);
+  if (!a) return json(res, 401, { error: { code: 401 } });
+  const q = p.replace("/calendar/v3", "");
+  if (q === "/users/me/calendarList")
+    return json(res, 200, {
+      items: [{ id: a.name, summary: "Principal", primary: true, accessRole: "owner" }],
+    });
+  if (q === "/calendars" && req.method === "POST")
+    return json(res, 200, { id: "app-cal", summary: body.summary });
+  if (q === "/freeBusy") return json(res, 200, { calendars: { [a.name]: { busy: a.busy } } });
+  if (q === "/calendars/app-cal/events/watch")
+    return json(res, 200, { resourceId: "recurso", expiration: String(Date.now() + 7 * 86400000) });
+  if (q === "/calendars/app-cal/events" && req.method === "POST") {
+    const id = `g${++prov.n}`;
+    const ev = { ...body, id, etag: `e${prov.n}` };
+    a.events.set(id, ev);
+    return json(res, 200, ev);
+  }
+  const m = q.match(/^\/calendars\/app-cal\/events\/(.+)$/);
+  if (m) {
+    const ev = a.events.get(m[1]);
+    if (req.method === "DELETE") {
+      a.events.delete(m[1]);
+      res.writeHead(204);
+      return res.end();
+    }
+    if (!ev) return json(res, 404, { error: { code: 404 } });
+    if (req.method === "PUT") {
+      const next = { ...body, id: m[1], etag: `e${++prov.n}` };
+      a.events.set(m[1], next);
+      return json(res, 200, next);
+    }
+    return json(res, 200, ev);
+  }
+  return json(res, 404, { error: { message: `Sin imitar: ${req.method} ${q}` } });
+}
+function fakeGraph(req, url, body, res) {
+  const p = url.pathname;
+  if (p === "/ms/authorize") return authorize(url, res, "outlook");
+  if (p === "/ms/token") return tokenEndpoint(body, res);
+  const a = bearer(req);
+  if (!a) return json(res, 401, { error: { code: "InvalidAuthenticationToken" } });
+  const q = p.replace("/graph", "");
+  if (q === "/me/calendars" && req.method === "GET") {
+    const cals = [{ id: "cal-principal", name: "Calendario", canEdit: true, isDefaultCalendar: true }];
+    if (a.appCal) cals.push({ id: "cal-app", name: a.appCal, canEdit: true, isDefaultCalendar: false });
+    return json(res, 200, { value: cals });
+  }
+  if (q === "/me/calendars" && req.method === "POST") {
+    a.appCal = body.name;
+    return json(res, 201, { id: "cal-app", name: body.name });
+  }
+  if (q.startsWith("/me/calendars/cal-principal/calendarView"))
+    return json(res, 200, {
+      value: a.busy.map((b) => ({
+        start: { dateTime: b.start.replace("Z", ""), timeZone: "UTC" },
+        end: { dateTime: b.end.replace("Z", ""), timeZone: "UTC" },
+        showAs: "busy",
+      })),
+    });
+  if (q === "/me/calendars/cal-app/events" && req.method === "POST") {
+    const id = `m${++prov.n}`;
+    const ev = { ...body, id, changeKey: `c${prov.n}` };
+    a.events.set(id, ev);
+    return json(res, 201, ev);
+  }
+  if (q === "/subscriptions")
+    return json(res, 201, { id: `sub-${++prov.n}`, expirationDateTime: body.expirationDateTime });
+  const m = q.match(/^\/me\/events\/([^?]+)/);
+  if (m) {
+    const ev = a.events.get(m[1]);
+    if (req.method === "DELETE") {
+      a.events.delete(m[1]);
+      res.writeHead(204);
+      return res.end();
+    }
+    if (!ev) return json(res, 404, { error: { code: "ErrorItemNotFound" } });
+    if (req.method === "PATCH") {
+      const next = { ...ev, ...body, changeKey: `c${++prov.n}` };
+      a.events.set(m[1], next);
+      return json(res, 200, next);
+    }
+    return json(res, 200, ev);
+  }
+  return json(res, 404, { error: { message: `Sin imitar: ${req.method} ${q}` } });
+}
+
 function fakeStripe(req, url, form, res) {
   const p = url.pathname;
   if (req.method === "POST" && p === "/v1/customers") {
@@ -156,6 +294,27 @@ createServer((req, res) => {
     if (url.pathname === "/__stripe/subscriptions" && req.method === "POST")
       return json(res, 200, subscription(JSON.parse(raw || "{}")));
     if (url.pathname === "/__stripe/customers") return json(res, 200, [...stripe.customers.values()]);
+    if (url.pathname === "/__prov/busy" && req.method === "POST") {
+      const { account: name, start, end } = JSON.parse(raw || "{}");
+      account(name).busy.push({ start, end });
+      return json(res, 200, { ok: true });
+    }
+    if (url.pathname === "/__prov/revoke" && req.method === "POST") {
+      account(JSON.parse(raw || "{}").account).revoked = true;
+      return json(res, 200, { ok: true });
+    }
+    if (url.pathname === "/__prov/events")
+      return json(res, 200, [...account(url.searchParams.get("account") ?? "").events.values()]);
+    if (url.pathname === "/__prov/move" && req.method === "POST") {
+      const { account: name, start, end } = JSON.parse(raw || "{}");
+      for (const ev of account(name).events.values()) {
+        ev.start = ev.start?.timeZone
+          ? { dateTime: start.replace("Z", ""), timeZone: "UTC" }
+          : { dateTime: start };
+        ev.end = ev.end?.timeZone ? { dateTime: end.replace("Z", ""), timeZone: "UTC" } : { dateTime: end };
+      }
+      return json(res, 200, { ok: true });
+    }
     let body = raw;
     try {
       body = raw ? JSON.parse(raw) : null;
@@ -176,8 +335,11 @@ createServer((req, res) => {
         return json(res, status, { ok: false });
       }
     }
-    if (url.pathname.startsWith("/v1/"))
-      return fakeStripe(req, url, typeof body === "object" && body ? body : {}, res);
+    const form = typeof body === "object" && body ? body : {};
+    if (url.pathname.startsWith("/v1/")) return fakeStripe(req, url, form, res);
+    if (url.pathname.startsWith("/google/")) return fakeGoogle(req, url, form, res);
+    if (url.pathname.startsWith("/ms/") || url.pathname.startsWith("/graph/"))
+      return fakeGraph(req, url, form, res);
     if (url.pathname === "/slack/authorize") {
       const back = new URL(url.searchParams.get("redirect_uri") ?? "http://localhost/");
       back.searchParams.set("code", "codigo-de-prueba");

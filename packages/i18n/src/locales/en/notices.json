@@ -20,7 +20,9 @@
     "billing.trial_ended": "Your free trial ended. Your account is read-only until you choose a plan.",
     "billing.payment_failed": "We couldn't charge your subscription. Update your payment method so you don't lose bookings.",
     "billing.read_only": "Your account is now read-only. Choose a plan to take bookings again.",
-    "billing.active": "Your subscription is active. Thank you!"
+    "billing.active": "Your subscription is active. Thank you!",
+    "sync.revoked": "Your {{provider}} calendar ({{account}}) was disconnected from “{{calendar}}”. Reconnect it in the board settings.",
+    "sync.restored": "We restored {{count}} appointment(s) from “{{calendar}}” that were changed in your {{provider}} calendar. Make changes in My Appointment On Time."
   },
   "customer": {
     "booking.created": "Your {{service}} appointment at “{{calendar}}” is set for {{when}}.",
@@ -54,5 +56,10 @@
     "panel": "dashboard"
   },
   "telegramLinked": "Done: you'll get My Appointment On Time notifications here.",
-  "whatsappCode": "Your My Appointment On Time code is {{code}}."
+  "whatsappCode": "Your My Appointment On Time code is {{code}}.",
+  "providers": {
+    "google": "Google",
+    "microsoft": "Outlook",
+    "icloud": "iCloud"
+  }
 }

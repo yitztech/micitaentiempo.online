@@ -1,5 +1,6 @@
 import { type FormEvent, useState } from "react";
 import { useRevalidator } from "react-router";
+import { ConnectedCalendars } from "~/components/connected-calendars";
 import { CopyField, embedSnippets } from "~/components/copy-field";
 import { HoursEditor, shiftsFromWeek, weekFromShifts } from "~/components/hours-editor";
 import { Select } from "~/components/select";
@@ -285,6 +286,8 @@ export default function CalendarSettings({ loaderData }: Route.ComponentProps) {
         </ul>
         {message("services")}
       </Card>
+
+      <ConnectedCalendars calendarId={board.id} isOwner={board.role === "owner"} tz={board.timezone} />
 
       <Card className="space-y-4 p-6">
         <h2 className="text-lg font-semibold">{s.share}</h2>

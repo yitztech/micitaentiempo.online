@@ -120,6 +120,9 @@ export class NotificationsService implements OnModuleInit {
       start: str("start") || undefined,
       end: str("end") || undefined,
       timezone: cal?.timezone || str("calendar_timezone") || "UTC",
+      provider: str("provider") || undefined,
+      account: str("account") || undefined,
+      count: typeof subject.count === "number" ? subject.count : undefined,
     };
     const actorId = event.actor?.userId ?? "";
 

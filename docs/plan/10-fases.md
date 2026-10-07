@@ -212,14 +212,14 @@ dobles; eventos fuera de orden bien resueltos; ninguna clave real en el reposito
 
 **Objetivo:** RF-15 (`04-motor-calendario.md` §4.9).
 
-- [ ] Nivel 1: feeds ICS de tablero y de cliente final, tokens revocables, instrucciones `webcal://`,
+- [x] Nivel 1: feeds ICS de tablero y de cliente final, tokens revocables, instrucciones `webcal://`,
       botones «Añadir al calendario».
-- [ ] Google: OAuth incremental en `api`, credenciales cifradas en `calendar`, calendario de la app,
+- [x] Google: OAuth incremental en `api`, credenciales cifradas en `calendar`, calendario de la app,
       `freebusy`, escritura, canal `watch` + `syncToken`, política de fuente de verdad.
-- [ ] Microsoft: OAuth `common`, `getSchedule`/`calendarView`, calendario propio, suscripciones + `delta`.
-- [ ] iCloud: contraseña de app, descubrimiento CalDAV, ocupado con sus tres alternativas, `PUT`, sondeo.
-- [ ] Reconciliación cada 15 min, salud de conexiones, «Reconectar», clasificación de errores.
-- [ ] Dobles de Google y Graph, Radicale en pruebas; guion y vídeo para la verificación de Google.
+- [x] Microsoft: OAuth `common`, `getSchedule`/`calendarView`, calendario propio, suscripciones + `delta`.
+- [x] iCloud: contraseña de app, descubrimiento CalDAV, ocupado con sus tres alternativas, `PUT`, sondeo.
+- [x] Reconciliación cada 15 min, salud de conexiones, «Reconectar», clasificación de errores.
+- [x] Dobles de Google y Graph, Radicale en pruebas; guion y vídeo para la verificación de Google.
 
 **Aceptación:** escenarios de ocupado externo que bloquea, reserva que aparece en el calendario de la app,
 cambio externo restaurado, credencial revocada y contenido de los feeds.

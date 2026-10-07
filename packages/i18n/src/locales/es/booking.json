@@ -1,7 +1,10 @@
 {
   "seoTitle": "Reservar en {{name}}",
   "steps": ["Servicio", "Día", "Hora", "Tus datos", "Confirmación"],
-  "service": { "title": "Elige un servicio", "minutes": "{{n}} min" },
+  "service": {
+    "title": "Elige un servicio",
+    "minutes": "{{n}} min"
+  },
   "date": {
     "title": "Elige un día",
     "prev": "Mes anterior",
@@ -67,7 +70,9 @@
     "rescheduled": "Cambiamos tu cita.",
     "addToCalendar": "Añadir al calendario",
     "signOut": "Salir",
-    "noticeRule": "Puedes cambiarla o cancelarla hasta {{hours}} h antes."
+    "noticeRule": "Puedes cambiarla o cancelarla hasta {{hours}} h antes.",
+    "subscribe": "Suscribirme a mis citas",
+    "subscribeHelp": "Añade este enlace a tu calendario (Google: Desde URL; Apple: Nueva suscripción)."
   },
   "embed": {
     "poweredBy": "Reservas con Mi Cita en Tiempo",
