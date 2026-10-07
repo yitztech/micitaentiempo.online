@@ -1,0 +1,13 @@
+{
+  "name": "@mcet/holidays-gen",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Genera los datos de feriados por país que embebe el motor (ADR 0008).",
+  "scripts": {
+    "generate": "node generate.mjs"
+  },
+  "devDependencies": {
+    "date-holidays": "3.37.0"
+  }
+}

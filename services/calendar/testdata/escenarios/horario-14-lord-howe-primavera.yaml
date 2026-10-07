@@ -1,0 +1,11 @@
+nombre: "Lord Howe: salto de 30 minutos el 4 de octubre"
+tablero:
+  zona: Australia/Lord_Howe
+  capacidad: 1
+  horario:
+    todos: ["00:00-24:00"]
+servicio: {"duracion": 30, "intervalo": 30}
+ahora: "2026-10-02T00:00:00Z"
+consulta: { desde: "2026-10-04", hasta: "2026-10-04" }
+esperado:
+  "2026-10-04": {"total": 47, "excluye": ["02:00"], "incluye": ["01:30", "02:30"]}

@@ -45,19 +45,19 @@ server {
     # ── api (NestJS) ──
     # Rutas sensibles de identidad: entrar, registrarse, recuperar contraseña, códigos.
     location ~ ^/api/auth/(sign-in|sign-up|forget-password|reset-password|email-otp|two-factor)/ {
-        limit_req zone=auth burst=10 nodelay;
+        limit_req zone=auth burst=${BURST_AUTH} nodelay;
         include /etc/nginx/snippets/proxy-headers.conf;
         include /etc/nginx/snippets/security-headers.conf;
         proxy_pass http://api_upstream;
     }
     location /api/auth/ {
-        limit_req zone=public burst=40 nodelay;
+        limit_req zone=public burst=${BURST_PUBLIC} nodelay;
         include /etc/nginx/snippets/proxy-headers.conf;
         include /etc/nginx/snippets/security-headers.conf;
         proxy_pass http://api_upstream;
     }
     location /api/public/ {
-        limit_req zone=public burst=40 nodelay;
+        limit_req zone=public burst=${BURST_PUBLIC} nodelay;
         include /etc/nginx/snippets/proxy-headers.conf;
         include /etc/nginx/snippets/security-headers.conf;
         proxy_pass http://api_upstream;
@@ -80,7 +80,7 @@ server {
         proxy_pass http://api_upstream;
     }
     location = /mcp {
-        limit_req zone=mcp burst=40 nodelay;
+        limit_req zone=mcp burst=${BURST_PUBLIC} nodelay;
         include /etc/nginx/snippets/proxy-headers.conf;
         include /etc/nginx/snippets/security-headers.conf;
         include /etc/nginx/snippets/stream.conf;
@@ -100,7 +100,7 @@ server {
         proxy_pass http://calendar_upstream;
     }
     location /ics/ {
-        limit_req zone=ics burst=10 nodelay;
+        limit_req zone=ics burst=${BURST_AUTH} nodelay;
         include /etc/nginx/snippets/proxy-headers.conf;
         include /etc/nginx/snippets/security-headers.conf;
         proxy_pass http://calendar_upstream;

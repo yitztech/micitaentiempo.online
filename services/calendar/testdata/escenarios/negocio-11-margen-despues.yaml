@@ -1,0 +1,13 @@
+nombre: "Margen de 15 min después de cada cita"
+tablero:
+  zona: America/Mexico_City
+  capacidad: 1
+  horario:
+    lunes-viernes: ["09:00-12:00"]
+servicio: {"duracion": 30, "intervalo": 15, "margen_despues": 15}
+ahora: "2026-09-14T06:00:00-06:00"
+existentes:
+  - {"tipo": "cita", "inicio": "2026-09-14T10:00:00-06:00", "fin": "2026-09-14T10:30:00-06:00", "margen_despues": 15}
+consulta: { desde: "2026-09-14", hasta: "2026-09-14" }
+esperado:
+  "2026-09-14": {"incluye": ["09:15", "10:45"], "excluye": ["09:30", "09:45", "10:00", "10:30"]}

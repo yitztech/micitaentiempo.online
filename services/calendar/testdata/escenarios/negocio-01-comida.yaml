@@ -1,0 +1,13 @@
+nombre: "Comida de 14:00 a 15:00"
+tablero:
+  zona: America/Mexico_City
+  capacidad: 1
+  horario:
+    lunes-viernes: ["09:00-18:00"]
+  descansos:
+    lunes-viernes: ["14:00-15:00"]
+servicio: {"duracion": 30, "intervalo": 30}
+ahora: "2026-09-14T06:00:00-06:00"
+consulta: { desde: "2026-09-14", hasta: "2026-09-14" }
+esperado:
+  "2026-09-14": {"total": 16, "excluye": ["14:00", "14:30"], "incluye": ["13:30", "15:00"]}

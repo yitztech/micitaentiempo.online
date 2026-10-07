@@ -9,8 +9,10 @@ ENV RELEASE_SHA=${RELEASE_SHA} \
     RATE_PUBLIC=120r/m \
     RATE_MCP=120r/m \
     RATE_ICS=30r/m \
+    BURST_AUTH=10 \
+    BURST_PUBLIC=40 \
     # El entrypoint de nginx solo sustituye estas variables en la plantilla
-    NGINX_ENVSUBST_FILTER='^(TRUSTED_PROXY_CIDR|RELEASE_SHA|RATE_[A-Z]+)$'
+    NGINX_ENVSUBST_FILTER='^(TRUSTED_PROXY_CIDR|RELEASE_SHA|RATE_[A-Z]+|BURST_[A-Z]+)$'
 
 COPY services/gateway/nginx.conf /etc/nginx/nginx.conf
 COPY services/gateway/snippets/ /etc/nginx/snippets/

@@ -52,7 +52,7 @@ otro (p. ej., `@nestjs/swagger` a TypeScript 6), usa la última compatible y an�
 | Necesidad | Módulo | Versión |
 |---|---|---|
 | PostgreSQL | `github.com/jackc/pgx/v5` | v5.11.0 |
-| Consultas tipadas | `github.com/sqlc-dev/sqlc` (herramienta) | v1.31.1 |
+| Consultas | pgx directo con escaneo explícito (sqlc v1.31.1 descartado: exige cgo y apenas aporta con este número de consultas; ADR 0012) | — |
 | Migraciones | `github.com/pressly/goose/v3` | v3.28.0 |
 | Cola de trabajos | `github.com/riverqueue/river` (+ `riverdriver/riverpgxv5`) | v0.49.0 |
 | RPC interno | `connectrpc.com/connect` | v1.21.0 |
@@ -66,6 +66,7 @@ otro (p. ej., `@nestjs/swagger` a TypeScript 6), usa la última compatible y an�
 | JWT interno | `github.com/go-jose/go-jose/v4` | v4.1.5 |
 | Observabilidad | `go.opentelemetry.io/otel` · `github.com/prometheus/client_golang` | v1.47.0 · v1.24.1 |
 | Pruebas | `github.com/testcontainers/testcontainers-go` (+ `modules/postgres`) · `pgregory.net/rapid` | v0.44.0 · v1.3.0 |
+| Escenarios YAML del motor | `go.yaml.in/yaml/v3` | última estable |
 | Pruebas diferenciales de RRULE | `github.com/teambition/rrule-go` | v1.8.2 (solo en pruebas; sin cambios desde 2023) |
 | Lint | `golangci-lint` | v2.14.0 |
 | Feriados (descartado) | `github.com/rickar/cal/v2` | v2.1.32 — solo 45 países; ver `04-motor-calendario.md` §4.6 |
@@ -93,7 +94,7 @@ otro (p. ej., `@nestjs/swagger` a TypeScript 6), usa la última compatible y an�
 | `@bufbuild/protobuf` · `@bufbuild/protoc-gen-es` · `@bufbuild/buf` | 2.16.0 · 2.16.0 · 1.73.0 | |
 | `pino` · `nestjs-pino` | 10.4.0 · 5.3.1 | |
 | `@opentelemetry/sdk-node` | 0.223.0 | |
-| `@node-rs/argon2` | 2.2.2 | |
+| `@node-rs/argon2` | 2.2.1 | 2.2.2 salió el 2026-10-06 y `minimumReleaseAge` la bloquea; subir en el siguiente PR |
 | `altcha-lib` (servidor) · `altcha` (widget) | 2.6.0 · 3.3.0 | Antibots con prueba de trabajo, autoalojado, sin terceros |
 | `mailchecker` | 6.0.21 | Dominios de correo desechables |
 | `libphonenumber-js` | 1.13.14 | Teléfonos E.164 para WhatsApp |

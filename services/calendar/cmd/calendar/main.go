@@ -20,9 +20,12 @@ import (
 	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/clock"
 	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/config"
 	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/db"
+	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/engine"
+	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/holidays"
 	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/httpapi"
 	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/outbox"
 	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/rpc"
+	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/store"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -116,10 +119,17 @@ func serve() error {
 		Revision: revision,
 		Verifier: auth.NewVerifier(cfg.RPCSecretAPIToCalendar, auth.IssuerAPI, auth.AudienceCalendar),
 	}
+	catalog, err := holidays.NewCatalog()
+	if err != nil {
+		return fmt.Errorf("datos de feriados: %w", err)
+	}
+	var clk clock.Clock = clock.Real{}
 	if cfg.TestMode {
 		log.Warn("TEST_MODE activo: reloj controlable expuesto en el puerto interno")
-		rpcOpts.TestClock = &clock.Settable{}
+		settable := &clock.Settable{}
+		rpcOpts.TestClock, clk = settable, settable
 	}
+	rpcOpts.Engine = &engine.Engine{Store: store.New(pool), Holidays: catalog, Clock: clk}
 	rpc.Mount(internalMux, rpcOpts)
 
 	public := httpapi.NewServer(cfg.PublicAddr, httpapi.PublicMux(revision))

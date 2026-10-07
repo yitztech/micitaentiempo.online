@@ -78,6 +78,7 @@ require (
 	golang.org/x/crypto v0.55.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
 	golang.org/x/text v0.42.0 // indirect
+	pgregory.net/rapid v1.3.0 // indirect
 )
 
 tool (

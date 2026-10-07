@@ -1,0 +1,11 @@
+nombre: "Sídney: 02:00 no existe el 4 de octubre"
+tablero:
+  zona: Australia/Sydney
+  capacidad: 1
+  horario:
+    todos: ["00:00-24:00"]
+servicio: {"duracion": 60, "intervalo": 60}
+ahora: "2026-10-02T00:00:00Z"
+consulta: { desde: "2026-10-04", hasta: "2026-10-04" }
+esperado:
+  "2026-10-04": {"total": 23, "excluye": ["02:00"]}

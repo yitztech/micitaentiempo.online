@@ -11,6 +11,8 @@ services:
       RATE_PUBLIC: 6000r/m
       RATE_MCP: 6000r/m
       RATE_ICS: 600r/m
+      BURST_AUTH: "500"
+      BURST_PUBLIC: "2000"
   web:
     build: { context: ., dockerfile: services/web/Dockerfile, args: { RELEASE_SHA: "${RELEASE_SHA:-ci}" } }
     environment:

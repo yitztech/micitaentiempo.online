@@ -1,0 +1,103 @@
+syntax = "proto3";
+
+package mcet.calendar.v1;
+
+import "google/protobuf/timestamp.proto";
+
+// Tableros (calendarios de reservas). Un tablero = una sucursal en el plan Sucursales.
+service CalendarService {
+  rpc CreateCalendar(CreateCalendarRequest) returns (Calendar);
+  rpc GetCalendar(GetCalendarRequest) returns (Calendar);
+  rpc GetCalendarBySlug(GetCalendarBySlugRequest) returns (Calendar);
+  rpc ListCalendars(ListCalendarsRequest) returns (ListCalendarsResponse);
+  rpc UpdateCalendar(UpdateCalendarRequest) returns (Calendar);
+  rpc ArchiveCalendar(ArchiveCalendarRequest) returns (Calendar);
+  // Refleja el estado de la organización (prueba, activa, solo lectura…).
+  rpc SetOrgStatus(SetOrgStatusRequest) returns (SetOrgStatusResponse);
+}
+
+message EmbedPolicy {
+  // "any" (cualquier sitio) | "allowlist"
+  string mode = 1;
+  repeated string origins = 2;
+}
+
+message BookingPolicy {
+  // Antelación mínima para que el cliente final cancele o reprograme por su cuenta.
+  int32 cancel_min_notice_minutes = 1;
+}
+
+message Calendar {
+  string id = 1;
+  string org_id = 2;
+  string slug = 3;
+  string name = 4;
+  string timezone = 5;
+  int32 capacity = 6;
+  string country = 7;
+  string subdivision = 8;
+  string address = 9;
+  EmbedPolicy embed_policy = 10;
+  BookingPolicy booking_policy = 11;
+  // "active" | "archived"
+  string status = 12;
+  google.protobuf.Timestamp created_at = 13;
+  // Estado de la organización dueña.
+  string org_status = 14;
+}
+
+message CreateCalendarRequest {
+  string org_id = 1;
+  string org_status = 2;
+  string name = 3;
+  // Vacío = se deriva del nombre.
+  string slug = 4;
+  string timezone = 5;
+  int32 capacity = 6;
+  string country = 7;
+  string subdivision = 8;
+  string address = 9;
+}
+
+message GetCalendarRequest {
+  string id = 1;
+}
+
+message GetCalendarBySlugRequest {
+  string slug = 1;
+}
+
+message ListCalendarsRequest {
+  string org_id = 1;
+  bool include_archived = 2;
+}
+
+message ListCalendarsResponse {
+  repeated Calendar calendars = 1;
+}
+
+message UpdateCalendarRequest {
+  string id = 1;
+  optional string name = 2;
+  optional string slug = 3;
+  optional string timezone = 4;
+  optional int32 capacity = 5;
+  optional string country = 6;
+  optional string subdivision = 7;
+  optional string address = 8;
+  EmbedPolicy embed_policy = 9;
+  BookingPolicy booking_policy = 10;
+}
+
+message ArchiveCalendarRequest {
+  string id = 1;
+  // false = reactivar
+  bool archived = 2;
+}
+
+message SetOrgStatusRequest {
+  string org_id = 1;
+  string status = 2;
+}
+
+message SetOrgStatusResponse {}

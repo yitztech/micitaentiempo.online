@@ -1,0 +1,39 @@
+# Regenera cada año los datos de feriados del motor (ADR 0008) y abre un PR para revisarlos.
+name: Actualizar feriados
+
+on:
+  schedule:
+    - cron: "0 9 1 10 *" # 1 de octubre
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  regenerar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @mcet/holidays-gen generate "$(date -u +%Y)"
+      - name: Abrir PR si hay cambios
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --quiet -- services/calendar/internal/holidays/data; then
+            echo "Sin cambios en los feriados"; exit 0
+          fi
+          branch="feriados/$(date -u +%Y)"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          git add services/calendar/internal/holidays/data
+          git commit -m "Motor: feriados $(date -u +%Y) a $(( $(date -u +%Y) + 5 ))"
+          git push -u origin "$branch"
+          gh pr create --title "Feriados $(date -u +%Y)" --body "Datos regenerados con date-holidays. Revisar y aprobar."

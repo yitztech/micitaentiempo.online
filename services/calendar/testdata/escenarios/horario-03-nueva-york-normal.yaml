@@ -1,0 +1,11 @@
+nombre: "Nueva York: día normal"
+tablero:
+  zona: America/New_York
+  capacidad: 1
+  horario:
+    todos: ["00:00-24:00"]
+servicio: {"duracion": 60, "intervalo": 60}
+ahora: "2026-06-29T00:00:00Z"
+consulta: { desde: "2026-07-01", hasta: "2026-07-01" }
+esperado:
+  "2026-07-01": {"total": 24}

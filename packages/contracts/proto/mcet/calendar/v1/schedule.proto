@@ -1,0 +1,141 @@
+syntax = "proto3";
+
+package mcet.calendar.v1;
+
+// Horario semanal, descansos, excepciones por fecha y feriados de un tablero.
+service ScheduleService {
+  rpc GetSchedule(GetScheduleRequest) returns (Schedule);
+  rpc SetWeeklyHours(SetWeeklyHoursRequest) returns (Schedule);
+  rpc UpsertDateOverride(UpsertDateOverrideRequest) returns (Schedule);
+  rpc DeleteDateOverride(DeleteDateOverrideRequest) returns (Schedule);
+  rpc SetHolidayPolicies(SetHolidayPoliciesRequest) returns (Schedule);
+  rpc UpsertCustomHoliday(UpsertCustomHolidayRequest) returns (Schedule);
+  rpc DeleteCustomHoliday(DeleteCustomHolidayRequest) returns (Schedule);
+  rpc ListHolidays(ListHolidaysRequest) returns (ListHolidaysResponse);
+  rpc ListCountries(ListCountriesRequest) returns (ListCountriesResponse);
+}
+
+message TimeRange {
+  // "HH:MM"
+  string start = 1;
+  // "HH:MM" ("24:00" = fin del día)
+  string end = 2;
+}
+
+message Shift {
+  // ISO 8601: 1 = lunes … 7 = domingo
+  int32 weekday = 1;
+  // "open" | "break"
+  string kind = 2;
+  TimeRange range = 3;
+  string label = 4;
+}
+
+message DateOverride {
+  // "AAAA-MM-DD"
+  string date = 1;
+  // "closed" | "custom" | "open_on_holiday"
+  string kind = 2;
+  repeated TimeRange intervals = 3;
+  string note = 4;
+}
+
+message HolidayPolicy {
+  string country = 1;
+  string subdivision = 2;
+  repeated string types = 3;
+  bool substitutes = 4;
+}
+
+message CustomHoliday {
+  string id = 1;
+  string name = 2;
+  // Fecha concreta "AAAA-MM-DD"…
+  string date = 3;
+  // …o "MM-DD" cada año
+  string month_day = 4;
+}
+
+message Schedule {
+  string calendar_id = 1;
+  repeated Shift shifts = 2;
+  repeated DateOverride overrides = 3;
+  repeated HolidayPolicy holiday_policies = 4;
+  repeated CustomHoliday custom_holidays = 5;
+}
+
+message GetScheduleRequest {
+  string calendar_id = 1;
+}
+
+message SetWeeklyHoursRequest {
+  string calendar_id = 1;
+  repeated Shift shifts = 2;
+}
+
+message UpsertDateOverrideRequest {
+  string calendar_id = 1;
+  DateOverride override = 2;
+}
+
+message DeleteDateOverrideRequest {
+  string calendar_id = 1;
+  string date = 2;
+}
+
+message SetHolidayPoliciesRequest {
+  string calendar_id = 1;
+  repeated HolidayPolicy policies = 2;
+}
+
+message UpsertCustomHolidayRequest {
+  string calendar_id = 1;
+  CustomHoliday holiday = 2;
+}
+
+message DeleteCustomHolidayRequest {
+  string calendar_id = 1;
+  string id = 2;
+}
+
+message ListHolidaysRequest {
+  string calendar_id = 1;
+  string from = 2;
+  string to = 3;
+  // "es" | "en"
+  string locale = 4;
+}
+
+message Holiday {
+  string date = 1;
+  string name = 2;
+  // Código de país o "custom"
+  string source = 3;
+  string type = 4;
+  // true si hay excepción «abrimos ese día»
+  bool open = 5;
+}
+
+message ListHolidaysResponse {
+  repeated Holiday holidays = 1;
+}
+
+message ListCountriesRequest {
+  string locale = 1;
+}
+
+message Subdivision {
+  string code = 1;
+  string name = 2;
+}
+
+message Country {
+  string code = 1;
+  string name = 2;
+  repeated Subdivision subdivisions = 3;
+}
+
+message ListCountriesResponse {
+  repeated Country countries = 1;
+  repeated int32 years = 2;
+}

@@ -1,0 +1,15 @@
+nombre: "Abrimos el 16 de septiembre"
+tablero:
+  zona: America/Mexico_City
+  capacidad: 1
+  horario:
+    lunes-viernes: ["09:00-18:00"]
+  feriados:
+    - {"pais": "MX", "tipos": ["public"]}
+  excepciones:
+    "2026-09-16": {"tipo": "abrir_en_feriado"}
+servicio: {"duracion": 30, "intervalo": 30}
+ahora: "2026-09-14T06:00:00-06:00"
+consulta: { desde: "2026-09-16", hasta: "2026-09-16" }
+esperado:
+  "2026-09-16": {"total": 18}

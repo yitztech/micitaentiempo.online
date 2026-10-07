@@ -1,0 +1,11 @@
+nombre: "Turno partido 9–13 y 16–20"
+tablero:
+  zona: America/Mexico_City
+  capacidad: 1
+  horario:
+    lunes-viernes: ["09:00-13:00", "16:00-20:00"]
+servicio: {"duracion": 60, "intervalo": 60}
+ahora: "2026-09-14T06:00:00-06:00"
+consulta: { desde: "2026-09-14", hasta: "2026-09-14" }
+esperado:
+  "2026-09-14": {"total": 8, "excluye": ["13:00", "14:00", "15:00"], "ultimo": "19:00"}

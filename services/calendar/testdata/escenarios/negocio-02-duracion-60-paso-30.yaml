@@ -1,0 +1,13 @@
+nombre: "Cita de 60 min cada 30 min con comida"
+tablero:
+  zona: America/Mexico_City
+  capacidad: 1
+  horario:
+    lunes-viernes: ["09:00-18:00"]
+  descansos:
+    lunes-viernes: ["14:00-15:00"]
+servicio: {"duracion": 60, "intervalo": 30}
+ahora: "2026-09-14T06:00:00-06:00"
+consulta: { desde: "2026-09-14", hasta: "2026-09-14" }
+esperado:
+  "2026-09-14": {"total": 14, "incluye": ["13:00"], "excluye": ["13:30", "14:00"], "ultimo": "17:00"}

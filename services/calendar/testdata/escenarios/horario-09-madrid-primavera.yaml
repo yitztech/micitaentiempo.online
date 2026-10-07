@@ -1,0 +1,11 @@
+nombre: "Madrid: 02:00 no existe el 29 de marzo"
+tablero:
+  zona: Europe/Madrid
+  capacidad: 1
+  horario:
+    todos: ["00:00-24:00"]
+servicio: {"duracion": 60, "intervalo": 60}
+ahora: "2026-03-27T00:00:00Z"
+consulta: { desde: "2026-03-29", hasta: "2026-03-29" }
+esperado:
+  "2026-03-29": {"total": 23, "excluye": ["02:00"]}

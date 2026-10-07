@@ -3,5 +3,7 @@ modules:
   - path: proto
 lint:
   use: [STANDARD]
+  # Se reutilizan recursos como respuesta (p. ej., Calendar o Schedule) para no duplicar mensajes.
+  except: [RPC_REQUEST_RESPONSE_UNIQUE, RPC_RESPONSE_STANDARD_NAME]
 breaking:
   use: [FILE]

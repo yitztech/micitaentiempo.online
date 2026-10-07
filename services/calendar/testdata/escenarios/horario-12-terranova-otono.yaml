@@ -1,0 +1,11 @@
+nombre: "Terranova: 1 de noviembre"
+tablero:
+  zona: America/St_Johns
+  capacidad: 1
+  horario:
+    todos: ["00:00-24:00"]
+servicio: {"duracion": 60, "intervalo": 60}
+ahora: "2026-10-30T00:00:00Z"
+consulta: { desde: "2026-11-01", hasta: "2026-11-01" }
+esperado:
+  "2026-11-01": {"total": 24}

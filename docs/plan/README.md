@@ -107,8 +107,8 @@ riesgo (F0, F1, F6, F7 y F8). Se fija con `/model` y `/effort xhigh` (o `high`) 
 - [x] F0 · Fundaciones del repositorio
 - [x] F1 · Esqueleto desplegable
 - [x] F2 · Contratos y comunicación interna
-- [ ] F3 · Identidad, organizaciones y roles
-- [ ] F4 · Motor: tableros, horarios, feriados y disponibilidad
+- [x] F3 · Identidad, organizaciones y roles
+- [x] F4 · Motor: tableros, horarios, feriados y disponibilidad
 - [ ] F5 · Motor: eventos, recurrencia, reservas y concurrencia
 - [ ] F6 · Frontend base en español e inglés
 - [ ] F7 · Panel, reserva, «Mis citas» y embed

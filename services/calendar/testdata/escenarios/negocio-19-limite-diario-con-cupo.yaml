@@ -1,0 +1,14 @@
+nombre: "Límite de 3 al día con 2 reservas"
+tablero:
+  zona: America/Mexico_City
+  capacidad: 1
+  horario:
+    lunes-viernes: ["09:00-18:00"]
+servicio: {"duracion": 30, "intervalo": 30, "limite_diario": 3}
+ahora: "2026-09-14T06:00:00-06:00"
+existentes:
+  - {"tipo": "cita", "inicio": "2026-09-14T09:00:00-06:00", "fin": "2026-09-14T09:30:00-06:00"}
+  - {"tipo": "cita", "inicio": "2026-09-14T16:00:00-06:00", "fin": "2026-09-14T16:30:00-06:00"}
+consulta: { desde: "2026-09-14", hasta: "2026-09-14" }
+esperado:
+  "2026-09-14": {"total": 16}

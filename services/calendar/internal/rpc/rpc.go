@@ -13,6 +13,7 @@ import (
 	"github.com/yitztech/micitaentiempo.online/services/calendar/gen/mcet/calendar/v1/calendarv1connect"
 	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/auth"
 	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/clock"
+	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/engine"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -79,6 +80,8 @@ type Options struct {
 	Verifier *auth.Verifier
 	// TestClock solo se pasa con TEST_MODE.
 	TestClock *clock.Settable
+	// Engine implementa los servicios de dominio (nil en pruebas de transporte).
+	Engine *engine.Engine
 }
 
 // Mount registra los servicios Connect en el mux interno.
@@ -87,5 +90,11 @@ func Mount(mux *http.ServeMux, o Options) {
 	mux.Handle(calendarv1connect.NewSystemServiceHandler(SystemServer{Revision: o.Revision}, interceptors))
 	if o.TestClock != nil {
 		mux.Handle(calendarv1connect.NewTestingServiceHandler(TestingServer{Clock: o.TestClock}, interceptors))
+	}
+	if e := o.Engine; e != nil {
+		mux.Handle(calendarv1connect.NewCalendarServiceHandler(engine.CalendarServer{Engine: e}, interceptors))
+		mux.Handle(calendarv1connect.NewScheduleServiceHandler(engine.ScheduleServer{Engine: e}, interceptors))
+		mux.Handle(calendarv1connect.NewServiceCatalogServiceHandler(engine.ServiceCatalogServer{Engine: e}, interceptors))
+		mux.Handle(calendarv1connect.NewAvailabilityServiceHandler(engine.AvailabilityServer{Engine: e}, interceptors))
 	}
 }

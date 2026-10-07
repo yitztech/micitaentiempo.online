@@ -1,0 +1,11 @@
+nombre: "Nueva York: 02:00 no existe el 8 de marzo"
+tablero:
+  zona: America/New_York
+  capacidad: 1
+  horario:
+    todos: ["00:00-24:00"]
+servicio: {"duracion": 60, "intervalo": 60}
+ahora: "2026-03-06T00:00:00Z"
+consulta: { desde: "2026-03-08", hasta: "2026-03-08" }
+esperado:
+  "2026-03-08": {"total": 23, "excluye": ["02:00"], "incluye": ["01:00", "03:00"]}
