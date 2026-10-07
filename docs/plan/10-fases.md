@@ -161,14 +161,15 @@ rendimiento de §7.9 en páginas públicas; ningún texto fuera de los catálogo
 
 **Objetivo:** RF-05 a RF-12 y RF-17 en la interfaz.
 
-- [ ] Asistente de alta (plan, tablero, horario y descansos, feriados con vista previa, servicio, compartir).
-- [ ] Panel: inicio, calendario adaptable con FullCalendar 7, editor de eventos con recurrencia y alcance,
+- [x] Asistente de alta (plan, tablero, horario y descansos, feriados con vista previa, servicio, compartir).
+- [x] Panel: inicio, calendario adaptable con FullCalendar 7, editor de eventos con recurrencia y alcance,
       bloqueos, conflictos, tiempo real por SSE.
-- [ ] Ajustes del tablero, equipo (invitar y quitar), clientes y asistencia.
-- [ ] Página de reserva, «Mis citas» y embed (iframe, `embed.js` con modos, altura automática, eventos al
+- [x] Ajustes del tablero, equipo (invitar y quitar), clientes y asistencia.
+- [x] Página de reserva, «Mis citas» y embed (iframe, `embed.js` con modos, altura automática, eventos al
       anfitrión, token Bearer en el iframe).
-- [ ] Campana de avisos (la alimenta F8).
-- [ ] Capturas visuales en 360, 768, 1024 y 1440 px.
+- [x] Campana de avisos (la alimenta F8).
+- [x] Capturas visuales en 360, 768, 1024 y 1440 px (escenario `@capturas`; pendientes de aprobación del usuario).
+- [ ] «Continuar con Google» en la verificación del cliente final (ventana emergente): pendiente; hoy solo código por correo.
 
 **Aceptación:** escenarios de reserva en móvil, serie semanal, bloqueo, «Mis citas» y embed en es y en;
 capturas aprobadas; axe sin violaciones serias.

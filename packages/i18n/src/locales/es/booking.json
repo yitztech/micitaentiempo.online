@@ -1,0 +1,96 @@
+{
+  "seoTitle": "Reservar en {{name}}",
+  "steps": ["Servicio", "Día", "Hora", "Tus datos", "Confirmación"],
+  "service": { "title": "Elige un servicio", "minutes": "{{n}} min" },
+  "date": {
+    "title": "Elige un día",
+    "prev": "Mes anterior",
+    "next": "Mes siguiente",
+    "none": "No hay horarios libres este mes.",
+    "available": "con horarios",
+    "unavailable": "sin horarios"
+  },
+  "time": {
+    "title": "Elige una hora",
+    "inTz": "Horarios en {{tz}}",
+    "changeTz": "Zona horaria",
+    "businessTz": "El negocio está en {{tz}}.",
+    "none": "No quedan horarios este día.",
+    "slotLabel": "{{date}}, {{time}}, disponible"
+  },
+  "details": {
+    "title": "Tus datos",
+    "name": "Nombre completo",
+    "email": "Correo",
+    "emailHint": "Te enviaremos un código para confirmar.",
+    "phone": "Teléfono",
+    "phoneHint": "Con código de país, por ejemplo +52 55 1234 5678.",
+    "notes": "Nota para el negocio",
+    "submit": "Apartar este horario",
+    "held": "Apartamos tu horario. Tienes {{time}} para confirmarlo.",
+    "expired": "Tu horario apartado caducó. Elige otra vez."
+  },
+  "verify": {
+    "title": "Confirma tu correo",
+    "sent": "Te enviamos un código de 6 dígitos a {{email}}.",
+    "code": "Código",
+    "confirm": "Confirmar reserva",
+    "resend": "Enviar otro código"
+  },
+  "done": {
+    "title": "¡Cita confirmada!",
+    "lead": "Te enviamos los detalles a {{email}}.",
+    "addGoogle": "Añadir a Google Calendar",
+    "addOutlook": "Añadir a Outlook",
+    "downloadIcs": "Descargar .ics",
+    "myAppointments": "Ver mis citas",
+    "another": "Reservar otra cita"
+  },
+  "taken": "Alguien acaba de reservar ese horario. Elige otro.",
+  "change": "Cambiar",
+  "unavailable": "Este tablero no recibe reservas por ahora.",
+  "my": {
+    "seoTitle": "Mis citas",
+    "title": "Mis citas",
+    "signInTitle": "Entra con tu correo",
+    "signInLead": "Te enviaremos un código para ver tus citas. No necesitas contraseña.",
+    "sendCode": "Enviar código",
+    "enter": "Entrar",
+    "upcoming": "Próximas",
+    "past": "Anteriores",
+    "showPast": "Ver citas anteriores",
+    "none": "No tienes citas próximas.",
+    "cancel": "Cancelar",
+    "cancelConfirm": "¿Cancelar esta cita?",
+    "cancelled": "Cita cancelada.",
+    "reschedule": "Cambiar hora",
+    "rescheduled": "Cambiamos tu cita.",
+    "addToCalendar": "Añadir al calendario",
+    "signOut": "Salir",
+    "noticeRule": "Puedes cambiarla o cancelarla hasta {{hours}} h antes."
+  },
+  "embed": {
+    "poweredBy": "Reservas con Mi Cita en Tiempo",
+    "book": "Reservar cita",
+    "myAppointments": "Mis citas",
+    "close": "Cerrar"
+  },
+  "errors": {
+    "generic": "Algo salió mal. Inténtalo de nuevo.",
+    "slot_taken": "Alguien acaba de reservar ese horario. Elige otro.",
+    "hold_expired": "Tu horario apartado caducó y ya no está libre. Elige otro.",
+    "hold_not_found": "Tu horario apartado ya no existe. Elige otro.",
+    "invalid_otp": "El código no es correcto.",
+    "otp_expired": "El código caducó. Pide otro.",
+    "too_many_attempts": "Demasiados intentos. Pide otro código.",
+    "too_late": "Ya no puedes cambiar esta cita por tu cuenta. Escríbele al negocio.",
+    "calendar_unavailable": "Este tablero no recibe reservas por ahora.",
+    "altcha_required": "No pudimos comprobar que no eres un robot. Inténtalo de nuevo.",
+    "invalid_format": "Escribe un correo válido.",
+    "disposable": "Usa un correo permanente.",
+    "no_mail_server": "El dominio de ese correo no recibe mensajes.",
+    "too_many_requests": "Demasiados intentos. Espera unos minutos.",
+    "network": "No hay conexión. Revisa tu internet.",
+    "validation_failed": "Revisa los datos."
+  }
+}

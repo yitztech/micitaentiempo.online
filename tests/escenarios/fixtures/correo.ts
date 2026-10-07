@@ -15,13 +15,19 @@ export interface Correo {
 export async function esperarCorreo(
   request: APIRequestContext,
   para: string,
-  opts: { asunto?: RegExp; timeoutMs?: number } = {},
+  opts: { asunto?: RegExp; timeoutMs?: number; despuesDe?: number } = {},
 ): Promise<Correo> {
   const limite = Date.now() + (opts.timeoutMs ?? 15_000);
   while (Date.now() < limite) {
     const res = await request.get(`${MAILPIT}/api/v1/search?query=${encodeURIComponent(`to:"${para}"`)}`);
-    const { messages } = (await res.json()) as { messages: Array<{ ID: string; Subject: string }> };
-    const msg = messages.find((m) => !opts.asunto || opts.asunto.test(m.Subject));
+    const { messages } = (await res.json()) as {
+      messages: Array<{ ID: string; Subject: string; Created: string }>;
+    };
+    const msg = messages.find(
+      (m) =>
+        (!opts.asunto || opts.asunto.test(m.Subject)) &&
+        (!opts.despuesDe || Date.parse(m.Created) >= opts.despuesDe),
+    );
     if (msg) {
       const full = (await (await request.get(`${MAILPIT}/api/v1/message/${msg.ID}`)).json()) as {
         Subject: string;

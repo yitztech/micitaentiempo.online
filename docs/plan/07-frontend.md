@@ -10,7 +10,7 @@ idioma, `<html lang>`, `hreflang`, `canonical`, Open Graph y la CSP salgan corre
 |---|---|
 | Framework | React Router 8 en modo framework (Vite 8), SSR sobre Node 24 con `@react-router/serve` |
 | Middleware | Idioma por `Host`, sesión del usuario, cabeceras por ruta (CSP con nonce) |
-| Datos | `loader` en servidor para páginas públicas; `clientLoader` + TanStack Query en el panel; invalidación por eventos SSE |
+| Datos | `loader` en servidor en todas las páginas; mutaciones con `fetch` y revalidación; SSE avisa de cambios (ADR 0014) |
 | Estilos | Tailwind CSS 4.3 con tokens propios; componentes shadcn/ui sobre `radix-ui` |
 | Formularios | react-hook-form + Zod 4 (esquemas compartidos de `packages/schemas`) |
 | Calendario del panel | FullCalendar 7 (`daygrid`, `timegrid`, `list`, `interaction`; solo plugins MIT) |
@@ -231,8 +231,8 @@ idioma; contraste comprobado en CI con axe.
 ## 7.9 Rendimiento y SEO técnico
 
 - Objetivos en móvil medio con 4G: LCP < 2,5 s, INP < 200 ms, CLS < 0,1.
-- Presupuesto de JavaScript comprimido: páginas públicas ≤ 130 KB (ADR 0013: React 19 + React Router ya
-  ocupan ~105 KB); reserva y embed se fijan en F7; FullCalendar solo se carga en el panel.
+- Presupuesto de JavaScript comprimido: páginas públicas ≤ 130 KB y reserva/embed ≤ 150 KB (ADR 0013 y
+  0014: React 19 + React Router ya ocupan ~105 KB); FullCalendar solo se carga en el panel.
 - Fuentes con `preload` y `font-display: swap`; imágenes AVIF/WebP con dimensiones.
 - Páginas públicas con `Cache-Control: public, max-age=0, s-maxage=60` y microcaché en el gateway por
   `Host` + ruta.

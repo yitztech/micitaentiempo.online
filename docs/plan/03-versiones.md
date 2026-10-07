@@ -127,7 +127,7 @@ otro (p. ej., `@nestjs/swagger` a TypeScript 6), usa la última compatible y an�
 | `@tanstack/react-query` | 5.104.1 | |
 | `react-hook-form` · `@hookform/resolvers` | 7.89.0 · 5.9.1 | |
 | `marked` | 18.1.0 | Legales en Markdown, convertidos en el servidor (i18next descartado: ADR 0013) |
-| `@fullcalendar/core` · `@fullcalendar/react` (+ daygrid, timegrid, list, interaction) | 7.1.1 | Solo plugins MIT; nada de los premium |
+| `@fullcalendar/react` | 7.1.1 | Incluye daygrid, timegrid, list, interaction y temas (los paquetes sueltos siguen en 6.x); solo plugins MIT (ADR 0014) |
 | `temporal-polyfill` | 1.0.5 | |
 | `@fontsource-variable/inter` | 5.3.0 | Fuente autoalojada |
 | `@stripe/stripe-js` | 10.0.0 | Embedded Checkout y Payment Element |

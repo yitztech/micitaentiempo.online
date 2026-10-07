@@ -73,7 +73,7 @@ function BookingPreview() {
             <p className="text-sm text-muted">{h.previewService}</p>
           </div>
         </div>
-        <p className="mt-5 text-sm font-medium capitalize text-muted">{h.previewDay}</p>
+        <p className="mt-5 text-sm font-medium text-muted">{h.previewDay}</p>
         <div className="mt-2 grid grid-cols-3 gap-2">
           {h.previewTimes.map((time, i) => (
             <span

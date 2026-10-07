@@ -16,6 +16,7 @@ import * as schema from "../src/db/schema.js";
 import { EventIngressService } from "../src/internal-rpc/event-ingress.service.js";
 import { buildInternalServer } from "../src/internal-rpc/internal-rpc.server.js";
 import { AUDIENCE_API, ISSUER_CALENDAR, signInternal } from "../src/internal-rpc/jwt.js";
+import { RealtimeBus } from "../src/internal-rpc/realtime.bus.js";
 
 const secret = "secreto-calendar-a-api-de-al-menos-32-caracteres";
 let container: StartedPostgreSqlContainer;
@@ -27,7 +28,7 @@ beforeAll(async () => {
   container = await new PostgreSqlContainer("postgres:18.6-alpine3.24").start();
   pool = new pg.Pool({ connectionString: container.getConnectionUri() });
   await runMigrations(pool, { log: () => undefined });
-  const ingress = new EventIngressService(drizzle(pool, { schema }));
+  const ingress = new EventIngressService(drizzle(pool, { schema }), new RealtimeBus());
   server = await buildInternalServer(secret, ingress);
   baseUrl = await server.listen({ host: "127.0.0.1", port: 0 });
 }, 120_000);

@@ -156,7 +156,7 @@ async function eventosDelTablero(estado: Record<string, unknown>, incluirCancela
   const res = await duena(estado).api.get(`/api/v1/calendars/${tablero(estado).id}/events`, {
     params: {
       from: "2026-09-01T00:00:00Z",
-      to: "2026-12-31T00:00:00Z",
+      to: "2027-03-31T00:00:00Z",
       includeCancelled: String(incluirCanceladas),
     },
   });
@@ -172,8 +172,14 @@ async function eventosDelTablero(estado: Record<string, unknown>, incluirCancela
 }
 
 Then("{string} ve la cita de {string} en su tablero", async ({ estado }, _duena: string, nombre: string) => {
-  const v = visitante(estado, nombre);
   const evs = await eventosDelTablero(estado);
+  const ui = estado.visitanteUi as { nombre: string; email: string } | undefined;
+  if (ui?.nombre === nombre) {
+    // Reservó desde la interfaz: se busca por su correo (la fecha la eligió la página).
+    expect(evs.some((e) => e.status === "confirmed" && e.attendee?.email === ui.email)).toBe(true);
+    return;
+  }
+  const v = visitante(estado, nombre);
   expect(evs).toContainEqual(expect.objectContaining({ id: v.citaId, status: "confirmed" }));
   expect(evs.find((e) => e.id === v.citaId)?.attendee?.email).toBe(v.email);
 });

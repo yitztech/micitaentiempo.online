@@ -2,27 +2,47 @@
 export interface ApiError {
   status: number;
   code: string;
+  body?: Record<string, unknown>;
 }
 
 /** POST JSON al mismo origen; devuelve el cuerpo o lanza ApiError con el código en minúsculas. */
-export async function postJson<T = unknown>(
+export function postJson<T = unknown>(
   path: string,
   body: unknown,
+  headers: Record<string, string> = {},
+): Promise<T> {
+  return apiRequest<T>("POST", path, body, headers);
+}
+
+/** Petición JSON al mismo origen (cookie de sesión); lanza ApiError si falla. */
+export async function apiRequest<T = unknown>(
+  method: string,
+  path: string,
+  body?: unknown,
   headers: Record<string, string> = {},
 ): Promise<T> {
   let res: Response;
   try {
     res = await fetch(path, {
-      method: "POST",
-      headers: { "content-type": "application/json", accept: "application/json", ...headers },
-      body: JSON.stringify(body),
+      method,
+      headers: {
+        accept: "application/json",
+        ...(body === undefined ? {} : { "content-type": "application/json" }),
+        ...headers,
+      },
+      body: body === undefined ? undefined : JSON.stringify(body),
       credentials: "same-origin",
     });
   } catch {
     throw { status: 0, code: "network" } satisfies ApiError;
   }
   const text = await res.text();
-  const json = text ? (JSON.parse(text) as Record<string, unknown>) : {};
+  let json: Record<string, unknown> = {};
+  try {
+    json = text ? (JSON.parse(text) as Record<string, unknown>) : {};
+  } catch {
+    json = {};
+  }
   if (!res.ok) {
     const code =
       typeof json.code === "string"
@@ -30,7 +50,7 @@ export async function postJson<T = unknown>(
         : res.status === 429
           ? "too_many_requests"
           : "generic";
-    throw { status: res.status, code } satisfies ApiError;
+    throw { status: res.status, code, body: json } satisfies ApiError;
   }
   return json as T;
 }

@@ -111,7 +111,7 @@ riesgo (F0, F1, F6, F7 y F8). Se fija con `/model` y `/effort xhigh` (o `high`) 
 - [x] F4 · Motor: tableros, horarios, feriados y disponibilidad
 - [x] F5 · Motor: eventos, recurrencia, reservas y concurrencia
 - [x] F6 · Frontend base en español e inglés
-- [ ] F7 · Panel, reserva, «Mis citas» y embed
+- [x] F7 · Panel, reserva, «Mis citas» y embed (capturas por aprobar; Google para clientes finales pendiente)
 - [ ] F8 · Avisos multicanal y recordatorios
 - [ ] F9 · Planes, prueba gratuita y facturación (Stripe listo, sin configurar)
 - [ ] F10 · Sincronización con Google, Outlook y Apple

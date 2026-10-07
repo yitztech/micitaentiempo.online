@@ -57,11 +57,14 @@ Then("las páginas públicas no repiten frases entre los dos idiomas", async ({ 
 });
 
 Then("la página carga como mucho {int} KB de JavaScript comprimido", async ({ page }, kb: number) => {
-  const url = page.url();
-  let total = 0;
-  page.on("response", async (r) => {
-    if (r.request().resourceType() === "script") total += (await r.request().sizes()).responseBodySize;
-  });
-  await page.goto(url, { waitUntil: "networkidle" });
+  await page.waitForLoadState("networkidle");
+  // encodedBodySize: tamaño comprimido de cada script, aunque venga de la caché.
+  const total = await page.evaluate(() =>
+    (performance.getEntriesByType("resource") as PerformanceResourceTiming[])
+      .filter((e) => e.initiatorType === "script" || /\.js(\?|$)/.test(e.name))
+      .reduce((n, e) => n + e.encodedBodySize, 0),
+  );
+  console.log(`JavaScript de ${page.url()}: ${Math.round(total / 1024)} KB`);
+  expect(total).toBeGreaterThan(10_000);
   expect(Math.round(total / 1024), `${total} bytes`).toBeLessThanOrEqual(kb);
 });

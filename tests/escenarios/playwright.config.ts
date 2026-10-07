@@ -15,6 +15,8 @@ const suffix = process.env.INFORME ? `-${process.env.INFORME}` : "";
 export default defineConfig({
   testDir,
   fullyParallel: true,
+  // Los escenarios de interfaz resuelven ALTCHA y esperan correos: más margen que el predeterminado.
+  timeout: 90_000,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: [

@@ -31,6 +31,17 @@ export default [
     ...page("verifyEmail", "routes/verify-email.tsx"),
     ...page("invitation", "routes/invitation.tsx"),
   ]),
-  ...page("dashboard", "routes/dashboard.tsx"),
+  layout("routes/_panel.tsx", [
+    ...page("dashboard", "routes/dashboard.tsx"),
+    ...page("welcome", "routes/welcome.tsx"),
+    ...page("calendar", "routes/calendar.tsx"),
+    ...page("calendarSettings", "routes/calendar-settings.tsx"),
+    ...page("calendarTeam", "routes/calendar-team.tsx"),
+    ...page("customers", "routes/customers.tsx"),
+  ]),
+  ...page("booking", "routes/booking.tsx"),
+  ...page("myAppointments", "routes/my-appointments.tsx"),
+  route("embed/:slug", "routes/embed.tsx"),
+  route("embed.js", "routes/embed-js.ts"),
   route("*", "routes/not-found.tsx"),
 ] satisfies RouteConfig;

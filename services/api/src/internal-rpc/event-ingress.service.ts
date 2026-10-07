@@ -4,13 +4,17 @@ import { type DomainEvent, DomainEventSchema } from "@mcet/contracts/mcet/api/v1
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { type Database, DB } from "../db/db.module.js";
 import { customerLinks, inboundEvents } from "../db/schema.js";
+import { RealtimeBus } from "./realtime.bus.js";
 
 /** Recibe eventos de dominio del motor; idempotente por event_id (ADR 0004). */
 @Injectable()
 export class EventIngressService {
   private readonly logger = new Logger(EventIngressService.name);
 
-  constructor(@Inject(DB) private readonly db: Database) {}
+  constructor(
+    @Inject(DB) private readonly db: Database,
+    private readonly bus: RealtimeBus,
+  ) {}
 
   /** Devuelve true si el evento ya se había recibido. */
   async publish(event: DomainEvent): Promise<boolean> {
@@ -30,7 +34,18 @@ export class EventIngressService {
       .returning({ eventId: inboundEvents.eventId });
     const duplicate = inserted.length === 0;
     this.logger.debug({ eventId: event.eventId, type: event.type, duplicate }, "evento de dominio recibido");
-    if (!duplicate) await this.apply(event);
+    if (!duplicate) {
+      await this.apply(event);
+      if (event.calendarId) {
+        const id = event.subject?.event_id;
+        this.bus.publish({
+          type: event.type,
+          calendarId: event.calendarId,
+          eventId: typeof id === "string" ? id : undefined,
+          actorUserId: event.actor?.userId || undefined,
+        });
+      }
+    }
     return duplicate;
   }
 

@@ -1,0 +1,275 @@
+{
+  "nav": {
+    "label": "Dashboard",
+    "home": "Home",
+    "calendars": "Boards",
+    "customers": "Clients",
+    "notifications": "Notifications",
+    "signOut": "Sign out",
+    "calendar": "Calendar",
+    "settings": "Settings",
+    "team": "Team",
+    "newCalendar": "New board",
+    "menu": "Dashboard menu"
+  },
+  "bell": {
+    "label": "Notifications",
+    "empty": "You have no new notifications."
+  },
+  "home": {
+    "seoTitle": "Home",
+    "greeting": "Hi, {{name}}",
+    "upcoming": "Upcoming appointments",
+    "noUpcoming": "No appointments in the next 7 days.",
+    "boards": "Your boards",
+    "noBoards": "You don't have any boards yet.",
+    "openCalendar": "Open calendar",
+    "bookingLink": "Booking link",
+    "copy": "Copy",
+    "copied": "Copied",
+    "trialDays": "Free trial: {{days}} days left.",
+    "trial": "You're on the free trial.",
+    "readOnly": "Your account is read-only. Choose a plan to take bookings again.",
+    "roles": {
+      "owner": "Owner",
+      "editor": "Editor",
+      "observer": "Viewer"
+    }
+  },
+  "welcome": {
+    "seoTitle": "Welcome",
+    "title": "Set up your schedule",
+    "stepOf": "Step {{n}} of {{total}}",
+    "steps": ["Plan", "Board", "Hours", "Holidays", "Service", "Share"],
+    "next": "Next",
+    "back": "Back",
+    "skip": "Skip for now",
+    "finish": "Go to my calendar",
+    "plan": {
+      "title": "Your business",
+      "lead": "Choose the plan you want to try. You can change it later.",
+      "orgName": "Business name"
+    },
+    "calendar": {
+      "title": "Your first board",
+      "lead": "A board is a schedule: a location, a room or a professional.",
+      "name": "Board name",
+      "timezone": "Time zone",
+      "country": "Country",
+      "countryHint": "To block its holidays.",
+      "address": "Address"
+    },
+    "hours": {
+      "title": "When are you open?",
+      "lead": "Check the days you're open and your hours. You can add a break, for example lunch.",
+      "open": "Open",
+      "from": "From",
+      "to": "To",
+      "break": "Break",
+      "breakLabel": "Lunch"
+    },
+    "holidays": {
+      "title": "Holidays",
+      "lead": "The days shown are blocked automatically. Review this year's list.",
+      "types": "Types that close your schedule",
+      "preview": "{{year}} holidays",
+      "none": "No holidays match these filters."
+    },
+    "service": {
+      "title": "Your first service",
+      "lead": "What your clients book.",
+      "name": "Service name",
+      "duration": "Duration (minutes)"
+    },
+    "share": {
+      "title": "All set! Share your schedule",
+      "lead": "Send this link to your clients or embed the schedule on your website."
+    }
+  },
+  "holidayTypes": {
+    "public": "Public",
+    "bank": "Bank",
+    "school": "School",
+    "optional": "Optional",
+    "observance": "Observances"
+  },
+  "weekdays": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+  "calendar": {
+    "seoTitle": "Calendar",
+    "newAppointment": "New appointment",
+    "newBlock": "Block time",
+    "boardTz": "Board time zone: {{tz}}",
+    "yourTz": "Your time zone: {{tz}}",
+    "changedByOther": "Someone else updated the calendar.",
+    "readOnly": "You can only view this board.",
+    "legend": {
+      "booking": "Client booking",
+      "appointment": "Appointment",
+      "block": "Time block",
+      "holiday": "Holiday"
+    }
+  },
+  "editor": {
+    "newTitle": "New appointment",
+    "newBlockTitle": "Block time",
+    "editTitle": "Edit",
+    "kind": "Type",
+    "kinds": {
+      "appointment": "Appointment",
+      "block": "Time block"
+    },
+    "service": "Service",
+    "noService": "No service (set the end time)",
+    "date": "Date",
+    "start": "Start",
+    "end": "End",
+    "title": "Title",
+    "attendeeName": "Client name",
+    "attendeeEmail": "Client email",
+    "attendeePhone": "Client phone",
+    "internalNotes": "Internal notes",
+    "internalNotesHint": "Only your team sees them.",
+    "customerNotes": "Client note",
+    "repeat": "Repeat",
+    "repeatOptions": {
+      "none": "Doesn't repeat",
+      "daily": "Every day",
+      "weekly": "Every week",
+      "monthlyDay": "Every month, same date",
+      "monthlyNth": "Every month, same weekday",
+      "yearly": "Every year"
+    },
+    "interval": "Repeat every",
+    "weekdays": "Days",
+    "ends": "Ends",
+    "endsOptions": {
+      "never": "Never",
+      "until": "On a date",
+      "count": "After a number of times"
+    },
+    "untilDate": "End date",
+    "count": "Number of times",
+    "scopeTitle": "This is a recurring appointment. Which dates are you changing?",
+    "scopes": {
+      "this": "This one",
+      "following": "This and following",
+      "all": "All"
+    },
+    "save": "Save",
+    "cancelEvent": "Cancel appointment",
+    "removeBlock": "Remove time block",
+    "cancelReason": "Reason (the client will see it)",
+    "confirmCancel": "Yes, cancel",
+    "conflictsTitle": "These dates aren't free:",
+    "skipConflicts": "Create without those dates",
+    "conflictReasons": {
+      "seat_unavailable": "taken",
+      "blocked": "blocked"
+    },
+    "cancelOverlapping": "Cancel the appointments this block overlaps (clients are notified)",
+    "affected": "This block overlaps {{n}} appointment(s).",
+    "attendance": "Attendance",
+    "attendanceOptions": {
+      "attended": "Showed up",
+      "no_show": "No-show",
+      "clear": "Not marked"
+    },
+    "status": {
+      "held": "Held",
+      "confirmed": "Confirmed",
+      "cancelled": "Canceled"
+    },
+    "close": "Close",
+    "saved": "Saved."
+  },
+  "settings": {
+    "seoTitle": "Board settings",
+    "general": "General",
+    "name": "Name",
+    "slug": "Link address",
+    "timezone": "Time zone",
+    "capacity": "Appointments at the same time",
+    "capacityHint": "How many people you serve at once.",
+    "address": "Address",
+    "cancelNotice": "Minimum hours for clients to reschedule or cancel",
+    "embed": "Where it can be embedded",
+    "embedAny": "On any website",
+    "embedAllowlist": "Only on these sites",
+    "embedOrigins": "Sites (one per line, with https://)",
+    "save": "Save",
+    "saved": "Changes saved.",
+    "hours": "Weekly hours",
+    "closed": "Closed",
+    "addShift": "Add shift",
+    "addBreak": "Add break",
+    "remove": "Remove",
+    "holidays": "Holidays",
+    "addCountry": "Add country",
+    "services": "Services",
+    "addService": "New service",
+    "serviceName": "Name in English",
+    "serviceNameOther": "Name in Spanish",
+    "duration": "Duration (min)",
+    "slotStep": "Time between slots (min)",
+    "bufferBefore": "Buffer before (min)",
+    "bufferAfter": "Buffer after (min)",
+    "minNotice": "Minimum notice (min)",
+    "maxAdvance": "Book up to (days)",
+    "dailyLimit": "Max per day (0 = no limit)",
+    "active": "Available for booking",
+    "edit": "Edit",
+    "delete": "Delete",
+    "share": "Share",
+    "link": "Booking link",
+    "embedIframe": "Embed with an iframe",
+    "embedScript": "Embed with a button",
+    "embedHelp": "Paste the code on your website (WordPress: Custom HTML block; Wix: “Embed code” element; Squarespace: Code block).",
+    "inactive": "not bookable"
+  },
+  "team": {
+    "seoTitle": "Team",
+    "title": "Team",
+    "invite": "Invite",
+    "email": "Email",
+    "role": "Role",
+    "roles": {
+      "owner": "Owner",
+      "editor": "Editor",
+      "observer": "Viewer"
+    },
+    "roleHints": {
+      "editor": "Manages appointments and time blocks. Signs in with Google.",
+      "observer": "Can only view."
+    },
+    "invited": "Invitation sent to {{email}}.",
+    "members": "People with access",
+    "remove": "Remove access",
+    "you": "(you)",
+    "pending": "invitation pending"
+  },
+  "customers": {
+    "seoTitle": "Clients",
+    "title": "Clients",
+    "search": "Search by name or email",
+    "name": "Name",
+    "email": "Email",
+    "first": "First booking",
+    "last": "Last booking",
+    "empty": "No clients yet. They'll show up when they book."
+  },
+  "errors": {
+    "generic": "Couldn't save. Please try again.",
+    "slot_taken": "That time is already taken.",
+    "slot_blocked": "That time is blocked.",
+    "conflict": "Someone changed this first. Reload and try again.",
+    "series_conflict": "Some dates in the series aren't free.",
+    "invalid_rrule": "The repeat rule isn't valid.",
+    "invalid_range": "Check the start and end times.",
+    "plan_limit": "You've reached your plan's limit.",
+    "permission_denied": "You don't have permission to do this.",
+    "org_read_only": "Your account is read-only.",
+    "validation_failed": "Check the highlighted fields.",
+    "invalid_timezone": "Choose a valid time zone.",
+    "google_required": "Editors need a Google account with that email."
+  }
+}

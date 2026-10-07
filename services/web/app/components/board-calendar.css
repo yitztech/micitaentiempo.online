@@ -1,0 +1,58 @@
+/* FullCalendar con los tokens de la marca (07-frontend.md §7.7). */
+.board-calendar {
+  --fc-classic-primary: var(--primary);
+  --fc-classic-primary-foreground: var(--on-primary);
+  --fc-classic-button: var(--surface);
+  --fc-classic-button-border: var(--border);
+  --fc-classic-button-strong: var(--primary-soft);
+  --fc-classic-button-strong-border: var(--primary);
+  --fc-classic-button-foreground: var(--text);
+  --fc-classic-background: var(--surface);
+  --fc-classic-today: color-mix(in srgb, var(--accent) 14%, transparent);
+  --fc-classic-now: var(--danger);
+  --fc-classic-highlight: var(--primary-soft);
+  /* Textos con contraste AA sobre la superficie (el gris claro de la paleta no llega a 4,5:1). */
+  --fc-classic-foreground: var(--text);
+  --fc-classic-muted-foreground: var(--text-muted);
+  --fc-classic-faint-foreground: var(--text-muted);
+  --fc-classic-event-contrast: var(--on-primary);
+  font-size: 14px;
+}
+.board-calendar button {
+  min-height: 40px;
+}
+.board-calendar .ev-booking {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--on-primary);
+}
+.board-calendar .ev-appointment {
+  background: #4f8a6e;
+  border-color: #4f8a6e;
+  color: #fff;
+}
+.board-calendar .ev-block {
+  background: repeating-linear-gradient(
+    135deg,
+    var(--surface-2),
+    var(--surface-2) 6px,
+    var(--border) 6px,
+    var(--border) 12px
+  );
+  border-color: var(--border);
+  color: var(--text);
+}
+.board-calendar .ev-held {
+  opacity: 0.65;
+  border-style: dashed;
+}
+.board-calendar .ev-holiday {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+.board-calendar .legend-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+}
