@@ -174,6 +174,10 @@ export function createAuth(lang: Lang, { env, db, mail, verifyAltcha }: AuthDeps
         "/forget-password": { window: 60 * 60, max: 5 },
         "/request-password-reset": { window: 60 * 60, max: 5 },
         "/send-verification-email": { window: 60 * 60, max: 5 },
+        "/two-factor/verify-totp": { window: 60, max: 10 },
+        "/two-factor/verify-backup-code": { window: 60, max: 10 },
+        "/two-factor/enable": { window: 60, max: 5 },
+        "/two-factor/disable": { window: 60, max: 5 },
         // Registro dinámico de clientes OAuth (DCR): abierto, pero con tope por IP (06-mcp.md §6.3).
         "/oauth2/register": { window: 60 * 60, max: 10 },
       },

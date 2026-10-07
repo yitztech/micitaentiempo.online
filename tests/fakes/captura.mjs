@@ -75,8 +75,8 @@ function account(name) {
   }
   return a;
 }
-const fakeJwt = (email) =>
-  `e30.${Buffer.from(JSON.stringify({ email, preferred_username: email })).toString("base64url")}.x`;
+const fakeJwt = (email, aud) =>
+  `e30.${Buffer.from(JSON.stringify({ email, preferred_username: email, email_verified: true, aud, iss: "https://accounts.google.com" })).toString("base64url")}.x`;
 function authorize(url, res, prefix) {
   const name =
     url.searchParams.get("login_hint") || `${prefix}-${++prov.n}${Date.now().toString(36)}@example.com`;
@@ -91,7 +91,9 @@ function authorize(url, res, prefix) {
 }
 function tokenEndpoint(form, res) {
   let name;
-  if (form.grant_type === "authorization_code") name = prov.codes.get(form.code);
+  // «prueba:<correo>»: código del doble de Google Identity Services de los escenarios (popup del cliente).
+  if (form.grant_type === "authorization_code")
+    name = form.code?.startsWith("prueba:") ? form.code.slice(7) : prov.codes.get(form.code);
   else if (form.grant_type === "refresh_token") name = prov.refresh.get(form.refresh_token);
   const a = name ? account(name) : null;
   if (!a || a.revoked) return json(res, 400, { error: "invalid_grant" });
@@ -104,7 +106,7 @@ function tokenEndpoint(form, res) {
     refresh_token: refresh,
     expires_in: 3600,
     token_type: "Bearer",
-    id_token: fakeJwt(a.name),
+    id_token: fakeJwt(a.name, form.client_id),
   });
 }
 function bearer(req) {

@@ -3,10 +3,11 @@ import { type FormEvent, useState } from "react";
 import { useRevalidator } from "react-router";
 import { Dialog } from "~/components/dialog";
 import { Select } from "~/components/select";
+import { TwoFactorSection } from "~/components/two-factor";
 import { Alert, Button, Card, Field } from "~/components/ui";
 import { type ApiError, apiRequest, errorText, postJson } from "~/lib/api-client";
-import { useRoot } from "~/lib/i18n";
-import { panelGet } from "~/lib/panel.server";
+import { fmt, useRoot } from "~/lib/i18n";
+import { panelGet, panelGetOptional } from "~/lib/panel.server";
 import { metaFor } from "~/lib/seo";
 import { allTimeZones } from "~/lib/time";
 import type { Route } from "./+types/account";
@@ -19,10 +20,15 @@ interface MeFull {
   timezone: string;
   timeFormat: "12h" | "24h";
   weekStart: 1 | 7;
+  twoFactorEnabled: boolean;
 }
 
 export async function loader({ request, context }: Route.LoaderArgs) {
-  return { me: await panelGet<MeFull>(request, context, "/api/v1/me") };
+  const [me, org] = await Promise.all([
+    panelGet<MeFull>(request, context, "/api/v1/me"),
+    panelGetOptional<{ id: string; name: string }>(request, context, "/api/v1/org"),
+  ]);
+  return { me, org };
 }
 
 export const meta = (args: Route.MetaArgs) =>
@@ -32,7 +38,9 @@ export const meta = (args: Route.MetaArgs) =>
 export default function AccountPage({ loaderData }: Route.ComponentProps) {
   const { site, t } = useRoot();
   const a = t.panel.account;
-  const { me } = loaderData;
+  const { me, org } = loaderData;
+  const [closing, setClosing] = useState(false);
+  const [confirmName, setConfirmName] = useState("");
   const revalidator = useRevalidator();
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -101,6 +109,11 @@ export default function AccountPage({ loaderData }: Route.ComponentProps) {
       link.click();
       URL.revokeObjectURL(url);
     });
+  }
+
+  async function onClose() {
+    setClosing(false);
+    await run("close", () => apiRequest("DELETE", "/api/v1/org", { confirmName }), a.closed);
   }
 
   async function onDelete() {
@@ -187,6 +200,8 @@ export default function AccountPage({ loaderData }: Route.ComponentProps) {
         </Card>
       </section>
 
+      <TwoFactorSection enabled={me.twoFactorEnabled} onChange={() => void revalidator.revalidate()} />
+
       <section aria-labelledby="cuenta-datos">
         <h2 id="cuenta-datos" className="mb-3 text-xl font-semibold">
           {a.data}
@@ -203,6 +218,20 @@ export default function AccountPage({ loaderData }: Route.ComponentProps) {
               {a.export}
             </Button>
           </div>
+          {org ? (
+            <div className="border-t border-border pt-6">
+              <h3 className="font-semibold">{a.closeTitle}</h3>
+              <p className="mt-1 text-muted">{a.closeLead}</p>
+              <Button
+                variant="danger"
+                className="mt-3"
+                loading={busy === "close"}
+                onClick={() => setClosing(true)}
+              >
+                {a.close}
+              </Button>
+            </div>
+          ) : null}
           <div className="border-t border-border pt-6">
             <h3 className="font-semibold">{a.deleteTitle}</h3>
             <p className="mt-1 text-muted">{a.deleteLead}</p>
@@ -217,6 +246,30 @@ export default function AccountPage({ loaderData }: Route.ComponentProps) {
           </div>
         </Card>
       </section>
+
+      <Dialog open={closing} onClose={() => setClosing(false)} title={a.closeTitle}>
+        <p>{fmt(a.closeConfirm, { name: org?.name ?? "" })}</p>
+        <Field
+          label={a.closeName}
+          name="confirmName"
+          value={confirmName}
+          onChange={(e) => setConfirmName(e.currentTarget.value)}
+          className="mt-3"
+          autoComplete="off"
+        />
+        <div className="mt-6 flex justify-end gap-3">
+          <Button variant="secondary" onClick={() => setClosing(false)}>
+            {a.keep}
+          </Button>
+          <Button
+            variant="danger"
+            disabled={confirmName.trim() !== (org?.name ?? "").trim()}
+            onClick={() => void onClose()}
+          >
+            {a.close}
+          </Button>
+        </div>
+      </Dialog>
 
       <Dialog open={deleting} onClose={() => setDeleting(false)} title={a.deleteTitle}>
         <p>{a.deleteConfirm}</p>

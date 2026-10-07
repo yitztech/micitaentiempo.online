@@ -2,7 +2,7 @@ import { pathFor } from "@mcet/i18n";
 import { type FormEvent, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import { AuthCard, GoogleButton } from "~/components/auth";
-import { Alert, Button, Field } from "~/components/ui";
+import { Alert, Button, Checkbox, Field } from "~/components/ui";
 import { type ApiError, errorText, postJson, safeNext } from "~/lib/api-client";
 import { useRoot } from "~/lib/i18n";
 import { type OAuthRedirect, oauthNext, signedOAuthQuery } from "~/lib/oauth";
@@ -19,6 +19,37 @@ export default function SignIn() {
   const next = safeNext(params.get("next"), pathFor("dashboard", site.lang));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<{ text: string; tone: "danger" | "warning" } | null>(null);
+  // Segundo paso: código de la app de autenticación (o de respaldo) si la cuenta lo tiene activado.
+  const [twoFactor, setTwoFactor] = useState<null | "totp" | "backup">(null);
+
+  function finish(res: OAuthRedirect | null, oauthQuery: string | undefined) {
+    window.location.assign((oauthQuery && oauthNext(res)) || next);
+  }
+
+  async function onTwoFactor(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = new FormData(e.currentTarget);
+    const code = String(form.get("code") ?? "").trim();
+    setBusy(true);
+    setError(null);
+    try {
+      const oauthQuery = signedOAuthQuery(window.location.search);
+      const res = await postJson<OAuthRedirect>(
+        twoFactor === "backup"
+          ? "/api/auth/two-factor/verify-backup-code"
+          : "/api/auth/two-factor/verify-totp",
+        {
+          code,
+          trustDevice: form.get("trust") === "on",
+          ...(oauthQuery ? { oauth_query: oauthQuery } : {}),
+        },
+      );
+      finish(res, oauthQuery);
+    } catch (err) {
+      setError({ text: errorText(t.auth.errors, err), tone: "danger" });
+      setBusy(false);
+    }
+  }
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -29,12 +60,17 @@ export default function SignIn() {
     try {
       // Si la entrada viene de conectar una aplicación de IA, el servidor devuelve dónde seguir.
       const oauthQuery = signedOAuthQuery(window.location.search);
-      const res = await postJson<OAuthRedirect>("/api/auth/sign-in/email", {
+      const res = await postJson<OAuthRedirect & { twoFactorRedirect?: boolean }>("/api/auth/sign-in/email", {
         email,
         password: String(form.get("password") ?? ""),
         ...(oauthQuery ? { oauth_query: oauthQuery } : {}),
       });
-      window.location.assign((oauthQuery && oauthNext(res)) || next);
+      if (res?.twoFactorRedirect) {
+        setTwoFactor("totp");
+        setBusy(false);
+        return;
+      }
+      finish(res, oauthQuery);
     } catch (err) {
       if ((err as ApiError).code === "email_not_verified") {
         await postJson("/api/auth/send-verification-email", { email, callbackURL: next }).catch(
@@ -46,6 +82,39 @@ export default function SignIn() {
       }
       setBusy(false);
     }
+  }
+
+  if (twoFactor) {
+    return (
+      <AuthCard title={s.twoFactorTitle} lead={s.twoFactorLead}>
+        <form method="post" onSubmit={onTwoFactor} className="space-y-5" key={twoFactor}>
+          <Field
+            label={twoFactor === "backup" ? s.twoFactorBackupCode : s.twoFactorCode}
+            name="code"
+            autoComplete="one-time-code"
+            {...(twoFactor === "totp"
+              ? { inputMode: "numeric" as const, pattern: "\\d{6}", maxLength: 6 }
+              : {})}
+            required
+          />
+          <Checkbox label={s.twoFactorTrust} name="trust" />
+          {error ? <Alert tone={error.tone}>{error.text}</Alert> : null}
+          <Button type="submit" size="lg" className="w-full" loading={busy}>
+            {s.twoFactorSubmit}
+          </Button>
+          <button
+            type="button"
+            className="min-h-11 text-[15px] text-primary underline underline-offset-2"
+            onClick={() => {
+              setError(null);
+              setTwoFactor(twoFactor === "totp" ? "backup" : "totp");
+            }}
+          >
+            {twoFactor === "totp" ? s.twoFactorBackup : s.twoFactorApp}
+          </button>
+        </form>
+      </AuthCard>
+    );
   }
 
   return (

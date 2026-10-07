@@ -14,6 +14,9 @@ service CalendarService {
   rpc ArchiveCalendar(ArchiveCalendarRequest) returns (Calendar);
   // Refleja el estado de la organización (prueba, activa, solo lectura…).
   rpc SetOrgStatus(SetOrgStatusRequest) returns (SetOrgStatusResponse);
+  // Cierre de la organización: borra sus tableros y todo lo que cuelga de ellos (citas, series,
+  // horarios, servicios, conexiones y feeds). No se puede deshacer.
+  rpc PurgeOrg(PurgeOrgRequest) returns (PurgeOrgResponse);
 }
 
 message EmbedPolicy {
@@ -101,3 +104,11 @@ message SetOrgStatusRequest {
 }
 
 message SetOrgStatusResponse {}
+
+message PurgeOrgRequest {
+  string org_id = 1;
+}
+
+message PurgeOrgResponse {
+  int32 calendars_deleted = 1;
+}

@@ -45,6 +45,7 @@ export function apiGet<T>(request: Request, path: string): Promise<ApiResponse<T
 
 export interface Features {
   google: boolean;
+  googleClientId: string | null;
   microsoft: boolean;
   stripe: boolean;
   slack: boolean;
@@ -55,6 +56,7 @@ export interface Features {
 
 const NONE: Features = {
   google: false,
+  googleClientId: null,
   microsoft: false,
   stripe: false,
   slack: false,

@@ -17,6 +17,7 @@ export async function loader({ request, params, context }: Route.LoaderArgs) {
   const headers = new Headers({
     "Content-Security-Policy": contentSecurityPolicy(context.get(nonceContext), {
       frameAncestors: ancestors,
+      google: true,
     }),
   });
   return data({ calendar }, { headers });

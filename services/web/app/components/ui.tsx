@@ -1,5 +1,5 @@
 import { AlertCircle, CheckCircle2, Eye, EyeOff, Info, Loader2, TriangleAlert } from "lucide-react";
-import { type ComponentProps, type ReactNode, useId, useState } from "react";
+import { type ComponentProps, type ReactNode, useId, useState, useSyncExternalStore } from "react";
 import { Link, type LinkProps } from "react-router";
 import { cx, useT } from "~/lib/i18n";
 
@@ -20,6 +20,16 @@ export function buttonClass(variant: Variant = "primary", size: Size = "md", ext
   return cx(base, sizes[size], variants[variant], extra);
 }
 
+const noop = () => () => undefined;
+/** true en el navegador tras hidratar; false en el HTML del servidor. */
+export function useHydrated(): boolean {
+  return useSyncExternalStore(
+    noop,
+    () => true,
+    () => false,
+  );
+}
+
 export function Button({
   variant = "primary",
   size = "md",
@@ -28,12 +38,14 @@ export function Button({
   children,
   ...props
 }: ComponentProps<"button"> & { variant?: Variant; size?: Size; loading?: boolean }) {
+  // Los formularios los envía JavaScript: antes de hidratar, enviar haría un POST nativo sin acción.
+  const hydrated = useHydrated();
   return (
     <button
       type="button"
       {...props}
       aria-busy={loading || undefined}
-      disabled={props.disabled || loading}
+      disabled={props.disabled || loading || (props.type === "submit" && !hydrated)}
       className={buttonClass(variant, size, className)}
     >
       {loading ? <Loader2 aria-hidden className="size-4 animate-spin" /> : null}

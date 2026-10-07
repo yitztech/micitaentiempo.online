@@ -1,12 +1,12 @@
 import { Module, type OnModuleDestroy, type OnModuleInit } from "@nestjs/common";
 import { AuthModule } from "../auth/auth.module.js";
-import { BillingController, StripeWebhookController } from "./billing.controller.js";
+import { BillingController, OrgClosureController, StripeWebhookController } from "./billing.controller.js";
 import { BillingService } from "./billing.service.js";
 
 @Module({
   imports: [AuthModule],
   providers: [BillingService],
-  controllers: [BillingController, StripeWebhookController],
+  controllers: [BillingController, StripeWebhookController, OrgClosureController],
   exports: [BillingService],
 })
 export class BillingModule implements OnModuleInit, OnModuleDestroy {

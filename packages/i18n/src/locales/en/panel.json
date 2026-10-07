@@ -473,6 +473,28 @@
     "deleteConfirm": "Are you sure? Type DELETE to confirm.",
     "deleteWord": "DELETE",
     "keep": "Cancel",
-    "ownerHasOrg": "You own a business: to close it and delete your account, write to us from the contact page."
+    "ownerHasOrg": "First close your business (on this same page), then delete your account.",
+    "twoFactor": {
+      "title": "Two-step verification",
+      "on": "On: when you sign in we'll ask for a code from your authenticator app.",
+      "off": "Add a code from your authenticator app (Google Authenticator, 1Password, Authy…) to your password.",
+      "enable": "Turn on",
+      "disable": "Turn off",
+      "password": "Confirm your password",
+      "scan": "Scan the code with your app or type this key:",
+      "code": "6-digit code from the app",
+      "confirm": "Confirm and turn on",
+      "backup": "Backup codes: keep them somewhere safe. Each one works once if you lose your phone.",
+      "enabled": "Two-step verification turned on.",
+      "disabled": "Two-step verification turned off.",
+      "newBackup": "Generate new backup codes",
+      "cancel": "Cancel"
+    },
+    "closeTitle": "Close the business",
+    "closeLead": "The subscription is cancelled and the boards, appointments, team and your customers' data are deleted. This can't be undone. You can export your data first.",
+    "close": "Close the business",
+    "closeConfirm": "Type the business name (“{{name}}”) to confirm.",
+    "closeName": "Business name",
+    "closed": "Business closed. You can now delete your account if you want."
   }
 }

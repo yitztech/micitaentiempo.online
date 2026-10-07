@@ -96,6 +96,8 @@
     "no_mail_server": "El dominio de ese correo no recibe mensajes.",
     "too_many_requests": "Demasiados intentos. Espera unos minutos.",
     "network": "No hay conexión. Revisa tu internet.",
-    "validation_failed": "Revisa los datos."
+    "validation_failed": "Revisa los datos.",
+    "google_failed": "No pudimos verificarte con Google. Usa el código por correo.",
+    "google_blocked": "Tu navegador bloqueó la ventana de Google. Permite ventanas emergentes o usa el código por correo."
   }
 }

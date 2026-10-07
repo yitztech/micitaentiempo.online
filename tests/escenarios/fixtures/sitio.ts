@@ -13,7 +13,21 @@ export function idioma(valor: string): Idioma {
   throw new Error(`Idioma desconocido: ${valor}`);
 }
 
+/**
+ * Doble de Google Identity Services: los escenarios no salen a Internet. El «popup» devuelve un código
+ * que el doble de Google de la captura cambia por un id_token con ese correo (o GSI_CORREO si se fija).
+ */
+const GSI_DOBLE = `window.google={accounts:{oauth2:{initCodeClient:function(c){return{requestCode:function(){
+var correo=window.GSI_CORREO||c.login_hint||"cliente-google@example.com";
+setTimeout(function(){c.callback({code:"prueba:"+correo})},50);}}}}}};`;
+
 export const test = base.extend<{ estado: Record<string, unknown> }>({
+  context: async ({ context }, use) => {
+    await context.route("https://accounts.google.com/gsi/client", (r) =>
+      r.fulfill({ contentType: "text/javascript", body: GSI_DOBLE }),
+    );
+    await use(context);
+  },
   // biome-ignore lint/correctness/noEmptyPattern: firma de fixtures de Playwright
   estado: async ({}, use) => use({}),
 });

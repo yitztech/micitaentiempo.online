@@ -6,7 +6,7 @@ The operator of My Appointment On Time is the controller of business account dat
 
 ## What data we process
 
-- **Account:** name, email, password (stored only as an Argon2id hash, never readable), language, time zone, time format and, if you sign in with Google, that account's identifier.
+- **Account:** name, email, password (stored only as an Argon2id hash, never readable), language, time zone, time format and, if you sign in with Google, that account's identifier. If you turn on two-step verification, its key is stored encrypted.
 - **Business:** name, plan, boards, hours, services and team members with their role.
 - **Appointments:** service, date and time, name, email, phone if you give it, notes you write and attendance.
 - **Notifications:** the channels you turn on (email, Slack, Telegram) and your preferences.
@@ -32,7 +32,7 @@ You can connect a third-party AI app (for example, Claude, ChatGPT or Gemini) to
 Only with the business you book with (each end customer sees only their own appointments) and with the providers we need to operate, acting as processors:
 
 - Hosting and infrastructure for the service, and email delivery.
-- Google (Sign in with Google and Google Calendar), Microsoft (Outlook) and Apple (iCloud), only if you connect those services.
+- Google (Sign in with Google, including when confirming a booking, and Google Calendar), Microsoft (Outlook) and Apple (iCloud), only if you connect those services.
 - Slack and Telegram, only if you turn on notifications through those channels.
 
 When card payments and WhatsApp notifications are turned on, we will add Stripe and Meta to this list before using them. Some providers may process data outside your country; in that case we require appropriate safeguards.
@@ -47,11 +47,11 @@ While your account is active. If you delete it, we erase your data within 30 day
 
 ## Security
 
-Encryption in transit (HTTPS), Argon2id passwords, encrypted third-party credentials, role-based permissions on each board and backups managed by the hosting platform.
+Encryption in transit (HTTPS), Argon2id passwords, encrypted third-party credentials, role-based permissions on each board, optional two-step verification and backups managed by the hosting platform.
 
 ## Your rights
 
-You can access, correct and export your data or delete your account from your dashboard, and object to or restrict certain processing. If you booked with a business, you can also contact it. For any request, write to us from the contact page; we reply within 30 days. If you're not satisfied, you can complain to the data protection authority in your country.
+You can access, correct and export your data or delete your account (and, if you're an owner, close your business) from Dashboard → Account, and object to or restrict certain processing. If you booked with a business, you can also contact it. For any request, write to us from the contact page; we reply within 30 days. If you're not satisfied, you can complain to the data protection authority in your country.
 
 ## Minors
 

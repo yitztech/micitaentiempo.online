@@ -23,6 +23,19 @@ Característica: Reservar desde la página pública, «Mis citas» y el embed
       | español | es      | ¡Cita confirmada!       |
       | inglés  | en      | Appointment confirmed!  |
 
+  Escenario: Confirmar la reserva con «Continuar con Google» (ventana emergente)
+    Dado un propietario "Laura" con plan "personal" en el dominio "es"
+    Y "Laura" tiene el tablero "Consultas" en "America/Mexico_City" del país "MX"
+    Y el tablero abre de lunes a viernes de "09:00" a "18:00" con comida de "14:00" a "15:00"
+    Y el tablero tiene el servicio "Consulta general" de 30 minutos
+    Y la fecha actual es "2026-09-14T12:00:00Z"
+    Cuando la visitante "Carla" abre la página de reserva del tablero en el dominio "es"
+    Y elige el primer día y la primera hora libres
+    Y escribe sus datos y aparta el horario
+    Y continúa con Google
+    Entonces ve «¡Cita confirmada!»
+    Y "Laura" ve la cita de "Carla" en su tablero
+
   @critico
   Escenario: «Mis citas» permite cancelar una cita
     Dado un propietario "Laura" con plan "personal" en el dominio "es"

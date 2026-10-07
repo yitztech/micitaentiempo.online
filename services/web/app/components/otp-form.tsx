@@ -4,6 +4,7 @@ import { errorText, postJson } from "~/lib/api-client";
 import { setCustomerSession } from "~/lib/customer";
 import { fmt, useT } from "~/lib/i18n";
 import { AltchaStatus } from "./altcha-status";
+import { GoogleVerify } from "./google-verify";
 import { Alert, Button, Field } from "./ui";
 
 /**
@@ -74,59 +75,66 @@ export function OtpForm({
     }
   }
 
+  const google = <GoogleVerify email={given} onVerified={onVerified} />;
   if (!sent) {
     return (
-      <form
-        method="post"
-        onSubmit={(e) => {
-          e.preventDefault();
-          void send(email.trim());
-        }}
-        onFocus={() => void altcha.start().catch(() => undefined)}
-        className="space-y-4"
-      >
-        {given ? null : (
-          <Field
-            label={b.details.email}
-            type="email"
-            autoComplete="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        )}
-        <AltchaStatus state={altcha.state} onRetry={() => void altcha.start().catch(() => undefined)} />
-        {error ? <Alert tone="danger">{error}</Alert> : null}
-        <Button type="submit" size="lg" className="w-full" loading={busy}>
-          {b.my.sendCode}
-        </Button>
-      </form>
+      <>
+        <form
+          method="post"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void send(email.trim());
+          }}
+          onFocus={() => void altcha.start().catch(() => undefined)}
+          className="space-y-4"
+        >
+          {given ? null : (
+            <Field
+              label={b.details.email}
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          )}
+          <AltchaStatus state={altcha.state} onRetry={() => void altcha.start().catch(() => undefined)} />
+          {error ? <Alert tone="danger">{error}</Alert> : null}
+          <Button type="submit" size="lg" className="w-full" loading={busy}>
+            {b.my.sendCode}
+          </Button>
+        </form>
+        {google}
+      </>
     );
   }
   return (
-    <form method="post" onSubmit={verify} className="space-y-4">
-      <Alert tone="info">{fmt(b.verify.sent, { email })}</Alert>
-      <Field
-        label={b.verify.code}
-        name="code"
-        inputMode="numeric"
-        autoComplete="one-time-code"
-        pattern="\d{6}"
-        maxLength={6}
-        required
-        className="max-w-48"
-      />
-      {error ? <Alert tone="danger">{error}</Alert> : null}
-      <Button type="submit" size="lg" className="w-full" loading={busy}>
-        {submitLabel}
-      </Button>
-      <button
-        type="button"
-        className="min-h-11 text-[15px] text-primary underline underline-offset-2"
-        onClick={() => void send(email)}
-      >
-        {b.verify.resend}
-      </button>
-    </form>
+    <>
+      <form method="post" onSubmit={verify} className="space-y-4">
+        <Alert tone="info">{fmt(b.verify.sent, { email })}</Alert>
+        <Field
+          label={b.verify.code}
+          name="code"
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          pattern="\d{6}"
+          maxLength={6}
+          required
+          className="max-w-48"
+        />
+        {error ? <Alert tone="danger">{error}</Alert> : null}
+        <Button type="submit" size="lg" className="w-full" loading={busy}>
+          {submitLabel}
+        </Button>
+        <button
+          type="button"
+          className="min-h-11 text-[15px] text-primary underline underline-offset-2"
+          onClick={() => void send(email)}
+        >
+          {b.verify.resend}
+        </button>
+      </form>
+      {google}
+    </>
   );
 }

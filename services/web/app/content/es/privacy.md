@@ -6,7 +6,7 @@ El operador de Mi Cita en Tiempo es responsable de los datos de las cuentas de n
 
 ## Qué datos tratamos
 
-- **Cuenta:** nombre, correo, contraseña (guardada solo como huella cifrada con Argon2id, nunca legible), idioma, zona horaria, formato de hora y, si entras con Google, el identificador de esa cuenta.
+- **Cuenta:** nombre, correo, contraseña (guardada solo como huella cifrada con Argon2id, nunca legible), idioma, zona horaria, formato de hora y, si entras con Google, el identificador de esa cuenta. Si activas la verificación en dos pasos, su clave se guarda cifrada.
 - **Negocio:** nombre, plan, tableros, horarios, servicios y miembros del equipo con su rol.
 - **Citas:** servicio, fecha y hora, nombre, correo, teléfono si lo das, notas que escribas y asistencia.
 - **Avisos:** los canales que actives (correo, Slack, Telegram) y tus preferencias.
@@ -32,7 +32,7 @@ Puedes conectar a tu cuenta una aplicación de IA de terceros (por ejemplo, Clau
 Solo con el negocio con el que reservas (cada cliente final ve únicamente sus propias citas) y con los proveedores que necesitamos para operar, que actúan como encargados:
 
 - Alojamiento e infraestructura del servicio, y envío de correo.
-- Google (inicio de sesión con Google y Google Calendar), Microsoft (Outlook) y Apple (iCloud), solo si conectas esos servicios.
+- Google (inicio de sesión con Google, también al confirmar una reserva, y Google Calendar), Microsoft (Outlook) y Apple (iCloud), solo si conectas esos servicios.
 - Slack y Telegram, solo si activas avisos por esos canales.
 
 Cuando se activen los pagos con tarjeta y los avisos por WhatsApp, añadiremos a Stripe y a Meta a esta lista antes de usarlos. Algunos proveedores pueden tratar datos fuera de tu país; en ese caso exigimos garantías adecuadas.
@@ -47,11 +47,11 @@ Mientras tu cuenta esté activa. Si la borras, eliminamos tus datos en un plazo 
 
 ## Seguridad
 
-Cifrado en tránsito (HTTPS), contraseñas con Argon2id, credenciales de terceros cifradas, permisos por rol en cada tablero y copias de seguridad gestionadas por la plataforma de alojamiento.
+Cifrado en tránsito (HTTPS), contraseñas con Argon2id, credenciales de terceros cifradas, permisos por rol en cada tablero, verificación en dos pasos opcional y copias de seguridad gestionadas por la plataforma de alojamiento.
 
 ## Tus derechos
 
-Puedes acceder a tus datos, corregirlos, exportarlos o borrar tu cuenta desde tu panel, y oponerte o limitar ciertos tratamientos. Si reservaste con un negocio, también puedes dirigirte a él. Para cualquier solicitud, escríbenos desde la página de contacto; respondemos en un máximo de 30 días. Si no quedas conforme, puedes reclamar ante la autoridad de protección de datos de tu país.
+Puedes acceder a tus datos, corregirlos, exportarlos o borrar tu cuenta (y, si eres propietario, cerrar tu negocio) desde Panel → Cuenta, y oponerte o limitar ciertos tratamientos. Si reservaste con un negocio, también puedes dirigirte a él. Para cualquier solicitud, escríbenos desde la página de contacto; respondemos en un máximo de 30 días. Si no quedas conforme, puedes reclamar ante la autoridad de protección de datos de tu país.
 
 ## Menores
 

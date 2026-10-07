@@ -198,3 +198,19 @@ func (s CalendarServer) SetOrgStatus(ctx context.Context, req *calendarv1.SetOrg
 	}
 	return &calendarv1.SetOrgStatusResponse{}, s.Store.SetOrgStatus(ctx, req.GetOrgId(), req.GetStatus())
 }
+
+// PurgeOrg borra todos los tableros de la organización (solo su propietario).
+func (s CalendarServer) PurgeOrg(ctx context.Context, req *calendarv1.PurgeOrgRequest) (*calendarv1.PurgeOrgResponse, error) {
+	a, err := actorOf(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if err := requireOrg(a, req.GetOrgId(), "owner"); err != nil {
+		return nil, err
+	}
+	n, err := s.Store.PurgeOrg(ctx, req.GetOrgId())
+	if err != nil {
+		return nil, err
+	}
+	return &calendarv1.PurgeOrgResponse{CalendarsDeleted: int32(min(n, 1<<30))}, nil //nolint:gosec // acotado
+}

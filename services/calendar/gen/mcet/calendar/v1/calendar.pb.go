@@ -820,6 +820,94 @@ func (*SetOrgStatusResponse) Descriptor() ([]byte, []int) {
 	return file_mcet_calendar_v1_calendar_proto_rawDescGZIP(), []int{11}
 }
 
+type PurgeOrgRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	OrgId         string                 `protobuf:"bytes,1,opt,name=org_id,json=orgId,proto3" json:"org_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PurgeOrgRequest) Reset() {
+	*x = PurgeOrgRequest{}
+	mi := &file_mcet_calendar_v1_calendar_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PurgeOrgRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PurgeOrgRequest) ProtoMessage() {}
+
+func (x *PurgeOrgRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mcet_calendar_v1_calendar_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PurgeOrgRequest.ProtoReflect.Descriptor instead.
+func (*PurgeOrgRequest) Descriptor() ([]byte, []int) {
+	return file_mcet_calendar_v1_calendar_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *PurgeOrgRequest) GetOrgId() string {
+	if x != nil {
+		return x.OrgId
+	}
+	return ""
+}
+
+type PurgeOrgResponse struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	CalendarsDeleted int32                  `protobuf:"varint,1,opt,name=calendars_deleted,json=calendarsDeleted,proto3" json:"calendars_deleted,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *PurgeOrgResponse) Reset() {
+	*x = PurgeOrgResponse{}
+	mi := &file_mcet_calendar_v1_calendar_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PurgeOrgResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PurgeOrgResponse) ProtoMessage() {}
+
+func (x *PurgeOrgResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mcet_calendar_v1_calendar_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PurgeOrgResponse.ProtoReflect.Descriptor instead.
+func (*PurgeOrgResponse) Descriptor() ([]byte, []int) {
+	return file_mcet_calendar_v1_calendar_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *PurgeOrgResponse) GetCalendarsDeleted() int32 {
+	if x != nil {
+		return x.CalendarsDeleted
+	}
+	return 0
+}
+
 var File_mcet_calendar_v1_calendar_proto protoreflect.FileDescriptor
 
 const file_mcet_calendar_v1_calendar_proto_rawDesc = "" +
@@ -895,7 +983,11 @@ const file_mcet_calendar_v1_calendar_proto_rawDesc = "" +
 	"\x13SetOrgStatusRequest\x12\x15\n" +
 	"\x06org_id\x18\x01 \x01(\tR\x05orgId\x12\x16\n" +
 	"\x06status\x18\x02 \x01(\tR\x06status\"\x16\n" +
-	"\x14SetOrgStatusResponse2\x87\x05\n" +
+	"\x14SetOrgStatusResponse\"(\n" +
+	"\x0fPurgeOrgRequest\x12\x15\n" +
+	"\x06org_id\x18\x01 \x01(\tR\x05orgId\"?\n" +
+	"\x10PurgeOrgResponse\x12+\n" +
+	"\x11calendars_deleted\x18\x01 \x01(\x05R\x10calendarsDeleted2\xda\x05\n" +
 	"\x0fCalendarService\x12U\n" +
 	"\x0eCreateCalendar\x12'.mcet.calendar.v1.CreateCalendarRequest\x1a\x1a.mcet.calendar.v1.Calendar\x12O\n" +
 	"\vGetCalendar\x12$.mcet.calendar.v1.GetCalendarRequest\x1a\x1a.mcet.calendar.v1.Calendar\x12[\n" +
@@ -903,7 +995,8 @@ const file_mcet_calendar_v1_calendar_proto_rawDesc = "" +
 	"\rListCalendars\x12&.mcet.calendar.v1.ListCalendarsRequest\x1a'.mcet.calendar.v1.ListCalendarsResponse\x12U\n" +
 	"\x0eUpdateCalendar\x12'.mcet.calendar.v1.UpdateCalendarRequest\x1a\x1a.mcet.calendar.v1.Calendar\x12W\n" +
 	"\x0fArchiveCalendar\x12(.mcet.calendar.v1.ArchiveCalendarRequest\x1a\x1a.mcet.calendar.v1.Calendar\x12]\n" +
-	"\fSetOrgStatus\x12%.mcet.calendar.v1.SetOrgStatusRequest\x1a&.mcet.calendar.v1.SetOrgStatusResponseB\xe4\x01\n" +
+	"\fSetOrgStatus\x12%.mcet.calendar.v1.SetOrgStatusRequest\x1a&.mcet.calendar.v1.SetOrgStatusResponse\x12Q\n" +
+	"\bPurgeOrg\x12!.mcet.calendar.v1.PurgeOrgRequest\x1a\".mcet.calendar.v1.PurgeOrgResponseB\xe4\x01\n" +
 	"\x14com.mcet.calendar.v1B\rCalendarProtoP\x01Z[github.com/yitztech/micitaentiempo.online/services/calendar/gen/mcet/calendar/v1;calendarv1\xa2\x02\x03MCX\xaa\x02\x10Mcet.Calendar.V1\xca\x02\x10Mcet\\Calendar\\V1\xe2\x02\x1cMcet\\Calendar\\V1\\GPBMetadata\xea\x02\x12Mcet::Calendar::V1b\x06proto3"
 
 var (
@@ -918,7 +1011,7 @@ func file_mcet_calendar_v1_calendar_proto_rawDescGZIP() []byte {
 	return file_mcet_calendar_v1_calendar_proto_rawDescData
 }
 
-var file_mcet_calendar_v1_calendar_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_mcet_calendar_v1_calendar_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_mcet_calendar_v1_calendar_proto_goTypes = []any{
 	(*EmbedPolicy)(nil),              // 0: mcet.calendar.v1.EmbedPolicy
 	(*BookingPolicy)(nil),            // 1: mcet.calendar.v1.BookingPolicy
@@ -932,12 +1025,14 @@ var file_mcet_calendar_v1_calendar_proto_goTypes = []any{
 	(*ArchiveCalendarRequest)(nil),   // 9: mcet.calendar.v1.ArchiveCalendarRequest
 	(*SetOrgStatusRequest)(nil),      // 10: mcet.calendar.v1.SetOrgStatusRequest
 	(*SetOrgStatusResponse)(nil),     // 11: mcet.calendar.v1.SetOrgStatusResponse
-	(*timestamppb.Timestamp)(nil),    // 12: google.protobuf.Timestamp
+	(*PurgeOrgRequest)(nil),          // 12: mcet.calendar.v1.PurgeOrgRequest
+	(*PurgeOrgResponse)(nil),         // 13: mcet.calendar.v1.PurgeOrgResponse
+	(*timestamppb.Timestamp)(nil),    // 14: google.protobuf.Timestamp
 }
 var file_mcet_calendar_v1_calendar_proto_depIdxs = []int32{
 	0,  // 0: mcet.calendar.v1.Calendar.embed_policy:type_name -> mcet.calendar.v1.EmbedPolicy
 	1,  // 1: mcet.calendar.v1.Calendar.booking_policy:type_name -> mcet.calendar.v1.BookingPolicy
-	12, // 2: mcet.calendar.v1.Calendar.created_at:type_name -> google.protobuf.Timestamp
+	14, // 2: mcet.calendar.v1.Calendar.created_at:type_name -> google.protobuf.Timestamp
 	2,  // 3: mcet.calendar.v1.ListCalendarsResponse.calendars:type_name -> mcet.calendar.v1.Calendar
 	0,  // 4: mcet.calendar.v1.UpdateCalendarRequest.embed_policy:type_name -> mcet.calendar.v1.EmbedPolicy
 	1,  // 5: mcet.calendar.v1.UpdateCalendarRequest.booking_policy:type_name -> mcet.calendar.v1.BookingPolicy
@@ -948,15 +1043,17 @@ var file_mcet_calendar_v1_calendar_proto_depIdxs = []int32{
 	8,  // 10: mcet.calendar.v1.CalendarService.UpdateCalendar:input_type -> mcet.calendar.v1.UpdateCalendarRequest
 	9,  // 11: mcet.calendar.v1.CalendarService.ArchiveCalendar:input_type -> mcet.calendar.v1.ArchiveCalendarRequest
 	10, // 12: mcet.calendar.v1.CalendarService.SetOrgStatus:input_type -> mcet.calendar.v1.SetOrgStatusRequest
-	2,  // 13: mcet.calendar.v1.CalendarService.CreateCalendar:output_type -> mcet.calendar.v1.Calendar
-	2,  // 14: mcet.calendar.v1.CalendarService.GetCalendar:output_type -> mcet.calendar.v1.Calendar
-	2,  // 15: mcet.calendar.v1.CalendarService.GetCalendarBySlug:output_type -> mcet.calendar.v1.Calendar
-	7,  // 16: mcet.calendar.v1.CalendarService.ListCalendars:output_type -> mcet.calendar.v1.ListCalendarsResponse
-	2,  // 17: mcet.calendar.v1.CalendarService.UpdateCalendar:output_type -> mcet.calendar.v1.Calendar
-	2,  // 18: mcet.calendar.v1.CalendarService.ArchiveCalendar:output_type -> mcet.calendar.v1.Calendar
-	11, // 19: mcet.calendar.v1.CalendarService.SetOrgStatus:output_type -> mcet.calendar.v1.SetOrgStatusResponse
-	13, // [13:20] is the sub-list for method output_type
-	6,  // [6:13] is the sub-list for method input_type
+	12, // 13: mcet.calendar.v1.CalendarService.PurgeOrg:input_type -> mcet.calendar.v1.PurgeOrgRequest
+	2,  // 14: mcet.calendar.v1.CalendarService.CreateCalendar:output_type -> mcet.calendar.v1.Calendar
+	2,  // 15: mcet.calendar.v1.CalendarService.GetCalendar:output_type -> mcet.calendar.v1.Calendar
+	2,  // 16: mcet.calendar.v1.CalendarService.GetCalendarBySlug:output_type -> mcet.calendar.v1.Calendar
+	7,  // 17: mcet.calendar.v1.CalendarService.ListCalendars:output_type -> mcet.calendar.v1.ListCalendarsResponse
+	2,  // 18: mcet.calendar.v1.CalendarService.UpdateCalendar:output_type -> mcet.calendar.v1.Calendar
+	2,  // 19: mcet.calendar.v1.CalendarService.ArchiveCalendar:output_type -> mcet.calendar.v1.Calendar
+	11, // 20: mcet.calendar.v1.CalendarService.SetOrgStatus:output_type -> mcet.calendar.v1.SetOrgStatusResponse
+	13, // 21: mcet.calendar.v1.CalendarService.PurgeOrg:output_type -> mcet.calendar.v1.PurgeOrgResponse
+	14, // [14:22] is the sub-list for method output_type
+	6,  // [6:14] is the sub-list for method input_type
 	6,  // [6:6] is the sub-list for extension type_name
 	6,  // [6:6] is the sub-list for extension extendee
 	0,  // [0:6] is the sub-list for field type_name
@@ -974,7 +1071,7 @@ func file_mcet_calendar_v1_calendar_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mcet_calendar_v1_calendar_proto_rawDesc), len(file_mcet_calendar_v1_calendar_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   12,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

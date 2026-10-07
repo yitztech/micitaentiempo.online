@@ -198,6 +198,23 @@ func (s *Store) SetOrgStatus(ctx context.Context, orgID, status string) error {
 	return err
 }
 
+// PurgeOrg borra los tableros de la organización (el resto cae en cascada) y su estado.
+func (s *Store) PurgeOrg(ctx context.Context, orgID string) (int, error) {
+	tx, err := s.Pool.Begin(ctx)
+	if err != nil {
+		return 0, err
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+	tag, err := tx.Exec(ctx, `delete from calendars where org_id = $1`, orgID)
+	if err != nil {
+		return 0, err
+	}
+	if _, err := tx.Exec(ctx, `delete from org_status where org_id = $1`, orgID); err != nil {
+		return 0, err
+	}
+	return int(tag.RowsAffected()), tx.Commit(ctx)
+}
+
 // randomSuffix devuelve 5 caracteres en minúsculas y cifras para desambiguar slugs.
 func randomSuffix() string {
 	const alphabet = "abcdefghijkmnpqrstuvwxyz23456789"

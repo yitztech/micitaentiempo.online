@@ -1,6 +1,16 @@
 import { CalendarService } from "@mcet/contracts/mcet/calendar/v1/calendar_pb";
 import { Plan } from "@mcet/schemas";
-import { BadRequestException, Body, Controller, Get, HttpCode, Inject, Post, Req } from "@nestjs/common";
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Inject,
+  Post,
+  Req,
+} from "@nestjs/common";
 import type { FastifyRequest } from "fastify";
 import { z } from "zod";
 import { CurrentUser, Public } from "../auth/auth.guard.js";
@@ -95,5 +105,19 @@ export class StripeWebhookController {
       }
       throw err;
     }
+  }
+}
+
+const CloseOrg = z.object({ confirmName: z.string().min(1).max(200) }).strict();
+
+/** Cerrar la organización desde Panel → Cuenta (solo su propietario). */
+@Controller("v1/org")
+export class OrgClosureController {
+  constructor(private readonly billing: BillingService) {}
+
+  @Delete()
+  @HttpCode(204)
+  async close(@CurrentUser() user: SessionUser, @Body(new ZodPipe(CloseOrg)) body: z.infer<typeof CloseOrg>) {
+    await this.billing.closeOrg(user.id, body.confirmName);
   }
 }

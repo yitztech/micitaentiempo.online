@@ -30,6 +30,8 @@ import { checkEmail } from "../security/email-validation.js";
 export function features(env: Env) {
   return {
     google: Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET),
+    // Público por diseño: lo usa el botón «Continuar con Google» del cliente final.
+    googleClientId: env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET ? env.GOOGLE_CLIENT_ID : null,
     microsoft: Boolean(env.MS_CLIENT_ID && env.MS_CLIENT_SECRET),
     stripe: stripeConfig(env).enabled,
     slack: Boolean(env.SLACK_CLIENT_ID),

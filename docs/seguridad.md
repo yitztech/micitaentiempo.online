@@ -27,7 +27,7 @@ oculta en `api` y en el gateway; ruta de los feeds ICS oculta).
 | V3 Seguridad del frontend | Cumple | CSP con nonce, `frame-ancestors 'none'` (el embed, con su lista), `X-Frame-Options`, COOP, CORP, `nosniff`, `Referrer-Policy`, `Permissions-Policy`, HSTS. `style-src 'unsafe-inline'` aceptado (solo estilos) |
 | V4 API y servicios web | Cumple | JSON obligatorio en mutaciones, cuerpo ≤ 256 KB, límites por IP en el gateway y por ruta en Better Auth, `problem+json` sin trazas |
 | V5 Archivos | No aplica | No hay subida de archivos |
-| V6 Autenticación | Cumple, con una tarea | Contraseñas de 12 a 128 caracteres, Argon2id (OWASP), comprobación de filtraciones (HIBP), 10 intentos/min, correo verificado, restablecimiento de 1 h que cierra sesiones. **Pendiente:** interfaz para la verificación en dos pasos (el plugin está activo) |
+| V6 Autenticación | Cumple | Contraseñas de 12 a 128 caracteres, Argon2id (OWASP), comprobación de filtraciones (HIBP), 10 intentos/min, correo verificado, restablecimiento de 1 h que cierra sesiones; verificación en dos pasos opcional (TOTP con códigos de respaldo y 10 intentos/min) en Panel → Cuenta |
 | V7 Sesiones | Cumple | Cookies `__Secure-`, `HttpOnly`, `SameSite=Lax`, por dominio; 7 días con renovación diaria; cierre al cambiar o restablecer la contraseña y al borrar la cuenta |
 | V8 Autorización | Cumple | Matriz única (`auth/permissions.ts`) aplicada por `CalendarAccess` en REST y MCP; 404 a quien no es miembro; tableros elegidos en el consentimiento MCP; clientes finales solo ven lo suyo |
 | V9 Tokens autocontenidos | Cumple | JWT EdDSA del JWKS, `iss`/`aud`/`exp` comprobados, 15 min, conexión vigente comprobada en cada llamada; JWT internos HS256 de 60 s entre servicios |
@@ -35,7 +35,7 @@ oculta en `api` y en el gateway; ruta de los feeds ICS oculta).
 | V11 Criptografía | Cumple | AES-256-GCM con HKDF, HMAC-SHA-256, aleatoriedad del sistema; secretos ≥ 32 caracteres exigidos al arrancar |
 | V12 Comunicaciones | Cumple (plataforma) | TLS en Traefik/Coolify; HSTS desde el gateway; tráfico interno en la red de Docker |
 | V13 Configuración | Cumple | Secretos solo por entorno; variables obligatorias; `TEST_MODE` prohibido con dominios reales; `server_tokens off`; imágenes sin herramientas de compilación |
-| V14 Protección de datos | Cumple | `no-store` en datos de cuenta; enmascarado de contacto en MCP sin `customers:read`; exportación y borrado en Panel → Cuenta; IP solo como huella en la auditoría |
+| V14 Protección de datos | Cumple | `no-store` en datos de cuenta; enmascarado de contacto en MCP sin `customers:read`; exportación, borrado de la cuenta y cierre del negocio (borra sus datos en el motor) en Panel → Cuenta; IP solo como huella en la auditoría |
 | V15 Código y arquitectura seguros | Cumple | Versiones fijadas y verificadas, `minimumReleaseAge` de 24 h en pnpm, Trivy, gitleaks, actualizaciones de dependencias con Dependabot |
 | V16 Registro y errores | Cumple | JSON con `request_id`; sin cabeceras de autenticación, cookies ni consultas; auditoría de escrituras (`via` panel/mcp/público) |
 | V17 WebRTC | No aplica | |
@@ -50,6 +50,5 @@ oculta en `api` y en el gateway; ruta de los feeds ICS oculta).
 
 ## Pendiente antes o después del lanzamiento
 
-- Interfaz de verificación en dos pasos (TOTP) en Panel → Cuenta.
 - Verificación manual de MCP con los clientes reales (`docs/mcp-verificacion.md`).
 - Revisión legal de los textos de privacidad y condiciones por un abogado.

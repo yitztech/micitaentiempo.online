@@ -1,13 +1,13 @@
 import { UpdateMe } from "@mcet/schemas";
 import { Body, ConflictException, Controller, Delete, Get, Inject, Patch, Req } from "@nestjs/common";
-import { eq } from "drizzle-orm";
+import { and, eq, isNotNull } from "drizzle-orm";
 import { AuditService } from "../audit/audit.service.js";
 import { type AuthedRequest, CurrentUser } from "../auth/auth.guard.js";
 import { AuthRegistry, type SessionUser } from "../auth/auth.registry.js";
 import { toHeaders } from "../common/request.js";
 import { ZodPipe } from "../common/zod.pipe.js";
 import { type Database, DB } from "../db/db.module.js";
-import { calendarMembers, customerLinks, user as users } from "../db/schema.js";
+import { calendarMembers, customerLinks, organizations, user as users } from "../db/schema.js";
 import { OrgsService } from "../orgs/orgs.service.js";
 
 @Controller("v1/me")
@@ -83,6 +83,10 @@ export class MeController {
     }
     await this.audit.record({ actorUserId: current.id, via: "panel", action: "user.deleted", ip: req.ip });
     await this.registry.forRequest(req).api.revokeSessions({ headers: toHeaders(req.headers) });
+    // Las organizaciones ya cerradas del propietario se borran con la cuenta (sus datos ya no existen).
+    await this.db
+      .delete(organizations)
+      .where(and(eq(organizations.ownerUserId, current.id), isNotNull(organizations.deletedAt)));
     await this.db.delete(users).where(eq(users.id, current.id));
     return { deleted: true };
   }

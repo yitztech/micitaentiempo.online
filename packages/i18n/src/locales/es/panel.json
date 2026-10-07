@@ -473,6 +473,28 @@
     "deleteConfirm": "¿Seguro? Escribe BORRAR para confirmar.",
     "deleteWord": "BORRAR",
     "keep": "Cancelar",
-    "ownerHasOrg": "Eres propietario de un negocio: para cerrarlo y borrar la cuenta, escríbenos desde la página de contacto."
+    "ownerHasOrg": "Primero cierra tu negocio (en esta misma página) y después borra la cuenta.",
+    "twoFactor": {
+      "title": "Verificación en dos pasos",
+      "on": "Activada: al entrar te pediremos un código de tu app de autenticación.",
+      "off": "Añade un código de tu app de autenticación (Google Authenticator, 1Password, Authy…) a tu contraseña.",
+      "enable": "Activar",
+      "disable": "Desactivar",
+      "password": "Confirma tu contraseña",
+      "scan": "Escanea el código con tu app o escribe esta clave:",
+      "code": "Código de 6 dígitos de la app",
+      "confirm": "Confirmar y activar",
+      "backup": "Códigos de respaldo: guárdalos en un lugar seguro. Cada uno sirve una vez si pierdes el teléfono.",
+      "enabled": "Verificación en dos pasos activada.",
+      "disabled": "Verificación en dos pasos desactivada.",
+      "newBackup": "Generar códigos de respaldo nuevos",
+      "cancel": "Cancelar"
+    },
+    "closeTitle": "Cerrar el negocio",
+    "closeLead": "Se cancelan la suscripción y se borran los tableros, las citas, el equipo y los datos de tus clientes. No se puede deshacer. Antes puedes exportar tus datos.",
+    "close": "Cerrar el negocio",
+    "closeConfirm": "Escribe el nombre del negocio («{{name}}») para confirmar.",
+    "closeName": "Nombre del negocio",
+    "closed": "Negocio cerrado. Ya puedes borrar tu cuenta si quieres."
   }
 }

@@ -186,6 +186,10 @@ When("escribe el código que le llegó por correo", async ({ page, request, esta
   await page.getByRole("button", { name: v.lang === "es" ? "Confirmar reserva" : "Confirm booking" }).click();
 });
 
+When("continúa con Google", async ({ page }) => {
+  await page.getByRole("button", { name: /Continuar con Google|Continue with Google/ }).click();
+});
+
 Then("ve «{}»", async ({ page }, texto: string) => {
   await expect(page.getByText(texto, { exact: true }).first()).toBeVisible({ timeout: 20_000 });
 });

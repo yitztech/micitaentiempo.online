@@ -96,6 +96,8 @@
     "no_mail_server": "That email's domain doesn't receive mail.",
     "too_many_requests": "Too many attempts. Please wait a few minutes.",
     "network": "You're offline. Check your connection.",
-    "validation_failed": "Check your details."
+    "validation_failed": "Check your details.",
+    "google_failed": "We couldn't verify you with Google. Use the email code instead.",
+    "google_blocked": "Your browser blocked the Google window. Allow pop-ups or use the email code."
   }
 }

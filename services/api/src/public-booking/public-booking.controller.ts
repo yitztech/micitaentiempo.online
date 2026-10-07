@@ -38,7 +38,7 @@ import {
 import { APIError } from "better-auth/api";
 import { and, eq } from "drizzle-orm";
 import type { FastifyReply, FastifyRequest } from "fastify";
-import type { z } from "zod";
+import { z } from "zod";
 import { checkOrigin, Public } from "../auth/auth.guard.js";
 import { AuthRegistry, type SessionUser } from "../auth/auth.registry.js";
 import { rpc } from "../calendars/rpc-errors.js";
@@ -55,10 +55,12 @@ import { CALENDAR } from "../internal-rpc/internal-rpc.module.js";
 import type { ActorClaims } from "../internal-rpc/jwt.js";
 import { AltchaService } from "../security/altcha.service.js";
 import { checkEmail } from "../security/email-validation.js";
+import { customerSessionFor, exchangeGoogleCode } from "./google-customer.js";
 import { holderId, holdToken } from "./hold-token.js";
 
 const SLUG = /^[a-z0-9](-?[a-z0-9]){2,59}$/;
 const at = (s: string) => timestampFromDate(new Date(s));
+const GoogleCode = z.object({ code: z.string().min(10).max(2048) }).strict();
 
 /** Nombre del servicio en el idioma del dominio (o el primero que haya). */
 const pick = (m: Record<string, string>, lang: Lang) => m[lang] || Object.values(m)[0] || "";
@@ -291,6 +293,22 @@ export class PublicBookingController {
       token: res.headers.get("set-auth-token"),
       user: { id: u.id, email: u.email, name: u.name || body.name || "" },
     };
+  }
+
+  /**
+   * «Continuar con Google» del cliente final (popup de Google Identity Services): cambia el código por
+   * un token Bearer, igual que la verificación por código. Funciona también dentro del embed.
+   */
+  @Post("google/verify")
+  async googleVerify(
+    @Req() req: FastifyRequest,
+    @Body(new ZodPipe(GoogleCode)) body: z.infer<typeof GoogleCode>,
+  ) {
+    checkOrigin(req, this.env);
+    const id = await exchangeGoogleCode(this.env, body.code);
+    if (!id)
+      throw new HttpException({ code: "google_failed", message: "No se pudo verificar con Google" }, 400);
+    return customerSessionFor(this.registry.forRequest(req), id, requestLang(req, this.env));
   }
 
   @Get("my/bookings")

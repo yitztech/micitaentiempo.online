@@ -169,7 +169,7 @@ rendimiento de §7.9 en páginas públicas; ningún texto fuera de los catálogo
       anfitrión, token Bearer en el iframe).
 - [x] Campana de avisos (la alimenta F8).
 - [x] Capturas visuales en 360, 768, 1024 y 1440 px (escenario `@capturas`; pendientes de aprobación del usuario).
-- [ ] «Continuar con Google» en la verificación del cliente final (ventana emergente): pendiente; hoy solo código por correo.
+- [x] «Continuar con Google» en la verificación del cliente final (ventana emergente de Google Identity Services, también dentro del embed).
 
 **Aceptación:** escenarios de reserva en móvil, serie semanal, bloqueo, «Mis citas» y embed en es y en;
 capturas aprobadas; axe sin violaciones serias.
@@ -245,7 +245,7 @@ cambio externo restaurado, credencial revocada y contenido de los feeds.
 **Objetivo:** salir a producción con garantías.
 
 - [x] Revisión de seguridad con ASVS 5.0 nivel 2; ZAP *baseline*; verificación de cabeceras y CSP; escaneo
-      de secretos del historial (`docs/seguridad.md`). Pendiente: interfaz de verificación en dos pasos.
+      de secretos del historial (`docs/seguridad.md`); verificación en dos pasos en Panel → Cuenta.
 - [x] k6 con los límites de memoria; `docker stats` bajo carga; ajuste de PostgreSQL (`docs/carga.md`).
 - [x] Catálogo completo de escenarios en verde (nocturno), capturas y accesibilidad (`nocturno.yml`).
 - [x] Legales finales en es y en: privacidad (incluye MCP, IA de terceros y los encargados activos: Google,

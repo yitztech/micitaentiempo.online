@@ -54,6 +54,9 @@ const (
 	// CalendarServiceSetOrgStatusProcedure is the fully-qualified name of the CalendarService's
 	// SetOrgStatus RPC.
 	CalendarServiceSetOrgStatusProcedure = "/mcet.calendar.v1.CalendarService/SetOrgStatus"
+	// CalendarServicePurgeOrgProcedure is the fully-qualified name of the CalendarService's PurgeOrg
+	// RPC.
+	CalendarServicePurgeOrgProcedure = "/mcet.calendar.v1.CalendarService/PurgeOrg"
 )
 
 // CalendarServiceClient is a client for the mcet.calendar.v1.CalendarService service.
@@ -66,6 +69,9 @@ type CalendarServiceClient interface {
 	ArchiveCalendar(context.Context, *v1.ArchiveCalendarRequest) (*v1.Calendar, error)
 	// Refleja el estado de la organización (prueba, activa, solo lectura…).
 	SetOrgStatus(context.Context, *v1.SetOrgStatusRequest) (*v1.SetOrgStatusResponse, error)
+	// Cierre de la organización: borra sus tableros y todo lo que cuelga de ellos (citas, series,
+	// horarios, servicios, conexiones y feeds). No se puede deshacer.
+	PurgeOrg(context.Context, *v1.PurgeOrgRequest) (*v1.PurgeOrgResponse, error)
 }
 
 // NewCalendarServiceClient constructs a client for the mcet.calendar.v1.CalendarService service. By
@@ -121,6 +127,12 @@ func NewCalendarServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 			connect.WithSchema(calendarServiceMethods.ByName("SetOrgStatus")),
 			connect.WithClientOptions(opts...),
 		),
+		purgeOrg: connect.NewClient[v1.PurgeOrgRequest, v1.PurgeOrgResponse](
+			httpClient,
+			baseURL+CalendarServicePurgeOrgProcedure,
+			connect.WithSchema(calendarServiceMethods.ByName("PurgeOrg")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -133,6 +145,7 @@ type calendarServiceClient struct {
 	updateCalendar    *connect.Client[v1.UpdateCalendarRequest, v1.Calendar]
 	archiveCalendar   *connect.Client[v1.ArchiveCalendarRequest, v1.Calendar]
 	setOrgStatus      *connect.Client[v1.SetOrgStatusRequest, v1.SetOrgStatusResponse]
+	purgeOrg          *connect.Client[v1.PurgeOrgRequest, v1.PurgeOrgResponse]
 }
 
 // CreateCalendar calls mcet.calendar.v1.CalendarService.CreateCalendar.
@@ -198,6 +211,15 @@ func (c *calendarServiceClient) SetOrgStatus(ctx context.Context, req *v1.SetOrg
 	return nil, err
 }
 
+// PurgeOrg calls mcet.calendar.v1.CalendarService.PurgeOrg.
+func (c *calendarServiceClient) PurgeOrg(ctx context.Context, req *v1.PurgeOrgRequest) (*v1.PurgeOrgResponse, error) {
+	response, err := c.purgeOrg.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // CalendarServiceHandler is an implementation of the mcet.calendar.v1.CalendarService service.
 type CalendarServiceHandler interface {
 	CreateCalendar(context.Context, *v1.CreateCalendarRequest) (*v1.Calendar, error)
@@ -208,6 +230,9 @@ type CalendarServiceHandler interface {
 	ArchiveCalendar(context.Context, *v1.ArchiveCalendarRequest) (*v1.Calendar, error)
 	// Refleja el estado de la organización (prueba, activa, solo lectura…).
 	SetOrgStatus(context.Context, *v1.SetOrgStatusRequest) (*v1.SetOrgStatusResponse, error)
+	// Cierre de la organización: borra sus tableros y todo lo que cuelga de ellos (citas, series,
+	// horarios, servicios, conexiones y feeds). No se puede deshacer.
+	PurgeOrg(context.Context, *v1.PurgeOrgRequest) (*v1.PurgeOrgResponse, error)
 }
 
 // NewCalendarServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -259,6 +284,12 @@ func NewCalendarServiceHandler(svc CalendarServiceHandler, opts ...connect.Handl
 		connect.WithSchema(calendarServiceMethods.ByName("SetOrgStatus")),
 		connect.WithHandlerOptions(opts...),
 	)
+	calendarServicePurgeOrgHandler := connect.NewUnaryHandlerSimple(
+		CalendarServicePurgeOrgProcedure,
+		svc.PurgeOrg,
+		connect.WithSchema(calendarServiceMethods.ByName("PurgeOrg")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mcet.calendar.v1.CalendarService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case CalendarServiceCreateCalendarProcedure:
@@ -275,6 +306,8 @@ func NewCalendarServiceHandler(svc CalendarServiceHandler, opts ...connect.Handl
 			calendarServiceArchiveCalendarHandler.ServeHTTP(w, r)
 		case CalendarServiceSetOrgStatusProcedure:
 			calendarServiceSetOrgStatusHandler.ServeHTTP(w, r)
+		case CalendarServicePurgeOrgProcedure:
+			calendarServicePurgeOrgHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -310,4 +343,8 @@ func (UnimplementedCalendarServiceHandler) ArchiveCalendar(context.Context, *v1.
 
 func (UnimplementedCalendarServiceHandler) SetOrgStatus(context.Context, *v1.SetOrgStatusRequest) (*v1.SetOrgStatusResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mcet.calendar.v1.CalendarService.SetOrgStatus is not implemented"))
+}
+
+func (UnimplementedCalendarServiceHandler) PurgeOrg(context.Context, *v1.PurgeOrgRequest) (*v1.PurgeOrgResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mcet.calendar.v1.CalendarService.PurgeOrg is not implemented"))
 }

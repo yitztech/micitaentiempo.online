@@ -135,3 +135,48 @@ func TestSlugsRepetidos(t *testing.T) {
 		seen[c.GetSlug()] = true
 	}
 }
+
+func TestCierreDeOrganizacion(t *testing.T) {
+	pool := testdb.New(t)
+	ctx := testdb.Context(t)
+	e := &engine.Engine{Store: store.New(pool), Clock: &clock.Settable{}}
+	cal, svc := engine.CalendarServer{Engine: e}, engine.ServiceCatalogServer{Engine: e}
+	owner := as(ctx, "owner", org)
+	otra := "0192f3c4-0000-7000-8000-00000000bbbb"
+
+	c, err := cal.CreateCalendar(owner, &calendarv1.CreateCalendarRequest{OrgId: org, OrgStatus: "trialing", Name: "Estudio", Timezone: "UTC"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := svc.CreateService(owner, &calendarv1.CreateServiceRequest{Service: &calendarv1.Service{
+		CalendarId: c.GetId(), Name: map[string]string{"es": "Corte"}, DurationMin: 30, SlotStepMin: 30}}); err != nil {
+		t.Fatal(err)
+	}
+	ajeno, err := cal.CreateCalendar(as(ctx, "owner", otra), &calendarv1.CreateCalendarRequest{OrgId: otra, OrgStatus: "trialing", Name: "Ajeno", Timezone: "UTC"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Solo el propietario de esa organización puede cerrarla.
+	if _, err := cal.PurgeOrg(as(ctx, "editor", org), &calendarv1.PurgeOrgRequest{OrgId: org}); connect.CodeOf(err) != connect.CodePermissionDenied {
+		t.Fatalf("editor cerrando: %v", err)
+	}
+	if _, err := cal.PurgeOrg(as(ctx, "owner", otra), &calendarv1.PurgeOrgRequest{OrgId: org}); connect.CodeOf(err) != connect.CodePermissionDenied {
+		t.Fatalf("otra organización cerrando: %v", err)
+	}
+
+	res, err := cal.PurgeOrg(owner, &calendarv1.PurgeOrgRequest{OrgId: org})
+	if err != nil || res.GetCalendarsDeleted() != 1 {
+		t.Fatalf("cierre: %v %v", res, err)
+	}
+	if _, err := cal.GetCalendar(owner, &calendarv1.GetCalendarRequest{Id: c.GetId()}); connect.CodeOf(err) != connect.CodeNotFound {
+		t.Fatalf("el tablero sigue: %v", err)
+	}
+	var services int
+	if err := pool.QueryRow(ctx, `select count(*) from services where calendar_id = $1`, c.GetId()).Scan(&services); err != nil || services != 0 {
+		t.Fatalf("servicios tras el cierre: %d %v", services, err)
+	}
+	if _, err := cal.GetCalendar(as(ctx, "owner", otra), &calendarv1.GetCalendarRequest{Id: ajeno.GetId()}); err != nil {
+		t.Fatalf("el tablero de otra organización desapareció: %v", err)
+	}
+}

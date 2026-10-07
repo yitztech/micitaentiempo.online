@@ -1,7 +1,14 @@
 import { CalendarService } from "@mcet/contracts/mcet/calendar/v1/calendar_pb";
 import { type Lang, pathFor } from "@mcet/i18n";
 import { PLAN_LIMITS, type Plan, TRIAL_DAYS } from "@mcet/schemas";
-import { ConflictException, Inject, Injectable, Logger, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  ConflictException,
+  Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from "@nestjs/common";
 import { and, eq, isNull, lte } from "drizzle-orm";
 import type Stripe from "stripe";
 import { AuditService } from "../audit/audit.service.js";
@@ -9,7 +16,17 @@ import { AppClock } from "../common/clock.js";
 import { ENV } from "../config/config.module.js";
 import type { Env } from "../config/env.js";
 import { type Database, DB } from "../db/db.module.js";
-import { billingEvents, organizations, user as users } from "../db/schema.js";
+import {
+  billingEvents,
+  calendarMembers,
+  customerLinks,
+  invitations,
+  notificationDeliveries,
+  notifications,
+  organizations,
+  reminders,
+  user as users,
+} from "../db/schema.js";
 import { asActor, type CalendarClients } from "../internal-rpc/calendar-client.js";
 import { CALENDAR } from "../internal-rpc/internal-rpc.module.js";
 import { NotificationsService } from "../notifications/notifications.service.js";
@@ -92,6 +109,46 @@ export class BillingService {
       hasSubscription: Boolean(org.stripeSubscriptionId),
       limits: PLAN_LIMITS[org.plan],
     };
+  }
+
+  /**
+   * Cierra la organización (RNF-06): cancela la suscripción al momento, borra en el motor sus tableros y
+   * todo lo que cuelga de ellos, y aquí equipo, invitaciones, clientes, avisos y recordatorios. La
+   * organización queda marcada como borrada (la auditoría se conserva). Pide escribir su nombre.
+   */
+  async closeOrg(userId: string, confirmName: string): Promise<void> {
+    const org = await this.orgOf(userId);
+    if (confirmName.trim() !== org.name.trim()) {
+      throw new BadRequestException({ code: "confirm_mismatch", message: "El nombre no coincide" });
+    }
+    if (org.stripeSubscriptionId && this.config.enabled) {
+      await this.stripe().subscriptions.cancel(org.stripeSubscriptionId);
+    }
+    await this.rpc
+      .client(CalendarService)
+      .purgeOrg(
+        { orgId: org.id },
+        asActor({ actor: { sub: userId, org: org.id, role: "owner", via: "panel" } }),
+      );
+    await this.db.transaction(async (tx) => {
+      await tx.delete(reminders).where(eq(reminders.orgId, org.id));
+      await tx.delete(notificationDeliveries).where(eq(notificationDeliveries.orgId, org.id));
+      await tx.delete(notifications).where(eq(notifications.orgId, org.id));
+      await tx.delete(invitations).where(eq(invitations.orgId, org.id));
+      await tx.delete(customerLinks).where(eq(customerLinks.orgId, org.id));
+      await tx.delete(calendarMembers).where(eq(calendarMembers.orgId, org.id));
+      await tx
+        .update(organizations)
+        .set({ deletedAt: this.clock.now(), status: "suspended", stripeSubscriptionId: null })
+        .where(eq(organizations.id, org.id));
+    });
+    await this.audit.record({
+      orgId: org.id,
+      actorUserId: userId,
+      via: "panel",
+      action: "org.closed",
+      target: org.id,
+    });
   }
 
   /** Cambia estado (y lo refleja en el motor) avisando al propietario si corresponde. */

@@ -28,7 +28,7 @@ export function AuthCard({
   );
 }
 
-function GoogleIcon() {
+export function GoogleIcon() {
   return (
     <svg viewBox="0 0 24 24" className="size-5" aria-hidden focusable="false">
       <path
