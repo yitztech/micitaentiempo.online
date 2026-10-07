@@ -17,7 +17,11 @@ export default function Faq() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    mainEntity: f.items.map((i) => ({ "@type": "Question", name: i.q, acceptedAnswer: { "@type": "Answer", text: i.a } })),
+    mainEntity: f.items.map((i) => ({
+      "@type": "Question",
+      name: i.q,
+      acceptedAnswer: { "@type": "Answer", text: i.a },
+    })),
   };
   return (
     <Container className="max-w-3xl py-14 sm:py-20">
@@ -39,7 +43,10 @@ export default function Faq() {
           <details key={item.q} className="group p-5">
             <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 font-semibold [&::-webkit-details-marker]:hidden">
               {item.q}
-              <ChevronDown aria-hidden className="size-5 shrink-0 text-muted transition-transform group-open:rotate-180" />
+              <ChevronDown
+                aria-hidden
+                className="size-5 shrink-0 text-muted transition-transform group-open:rotate-180"
+              />
             </summary>
             <p className="mt-2 text-muted">{item.a}</p>
           </details>

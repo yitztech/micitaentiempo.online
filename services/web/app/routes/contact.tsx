@@ -52,7 +52,12 @@ export default function Contact() {
           {c.sent}
         </Alert>
       ) : (
-        <form onSubmit={onSubmit} onFocus={() => void altcha.start().catch(() => undefined)} className="mt-8 space-y-5" noValidate={false}>
+        <form
+          onSubmit={onSubmit}
+          onFocus={() => void altcha.start().catch(() => undefined)}
+          className="mt-8 space-y-5"
+          noValidate={false}
+        >
           <Field label={c.name} name="name" autoComplete="name" required maxLength={120} />
           <Field label={c.email} name="email" type="email" autoComplete="email" required maxLength={254} />
           <TextArea label={c.message} name="message" required minLength={10} maxLength={4000} />

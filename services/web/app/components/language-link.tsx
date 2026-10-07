@@ -18,7 +18,10 @@ export function LanguageLink({ className }: { className?: string }) {
       lang={site.other}
       title={t.common.language.sessionNote}
       aria-label={t.common.language.switchToLabel}
-      className={cx("inline-flex min-h-11 items-center gap-1.5 rounded-[var(--radius-field)] px-2 text-[15px] hover:bg-surface-2", className)}
+      className={cx(
+        "inline-flex min-h-11 items-center gap-1.5 rounded-[var(--radius-field)] px-2 text-[15px] hover:bg-surface-2",
+        className,
+      )}
     >
       <Languages aria-hidden className="size-4" />
       {t.common.language.switchTo}

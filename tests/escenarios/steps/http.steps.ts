@@ -7,6 +7,7 @@ When(
     const res = await request.get(`${sitio[idioma(dominio)]}${ruta}`, { maxRedirects: 0 });
     estado.status = res.status();
     estado.body = await res.text();
+    estado.location = res.headers().location;
   },
 );
 
@@ -33,4 +34,8 @@ When("se fija el reloj del sistema en la hora real", async ({ request, estado })
   const res = await request.post(`${sitio.es}/api/__test/clock`, { data: { now: null } });
   estado.status = res.status();
   estado.body = await res.text();
+});
+
+Then("la respuesta redirige a {string}", ({ estado }, destino: string) => {
+  expect(estado.location).toBe(destino);
 });

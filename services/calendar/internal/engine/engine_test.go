@@ -117,3 +117,21 @@ func TestTableroCompleto(t *testing.T) {
 }
 
 func ptr[T any](v T) *T { return &v }
+
+func TestSlugsRepetidos(t *testing.T) {
+	pool := testdb.New(t)
+	ctx := testdb.Context(t)
+	e := &engine.Engine{Store: store.New(pool), Clock: &clock.Settable{}}
+	seen := map[string]bool{}
+	for i := range 60 {
+		c, err := engine.CalendarServer{Engine: e}.CreateCalendar(as(ctx, "owner", org), &calendarv1.CreateCalendarRequest{
+			OrgId: org, OrgStatus: "trialing", Name: "Consultas", Timezone: "America/Mexico_City"})
+		if err != nil {
+			t.Fatalf("tablero %d: %v", i+1, err)
+		}
+		if seen[c.GetSlug()] {
+			t.Fatalf("slug repetido %s", c.GetSlug())
+		}
+		seen[c.GetSlug()] = true
+	}
+}

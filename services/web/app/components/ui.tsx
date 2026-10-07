@@ -59,7 +59,10 @@ export function Card({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
       {...props}
-      className={cx("rounded-[var(--radius-card)] border border-border bg-surface shadow-[var(--shadow-soft)]", className)}
+      className={cx(
+        "rounded-[var(--radius-card)] border border-border bg-surface shadow-[var(--shadow-soft)]",
+        className,
+      )}
     />
   );
 }
@@ -120,7 +123,8 @@ export function Field({ label, hint, error, optional, className, type, ...props 
   const id = useId();
   const t = useT();
   const [visible, setVisible] = useState(false);
-  const describedBy = [hint ? `${id}-hint` : "", error ? `${id}-error` : ""].filter(Boolean).join(" ") || undefined;
+  const describedBy =
+    [hint ? `${id}-hint` : "", error ? `${id}-error` : ""].filter(Boolean).join(" ") || undefined;
   const isPassword = type === "password";
   return (
     <div className={className}>
@@ -198,7 +202,11 @@ export function TextArea({
   );
 }
 
-export function Checkbox({ label, className, ...props }: Omit<ComponentProps<"input">, "type"> & { label: ReactNode }) {
+export function Checkbox({
+  label,
+  className,
+  ...props
+}: Omit<ComponentProps<"input">, "type"> & { label: ReactNode }) {
   const id = useId();
   return (
     <div className={cx("flex items-start gap-3", className)}>

@@ -1,5 +1,5 @@
-import { index, layout, type RouteConfig, route } from "@react-router/dev/routes";
 import { ROUTES, type RouteId } from "@mcet/i18n";
+import { index, layout, type RouteConfig, route } from "@react-router/dev/routes";
 
 /** Registra una página en sus dos rutas traducidas (un id por idioma, el mismo módulo). */
 function page(id: RouteId, file: string) {

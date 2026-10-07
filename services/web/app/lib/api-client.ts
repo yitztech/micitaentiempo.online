@@ -5,7 +5,11 @@ export interface ApiError {
 }
 
 /** POST JSON al mismo origen; devuelve el cuerpo o lanza ApiError con el código en minúsculas. */
-export async function postJson<T = unknown>(path: string, body: unknown, headers: Record<string, string> = {}): Promise<T> {
+export async function postJson<T = unknown>(
+  path: string,
+  body: unknown,
+  headers: Record<string, string> = {},
+): Promise<T> {
   let res: Response;
   try {
     res = await fetch(path, {
@@ -20,7 +24,12 @@ export async function postJson<T = unknown>(path: string, body: unknown, headers
   const text = await res.text();
   const json = text ? (JSON.parse(text) as Record<string, unknown>) : {};
   if (!res.ok) {
-    const code = typeof json.code === "string" ? json.code.toLowerCase() : res.status === 429 ? "too_many_requests" : "generic";
+    const code =
+      typeof json.code === "string"
+        ? json.code.toLowerCase()
+        : res.status === 429
+          ? "too_many_requests"
+          : "generic";
     throw { status: res.status, code } satisfies ApiError;
   }
   return json as T;
@@ -38,5 +47,5 @@ export function errorText(errors: Record<string, string>, err: unknown): string 
 
 /** Solo rutas relativas propias para volver tras entrar (07-frontend.md §7.10). */
 export function safeNext(next: string | null, fallback: string): string {
-  return next && next.startsWith("/") && !next.startsWith("//") && !next.startsWith("/\\") ? next : fallback;
+  return next?.startsWith("/") && !next.startsWith("//") && !next.startsWith("/\\") ? next : fallback;
 }

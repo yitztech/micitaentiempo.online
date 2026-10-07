@@ -11,14 +11,7 @@
     "previewLabel": "Ejemplo de la página de reserva",
     "previewService": "Consulta general · 30 min",
     "previewDay": "martes 15",
-    "previewTimes": [
-      "9:00",
-      "9:30",
-      "10:30",
-      "11:00",
-      "12:30",
-      "16:00"
-    ],
+    "previewTimes": ["9:00", "9:30", "10:30", "11:00", "12:30", "16:00"],
     "previewConfirm": "Cita confirmada",
     "highlightsTitle": "Todo lo que necesita una agenda que trabaja por ti",
     "highlights": [

@@ -1,5 +1,5 @@
-import { isLang, matchRoute, pathFor, ROUTES } from "@mcet/i18n";
 import interLatin from "@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url";
+import { isLang, matchRoute, pathFor, ROUTES } from "@mcet/i18n";
 import {
   isRouteErrorResponse,
   Links,
@@ -99,9 +99,14 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   const notFound = isRouteErrorResponse(error) && error.status === 404;
   const status = isRouteErrorResponse(error) ? error.status : 500;
   return (
-    <main id="contenido" className="mx-auto flex min-h-dvh max-w-xl flex-col justify-center px-4 py-24 text-center">
+    <main
+      id="contenido"
+      className="mx-auto flex min-h-dvh max-w-xl flex-col justify-center px-4 py-24 text-center"
+    >
       <p className="text-sm font-medium text-muted tabular">{status}</p>
-      <h1 className="mt-2 text-3xl font-semibold">{notFound ? t.errors.notFoundTitle : t.errors.serverTitle}</h1>
+      <h1 className="mt-2 text-3xl font-semibold">
+        {notFound ? t.errors.notFoundTitle : t.errors.serverTitle}
+      </h1>
       <p className="mt-3 text-muted">{notFound ? t.errors.notFoundBody : t.errors.serverBody}</p>
       <a
         className="mx-auto mt-8 inline-flex min-h-11 items-center rounded-[var(--radius-field)] bg-primary px-5 font-medium text-on-primary hover:bg-primary-hover"

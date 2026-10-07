@@ -15,7 +15,10 @@ export function SiteFooter() {
       <ul className="mt-3 space-y-1">
         {items.map(([id, label]) => (
           <li key={id}>
-            <Link to={pathFor(id, site.lang)} className="inline-flex min-h-9 items-center text-[15px] text-muted hover:text-text">
+            <Link
+              to={pathFor(id, site.lang)}
+              className="inline-flex min-h-9 items-center text-[15px] text-muted hover:text-text"
+            >
               {label}
             </Link>
           </li>

@@ -6,7 +6,10 @@ import { metaFor, publicCacheHeaders } from "~/lib/seo";
 import type { Route } from "./+types/features";
 
 export const meta = (args: Route.MetaArgs) =>
-  metaFor(args, (t) => ({ title: t.public.features.seoTitle, description: t.public.features.seoDescription }));
+  metaFor(args, (t) => ({
+    title: t.public.features.seoTitle,
+    description: t.public.features.seoDescription,
+  }));
 
 export const headers = () => publicCacheHeaders;
 
@@ -25,7 +28,11 @@ export default function Features() {
         {f.groups.map((g, i) => {
           const Icon = ICONS[i] ?? Check;
           return (
-            <section key={g.title} aria-labelledby={`grupo-${i}`} className="rounded-[var(--radius-card)] border border-border bg-surface p-6">
+            <section
+              key={g.title}
+              aria-labelledby={`grupo-${i}`}
+              className="rounded-[var(--radius-card)] border border-border bg-surface p-6"
+            >
               <div className="flex items-center gap-3">
                 <span className="flex size-10 items-center justify-center rounded-[var(--radius-field)] bg-primary-soft text-primary">
                   <Icon aria-hidden className="size-5" />

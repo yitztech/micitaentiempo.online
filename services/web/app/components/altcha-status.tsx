@@ -6,7 +6,10 @@ import { useT } from "~/lib/i18n";
 export function AltchaStatus({ state, onRetry }: { state: AltchaState; onRetry: () => void }) {
   const a = useT().auth.altcha;
   return (
-    <div aria-live="polite" className="flex min-h-11 items-center gap-2 rounded-[var(--radius-field)] border border-border bg-surface-2 px-3 text-sm">
+    <div
+      aria-live="polite"
+      className="flex min-h-11 items-center gap-2 rounded-[var(--radius-field)] border border-border bg-surface-2 px-3 text-sm"
+    >
       {state === "verifying" ? (
         <>
           <Loader2 aria-hidden className="size-4 animate-spin text-primary" />
@@ -21,7 +24,11 @@ export function AltchaStatus({ state, onRetry }: { state: AltchaState; onRetry: 
         <>
           <TriangleAlert aria-hidden className="size-4 text-danger" />
           {a.error}
-          <button type="button" onClick={onRetry} className="ml-auto font-medium text-primary underline underline-offset-2">
+          <button
+            type="button"
+            onClick={onRetry}
+            className="ml-auto font-medium text-primary underline underline-offset-2"
+          >
             {a.label}
           </button>
         </>

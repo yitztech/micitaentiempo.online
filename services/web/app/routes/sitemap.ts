@@ -3,7 +3,17 @@ import { siteForRequest } from "~/lib/site.server";
 import type { Route } from "./+types/sitemap";
 
 /** Páginas públicas ya publicadas; cada fase añade las suyas. */
-const PUBLISHED = new Set<RouteId>(["home"]);
+const PUBLISHED = new Set<RouteId>([
+  "home",
+  "features",
+  "pricing",
+  "faq",
+  "connectAi",
+  "contact",
+  "privacy",
+  "terms",
+  "credits",
+]);
 
 /** Un sitemap por dominio: solo las páginas indexables, con su par en el otro idioma. */
 export function loader({ request }: Route.LoaderArgs) {

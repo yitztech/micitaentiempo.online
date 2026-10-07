@@ -92,7 +92,10 @@ export async function invitationEmail(
   );
 }
 
-export async function contactEmail(lang: Lang, p: { name: string; email: string; message: string; newsletter: boolean }) {
+export async function contactEmail(
+  lang: Lang,
+  p: { name: string; email: string; message: string; newsletter: boolean },
+) {
   const t = CATALOG[lang];
   return finish(
     interpolate(t.contact.subject, { name: p.name }),

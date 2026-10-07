@@ -16,7 +16,7 @@ idioma, `<html lang>`, `hreflang`, `canonical`, Open Graph y la CSP salgan corre
 | Calendario del panel | FullCalendar 7 (`daygrid`, `timegrid`, `list`, `interaction`; solo plugins MIT) |
 | Selector de horarios | Componente propio, ligero y pensado para móvil |
 | Fechas | `Intl` + `temporal-polyfill` para aritmética con zonas |
-| i18n | i18next + react-i18next, catálogos en `packages/i18n` |
+| i18n | Catálogos JSON tipados en `packages/i18n`; el loader raíz entrega solo el del idioma (ADR 0013) |
 | Iconos | Lucide |
 
 ## 7.2 Español e inglés (requisito obligatorio)
@@ -231,8 +231,8 @@ idioma; contraste comprobado en CI con axe.
 ## 7.9 Rendimiento y SEO técnico
 
 - Objetivos en móvil medio con 4G: LCP < 2,5 s, INP < 200 ms, CLS < 0,1.
-- Presupuesto de JavaScript comprimido: página de reserva ≤ 120 KB, embed ≤ 150 KB, páginas públicas
-  ≤ 90 KB; FullCalendar solo se carga en el panel.
+- Presupuesto de JavaScript comprimido: páginas públicas ≤ 130 KB (ADR 0013: React 19 + React Router ya
+  ocupan ~105 KB); reserva y embed se fijan en F7; FullCalendar solo se carga en el panel.
 - Fuentes con `preload` y `font-display: swap`; imágenes AVIF/WebP con dimensiones.
 - Páginas públicas con `Cache-Control: public, max-age=0, s-maxage=60` y microcaché en el gateway por
   `Host` + ruta.

@@ -95,7 +95,7 @@ otro (p. ej., `@nestjs/swagger` a TypeScript 6), usa la última compatible y an�
 | `pino` · `nestjs-pino` | 10.4.0 · 5.3.1 | |
 | `@opentelemetry/sdk-node` | 0.223.0 | |
 | `@node-rs/argon2` | 2.2.1 | 2.2.2 salió el 2026-10-06 y `minimumReleaseAge` la bloquea; subir en el siguiente PR |
-| `altcha-lib` (servidor) · `altcha` (widget) | 2.6.0 · 3.3.0 | Antibots con prueba de trabajo, autoalojado, sin terceros |
+| `altcha-lib` (servidor y navegador) | 2.6.0 | Antibots con prueba de trabajo, autoalojado, sin terceros; sin el widget `altcha` (ADR 0013) |
 | `mailchecker` | 6.0.21 | Dominios de correo desechables |
 | `libphonenumber-js` | 1.13.14 | Teléfonos E.164 para WhatsApp |
 | `grammy` | 1.46.0 | Bot de Telegram |
@@ -126,7 +126,7 @@ otro (p. ej., `@nestjs/swagger` a TypeScript 6), usa la última compatible y an�
 | `lucide-react` | 1.52.0 | |
 | `@tanstack/react-query` | 5.104.1 | |
 | `react-hook-form` · `@hookform/resolvers` | 7.89.0 · 5.9.1 | |
-| `i18next` · `react-i18next` | 26.4.2 · 17.0.16 | |
+| `marked` | 18.1.0 | Legales en Markdown, convertidos en el servidor (i18next descartado: ADR 0013) |
 | `@fullcalendar/core` · `@fullcalendar/react` (+ daygrid, timegrid, list, interaction) | 7.1.1 | Solo plugins MIT; nada de los premium |
 | `temporal-polyfill` | 1.0.5 | |
 | `@fontsource-variable/inter` | 5.3.0 | Fuente autoalojada |

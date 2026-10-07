@@ -34,7 +34,10 @@ export function features(env: Env) {
     slack: Boolean(env.SLACK_CLIENT_ID),
     telegram: Boolean(env.TELEGRAM_BOT_TOKEN),
     whatsapp: Boolean(env.WHATSAPP_TOKEN && env.WHATSAPP_PHONE_NUMBER_ID),
-    newsletter: { es: Boolean(env.LISTMONK_URL && env.LISTMONK_LIST_UUID), en: Boolean(env.LISTMONK_URL_EN && env.LISTMONK_LIST_UUID_EN) },
+    newsletter: {
+      es: Boolean(env.LISTMONK_URL && env.LISTMONK_LIST_UUID),
+      en: Boolean(env.LISTMONK_URL_EN && env.LISTMONK_LIST_UUID_EN),
+    },
   };
 }
 
@@ -91,7 +94,10 @@ export class SiteController {
     }
     const email = await this.guard(req, body.email);
     await this.subscribe(lang, email, body.name ?? "").catch(() => {
-      throw new ServiceUnavailableException({ code: "newsletter_unavailable", message: "Newsletter no disponible" });
+      throw new ServiceUnavailableException({
+        code: "newsletter_unavailable",
+        message: "Newsletter no disponible",
+      });
     });
   }
 

@@ -39,7 +39,13 @@ function StructuredData() {
         { "@type": "Offer", name: t.public.pricing.plans.branches.name, price: "20", priceCurrency: "USD" },
       ],
     },
-    { "@context": "https://schema.org", "@type": "Organization", name: t.common.site.name, url: site.siteUrl, logo: `${site.siteUrl}/favicon.svg` },
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: t.common.site.name,
+      url: site.siteUrl,
+      logo: `${site.siteUrl}/favicon.svg`,
+    },
   ];
   return (
     <script
@@ -87,8 +93,14 @@ function BookingPreview() {
           {h.previewConfirm}
         </div>
       </div>
-      <span aria-hidden className="absolute -right-3 -top-3 -z-10 size-24 rounded-full bg-accent/40 blur-2xl" />
-      <span aria-hidden className="absolute -bottom-6 -left-6 -z-10 size-32 rounded-full bg-secondary/30 blur-2xl" />
+      <span
+        aria-hidden
+        className="absolute -right-3 -top-3 -z-10 size-24 rounded-full bg-accent/40 blur-2xl"
+      />
+      <span
+        aria-hidden
+        className="absolute -bottom-6 -left-6 -z-10 size-32 rounded-full bg-secondary/30 blur-2xl"
+      />
     </Card>
   );
 }
@@ -131,7 +143,10 @@ export default function Home() {
             {h.highlights.map((item, i) => {
               const Icon = ICONS[i] ?? Sparkles;
               return (
-                <li key={item.title} className="rounded-[var(--radius-card)] border border-border bg-background p-6">
+                <li
+                  key={item.title}
+                  className="rounded-[var(--radius-card)] border border-border bg-background p-6"
+                >
                   <span className="flex size-10 items-center justify-center rounded-[var(--radius-field)] bg-primary-soft text-primary">
                     <Icon aria-hidden className="size-5" />
                   </span>
@@ -152,7 +167,10 @@ export default function Home() {
           <ol className="mt-10 grid gap-6 md:grid-cols-3">
             {h.steps.map((step, i) => (
               <li key={step.title} className="relative">
-                <span className="flex size-10 items-center justify-center rounded-full bg-primary text-lg font-semibold text-on-primary tabular" aria-hidden>
+                <span
+                  className="flex size-10 items-center justify-center rounded-full bg-primary text-lg font-semibold text-on-primary tabular"
+                  aria-hidden
+                >
                   {i + 1}
                 </span>
                 <h3 className="mt-4 text-lg font-semibold">{step.title}</h3>

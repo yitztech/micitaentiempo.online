@@ -146,13 +146,13 @@ bloqueo, hold que caduca, cliente que no ve a otros y que no puede crear series.
 
 **Objetivo:** RF-16, RF-20 y la base de RF-17.
 
-- [ ] Tokens de diseño (paleta, tipografía, modo oscuro) y componentes base (`07-frontend.md` §7.7).
-- [ ] `packages/i18n`: catálogos es/en tipados, comprobación en CI, mapa de rutas, `hreflang`, `canonical`,
+- [x] Tokens de diseño (paleta, tipografía, modo oscuro) y componentes base (`07-frontend.md` §7.7).
+- [x] `packages/i18n`: catálogos es/en tipados, comprobación en CI, mapa de rutas, `hreflang`, `canonical`,
       `x-default`, `sitemap.xml` y `robots.txt` por dominio, selector de idioma sin redirección.
-- [ ] Páginas públicas en los dos idiomas: inicio, funciones, precios, preguntas frecuentes, «Conecta tu IA»
+- [x] Páginas públicas en los dos idiomas: inicio, funciones, precios, preguntas frecuentes, «Conecta tu IA»
       (contenido final en F11), contacto con newsletter, privacidad, condiciones, créditos, 404 y 500.
-- [ ] Páginas de acceso conectadas a F3.
-- [ ] CSP con nonce y cabeceras por ruta; Umami.
+- [x] Páginas de acceso conectadas a F3.
+- [x] CSP con nonce y cabeceras por ruta; Umami.
 
 **Aceptación:** escenario de idiomas y SEO en los dos dominios; axe sin violaciones serias; presupuestos de
 rendimiento de §7.9 en páginas públicas; ningún texto fuera de los catálogos.

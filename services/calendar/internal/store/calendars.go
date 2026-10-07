@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"crypto/rand"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -82,9 +83,13 @@ func (s *Store) CreateCalendar(ctx context.Context, in NewCalendar) (Calendar, e
 			on conflict (org_id) do update set status = excluded.status, updated_at = now()`, in.OrgID, in.OrgStatus); err != nil {
 			return err
 		}
-		for i := 0; i < 50; i++ {
+		// Primero base, base-2…base-5; después un sufijo aleatorio corto (nombres comunes se repiten mucho).
+		for i := 0; i < 25; i++ {
 			slug := base
-			if i > 0 {
+			switch {
+			case i >= 5:
+				slug = fmt.Sprintf("%s-%s", base, randomSuffix())
+			case i > 0:
 				slug = fmt.Sprintf("%s-%d", base, i+1)
 			}
 			var id string
@@ -191,4 +196,15 @@ func (s *Store) SetOrgStatus(ctx context.Context, orgID, status string) error {
 	_, err := s.Pool.Exec(ctx, `insert into org_status (org_id, status) values ($1, $2)
 		on conflict (org_id) do update set status = excluded.status, updated_at = now()`, orgID, status)
 	return err
+}
+
+// randomSuffix devuelve 5 caracteres en minúsculas y cifras para desambiguar slugs.
+func randomSuffix() string {
+	const alphabet = "abcdefghijkmnpqrstuvwxyz23456789"
+	b := make([]byte, 5)
+	_, _ = rand.Read(b)
+	for i := range b {
+		b[i] = alphabet[int(b[i])%len(alphabet)]
+	}
+	return string(b)
 }

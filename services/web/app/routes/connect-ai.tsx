@@ -6,7 +6,10 @@ import { metaFor, publicCacheHeaders } from "~/lib/seo";
 import type { Route } from "./+types/connect-ai";
 
 export const meta = (args: Route.MetaArgs) =>
-  metaFor(args, (t) => ({ title: t.public.connectAi.seoTitle, description: t.public.connectAi.seoDescription }));
+  metaFor(args, (t) => ({
+    title: t.public.connectAi.seoTitle,
+    description: t.public.connectAi.seoDescription,
+  }));
 
 export const headers = () => publicCacheHeaders;
 
@@ -36,7 +39,10 @@ export default function ConnectAi() {
         </ul>
       </section>
       <div className="mt-12 grid gap-6 lg:grid-cols-2">
-        <section aria-labelledby="ejemplos" className="rounded-[var(--radius-card)] border border-border bg-surface p-6">
+        <section
+          aria-labelledby="ejemplos"
+          className="rounded-[var(--radius-card)] border border-border bg-surface p-6"
+        >
           <h2 id="ejemplos" className="flex items-center gap-2 text-xl font-semibold">
             <MessageSquareText aria-hidden className="size-5 text-primary" />
             {c.examplesTitle}
@@ -49,7 +55,10 @@ export default function ConnectAi() {
             ))}
           </ul>
         </section>
-        <section aria-labelledby="seguridad" className="rounded-[var(--radius-card)] border border-border bg-surface p-6">
+        <section
+          aria-labelledby="seguridad"
+          className="rounded-[var(--radius-card)] border border-border bg-surface p-6"
+        >
           <h2 id="seguridad" className="flex items-center gap-2 text-xl font-semibold">
             <ShieldCheck aria-hidden className="size-5 text-primary" />
             {c.safetyTitle}

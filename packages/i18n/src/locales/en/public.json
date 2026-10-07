@@ -11,14 +11,7 @@
     "previewLabel": "Example of the booking page",
     "previewService": "General consultation · 30 min",
     "previewDay": "Tuesday 15",
-    "previewTimes": [
-      "9:00 AM",
-      "9:30 AM",
-      "10:30 AM",
-      "11:00 AM",
-      "12:30 PM",
-      "4:00 PM"
-    ],
+    "previewTimes": ["9:00 AM", "9:30 AM", "10:30 AM", "11:00 AM", "12:30 PM", "4:00 PM"],
     "previewConfirm": "Appointment confirmed",
     "highlightsTitle": "Everything a schedule that works for you needs",
     "highlights": [
