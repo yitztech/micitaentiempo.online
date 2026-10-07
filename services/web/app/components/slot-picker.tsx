@@ -184,7 +184,7 @@ export function SlotPicker({
           <select
             value={tz}
             onChange={(e) => onTzChange(e.target.value)}
-            className="mt-1 block min-h-11 w-full rounded-[var(--radius-field)] border border-border bg-surface px-3 text-base text-text"
+            className="mt-1 block min-h-11 w-full rounded-[var(--radius-field)] border border-border-field bg-surface px-3 text-base text-text"
           >
             {allTimeZones().map((z) => (
               <option key={z} value={z}>

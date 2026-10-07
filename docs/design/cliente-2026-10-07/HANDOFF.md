@@ -34,10 +34,11 @@ Rutas relativas a `services/web/app/`. Los números de línea se comprobaron sob
 
 ### Fase A — base visual (no depende del concepto elegido)
 
-- [ ] **A1. Ancho de `Container`** — `components/ui.tsx:66-68`. Siempre aplica `max-w-6xl` y `cx` solo concatena, así que un `className="max-w-xl"` no lo anula (Contacto mide 1104 px). Añadir prop `width?: "page" | "form" | "auth" | "prose"` → 1152 px / 640 px / 448 px / `70ch`. Revisar usos en `routes/contact.tsx`, `faq.tsx`, `legal.tsx`, `booking.tsx` y las rutas de acceso.
-- [ ] **A2. Borde funcional de campos** — `components/ui.tsx:130-131` (`inputClass` usa `border-border`, 1,31:1). Crear token nuevo (p. ej. `--color-border-field: #7D898E`, 3,60:1 sobre blanco) en `app.css`, con su valor para modo oscuro, y usarlo en campos, selects y controles. Mantener `--color-border` para separadores decorativos.
-- [ ] **A3. Navegación diferenciada** — `components/site-header.tsx` y catálogos i18n: «Mis citas» visible (también en el menú móvil, primer grupo), «Acceso del negocio» en lugar del «Entrar» genérico y la acción principal «Crear mi agenda». Equivalentes en inglés.
-- [ ] **A4. Enlace de salto** en la cabecera de la reserva — `routes/booking.tsx:28` (baja prioridad).
+- [x] **A1. Ancho de `Container`** — `components/ui.tsx:66-68`. Siempre aplica `max-w-6xl` y `cx` solo concatena, así que un `className="max-w-xl"` no lo anula (Contacto mide 1104 px). Añadir prop `width?: "page" | "form" | "auth" | "prose" | "booking"` → 1152 px / 640 px / 448 px / `70ch` / 896 px. Revisado y aplicado en `contact.tsx`, `faq.tsx`, `legal.tsx`, `booking.tsx` y `my-appointments.tsx`.
+- [x] **A2. Borde funcional de campos** — `components/ui.tsx:130-131` (`inputClass` usa `border-border`, 1,31:1). Creado token `--color-border-field: #7D898E` (3,60:1 sobre blanco) en `app.css`, con su valor para modo oscuro (`#6b818a`), y usado en campos, selects y controles. Mantener `--color-border` para separadores decorativos.
+- [x] **A3. Navegación diferenciada** — `components/site-header.tsx` y catálogos i18n: «Mis citas» visible (también en el menú móvil, primer grupo), «Acceso del negocio» en lugar del «Entrar» genérico y la acción principal «Crear mi agenda». Equivalentes en inglés. Pie actualizado con enlace a Mis citas.
+- [x] **A4. Enlace de salto** en la cabecera de la reserva — `routes/booking.tsx:28` y `my-appointments.tsx` usando `ClientHeader` con enlace `#contenido`, logo, Mis citas e idioma.
+
 
 ### Fase B — reserva (requiere concepto elegido)
 

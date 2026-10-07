@@ -28,7 +28,7 @@ export function Logo() {
   return (
     <Link to={pathFor("home", site.lang)} className="flex items-center gap-2.5 font-semibold tracking-tight">
       <LogoMark />
-      <span className="text-[17px]">{t.common.site.name}</span>
+      <span className="whitespace-nowrap text-[17px]">{t.common.site.name}</span>
     </Link>
   );
 }

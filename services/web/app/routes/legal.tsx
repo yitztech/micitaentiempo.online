@@ -34,7 +34,7 @@ export default function Legal({ loaderData }: Route.ComponentProps) {
     timeZone: "UTC",
   }).format(new Date(`${loaderData.updated}T12:00:00Z`));
   return (
-    <Container className="max-w-3xl py-14 sm:py-20">
+    <Container width="prose" className="py-14 sm:py-20">
       <h1 className="text-4xl font-semibold tracking-tight">{l[`${loaderData.doc}Title`]}</h1>
       <p className="mt-3 text-sm text-muted">{fmt(l.updated, { date: updated })}</p>
       <div

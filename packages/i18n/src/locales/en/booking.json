@@ -1,9 +1,22 @@
 {
   "seoTitle": "Book with {{name}}",
-  "steps": ["Service", "Day", "Time", "Your details", "Confirmation"],
+  "steps": ["Service", "Date & time", "Your details", "Confirmation"],
   "service": {
     "title": "Choose a service",
     "minutes": "{{n}} min"
+  },
+  "slotStep": {
+    "title": "Pick a date and time",
+    "continue": "Continue with this time",
+    "selection": "Your selection",
+    "pick": "Pick a time to continue.",
+    "selected": "selected"
+  },
+  "summary": {
+    "label": "Appointment summary",
+    "duration": "Duration: {{n}} min",
+    "tz": "{{tz}}",
+    "location": "Address"
   },
   "date": {
     "title": "Choose a day",
@@ -11,7 +24,10 @@
     "next": "Next month",
     "none": "No open times this month.",
     "available": "has open times",
-    "unavailable": "no open times"
+    "unavailable": "no open times",
+    "nextMonth": "See next month",
+    "error": "We couldn't load the times. Check your connection and try again.",
+    "retry": "Try again"
   },
   "time": {
     "title": "Choose a time",
@@ -31,14 +47,18 @@
     "notes": "Note for the business",
     "submit": "Hold this time",
     "held": "We're holding your time. You have {{time}} to confirm it.",
-    "expired": "Your hold expired. Please choose again."
+    "expired": "Your hold expired. Please choose again.",
+    "lead": "We'll hold this time while you confirm your email."
   },
   "verify": {
     "title": "Confirm your email",
     "sent": "We sent a 6-digit code to {{email}}.",
     "code": "Code",
     "confirm": "Confirm booking",
-    "resend": "Send another code"
+    "resend": "Send another code",
+    "changeEmail": "Fix email",
+    "heldShort": "Time held",
+    "oneMinute": "One minute left to confirm your time."
   },
   "done": {
     "title": "Appointment confirmed!",
@@ -47,7 +67,8 @@
     "addOutlook": "Add to Outlook",
     "downloadIcs": "Download .ics",
     "myAppointments": "See my appointments",
-    "another": "Book another appointment"
+    "another": "Book another appointment",
+    "addTo": "Add to your calendar"
   },
   "taken": "Someone just booked that time. Please choose another.",
   "change": "Change",
@@ -99,5 +120,6 @@
     "validation_failed": "Check your details.",
     "google_failed": "We couldn't verify you with Google. Use the email code instead.",
     "google_blocked": "Your browser blocked the Google window. Allow pop-ups or use the email code."
-  }
+  },
+  "noServices": "This business doesn't have any services to book online yet."
 }

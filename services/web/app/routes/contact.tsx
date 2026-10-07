@@ -44,7 +44,7 @@ export default function Contact() {
   }
 
   return (
-    <Container className="max-w-2xl py-14 sm:py-20">
+    <Container width="form" className="py-14 sm:py-20">
       <h1 className="text-4xl font-semibold tracking-tight">{c.title}</h1>
       <p className="mt-4 text-lg text-muted">{c.lead}</p>
       {status === "sent" ? (

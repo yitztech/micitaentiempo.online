@@ -24,7 +24,7 @@ export default function Faq() {
     })),
   };
   return (
-    <Container className="max-w-3xl py-14 sm:py-20">
+    <Container width="prose" className="py-14 sm:py-20">
       <script
         type="application/ld+json"
         nonce={nonce}
