@@ -68,3 +68,21 @@ Lo que debe hacer la app:
 - Fechas en UTC en la base de datos; mostrarlas en la zona horaria del usuario.
 
 Ejemplo completo que cumple el contrato: [yitztech/plantilla-cliente](https://github.com/yitztech/plantilla-cliente).
+
+## Desarrollo local
+
+Requisitos: Node 24 (o ≥ 22.22), pnpm 12, Go 1.27 y Docker con Compose v5.
+
+```bash
+pnpm install
+cp .env.example .env            # valores ficticios; .env nunca se sube
+docker compose up --watch       # todo el sistema con recarga en caliente
+```
+
+- Español: http://micitaentiempo.localhost:8080 · Inglés: http://myappointmentontime.localhost:8080
+- Correos de desarrollo (Mailpit): http://localhost:8025
+- Calidad: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `cd services/calendar && go test ./...`
+- Pruebas por escenarios: `pnpm escenarios`
+
+El plan de construcción está en [`docs/plan/`](docs/plan/README.md) y las decisiones de arquitectura en
+[`docs/adr/`](docs/adr/).

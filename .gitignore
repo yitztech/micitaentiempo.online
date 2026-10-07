@@ -1,0 +1,15 @@
+.env
+.env.*
+!.env.example
+node_modules/
+.DS_Store
+dist/
+build/
+.react-router/
+coverage/
+playwright-report/
+test-results/
+blob-report/
+tests/escenarios/.features-gen/
+*.tsbuildinfo
+/services/calendar/bin/

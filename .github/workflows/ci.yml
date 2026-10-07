@@ -1,0 +1,50 @@
+# Integración continua: calidad de TypeScript y Go.
+# También la reutiliza deploy.yml antes de publicar imágenes (si falla, no se publica nada).
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches-ignore: [main]
+  workflow_call:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_call' }}
+
+permissions:
+  contents: read
+
+jobs:
+  ts:
+    name: TypeScript
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec biome ci .
+      - run: pnpm typecheck
+      - run: pnpm test
+
+  go:
+    name: Go
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/calendar
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: services/calendar/go.mod
+          cache-dependency-path: services/calendar/go.sum
+      - uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.14.0
+          working-directory: services/calendar
+      - run: go test -race ./...

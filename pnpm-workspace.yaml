@@ -1,0 +1,10 @@
+packages:
+  - services/web
+  - services/api
+  - packages/*
+  - tools/*
+  - tests/escenarios
+  - tests/fakes
+
+# Cadena de suministro: no instalar versiones publicadas hace menos de 24 h.
+minimumReleaseAge: 1440
