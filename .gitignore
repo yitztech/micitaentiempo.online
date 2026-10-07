@@ -8,11 +8,11 @@ dist/
 build/
 .react-router/
 coverage/
-playwright-report/
+playwright-report*/
 test-results/
 blob-report/
 tests/escenarios/.features-gen/
 *.tsbuildinfo
 /services/calendar/bin/
 /services/calendar/calendar
-cucumber-report/
+cucumber-report*/

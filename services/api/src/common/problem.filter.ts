@@ -31,6 +31,7 @@ export class ProblemFilter implements ExceptionFilter {
         status,
         code: typeof details.code === "string" ? details.code : String(HttpStatus[status]).toLowerCase(),
         ...(details.errors ? { errors: details.errors } : {}),
+        ...(details.conflicts ? { conflicts: details.conflicts } : {}),
       });
   }
 }

@@ -119,7 +119,7 @@ jobs:
           exit-code: "1"
       - run: pnpm --filter @mcet/escenarios exec playwright install --with-deps chromium webkit
       - name: Escenarios @humo y @critico
-        run: pnpm --filter @mcet/escenarios exec sh -c 'bddgen && playwright test --grep "@humo|@critico"'
+        run: pnpm --filter @mcet/escenarios exec ./correr.sh --grep "@humo|@critico"
       - name: Logs si falla
         if: failure()
         run: docker compose -p ci logs --no-color | tail -n 300
@@ -128,6 +128,6 @@ jobs:
         with:
           name: informe-escenarios
           path: |
-            tests/escenarios/playwright-report
-            tests/escenarios/cucumber-report
+            tests/escenarios/playwright-report*
+            tests/escenarios/cucumber-report*
           retention-days: 14

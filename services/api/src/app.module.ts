@@ -4,6 +4,7 @@ import { AuthModule } from "./auth/auth.module.js";
 import { CalendarsModule } from "./calendars/calendars.module.js";
 import { ConfigModule } from "./config/config.module.js";
 import { DbModule } from "./db/db.module.js";
+import { EventsModule } from "./events/events.module.js";
 import { HealthController } from "./health/health.controller.js";
 import { InternalRpcModule } from "./internal-rpc/internal-rpc.module.js";
 import { TestSupportController } from "./test-support/test-support.controller.js";
@@ -26,6 +27,7 @@ const testControllers = process.env.TEST_MODE ? [TestSupportController] : [];
     InternalRpcModule,
     AuthModule,
     CalendarsModule,
+    EventsModule,
   ],
   controllers: [HealthController, ...testControllers],
 })

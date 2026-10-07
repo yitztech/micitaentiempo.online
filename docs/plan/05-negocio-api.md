@@ -239,6 +239,12 @@ clientes finales.
 Las reservas del embed llevan `Idempotency-Key`. Las respuestas públicas nunca incluyen datos de otros
 clientes finales.
 
+**Titular del hold.** El horario se aparta antes de saber quién es el cliente. `POST …/holds` devuelve un
+`holdToken` secreto (HMAC de la `Idempotency-Key` con `APP_ENC_KEY`, así que un reintento recibe el mismo);
+al motor solo viaja un UUID v8 derivado del token, que el panel ve como `created_by` sin poder
+reconstruirlo. Confirmar exige sesión de cliente final (código por correo → token Bearer) y el `holdToken`.
+Un hold caducado se revalida al confirmar: si el horario sigue libre, la reserva se confirma igual.
+
 ## 5.8 Seguridad específica
 
 | Control | Detalle |

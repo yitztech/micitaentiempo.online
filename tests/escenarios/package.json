@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "escenarios": "bddgen && playwright test",
+    "escenarios": "./correr.sh",
     "typecheck": "bddgen && tsc -p tsconfig.json"
   },
   "devDependencies": {

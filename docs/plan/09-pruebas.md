@@ -97,6 +97,7 @@ Característica: Reserva desde el widget embebido
 | Ejecutor | `playwright-bdd` genera pruebas de Playwright desde los `.feature`: paralelismo, reintentos, trazas, vídeo y proyectos por dispositivo de serie |
 | Varios actores | Cada actor (propietario, editor, observador, clienta) tiene su propio contexto de navegador y su sesión; un escenario los combina |
 | Dispositivos | Proyectos `escritorio` (1440 px), `tableta` (iPad Pro 11, vertical y horizontal), `movil` (iPhone 15 y Pixel 8); etiquetas `@movil`, `@tableta`, `@escritorio` |
+| Reloj | El reloj del motor es uno para todo el entorno. Los escenarios que lo mueven llevan `@reloj` y corren en el proyecto `reloj`, con un solo worker y en una segunda pasada (`tests/escenarios/correr.sh`); el resto fija siempre la misma fecha base. No se usa `dependencies` de Playwright porque las dependencias ignoran `--grep` |
 | Idiomas | Cada escenario de interfaz se ejecuta en `es` y `en` (los textos esperados salen de los catálogos, no se copian) |
 | Dominios locales | `micitaentiempo.localhost` y `myappointmentontime.localhost` (en CI, entradas en `/etc/hosts`) |
 | Reloj | `api` y `calendar` usan un reloj controlable solo con `TEST_MODE=1` (endpoint interno `POST /__test/clock`); el navegador, con `page.clock`. Permite probar recordatorios, holds que caducan y el fin de la prueba gratuita sin esperar |

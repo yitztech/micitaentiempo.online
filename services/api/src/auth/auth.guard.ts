@@ -51,15 +51,23 @@ export class SessionGuard implements CanActivate {
   }
 
   private checkOrigin(req: FastifyRequest): void {
-    const expected = this.env.site.siteUrl[requestLang(req, this.env)];
-    const origin = req.headers.origin;
-    const type = req.headers["content-type"] ?? "";
-    if (origin !== new URL(expected).origin && !this.env.TEST_MODE) {
-      throw new ForbiddenException({ code: "bad_origin", message: "Origen no permitido" });
-    }
-    if (req.body !== undefined && !String(type).includes("application/json")) {
-      throw new ForbiddenException({ code: "json_required", message: "Se requiere JSON" });
-    }
+    checkOrigin(req, this.env);
+  }
+}
+
+/**
+ * Protección CSRF de mutaciones con cookie: Origin igual al sitio del Host y cuerpo JSON (los
+ * navegadores no envían JSON entre orígenes sin preflight). Con TEST_MODE no se exige el Origin.
+ */
+export function checkOrigin(req: FastifyRequest, env: Env): void {
+  const expected = env.site.siteUrl[requestLang(req, env)];
+  const origin = req.headers.origin;
+  const type = req.headers["content-type"] ?? "";
+  if (origin !== new URL(expected).origin && !env.TEST_MODE) {
+    throw new ForbiddenException({ code: "bad_origin", message: "Origen no permitido" });
+  }
+  if (req.body !== undefined && !String(type).includes("application/json")) {
+    throw new ForbiddenException({ code: "json_required", message: "Se requiere JSON" });
   }
 }
 

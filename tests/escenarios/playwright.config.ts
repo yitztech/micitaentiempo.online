@@ -9,6 +9,9 @@ const testDir = defineBddConfig({
   language: "es",
 });
 
+// La segunda pasada (INFORME=reloj) deja sus informes aparte para no pisar los de la primera.
+const suffix = process.env.INFORME ? `-${process.env.INFORME}` : "";
+
 export default defineConfig({
   testDir,
   fullyParallel: true,
@@ -16,8 +19,8 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: [
     ["list"],
-    ["html", { open: "never", outputFolder: "playwright-report" }],
-    cucumberReporter("html", { outputFile: "cucumber-report/index.html" }),
+    ["html", { open: "never", outputFolder: `playwright-report${suffix}` }],
+    cucumberReporter("html", { outputFile: `cucumber-report${suffix}/index.html` }),
   ],
   use: {
     trace: "retain-on-failure",
@@ -25,8 +28,11 @@ export default defineConfig({
     screenshot: "only-on-failure",
   },
   projects: [
-    { name: "escritorio", use: { ...devices["Desktop Chrome"] } },
-    { name: "movil", use: { ...devices["Pixel 8"] }, grep: /@movil|@humo/ },
-    { name: "tableta", use: { ...devices["iPad Pro 11"] }, grep: /@tableta/ },
+    { name: "escritorio", use: { ...devices["Desktop Chrome"] }, grepInvert: /@reloj/ },
+    { name: "movil", use: { ...devices["Pixel 8"] }, grep: /@movil|@humo/, grepInvert: /@reloj/ },
+    { name: "tableta", use: { ...devices["iPad Pro 11"] }, grep: /@tableta/, grepInvert: /@reloj/ },
+    // El reloj del motor es uno para todo el entorno: quien lo mueve corre solo, en una segunda
+    // pasada (correr.sh). No se usa `dependencies` porque las dependencias ignoran --grep.
+    { name: "reloj", use: { ...devices["Desktop Chrome"] }, grep: /@reloj/, workers: 1 },
   ],
 });

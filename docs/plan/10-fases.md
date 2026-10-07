@@ -128,16 +128,16 @@ solo lectura; matriz de permisos en verde.
 
 **Objetivo:** RF-10, RF-11, RF-12 y la garantía contra la doble reserva.
 
-- [ ] `series` y `events` con la restricción `EXCLUDE` por asiento y bloqueo consultivo por tablero.
-- [ ] Subconjunto RRULE (parseo, validación, expansión en hora de pared) + pruebas diferenciales con
+- [x] `series` y `events` con la restricción `EXCLUDE` por asiento y bloqueo consultivo por tablero.
+- [x] Subconjunto RRULE (parseo, validación, expansión en hora de pared) + pruebas diferenciales con
       `rrule-go` y ejemplos del RFC 5545.
-- [ ] Eventos con alcance `this`/`following`/`all`, conflictos (`abort`/`skip`), materialización a 18 meses y
+- [x] Eventos con alcance `this`/`following`/`all`, conflictos (`abort`/`skip`), materialización a 18 meses y
       `extend_series`.
-- [ ] Holds, confirmación con revalidación, liberación, reprogramación atómica, cancelación con política,
+- [x] Holds, confirmación con revalidación, liberación, reprogramación atómica, cancelación con política,
       idempotencia y concurrencia optimista.
-- [ ] Visibilidad del actor `customer`; prohibido crear series; marcar asistencia; `StatsService`.
-- [ ] Eventos de dominio para todo cambio; `RenderICS`.
-- [ ] Endpoints del panel y de la API pública del embed (OTP, ALTCHA, `Idempotency-Key`).
+- [x] Visibilidad del actor `customer`; prohibido crear series; marcar asistencia; `StatsService`.
+- [x] Eventos de dominio para todo cambio; `RenderICS`.
+- [x] Endpoints del panel y de la API pública del embed (OTP, ALTCHA, `Idempotency-Key`).
 
 **Aceptación:** prueba de 50 reservas simultáneas; escenarios de serie semanal con «este y los siguientes»,
 bloqueo, hold que caduca, cliente que no ve a otros y que no puede crear series.
