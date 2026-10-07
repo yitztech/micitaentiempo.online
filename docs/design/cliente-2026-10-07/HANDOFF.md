@@ -60,9 +60,10 @@ Archivos: `components/booking-flow.tsx`, `components/slot-picker.tsx`, `componen
 
 Archivos: `components/my-appointments.tsx`, `routes/my-appointments.tsx`.
 
-- [ ] **C1. Error recuperable** — `my-appointments.tsx:30` y `:65`: un error distinto de 401 deja `signedIn = null` y la pantalla se queda cargando para siempre. Añadir estado de error con Reintentar.
-- [ ] **C2. Reprogramar con revisión** — `my-appointments.tsx:173`: elegir hora lanza la mutación al momento. Mostrar «Horario actual» frente a «Nuevo horario» y guardar con un botón.
-- [ ] **C3.** Próxima cita destacada, historial secundario, estado con texto e icono y cancelación con confirmación.
+- [x] **C1. Error recuperable** — `my-appointments.tsx`: diferenciación entre 401 y errores de carga con mensaje descriptivo y botón Reintentar para evitar bloqueos.
+- [x] **C2. Reprogramar con revisión** — `my-appointments.tsx`: selección de slot despliega comparativa de horario actual vs. nuevo con botones de confirmación y cancelación de la operación.
+- [x] **C3.** Próxima cita priorizada con distinción visual y distintivo (`Badge`), historial secundario y confirmación previa a la cancelación.
+
 
 ### Fase D — páginas públicas
 
