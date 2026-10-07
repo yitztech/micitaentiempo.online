@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # Imagen de `api`. Se construye desde la raíz del repositorio:
 #   docker build -f services/api/Dockerfile --build-arg RELEASE_SHA=<sha> .
-FROM node:24.21.0-alpine3.24 AS base
+FROM node:26.10.0-alpine3.24 AS base
 RUN npm install -g pnpm@12.9.1
 WORKDIR /repo
 
@@ -35,7 +35,7 @@ RUN cd /out/node_modules/.pnpm \
  && ! find /out -name "*esbuild*" | grep . \
  && ! ls /out/node_modules/.pnpm | grep -E '^(@?esbuild|vite@|vitest@|drizzle-kit@|tsx@)'
 
-FROM node:24.21.0-alpine3.24
+FROM node:26.10.0-alpine3.24
 ARG RELEASE_SHA=dev
 ENV NODE_ENV=production \
     RELEASE_SHA=${RELEASE_SHA} \
