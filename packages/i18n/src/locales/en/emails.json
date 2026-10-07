@@ -1,0 +1,51 @@
+{
+  "footer": "You're receiving this email because this address was used on My Appointment On Time.",
+  "greeting": "Hi {{name}},",
+  "greetingNoName": "Hi,",
+  "verify": {
+    "subject": "Confirm your email",
+    "preview": "Confirm your email to start using My Appointment On Time",
+    "body": "Confirm this email address is yours to activate your account.",
+    "button": "Confirm my email",
+    "code": "Or enter this code: {{code}}",
+    "expires": "The link expires in 24 hours. If you didn't create an account, ignore this message."
+  },
+  "otp": {
+    "subject": "Your verification code: {{code}}",
+    "preview": "Your verification code",
+    "body": "Use this code to continue. It expires in 10 minutes.",
+    "ignore": "If you didn't request it, ignore this message."
+  },
+  "reset": {
+    "subject": "Reset your password",
+    "preview": "Reset your My Appointment On Time password",
+    "body": "We received a request to change your password.",
+    "button": "Choose a new password",
+    "expires": "The link expires in 1 hour. If you didn't request it, ignore this message: your password won't change."
+  },
+  "invitation": {
+    "subject": "{{inviter}} invited you to “{{calendar}}”",
+    "preview": "You've been invited to a My Appointment On Time calendar",
+    "body": "{{inviter}} invited you to “{{calendar}}” as {{role}}.",
+    "googleNote": "To accept, sign in with the Google account for {{email}}.",
+    "button": "Accept the invitation",
+    "expires": "The invitation expires in 7 days.",
+    "roles": {
+      "editor": "an editor",
+      "observer": "a viewer"
+    }
+  },
+  "contact": {
+    "subject": "Contact message from {{name}}",
+    "preview": "New message from the contact form",
+    "intro": "{{name}} ({{email}}) wrote from the contact form:",
+    "newsletterYes": "They asked to receive product news by email.",
+    "replyHint": "Reply to this email to answer them."
+  },
+  "aiConnected": {
+    "subject": "New AI app connected: {{app}}",
+    "preview": "An AI app can access your account.",
+    "body": "{{app}} ({{domain}}) connected to your account with these permissions: {{scopes}}. If this wasn't you, revoke it now.",
+    "button": "See connected apps"
+  }
+}

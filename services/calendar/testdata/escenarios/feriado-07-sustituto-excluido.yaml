@@ -1,0 +1,13 @@
+nombre: "Sin sustitutos el 3 de julio se trabaja"
+tablero:
+  zona: America/New_York
+  capacidad: 1
+  horario:
+    lunes-viernes: ["09:00-18:00"]
+  feriados:
+    - {"pais": "US", "tipos": ["public"], "sustitutos": false}
+servicio: {"duracion": 30, "intervalo": 30}
+ahora: "2026-06-29T08:00:00-04:00"
+consulta: { desde: "2026-07-03", hasta: "2026-07-03" }
+esperado:
+  "2026-07-03": {"total": 18}

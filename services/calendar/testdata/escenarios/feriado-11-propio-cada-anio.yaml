@@ -1,0 +1,14 @@
+nombre: "Feriado propio cada 24 de diciembre"
+tablero:
+  zona: America/Mexico_City
+  capacidad: 1
+  horario:
+    lunes-viernes: ["09:00-18:00"]
+  propios:
+    - {"nombre": "Nochebuena", "cada_anio": "12-24"}
+servicio: {"duracion": 30, "intervalo": 30}
+ahora: "2026-12-20T08:00:00-06:00"
+consulta: { desde: "2026-12-23", hasta: "2026-12-24" }
+esperado:
+  "2026-12-23": {"total": 18}
+  "2026-12-24": {"vacio": true}

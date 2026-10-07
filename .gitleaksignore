@@ -1,0 +1,6 @@
+# Valores ficticios de pruebas (no son secretos): revisados en F12.
+5f2f408ffdff84f793c4683042ab21924d773b98:services/calendar/internal/config/config_test.go:generic-api-key:9
+63282dc94035939afda7e9f01c427331424eaeed:services/api/test/jwt.test.ts:generic-api-key:11
+63282dc94035939afda7e9f01c427331424eaeed:services/calendar/internal/auth/auth_test.go:generic-api-key:11
+63282dc94035939afda7e9f01c427331424eaeed:services/calendar/internal/config/config_test.go:generic-api-key:7
+63282dc94035939afda7e9f01c427331424eaeed:services/calendar/internal/config/config_test.go:generic-api-key:8

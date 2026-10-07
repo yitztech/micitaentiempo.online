@@ -1,0 +1,11 @@
+nombre: "Abre a las 09:10: los horarios siguen la cuadrícula"
+tablero:
+  zona: America/Mexico_City
+  capacidad: 1
+  horario:
+    lunes-viernes: ["09:10-12:00"]
+servicio: {"duracion": 30, "intervalo": 30}
+ahora: "2026-09-14T06:00:00-06:00"
+consulta: { desde: "2026-09-14", hasta: "2026-09-14" }
+esperado:
+  "2026-09-14": {"total": 5, "primero": "09:30", "ultimo": "11:30"}

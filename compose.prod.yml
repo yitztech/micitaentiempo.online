@@ -1,0 +1,185 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  PRODUCCIÓN en Coolify (aplicación Docker Compose)
+#
+#  Las imágenes las publica GitHub Actions en GHCR (.github/workflows/deploy.yml):
+#  el servidor solo las descarga y arranca, nunca compila.
+#  Contrato: docs/plan/08-infraestructura.md §8.1. Todo lo que termina en `:?`
+#  es obligatorio: si falta, el despliegue se detiene.
+# ─────────────────────────────────────────────────────────────────────────────
+x-hardening: &hardening
+  restart: unless-stopped
+  security_opt: [no-new-privileges:true]
+  cap_drop: [ALL]
+  logging:
+    driver: json-file
+    options: { max-size: "10m", max-file: "3" }
+
+x-site: &site
+  IDIOMAS: ${IDIOMAS:-es,en}
+  SITE_URL: ${SITE_URL:?Define SITE_URL}
+  SITE_URL_ES: ${SITE_URL_ES:-}
+  SITE_URL_EN: ${SITE_URL_EN:?Define SITE_URL_EN}
+
+services:
+  gateway:
+    <<: *hardening
+    image: ${IMAGE_PREFIX:?Define IMAGE_PREFIX, p. ej. ghcr.io/yitztech/micitaentiempo.online}-gateway:${IMAGE_TAG:-main}
+    cap_add: [CHOWN, SETGID, SETUID, NET_BIND_SERVICE]   # nginx arranca como root y baja de usuario
+    mem_limit: 64m
+    cpus: 0.25
+    environment:
+      TRUSTED_PROXY_CIDR: ${TRUSTED_PROXY_CIDR:?Define la subred de Traefik}
+    depends_on:
+      web: { condition: service_healthy }
+      api: { condition: service_healthy }
+      calendar: { condition: service_healthy }
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, "http://127.0.0.1/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    networks: [frontend]
+
+  web:
+    <<: *hardening
+    image: ${IMAGE_PREFIX:?Define IMAGE_PREFIX}-web:${IMAGE_TAG:-main}
+    read_only: true
+    tmpfs: [/tmp]
+    mem_limit: 192m
+    cpus: 0.5
+    environment:
+      <<: *site
+      NODE_OPTIONS: --max-old-space-size=128
+      API_INTERNAL_URL: http://api:3000
+      UMAMI_SCRIPT_URL: ${UMAMI_SCRIPT_URL:-}
+      UMAMI_WEBSITE_ID: ${UMAMI_WEBSITE_ID:-}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, "http://127.0.0.1:3000/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    networks: [frontend]
+
+  api:
+    <<: *hardening
+    image: ${IMAGE_PREFIX:?Define IMAGE_PREFIX}-api:${IMAGE_TAG:-main}
+    read_only: true
+    tmpfs: [/tmp]
+    mem_limit: 384m
+    cpus: 1.0
+    environment:
+      <<: *site
+      NODE_OPTIONS: --max-old-space-size=256
+      DB_HOST: postgres
+      DB_NAME: micita
+      DB_USER: api
+      DB_PASSWORD: ${API_DB_PASSWORD:?Define API_DB_PASSWORD}
+      CALENDAR_RPC_URL: http://calendar:8081
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?Define BETTER_AUTH_SECRET}
+      APP_ENC_KEY: ${APP_ENC_KEY:?Define APP_ENC_KEY}
+      ALTCHA_HMAC_KEY: ${ALTCHA_HMAC_KEY:?Define ALTCHA_HMAC_KEY}
+      RPC_SECRET_API_TO_CALENDAR: ${RPC_SECRET_API_TO_CALENDAR:?Define RPC_SECRET_API_TO_CALENDAR}
+      RPC_SECRET_CALENDAR_TO_API: ${RPC_SECRET_CALENDAR_TO_API:?Define RPC_SECRET_CALENDAR_TO_API}
+      TELEGRAM_WEBHOOK_SECRET: ${TELEGRAM_WEBHOOK_SECRET:?Define TELEGRAM_WEBHOOK_SECRET}
+      SMTP_HOST: ${SMTP_HOST:?Define SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT:?Define SMTP_PORT}
+      SMTP_SECURE: ${SMTP_SECURE:-true}
+      SMTP_USER: ${SMTP_USER:?Define SMTP_USER}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:?Define SMTP_PASSWORD}
+      MAIL_FROM: ${MAIL_FROM:?Define MAIL_FROM}
+      SMTP_USER_EN: ${SMTP_USER_EN:?Define SMTP_USER_EN}
+      SMTP_PASSWORD_EN: ${SMTP_PASSWORD_EN:?Define SMTP_PASSWORD_EN}
+      MAIL_FROM_EN: ${MAIL_FROM_EN:?Define MAIL_FROM_EN}
+      LISTMONK_URL: ${LISTMONK_URL:-}
+      LISTMONK_LIST_UUID: ${LISTMONK_LIST_UUID:-}
+      LISTMONK_URL_EN: ${LISTMONK_URL_EN:-}
+      LISTMONK_LIST_UUID_EN: ${LISTMONK_LIST_UUID_EN:-}
+      # Claves de terceros: vacías = función desactivada (permite desplegar antes de tenerlas)
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      MS_CLIENT_ID: ${MS_CLIENT_ID:-}
+      MS_CLIENT_SECRET: ${MS_CLIENT_SECRET:-}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      STRIPE_TAX_ENABLED: ${STRIPE_TAX_ENABLED:-false}
+      SLACK_CLIENT_ID: ${SLACK_CLIENT_ID:-}
+      SLACK_CLIENT_SECRET: ${SLACK_CLIENT_SECRET:-}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME:-}
+      WHATSAPP_TOKEN: ${WHATSAPP_TOKEN:-}
+      WHATSAPP_PHONE_NUMBER_ID: ${WHATSAPP_PHONE_NUMBER_ID:-}
+      WHATSAPP_APP_SECRET: ${WHATSAPP_APP_SECRET:-}
+      WHATSAPP_VERIFY_TOKEN: ${WHATSAPP_VERIFY_TOKEN:-}
+    depends_on:
+      postgres: { condition: service_healthy }
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, "http://127.0.0.1:3000/api/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    networks: [frontend, backend]
+
+  calendar:
+    <<: *hardening
+    image: ${IMAGE_PREFIX:?Define IMAGE_PREFIX}-calendar:${IMAGE_TAG:-main}
+    read_only: true
+    mem_limit: 160m
+    cpus: 0.5
+    environment:
+      GOMEMLIMIT: 120MiB
+      PUBLIC_URL_ES: ${SITE_URL:?Define SITE_URL}
+      PUBLIC_URL_EN: ${SITE_URL_EN:?Define SITE_URL_EN}
+      DB_HOST: postgres
+      DB_NAME: micita
+      DB_USER: calendar
+      DB_PASSWORD: ${CALENDAR_DB_PASSWORD:?Define CALENDAR_DB_PASSWORD}
+      API_RPC_URL: http://api:3001
+      RPC_SECRET_API_TO_CALENDAR: ${RPC_SECRET_API_TO_CALENDAR:?Define RPC_SECRET_API_TO_CALENDAR}
+      RPC_SECRET_CALENDAR_TO_API: ${RPC_SECRET_CALENDAR_TO_API:?Define RPC_SECRET_CALENDAR_TO_API}
+      CALENDAR_TOKEN_ENC_KEY: ${CALENDAR_TOKEN_ENC_KEY:?Define CALENDAR_TOKEN_ENC_KEY}
+      GOOGLE_CHANNEL_SECRET: ${GOOGLE_CHANNEL_SECRET:?Define GOOGLE_CHANNEL_SECRET}
+      MS_CLIENT_STATE_SECRET: ${MS_CLIENT_STATE_SECRET:?Define MS_CLIENT_STATE_SECRET}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      MS_CLIENT_ID: ${MS_CLIENT_ID:-}
+      MS_CLIENT_SECRET: ${MS_CLIENT_SECRET:-}
+    depends_on:
+      postgres: { condition: service_healthy }
+    healthcheck:
+      test: [CMD, /calendar, healthcheck]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    networks: [frontend, backend]
+
+  # El backup de la plataforma vuelca cada contenedor PostgreSQL en marcha.
+  postgres:
+    image: ${IMAGE_PREFIX:?Define IMAGE_PREFIX}-postgres:${IMAGE_TAG:-main}
+    restart: unless-stopped
+    security_opt: [no-new-privileges:true]
+    mem_limit: 512m
+    cpus: 1.0
+    environment:
+      POSTGRES_DB: micita
+      POSTGRES_USER: micita
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD}
+      API_DB_PASSWORD: ${API_DB_PASSWORD:?Define API_DB_PASSWORD}
+      CALENDAR_DB_PASSWORD: ${CALENDAR_DB_PASSWORD:?Define CALENDAR_DB_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql   # PostgreSQL 18: se monta en /var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U micita -d micita"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    networks: [backend]
+
+volumes:
+  postgres-data:
+
+networks:
+  frontend:
+  backend:
+    internal: true   # sin salida a internet: solo api y calendar ↔ postgres

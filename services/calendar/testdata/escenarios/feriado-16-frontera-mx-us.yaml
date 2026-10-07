@@ -1,0 +1,16 @@
+nombre: "Tijuana bloquea feriados de México y de EE. UU."
+tablero:
+  zona: America/Tijuana
+  capacidad: 1
+  horario:
+    lunes-viernes: ["09:00-18:00"]
+  feriados:
+    - {"pais": "MX", "tipos": ["public"]}
+    - {"pais": "US", "tipos": ["public"]}
+servicio: {"duracion": 30, "intervalo": 30}
+ahora: "2026-11-10T08:00:00-08:00"
+consulta: { desde: "2026-11-16", hasta: "2026-11-26" }
+esperado:
+  "2026-11-16": {"vacio": true}
+  "2026-11-26": {"vacio": true}
+  "2026-11-17": {"total": 18}

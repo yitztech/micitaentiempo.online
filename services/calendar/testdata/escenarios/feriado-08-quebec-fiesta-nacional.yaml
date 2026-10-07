@@ -1,0 +1,13 @@
+nombre: "24 de junio cerrado en Quebec"
+tablero:
+  zona: America/Toronto
+  capacidad: 1
+  horario:
+    lunes-viernes: ["09:00-18:00"]
+  feriados:
+    - {"pais": "CA", "region": "CA-QC", "tipos": ["public"]}
+servicio: {"duracion": 30, "intervalo": 30}
+ahora: "2026-06-22T08:00:00-04:00"
+consulta: { desde: "2026-06-24", hasta: "2026-06-24" }
+esperado:
+  "2026-06-24": {"vacio": true}

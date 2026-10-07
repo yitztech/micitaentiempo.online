@@ -1,0 +1,174 @@
+@import "tailwindcss";
+@import "@fontsource-variable/inter/wght.css";
+
+/*
+ * Tokens de diseño (docs/plan/07-frontend.md §7.7). Los colores viven en variables CSS para que el
+ * modo oscuro solo cambie valores; Tailwind los expone como utilidades (bg-primary, text-muted…).
+ */
+@theme {
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-soft: var(--primary-soft);
+  --color-on-primary: var(--on-primary);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-muted: var(--text-muted);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --radius-card: 12px;
+  --radius-field: 10px;
+  --shadow-soft: 0 1px 2px rgb(31 42 48 / 0.06), 0 4px 16px rgb(31 42 48 / 0.06);
+}
+
+:root {
+  color-scheme: light;
+  --primary: #1d6f86;
+  --primary-hover: #175c70;
+  --primary-soft: #e3f1f4;
+  --on-primary: #ffffff;
+  --secondary: #6e9e87;
+  --accent: #e8a37a;
+  --background: #faf8f4;
+  --surface: #ffffff;
+  --surface-2: #f3f0ea;
+  --border: #e4e1da;
+  --text: #1f2a30;
+  --text-muted: #55626b;
+  --success: #2e7d5b;
+  --success-soft: #e6f3ec;
+  --warning: #9a5b00;
+  --warning-soft: #fff4e0;
+  --danger: #b3261e;
+  --danger-soft: #fbe9e7;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --primary: #5fb3c8;
+    --primary-hover: #7cc3d4;
+    --primary-soft: #16323b;
+    --on-primary: #0f1a1f;
+    --background: #0f1a1f;
+    --surface: #16232a;
+    --surface-2: #1b2b33;
+    --border: #2a3b44;
+    --text: #e8eef0;
+    --text-muted: #a9b7be;
+    --success: #6cc49a;
+    --success-soft: #16302a;
+    --warning: #f0b45c;
+    --warning-soft: #33280f;
+    --danger: #f2877e;
+    --danger-soft: #3a1c1a;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --primary: #5fb3c8;
+  --primary-hover: #7cc3d4;
+  --primary-soft: #16323b;
+  --on-primary: #0f1a1f;
+  --background: #0f1a1f;
+  --surface: #16232a;
+  --surface-2: #1b2b33;
+  --border: #2a3b44;
+  --text: #e8eef0;
+  --text-muted: #a9b7be;
+  --success: #6cc49a;
+  --success-soft: #16302a;
+  --warning: #f0b45c;
+  --warning-soft: #33280f;
+  --danger: #f2877e;
+  --danger-soft: #3a1c1a;
+}
+
+html {
+  background: var(--background);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+/* Foco siempre visible (WCAG 2.2 AA). */
+:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Texto largo de Markdown (legales y créditos). */
+.prose-legal {
+  max-width: 70ch;
+}
+.prose-legal h2 {
+  margin-top: 2.25rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+.prose-legal h3 {
+  margin-top: 1.5rem;
+  font-weight: 600;
+}
+.prose-legal p,
+.prose-legal ul,
+.prose-legal ol {
+  margin-top: 0.875rem;
+  color: var(--text);
+}
+.prose-legal ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+}
+.prose-legal ol {
+  list-style: decimal;
+  padding-left: 1.25rem;
+}
+.prose-legal li + li {
+  margin-top: 0.375rem;
+}
+.prose-legal a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

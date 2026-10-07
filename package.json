@@ -1,0 +1,21 @@
+{
+  "name": "micitaentiempo",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.9.1",
+  "engines": {
+    "node": ">=22.22.0"
+  },
+  "scripts": {
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "typecheck": "pnpm build:packages && pnpm -r --if-present typecheck",
+    "test": "pnpm -r --if-present test",
+    "i18n:check": "pnpm --filter @mcet/i18n check",
+    "escenarios": "pnpm --filter @mcet/escenarios escenarios",
+    "build:packages": "pnpm --filter \"./packages/**\" --if-present build"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.15"
+  }
+}

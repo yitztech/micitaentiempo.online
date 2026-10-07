@@ -1,0 +1,112 @@
+syntax = "proto3";
+
+package mcet.calendar.v1;
+
+import "google/protobuf/timestamp.proto";
+
+// Sincronización con Google, Outlook y Apple y feeds ICS (docs/plan/04-motor-calendario.md §4.9).
+service SyncService {
+  rpc UpsertConnection(UpsertConnectionRequest) returns (Connection);
+  rpc ListConnections(ListConnectionsRequest) returns (ListConnectionsResponse);
+  rpc UpdateExternalCalendar(UpdateExternalCalendarRequest) returns (Connection);
+  rpc DeleteConnection(DeleteConnectionRequest) returns (DeleteConnectionResponse);
+  rpc ResyncConnection(ResyncConnectionRequest) returns (Connection);
+  rpc CreateFeed(CreateFeedRequest) returns (CreateFeedResponse);
+  rpc ListFeeds(ListFeedsRequest) returns (ListFeedsResponse);
+  rpc RevokeFeed(RevokeFeedRequest) returns (RevokeFeedResponse);
+}
+
+message ExternalCalendar {
+  string id = 1;
+  string external_id = 2;
+  string name = 3;
+  bool use_as_busy = 4;
+  bool write_target = 5;
+  bool app_created = 6;
+}
+
+message Connection {
+  string id = 1;
+  string calendar_id = 2;
+  // "google" | "microsoft" | "icloud"
+  string provider = 3;
+  string account = 4;
+  // "active" | "revoked" | "error"
+  string status = 5;
+  google.protobuf.Timestamp last_sync_at = 6;
+  string last_error = 7;
+  google.protobuf.Timestamp last_error_at = 8;
+  repeated ExternalCalendar calendars = 9;
+}
+
+message UpsertConnectionRequest {
+  string calendar_id = 1;
+  string provider = 2;
+  string account = 3;
+  // OAuth: {"access_token","refresh_token","expiry"}; iCloud: {"username","password"}. Se cifra en el motor.
+  bytes credentials = 4;
+}
+
+message ListConnectionsRequest {
+  string calendar_id = 1;
+}
+
+message ListConnectionsResponse {
+  repeated Connection connections = 1;
+}
+
+message UpdateExternalCalendarRequest {
+  string connection_id = 1;
+  string external_calendar_id = 2;
+  bool use_as_busy = 3;
+  bool write_target = 4;
+}
+
+message DeleteConnectionRequest {
+  string connection_id = 1;
+}
+
+message DeleteConnectionResponse {}
+
+message ResyncConnectionRequest {
+  string connection_id = 1;
+}
+
+message Feed {
+  string id = 1;
+  string calendar_id = 2;
+  // "full" | "busy" | "personal"
+  string scope = 3;
+  string label = 4;
+  google.protobuf.Timestamp created_at = 5;
+}
+
+message CreateFeedRequest {
+  // Vacío en el feed personal del cliente final (se usa org_id).
+  string calendar_id = 1;
+  string scope = 2;
+  string locale = 3;
+  string label = 4;
+  string org_id = 5;
+}
+
+message CreateFeedResponse {
+  Feed feed = 1;
+  // Solo se devuelve al crear; se guarda su hash.
+  string token = 2;
+}
+
+message ListFeedsRequest {
+  string calendar_id = 1;
+  string org_id = 2;
+}
+
+message ListFeedsResponse {
+  repeated Feed feeds = 1;
+}
+
+message RevokeFeedRequest {
+  string id = 1;
+}
+
+message RevokeFeedResponse {}

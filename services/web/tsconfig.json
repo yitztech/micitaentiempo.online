@@ -1,0 +1,10 @@
+{
+  "extends": "@mcet/tsconfig/react.json",
+  "compilerOptions": {
+    "rootDirs": [".", "./.react-router/types"],
+    "allowImportingTsExtensions": true,
+    "paths": { "~/*": ["./app/*"] }
+  },
+  "include": ["**/*", "**/.server/**/*", "**/.client/**/*", ".react-router/types/**/*"],
+  "exclude": ["build", "node_modules"]
+}

@@ -1,0 +1,14 @@
+nombre: "Cierre por inventario en una fecha concreta"
+tablero:
+  zona: America/Mexico_City
+  capacidad: 1
+  horario:
+    lunes-viernes: ["09:00-18:00"]
+  propios:
+    - {"nombre": "Inventario", "fecha": "2026-09-17"}
+servicio: {"duracion": 30, "intervalo": 30}
+ahora: "2026-09-14T06:00:00-06:00"
+consulta: { desde: "2026-09-17", hasta: "2026-09-18" }
+esperado:
+  "2026-09-17": {"vacio": true}
+  "2026-09-18": {"total": 18}

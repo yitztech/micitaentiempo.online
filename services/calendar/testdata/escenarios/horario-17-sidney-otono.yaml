@@ -1,0 +1,11 @@
+nombre: "Sídney: 02:00 se repite el 5 de abril"
+tablero:
+  zona: Australia/Sydney
+  capacidad: 1
+  horario:
+    todos: ["00:00-24:00"]
+servicio: {"duracion": 60, "intervalo": 60}
+ahora: "2026-04-03T00:00:00Z"
+consulta: { desde: "2026-04-05", hasta: "2026-04-05" }
+esperado:
+  "2026-04-05": {"total": 24}

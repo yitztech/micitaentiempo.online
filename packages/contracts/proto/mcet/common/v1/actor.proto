@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package mcet.common.v1;
+
+// Rol del actor en un tablero (docs/plan/01-requisitos.md §1.6).
+enum Role {
+  ROLE_UNSPECIFIED = 0;
+  ROLE_OWNER = 1;
+  ROLE_EDITOR = 2;
+  ROLE_OBSERVER = 3;
+  ROLE_CUSTOMER = 4;
+  // Procesos internos (jobs, sincronización).
+  ROLE_SYSTEM = 5;
+}
+
+// Canal por el que llega la acción.
+enum Via {
+  VIA_UNSPECIFIED = 0;
+  VIA_PANEL = 1;
+  VIA_EMBED = 2;
+  VIA_PUBLIC = 3;
+  VIA_MCP = 4;
+  VIA_SYNC = 5;
+  VIA_SYSTEM = 6;
+}
+
+// Quién actúa. Viaja firmado en el JWT interno; este mensaje es su forma tipada.
+message Actor {
+  string user_id = 1;
+  string org_id = 2;
+  string calendar_id = 3;
+  Role role = 4;
+  Via via = 5;
+  // "es" | "en"
+  string locale = 6;
+  // Zona IANA del usuario.
+  string timezone = 7;
+}

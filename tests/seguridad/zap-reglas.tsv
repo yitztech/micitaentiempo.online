@@ -1,0 +1,8 @@
+10049	IGNORE	(Páginas públicas cacheables a propósito; el panel y la API llevan no-store)
+10055	IGNORE	(style-src 'unsafe-inline': atributos style de React y FullCalendar; los scripts van con nonce)
+10063	IGNORE	(Permissions-Policy se envía en los documentos; ZAP lo pide también en los .js)
+10098	IGNORE	(CORS * en /mcp a propósito: solo Bearer, sin cookies)
+10111	IGNORE	(Informativo: formularios de acceso detectados)
+10202	IGNORE	(CSRF: Origin igual al sitio + JSON obligatorio en mutaciones con cookie; los formularios no envían por sí solos)
+90003	IGNORE	(Falso positivo: es el texto del código de embed que se copia, no una etiqueta de la página)
+90004	IGNORE	(Sin COEP: rompería el embed en webs de terceros y Stripe; no usamos SharedArrayBuffer)

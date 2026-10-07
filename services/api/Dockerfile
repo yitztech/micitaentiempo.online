@@ -1,0 +1,34 @@
+# syntax=docker/dockerfile:1
+# Imagen de `api`. Se construye desde la raíz del repositorio:
+#   docker build -f services/api/Dockerfile --build-arg RELEASE_SHA=<sha> .
+FROM node:24.21.0-alpine3.24 AS base
+RUN npm install -g pnpm@12.9.1
+WORKDIR /repo
+
+FROM base AS deps
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store pnpm fetch
+COPY . .
+RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
+    pnpm install --offline --frozen-lockfile --filter "@mcet/api..."
+
+# Desarrollo local (compose.yml): servidor con recarga; Compose Watch sincroniza el código.
+FROM deps AS dev
+RUN pnpm --filter "@mcet/api^..." build
+WORKDIR /repo/services/api
+CMD ["pnpm", "dev"]
+
+FROM deps AS build
+RUN pnpm --filter "@mcet/api..." build \
+ && pnpm --filter @mcet/api deploy --prod --legacy /out
+
+FROM node:24.21.0-alpine3.24
+ARG RELEASE_SHA=dev
+ENV NODE_ENV=production \
+    RELEASE_SHA=${RELEASE_SHA} \
+    PORT=3000
+WORKDIR /app
+COPY --from=build --chown=node:node /out ./
+USER node
+EXPOSE 3000 3001
+CMD ["node", "--enable-source-maps", "dist/main.js"]

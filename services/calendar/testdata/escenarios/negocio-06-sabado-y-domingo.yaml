@@ -1,0 +1,13 @@
+nombre: "Sábado medio día y domingo cerrado"
+tablero:
+  zona: America/Mexico_City
+  capacidad: 1
+  horario:
+    lunes-viernes: ["09:00-18:00"]
+    sabado: ["10:00-14:00"]
+servicio: {"duracion": 60, "intervalo": 60}
+ahora: "2026-09-14T06:00:00-06:00"
+consulta: { desde: "2026-09-19", hasta: "2026-09-20" }
+esperado:
+  "2026-09-19": {"total": 4, "primero": "10:00", "ultimo": "13:00"}
+  "2026-09-20": {"vacio": true}

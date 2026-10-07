@@ -1,0 +1,11 @@
+nombre: "Cita de 60 min cada 15 min"
+tablero:
+  zona: America/Mexico_City
+  capacidad: 1
+  horario:
+    lunes-viernes: ["09:00-12:00"]
+servicio: {"duracion": 60, "intervalo": 15}
+ahora: "2026-09-14T06:00:00-06:00"
+consulta: { desde: "2026-09-14", hasta: "2026-09-14" }
+esperado:
+  "2026-09-14": {"total": 9, "ultimo": "11:00"}

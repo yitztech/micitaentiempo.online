@@ -1,0 +1,20 @@
+{
+  "name": "@mcet/escenarios",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "escenarios": "./correr.sh",
+    "typecheck": "bddgen && tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@mcet/i18n": "workspace:*",
+    "@mcet/tsconfig": "workspace:*",
+    "@modelcontextprotocol/client": "2.3.1",
+    "@playwright/test": "1.63.0",
+    "@types/node": "24.19.1",
+    "playwright-bdd": "9.2.1",
+    "typescript": "7.0.2"
+  }
+}

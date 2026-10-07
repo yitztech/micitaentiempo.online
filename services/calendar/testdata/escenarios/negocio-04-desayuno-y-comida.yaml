@@ -1,0 +1,13 @@
+nombre: "Desayuno y comida"
+tablero:
+  zona: America/Mexico_City
+  capacidad: 1
+  horario:
+    lunes-viernes: ["08:00-17:00"]
+  descansos:
+    lunes-viernes: ["10:00-10:30", "13:00-14:00"]
+servicio: {"duracion": 30, "intervalo": 30}
+ahora: "2026-09-14T06:00:00-06:00"
+consulta: { desde: "2026-09-14", hasta: "2026-09-14" }
+esperado:
+  "2026-09-14": {"total": 15, "excluye": ["10:00", "13:00", "13:30"], "incluye": ["10:30", "14:00"]}

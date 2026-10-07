@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+package mcet.calendar.v1;
+
+// Servicios (tipos de cita) de un tablero.
+service ServiceCatalogService {
+  rpc ListServices(ListServicesRequest) returns (ListServicesResponse);
+  rpc CreateService(CreateServiceRequest) returns (Service);
+  rpc UpdateService(UpdateServiceRequest) returns (Service);
+  rpc DeleteService(DeleteServiceRequest) returns (DeleteServiceResponse);
+  rpc ReorderServices(ReorderServicesRequest) returns (ListServicesResponse);
+}
+
+message Service {
+  string id = 1;
+  string calendar_id = 2;
+  // {"es": "...", "en": "..."}
+  map<string, string> name = 3;
+  map<string, string> description = 4;
+  int32 duration_min = 5;
+  int32 buffer_before_min = 6;
+  int32 buffer_after_min = 7;
+  int32 min_notice_min = 8;
+  int32 max_advance_days = 9;
+  int32 slot_step_min = 10;
+  // 0 = sin límite
+  int32 daily_limit = 11;
+  string color = 12;
+  bool active = 13;
+  int32 position = 14;
+}
+
+message ListServicesRequest {
+  string calendar_id = 1;
+  bool include_inactive = 2;
+}
+
+message ListServicesResponse {
+  repeated Service services = 1;
+}
+
+message CreateServiceRequest {
+  Service service = 1;
+}
+
+message UpdateServiceRequest {
+  Service service = 1;
+}
+
+message DeleteServiceRequest {
+  string calendar_id = 1;
+  string id = 2;
+}
+
+message DeleteServiceResponse {}
+
+message ReorderServicesRequest {
+  string calendar_id = 1;
+  repeated string ids = 2;
+}

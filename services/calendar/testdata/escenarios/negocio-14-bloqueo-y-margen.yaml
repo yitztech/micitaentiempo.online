@@ -1,0 +1,13 @@
+nombre: "El margen también choca con un bloqueo"
+tablero:
+  zona: America/Mexico_City
+  capacidad: 1
+  horario:
+    lunes-viernes: ["09:00-18:00"]
+servicio: {"duracion": 30, "intervalo": 30, "margen_despues": 10}
+ahora: "2026-09-14T06:00:00-06:00"
+existentes:
+  - {"tipo": "bloqueo", "inicio": "2026-09-14T12:00:00-06:00", "fin": "2026-09-14T15:00:00-06:00"}
+consulta: { desde: "2026-09-14", hasta: "2026-09-14" }
+esperado:
+  "2026-09-14": {"incluye": ["11:00", "15:00"], "excluye": ["11:30", "12:00"]}

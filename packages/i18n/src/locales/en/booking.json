@@ -1,0 +1,103 @@
+{
+  "seoTitle": "Book with {{name}}",
+  "steps": ["Service", "Day", "Time", "Your details", "Confirmation"],
+  "service": {
+    "title": "Choose a service",
+    "minutes": "{{n}} min"
+  },
+  "date": {
+    "title": "Choose a day",
+    "prev": "Previous month",
+    "next": "Next month",
+    "none": "No open times this month.",
+    "available": "has open times",
+    "unavailable": "no open times"
+  },
+  "time": {
+    "title": "Choose a time",
+    "inTz": "Times in {{tz}}",
+    "changeTz": "Time zone",
+    "businessTz": "The business is in {{tz}}.",
+    "none": "No times left this day.",
+    "slotLabel": "{{date}}, {{time}}, available"
+  },
+  "details": {
+    "title": "Your details",
+    "name": "Full name",
+    "email": "Email",
+    "emailHint": "We'll send you a code to confirm.",
+    "phone": "Phone",
+    "phoneHint": "With country code, for example +1 555 123 4567.",
+    "notes": "Note for the business",
+    "submit": "Hold this time",
+    "held": "We're holding your time. You have {{time}} to confirm it.",
+    "expired": "Your hold expired. Please choose again."
+  },
+  "verify": {
+    "title": "Confirm your email",
+    "sent": "We sent a 6-digit code to {{email}}.",
+    "code": "Code",
+    "confirm": "Confirm booking",
+    "resend": "Send another code"
+  },
+  "done": {
+    "title": "Appointment confirmed!",
+    "lead": "We sent the details to {{email}}.",
+    "addGoogle": "Add to Google Calendar",
+    "addOutlook": "Add to Outlook",
+    "downloadIcs": "Download .ics",
+    "myAppointments": "See my appointments",
+    "another": "Book another appointment"
+  },
+  "taken": "Someone just booked that time. Please choose another.",
+  "change": "Change",
+  "unavailable": "This board isn't taking bookings right now.",
+  "my": {
+    "seoTitle": "My appointments",
+    "title": "My appointments",
+    "signInTitle": "Sign in with your email",
+    "signInLead": "We'll send you a code to see your appointments. No password needed.",
+    "sendCode": "Send code",
+    "enter": "Sign in",
+    "upcoming": "Upcoming",
+    "past": "Past",
+    "showPast": "Show past appointments",
+    "none": "You have no upcoming appointments.",
+    "cancel": "Cancel",
+    "cancelConfirm": "Cancel this appointment?",
+    "cancelled": "Appointment canceled.",
+    "reschedule": "Change time",
+    "rescheduled": "Your appointment was changed.",
+    "addToCalendar": "Add to calendar",
+    "signOut": "Sign out",
+    "noticeRule": "You can change or cancel it up to {{hours}} h before.",
+    "subscribe": "Subscribe to my appointments",
+    "subscribeHelp": "Add this link to your calendar (Google: From URL; Apple: New Calendar Subscription)."
+  },
+  "embed": {
+    "poweredBy": "Bookings by My Appointment On Time",
+    "book": "Book an appointment",
+    "myAppointments": "My appointments",
+    "close": "Close"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "slot_taken": "Someone just booked that time. Please choose another.",
+    "hold_expired": "Your hold expired and that time is no longer free. Please choose another.",
+    "hold_not_found": "Your hold no longer exists. Please choose another time.",
+    "invalid_otp": "The code isn't correct.",
+    "otp_expired": "The code expired. Request a new one.",
+    "too_many_attempts": "Too many attempts. Request a new code.",
+    "too_late": "You can no longer change this appointment yourself. Contact the business.",
+    "calendar_unavailable": "This board isn't taking bookings right now.",
+    "altcha_required": "We couldn't verify you're not a robot. Please try again.",
+    "invalid_format": "Enter a valid email.",
+    "disposable": "Use a permanent email.",
+    "no_mail_server": "That email's domain doesn't receive mail.",
+    "too_many_requests": "Too many attempts. Please wait a few minutes.",
+    "network": "You're offline. Check your connection.",
+    "validation_failed": "Check your details.",
+    "google_failed": "We couldn't verify you with Google. Use the email code instead.",
+    "google_blocked": "Your browser blocked the Google window. Allow pop-ups or use the email code."
+  }
+}

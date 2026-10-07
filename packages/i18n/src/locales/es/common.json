@@ -1,0 +1,74 @@
+{
+  "site": {
+    "name": "Mi Cita en Tiempo",
+    "tagline": "Tu agenda de citas, siempre a tiempo.",
+    "description": "Calendario de reservas para negocios: comparte tu agenda, recibe citas y sincroniza con Google, Outlook y Apple."
+  },
+  "home": {
+    "title": "Reservas sin llamadas ni mensajes",
+    "lead": "Comparte tu agenda o insértala en tu web. Tus clientes reservan solos y tú recibes cada cita al instante.",
+    "comingSoon": "Muy pronto"
+  },
+  "language": {
+    "switchTo": "English",
+    "switchToLabel": "Ver este sitio en inglés",
+    "sessionNote": "El sitio en inglés tiene su propia sesión: si entraste aquí, allá tendrás que entrar de nuevo."
+  },
+  "nav": {
+    "main": "Principal",
+    "features": "Funciones",
+    "pricing": "Precios",
+    "faq": "Preguntas frecuentes",
+    "connectAi": "Conecta tu IA",
+    "contact": "Contacto",
+    "signIn": "Entrar",
+    "signUp": "Empieza gratis",
+    "dashboard": "Ir al panel",
+    "openMenu": "Abrir menú",
+    "closeMenu": "Cerrar menú",
+    "skipToContent": "Saltar al contenido"
+  },
+  "footer": {
+    "product": "Producto",
+    "legal": "Legal",
+    "privacy": "Privacidad",
+    "terms": "Condiciones",
+    "credits": "Créditos",
+    "rights": "© {{year}} Mi Cita en Tiempo",
+    "madeFor": "Agenda en línea para negocios de servicios, en español e inglés."
+  },
+  "ui": {
+    "loading": "Cargando…",
+    "required": "Obligatorio",
+    "optional": "Opcional",
+    "showPassword": "Mostrar contraseña",
+    "hidePassword": "Ocultar contraseña",
+    "close": "Cerrar",
+    "back": "Volver",
+    "continue": "Continuar",
+    "or": "o",
+    "sending": "Enviando…",
+    "comingSoon": "Disponible pronto"
+  },
+  "errors": {
+    "notFoundTitle": "Página no encontrada",
+    "notFoundBody": "La dirección no existe o ha cambiado.",
+    "serverTitle": "Algo salió mal",
+    "serverBody": "Inténtalo de nuevo en unos minutos.",
+    "backHome": "Volver al inicio",
+    "errorCode": "Código {{code}}"
+  },
+  "aiScopes": {
+    "openid": "Saber que eres tú",
+    "profile": "Ver quién eres, tu organización, plan y roles",
+    "email": "Ver tu correo",
+    "offline_access": "Mantener la conexión sin volver a iniciar sesión",
+    "calendar:read": "Ver tableros, ajustes, eventos, huecos libres y feriados",
+    "calendar:write": "Crear, cambiar y cancelar eventos y bloqueos",
+    "customers:read": "Ver los datos de contacto de tus clientes (sin esto se ocultan)",
+    "stats:read": "Ver estadísticas",
+    "settings:write": "Cambiar horario, descansos y excepciones (solo propietario)",
+    "billing:read": "Ver plan, prueba y facturas (solo propietario)",
+    "notifications:read": "Ver avisos recientes"
+  }
+}

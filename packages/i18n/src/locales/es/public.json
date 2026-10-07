@@ -1,0 +1,308 @@
+{
+  "home": {
+    "seoTitle": "Agenda de citas en línea para tu negocio",
+    "seoDescription": "Tus clientes reservan solos, 24 horas, sin dobles reservas. Horarios, feriados de tu país, avisos y sincronización con Google, Outlook y Apple. Prueba 30 días gratis.",
+    "eyebrow": "Agenda de citas en línea",
+    "title": "Tus clientes reservan solos. Tú atiendes.",
+    "lead": "Publica tu horario, compártelo con un enlace o insértalo en tu web y recibe cada cita al instante, sin llamadas, sin mensajes y sin dobles reservas.",
+    "ctaPrimary": "Prueba 30 días gratis",
+    "ctaSecondary": "Ver precios",
+    "trialNote": "Sin tarjeta para empezar. Desde US$5 al mes.",
+    "previewLabel": "Ejemplo de la página de reserva",
+    "previewService": "Consulta general · 30 min",
+    "previewDay": "martes 15",
+    "previewTimes": ["9:00", "9:30", "10:30", "11:00", "12:30", "16:00"],
+    "previewConfirm": "Cita confirmada",
+    "highlightsTitle": "Todo lo que necesita una agenda que trabaja por ti",
+    "highlights": [
+      {
+        "title": "Reservas a cualquier hora",
+        "body": "Tus clientes eligen servicio, día y hora desde el teléfono, y confirman con un código que llega a su correo."
+      },
+      {
+        "title": "Nunca dos citas a la vez",
+        "body": "Cada horario se aparta en el momento: aunque dos personas reserven al mismo tiempo, solo una lo obtiene."
+      },
+      {
+        "title": "Feriados de tu país",
+        "body": "Bloquea los feriados de México, Estados Unidos, Canadá o cualquiera de unos 200 países, con sus regiones."
+      },
+      {
+        "title": "Tu horario, tus descansos",
+        "body": "Turnos por día, comida, desayuno, márgenes entre citas, aviso mínimo y días especiales."
+      },
+      {
+        "title": "Sincroniza tus calendarios",
+        "body": "Ve tus citas en Google Calendar, Outlook o Apple Calendar y evita choques con tus otros compromisos."
+      },
+      {
+        "title": "Conecta tu IA",
+        "body": "Pregúntale a Claude, ChatGPT o Gemini por tu agenda y pídele que mueva o cree citas por ti."
+      }
+    ],
+    "stepsTitle": "Empieza en tres pasos",
+    "steps": [
+      {
+        "title": "Crea tu tablero",
+        "body": "Nombre, zona horaria y ubicación. Elige tu país y los feriados se bloquean solos."
+      },
+      {
+        "title": "Define horario y servicios",
+        "body": "Indica cuándo atiendes, tus descansos y cuánto dura cada servicio."
+      },
+      {
+        "title": "Comparte tu enlace",
+        "body": "Envíalo por mensaje, ponlo en tus redes o insértalo en tu web con una línea de código."
+      }
+    ],
+    "audienceTitle": "Pensado para negocios que viven de su agenda",
+    "audience": [
+      "Consultorios y clínicas",
+      "Salones y barberías",
+      "Asesorías y despachos",
+      "Talleres y servicios técnicos",
+      "Clases y entrenamiento",
+      "Estudios de fotografía y bienestar"
+    ],
+    "ctaBandTitle": "Prueba tu agenda en línea hoy",
+    "ctaBandBody": "Tienes 30 días para probarla con todas sus funciones."
+  },
+  "features": {
+    "seoTitle": "Funciones",
+    "seoDescription": "Horarios, descansos, feriados de unos 200 países, reservas sin dobles citas, equipo con roles, avisos, sincronización con Google, Outlook y Apple, embed e IA.",
+    "title": "Funciones",
+    "lead": "Una agenda completa que tus clientes entienden a la primera y que tu equipo puede compartir.",
+    "groups": [
+      {
+        "title": "Horarios a tu medida",
+        "items": [
+          "Turnos distintos para cada día de la semana",
+          "Descansos con nombre: comida, desayuno o pausas",
+          "Días especiales: cerrado, horario reducido o abierto en feriado",
+          "Feriados públicos, bancarios o escolares de unos 200 países y sus regiones",
+          "Feriados propios: aniversario del negocio, vacaciones"
+        ]
+      },
+      {
+        "title": "Reservas sin fricción",
+        "items": [
+          "Página de reserva pensada para el teléfono",
+          "Horarios mostrados en la zona horaria de tu cliente",
+          "Confirmación con un código por correo, sin contraseñas",
+          "Tus clientes ven, cambian o cancelan sus citas cuando tú lo permites",
+          "Archivo .ics para añadir la cita a cualquier calendario"
+        ]
+      },
+      {
+        "title": "Cero dobles reservas",
+        "items": [
+          "El horario se aparta 10 minutos mientras el cliente confirma",
+          "Varios asientos por horario si atiendes a más de una persona a la vez",
+          "Márgenes antes y después de cada cita",
+          "Límite de citas por día y aviso mínimo"
+        ]
+      },
+      {
+        "title": "Tu equipo, con permisos claros",
+        "items": [
+          "Editores que gestionan citas y bloqueos",
+          "Observadores que solo consultan",
+          "Cada cliente final ve únicamente sus propias citas",
+          "Citas recurrentes y bloqueos para el personal"
+        ]
+      },
+      {
+        "title": "Avisos donde los necesitas",
+        "items": [
+          "Correo y avisos dentro de la plataforma",
+          "Cada persona elige además Slack o Telegram (WhatsApp, próximamente)",
+          "Recordatorios antes de cada cita"
+        ]
+      },
+      {
+        "title": "Conectado con lo que ya usas",
+        "items": [
+          "Google Calendar, Outlook y Apple Calendar",
+          "Tu tablero dentro de tu web con un iframe o una línea de código",
+          "Claude, ChatGPT y Gemini para consultar y gestionar tu agenda"
+        ]
+      }
+    ]
+  },
+  "pricing": {
+    "seoTitle": "Precios",
+    "seoDescription": "Plan Personal a US$5 al mes con un tablero y plan Sucursales a US$20 al mes con hasta 10 tableros. Prueba de 30 días.",
+    "title": "Precios simples",
+    "lead": "Elige según cuántas agendas necesitas. Empieza con 30 días de prueba con todas las funciones.",
+    "perMonth": "al mes",
+    "currencyNote": "Precios en dólares estadounidenses. Los impuestos pueden variar según tu país.",
+    "trialBadge": "30 días de prueba",
+    "choose": "Empieza la prueba",
+    "billingSoon": "El pago en línea estará disponible pronto. Mientras tanto, tu prueba sigue activa.",
+    "plans": {
+      "personal": {
+        "name": "Personal",
+        "price": "US$5",
+        "description": "Para profesionales independientes con una sola agenda.",
+        "features": [
+          "1 tablero",
+          "Hasta 10 personas en tu equipo",
+          "Reservas, avisos y recordatorios",
+          "Sincronización y embed",
+          "Conecta tu IA"
+        ]
+      },
+      "branches": {
+        "name": "Sucursales",
+        "price": "US$20",
+        "description": "Para negocios con varias sedes, salas o profesionales.",
+        "features": [
+          "Hasta 10 tableros",
+          "Hasta 10 personas por tablero",
+          "Un enlace y un embed para cada tablero",
+          "Todo lo del plan Personal"
+        ]
+      }
+    },
+    "faqTitle": "Sobre la prueba y el cobro",
+    "faq": [
+      {
+        "q": "¿Necesito tarjeta para la prueba?",
+        "a": "No. Creas tu cuenta y usas todas las funciones durante 30 días."
+      },
+      {
+        "q": "¿Qué pasa al terminar la prueba?",
+        "a": "Te avisamos antes. Si no eliges un plan, tu cuenta queda en solo lectura: no pierdes tus datos."
+      },
+      {
+        "q": "¿Puedo cambiar de plan?",
+        "a": "Sí, cuando quieras. El cambio se prorratea en tu siguiente cobro."
+      }
+    ]
+  },
+  "faq": {
+    "seoTitle": "Preguntas frecuentes",
+    "seoDescription": "Respuestas sobre reservas, feriados, sincronización, idiomas, privacidad y planes de Mi Cita en Tiempo.",
+    "title": "Preguntas frecuentes",
+    "lead": "Si no encuentras tu respuesta, escríbenos.",
+    "items": [
+      {
+        "q": "¿Mis clientes necesitan crear una cuenta?",
+        "a": "No. Escriben su nombre y correo, y confirman con un código de 6 dígitos que les llega por correo. Con ese mismo correo pueden ver sus citas después."
+      },
+      {
+        "q": "¿Cómo evitan las dobles reservas?",
+        "a": "Cuando alguien elige un horario, lo apartamos durante 10 minutos mientras confirma. La base de datos impide guardar dos citas en el mismo asiento a la misma hora, aunque lleguen al mismo tiempo."
+      },
+      {
+        "q": "¿Qué feriados incluyen?",
+        "a": "Los de unos 200 países, con sus regiones: públicos, bancarios, escolares y opcionales. Tú eliges cuáles bloquean tu agenda y puedes abrir en un feriado concreto."
+      },
+      {
+        "q": "¿Funciona con Google Calendar, Outlook y Apple?",
+        "a": "Sí. Tus citas aparecen en esos calendarios y tus compromisos de allá ocupan tu agenda para que nadie reserve encima."
+      },
+      {
+        "q": "¿Puedo ponerlo en mi web?",
+        "a": "Sí, con un iframe o una línea de código. Funciona en WordPress, Wix, Squarespace o HTML propio."
+      },
+      {
+        "q": "¿En qué idiomas está?",
+        "a": "En español en micitaentiempo.online y en inglés en myappointmentontime.online. Tus clientes reciben los correos en el idioma del sitio donde reservan."
+      },
+      {
+        "q": "¿Mis clientes ven las citas de otros?",
+        "a": "Nunca. Cada cliente final solo ve sus propias citas. Tu equipo ve lo que su rol le permite."
+      },
+      {
+        "q": "¿Dónde se guardan mis datos?",
+        "a": "En servidores dedicados, con copias de seguridad. Puedes exportar o borrar tu cuenta cuando quieras."
+      }
+    ]
+  },
+  "connectAi": {
+    "seoTitle": "Conecta tu IA",
+    "seoDescription": "Consulta y gestiona tu agenda desde Claude, ChatGPT o Gemini con el protocolo MCP.",
+    "title": "Conecta tu IA a tu agenda",
+    "lead": "Pregunta en lenguaje natural por tus citas, tus clientes y tus horarios libres, o pide que se cree, mueva o cancele una cita. Funciona con el protocolo abierto MCP.",
+    "assistantsTitle": "Asistentes compatibles",
+    "assistants": [
+      {
+        "name": "Claude",
+        "body": "Claude.ai, Claude Desktop y móvil: conector personalizado.",
+        "steps": [
+          "Abre Ajustes → Conectores → Añadir conector personalizado.",
+          "Pega la URL del servidor y guarda.",
+          "Pulsa «Conectar», entra con tu cuenta de Mi Cita en Tiempo y elige permisos y tableros."
+        ]
+      },
+      {
+        "name": "Claude Code",
+        "body": "Desde la terminal.",
+        "steps": [
+          "Ejecuta: claude mcp add --transport http mi-cita {{url}}",
+          "Dentro de Claude Code, usa /mcp y elige «Autenticar»."
+        ]
+      },
+      {
+        "name": "ChatGPT",
+        "body": "Modo desarrollador (Business, Enterprise y Edu) o, cuando esté publicada, desde el directorio de apps.",
+        "steps": [
+          "Activa el modo desarrollador en Ajustes → Apps y conectores → Avanzado.",
+          "Crea una app con la URL del servidor y autenticación OAuth.",
+          "Autoriza con tu cuenta y elige permisos y tableros."
+        ]
+      },
+      {
+        "name": "Gemini Enterprise",
+        "body": "Lo añade el administrador de tu espacio de trabajo.",
+        "steps": [
+          "En tu panel, abre IA → Credenciales para Gemini Enterprise y crea unas.",
+          "En Gemini Enterprise: Team → Connected Apps → Add MCP Server.",
+          "Pega la URL del servidor, el Client ID y el Client secret."
+        ]
+      },
+      {
+        "name": "Gemini CLI",
+        "body": "Desde la terminal.",
+        "steps": [
+          "Añade a settings.json: \"mcpServers\": { \"mi-cita\": { \"httpUrl\": \"{{url}}\" } }",
+          "Ejecuta /mcp auth mi-cita y autoriza con tu cuenta."
+        ]
+      }
+    ],
+    "examplesTitle": "Lo que puedes pedirle",
+    "examples": [
+      "¿Qué citas tengo mañana por la tarde?",
+      "Mueve la cita de Ana del jueves al viernes a la misma hora.",
+      "¿Cuántas citas canceladas hubo este mes?",
+      "Bloquea el lunes 2 de noviembre de 9 a 12."
+    ],
+    "safetyTitle": "Tú decides qué puede hacer",
+    "safety": "La IA actúa con los permisos de tu rol. Antes de cambiar o cancelar algo te pide confirmación, y puedes desconectarla desde tu panel.",
+    "serverUrl": "URL del servidor MCP",
+    "geminiApp": "La app de Gemini para consumidores aún no admite servidores MCP propios."
+  },
+  "contact": {
+    "seoTitle": "Contacto",
+    "seoDescription": "Escríbenos con tus dudas sobre Mi Cita en Tiempo.",
+    "title": "Contacto",
+    "lead": "Cuéntanos qué necesitas y te respondemos por correo.",
+    "name": "Nombre",
+    "email": "Correo",
+    "message": "Mensaje",
+    "newsletter": "Quiero recibir novedades por correo (máximo una vez al mes).",
+    "submit": "Enviar mensaje",
+    "sent": "Gracias. Te responderemos pronto a tu correo.",
+    "failed": "No pudimos enviar tu mensaje. Inténtalo de nuevo en unos minutos."
+  },
+  "legal": {
+    "privacyTitle": "Aviso de privacidad",
+    "privacyDescription": "Qué datos tratamos, para qué y cuáles son tus derechos.",
+    "termsTitle": "Condiciones de uso",
+    "termsDescription": "Las reglas del servicio de agenda en línea.",
+    "creditsTitle": "Créditos",
+    "creditsDescription": "Datos y software de terceros que usamos.",
+    "updated": "Última actualización: {{date}}"
+  }
+}

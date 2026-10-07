@@ -1,0 +1,308 @@
+{
+  "home": {
+    "seoTitle": "Online appointment scheduling for your business",
+    "seoDescription": "Clients book on their own, 24/7, with no double bookings. Hours, your country's holidays, notifications and sync with Google, Outlook and Apple. Try it free for 30 days.",
+    "eyebrow": "Online appointment scheduling",
+    "title": "Your clients book themselves. You do the work.",
+    "lead": "Publish your hours, share them with a link or embed them on your website, and get every appointment instantly — no calls, no texts and no double bookings.",
+    "ctaPrimary": "Try it free for 30 days",
+    "ctaSecondary": "See pricing",
+    "trialNote": "No card needed to start. From $5/month.",
+    "previewLabel": "Example of the booking page",
+    "previewService": "General consultation · 30 min",
+    "previewDay": "Tuesday 15",
+    "previewTimes": ["9:00 AM", "9:30 AM", "10:30 AM", "11:00 AM", "12:30 PM", "4:00 PM"],
+    "previewConfirm": "Appointment confirmed",
+    "highlightsTitle": "Everything a schedule that works for you needs",
+    "highlights": [
+      {
+        "title": "Bookings around the clock",
+        "body": "Clients pick a service, day and time from their phone, and confirm with a code sent to their email."
+      },
+      {
+        "title": "Never two at once",
+        "body": "Each time slot is held the moment it's picked: even if two people book at the same time, only one gets it."
+      },
+      {
+        "title": "Your country's holidays",
+        "body": "Block holidays for the United States, Canada, Mexico or any of about 200 countries, including their regions."
+      },
+      {
+        "title": "Your hours, your breaks",
+        "body": "Shifts per day, lunch breaks, buffers between appointments, minimum notice and special days."
+      },
+      {
+        "title": "Sync your calendars",
+        "body": "See your appointments in Google Calendar, Outlook or Apple Calendar and avoid clashes with your other plans."
+      },
+      {
+        "title": "Connect your AI",
+        "body": "Ask Claude, ChatGPT or Gemini about your schedule and have it create or move appointments for you."
+      }
+    ],
+    "stepsTitle": "Get started in three steps",
+    "steps": [
+      {
+        "title": "Create your board",
+        "body": "Name, time zone and location. Choose your country and holidays are blocked automatically."
+      },
+      {
+        "title": "Set hours and services",
+        "body": "Tell us when you work, your breaks and how long each service takes."
+      },
+      {
+        "title": "Share your link",
+        "body": "Send it in a message, add it to your social profiles or embed it on your website with one line of code."
+      }
+    ],
+    "audienceTitle": "Built for businesses that live by their schedule",
+    "audience": [
+      "Medical and dental offices",
+      "Salons and barbershops",
+      "Consultants and law offices",
+      "Repair shops and technical services",
+      "Classes and coaching",
+      "Photo, wellness and beauty studios"
+    ],
+    "ctaBandTitle": "Try your online schedule today",
+    "ctaBandBody": "You get 30 days to try every feature."
+  },
+  "features": {
+    "seoTitle": "Features",
+    "seoDescription": "Hours, breaks, holidays for about 200 countries, bookings without double booking, team roles, notifications, Google, Outlook and Apple sync, embedding and AI.",
+    "title": "Features",
+    "lead": "A complete scheduling tool your clients understand right away and your team can share.",
+    "groups": [
+      {
+        "title": "Hours that fit you",
+        "items": [
+          "Different shifts for each day of the week",
+          "Named breaks: lunch, breakfast or short pauses",
+          "Special days: closed, shorter hours or open on a holiday",
+          "Public, bank or school holidays for about 200 countries and their regions",
+          "Your own holidays: business anniversary, vacation"
+        ]
+      },
+      {
+        "title": "Frictionless booking",
+        "items": [
+          "Booking page designed for phones",
+          "Times shown in your client's time zone",
+          "Confirmation with an email code, no passwords",
+          "Clients view, reschedule or cancel their appointments when you allow it",
+          ".ics file to add the appointment to any calendar"
+        ]
+      },
+      {
+        "title": "Zero double bookings",
+        "items": [
+          "The time slot is held for 10 minutes while the client confirms",
+          "Several seats per time slot if you serve more than one person at once",
+          "Buffers before and after each appointment",
+          "Daily booking limit and minimum notice"
+        ]
+      },
+      {
+        "title": "Your team, with clear permissions",
+        "items": [
+          "Editors who manage appointments and time blocks",
+          "Viewers who can only look",
+          "Each client sees only their own appointments",
+          "Recurring appointments and time blocks for staff"
+        ]
+      },
+      {
+        "title": "Notifications where you need them",
+        "items": [
+          "Email and in-app notifications",
+          "Everyone can also choose Slack or Telegram (WhatsApp coming soon)",
+          "Reminders before every appointment"
+        ]
+      },
+      {
+        "title": "Connected to what you already use",
+        "items": [
+          "Google Calendar, Outlook and Apple Calendar",
+          "Your board on your website with an iframe or one line of code",
+          "Claude, ChatGPT and Gemini to check and manage your schedule"
+        ]
+      }
+    ]
+  },
+  "pricing": {
+    "seoTitle": "Pricing",
+    "seoDescription": "Personal plan at $5/month with one board and Branches plan at $20/month with up to 10 boards. 30-day trial.",
+    "title": "Simple pricing",
+    "lead": "Choose by how many schedules you need. Start with a 30-day trial with every feature.",
+    "perMonth": "/month",
+    "currencyNote": "Prices in US dollars. Taxes may vary by country.",
+    "trialBadge": "30-day trial",
+    "choose": "Start your trial",
+    "billingSoon": "Online payment is coming soon. In the meantime, your trial stays active.",
+    "plans": {
+      "personal": {
+        "name": "Personal",
+        "price": "$5",
+        "description": "For independent professionals with one schedule.",
+        "features": [
+          "1 board",
+          "Up to 10 people on your team",
+          "Bookings, notifications and reminders",
+          "Sync and embedding",
+          "Connect your AI"
+        ]
+      },
+      "branches": {
+        "name": "Branches",
+        "price": "$20",
+        "description": "For businesses with several locations, rooms or professionals.",
+        "features": [
+          "Up to 10 boards",
+          "Up to 10 people per board",
+          "A link and an embed for each board",
+          "Everything in Personal"
+        ]
+      }
+    },
+    "faqTitle": "About the trial and billing",
+    "faq": [
+      {
+        "q": "Do I need a card for the trial?",
+        "a": "No. Create your account and use every feature for 30 days."
+      },
+      {
+        "q": "What happens when the trial ends?",
+        "a": "We'll remind you before. If you don't pick a plan, your account becomes read-only: you don't lose your data."
+      },
+      {
+        "q": "Can I change plans?",
+        "a": "Yes, anytime. The change is prorated on your next bill."
+      }
+    ]
+  },
+  "faq": {
+    "seoTitle": "FAQ",
+    "seoDescription": "Answers about bookings, holidays, calendar sync, languages, privacy and plans for My Appointment On Time.",
+    "title": "Frequently asked questions",
+    "lead": "If you can't find your answer, write to us.",
+    "items": [
+      {
+        "q": "Do my clients need to create an account?",
+        "a": "No. They enter their name and email and confirm with a 6-digit code sent to their email. They can use that same email to see their appointments later."
+      },
+      {
+        "q": "How do you prevent double bookings?",
+        "a": "When someone picks a time, we hold it for 10 minutes while they confirm. The database refuses to save two appointments in the same seat at the same time, even if they arrive at the same moment."
+      },
+      {
+        "q": "Which holidays are included?",
+        "a": "Those of about 200 countries and their regions: public, bank, school and optional. You choose which ones block your schedule and can open on a specific holiday."
+      },
+      {
+        "q": "Does it work with Google Calendar, Outlook and Apple?",
+        "a": "Yes. Your appointments show up in those calendars, and your events there block your schedule so nobody books over them."
+      },
+      {
+        "q": "Can I put it on my website?",
+        "a": "Yes, with an iframe or one line of code. It works on WordPress, Wix, Squarespace or your own HTML."
+      },
+      {
+        "q": "Which languages are available?",
+        "a": "English at myappointmentontime.online and Spanish at micitaentiempo.online. Your clients get emails in the language of the site where they book."
+      },
+      {
+        "q": "Can my clients see other people's appointments?",
+        "a": "Never. Each client only sees their own appointments. Your team sees what their role allows."
+      },
+      {
+        "q": "Where is my data stored?",
+        "a": "On dedicated servers, with backups. You can export or delete your account at any time."
+      }
+    ]
+  },
+  "connectAi": {
+    "seoTitle": "Connect your AI",
+    "seoDescription": "Check and manage your schedule from Claude, ChatGPT or Gemini using the MCP protocol.",
+    "title": "Connect your AI to your schedule",
+    "lead": "Ask in plain language about your appointments, clients and open times, or have it create, move or cancel an appointment. It works with the open MCP protocol.",
+    "assistantsTitle": "Supported assistants",
+    "assistants": [
+      {
+        "name": "Claude",
+        "body": "Claude.ai, Claude Desktop and mobile: custom connector.",
+        "steps": [
+          "Open Settings → Connectors → Add custom connector.",
+          "Paste the server URL and save.",
+          "Click “Connect”, sign in with your My Appointment On Time account and choose permissions and boards."
+        ]
+      },
+      {
+        "name": "Claude Code",
+        "body": "From the terminal.",
+        "steps": [
+          "Run: claude mcp add --transport http my-appointment {{url}}",
+          "Inside Claude Code, use /mcp and choose “Authenticate”."
+        ]
+      },
+      {
+        "name": "ChatGPT",
+        "body": "Developer mode (Business, Enterprise and Edu) or, once published, from the app directory.",
+        "steps": [
+          "Turn on developer mode in Settings → Apps & Connectors → Advanced.",
+          "Create an app with the server URL and OAuth authentication.",
+          "Authorize with your account and choose permissions and boards."
+        ]
+      },
+      {
+        "name": "Gemini Enterprise",
+        "body": "Your workspace admin adds it.",
+        "steps": [
+          "In your dashboard, open AI → Gemini Enterprise credentials and create some.",
+          "In Gemini Enterprise: Team → Connected Apps → Add MCP Server.",
+          "Paste the server URL, the Client ID and the Client secret."
+        ]
+      },
+      {
+        "name": "Gemini CLI",
+        "body": "From the terminal.",
+        "steps": [
+          "Add to settings.json: \"mcpServers\": { \"my-appointment\": { \"httpUrl\": \"{{url}}\" } }",
+          "Run /mcp auth my-appointment and authorize with your account."
+        ]
+      }
+    ],
+    "examplesTitle": "What you can ask",
+    "examples": [
+      "What appointments do I have tomorrow afternoon?",
+      "Move Ana's appointment from Thursday to Friday at the same time.",
+      "How many appointments were canceled this month?",
+      "Block Monday, November 2 from 9 to 12."
+    ],
+    "safetyTitle": "You decide what it can do",
+    "safety": "The AI acts with your role's permissions. It asks you to confirm before changing or canceling anything, and you can disconnect it from your dashboard.",
+    "serverUrl": "MCP server URL",
+    "geminiApp": "The consumer Gemini app doesn't support custom MCP servers yet."
+  },
+  "contact": {
+    "seoTitle": "Contact",
+    "seoDescription": "Write to us with your questions about My Appointment On Time.",
+    "title": "Contact",
+    "lead": "Tell us what you need and we'll reply by email.",
+    "name": "Name",
+    "email": "Email",
+    "message": "Message",
+    "newsletter": "I want to get product news by email (at most once a month).",
+    "submit": "Send message",
+    "sent": "Thank you. We'll reply to your email soon.",
+    "failed": "We couldn't send your message. Please try again in a few minutes."
+  },
+  "legal": {
+    "privacyTitle": "Privacy notice",
+    "privacyDescription": "What data we process, why, and your rights.",
+    "termsTitle": "Terms of use",
+    "termsDescription": "The rules of the online scheduling service.",
+    "creditsTitle": "Credits",
+    "creditsDescription": "Third-party data and software we use.",
+    "updated": "Last updated: {{date}}"
+  }
+}

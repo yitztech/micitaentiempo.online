@@ -1,0 +1,65 @@
+{
+  "staff": {
+    "booking.created": "{{customer}} booked {{service}} for {{when}} at “{{calendar}}”.",
+    "booking.cancelled": "{{customer}}'s appointment on {{when}} at “{{calendar}}” was canceled.",
+    "booking.rescheduled": "{{customer}}'s appointment at “{{calendar}}” moved to {{when}}.",
+    "event.created": "There's a new appointment on {{when}} at “{{calendar}}”: {{title}}.",
+    "event.updated": "“{{title}}” on {{when}} at “{{calendar}}” was changed.",
+    "event.rescheduled": "“{{title}}” moved to {{when}} at “{{calendar}}”.",
+    "event.cancelled": "“{{title}}” on {{when}} at “{{calendar}}” was canceled.",
+    "series.created": "The series “{{title}}” was created starting {{when}} at “{{calendar}}”.",
+    "series.updated": "The series “{{title}}” at “{{calendar}}” was changed.",
+    "series.cancelled": "The series “{{title}}” at “{{calendar}}” was canceled.",
+    "series.instances_skipped": "Some dates in the series “{{title}}” weren't created because they were taken.",
+    "channel.failed": "We couldn't send you notifications by {{channel}}. Check the connection in your preferences.",
+    "block.created": "{{when}} at “{{calendar}}” was blocked: {{title}}.",
+    "block.updated": "The time block on {{when}} at “{{calendar}}” was changed.",
+    "block.rescheduled": "The time block at “{{calendar}}” moved to {{when}}.",
+    "block.cancelled": "The time block on {{when}} at “{{calendar}}” was removed.",
+    "billing.trial_ending": "Your free trial ends in {{days}} days. Choose a plan to keep taking bookings.",
+    "billing.trial_ended": "Your free trial ended. Your account is read-only until you choose a plan.",
+    "billing.payment_failed": "We couldn't charge your subscription. Update your payment method so you don't lose bookings.",
+    "billing.read_only": "Your account is now read-only. Choose a plan to take bookings again.",
+    "billing.active": "Your subscription is active. Thank you!",
+    "sync.revoked": "Your {{provider}} calendar ({{account}}) was disconnected from “{{calendar}}”. Reconnect it in the board settings.",
+    "sync.restored": "We restored {{count}} appointment(s) from “{{calendar}}” that were changed in your {{provider}} calendar. Make changes in My Appointment On Time."
+  },
+  "customer": {
+    "booking.created": "Your {{service}} appointment at “{{calendar}}” is set for {{when}}.",
+    "booking.cancelled": "Your {{service}} appointment on {{when}} at “{{calendar}}” was canceled.",
+    "booking.rescheduled": "Your {{service}} appointment at “{{calendar}}” is now on {{when}}.",
+    "reminder": "A reminder of your {{service}} appointment on {{when}} at “{{calendar}}”."
+  },
+  "subjects": {
+    "staff": "Update from “{{calendar}}”",
+    "booking.created": "Your appointment is confirmed",
+    "booking.cancelled": "Your appointment was canceled",
+    "booking.rescheduled": "Your appointment time changed",
+    "reminder": "Appointment reminder: {{when}}",
+    "billing": "Your My Appointment On Time account"
+  },
+  "preview": "Updates to your schedule on My Appointment On Time",
+  "address": "Address: {{address}}",
+  "reason": "Reason: {{reason}}",
+  "manage": "See or change my appointments",
+  "openPanel": "Open dashboard",
+  "unsubscribe": "Stop getting these notifications by email",
+  "unsubscribed": "Done, you won't get these notifications by email anymore.",
+  "someone": "A client",
+  "untitled": "Untitled",
+  "service": "their appointment",
+  "channels": {
+    "email": "email",
+    "telegram": "Telegram",
+    "slack": "Slack",
+    "whatsapp": "WhatsApp",
+    "panel": "dashboard"
+  },
+  "telegramLinked": "Done: you'll get My Appointment On Time notifications here.",
+  "whatsappCode": "Your My Appointment On Time code is {{code}}.",
+  "providers": {
+    "google": "Google",
+    "microsoft": "Outlook",
+    "icloud": "iCloud"
+  }
+}

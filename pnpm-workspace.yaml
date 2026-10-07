@@ -1,0 +1,19 @@
+packages:
+  - services/web
+  - services/api
+  - packages/*
+  - tools/*
+  - tests/escenarios
+  - tests/fakes
+
+# Cadena de suministro: no instalar versiones publicadas hace menos de 24 h.
+minimumReleaseAge: 1440
+
+# Solo estos paquetes pueden ejecutar scripts de instalación.
+allowBuilds:
+  esbuild: true
+  "@bufbuild/buf": true
+  # Dependencias opcionales de testcontainers (SSH a Docker remoto): no se compilan.
+  cpu-features: false
+  ssh2: false
+  protobufjs: false

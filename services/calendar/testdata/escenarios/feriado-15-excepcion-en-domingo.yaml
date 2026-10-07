@@ -1,0 +1,13 @@
+nombre: "Abrir un domingo con horario especial"
+tablero:
+  zona: America/Mexico_City
+  capacidad: 1
+  horario:
+    lunes-viernes: ["09:00-18:00"]
+  excepciones:
+    "2026-09-20": {"tipo": "horario", "tramos": ["10:00-13:00"]}
+servicio: {"duracion": 30, "intervalo": 30}
+ahora: "2026-09-14T06:00:00-06:00"
+consulta: { desde: "2026-09-20", hasta: "2026-09-20" }
+esperado:
+  "2026-09-20": {"total": 6}

@@ -1,0 +1,13 @@
+nombre: "Horario especial de 10 a 12"
+tablero:
+  zona: America/Mexico_City
+  capacidad: 1
+  horario:
+    lunes-viernes: ["09:00-18:00"]
+  excepciones:
+    "2026-09-14": {"tipo": "horario", "tramos": ["10:00-12:00"]}
+servicio: {"duracion": 30, "intervalo": 30}
+ahora: "2026-09-14T06:00:00-06:00"
+consulta: { desde: "2026-09-14", hasta: "2026-09-14" }
+esperado:
+  "2026-09-14": {"total": 4, "primero": "10:00", "ultimo": "11:30"}

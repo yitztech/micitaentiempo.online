@@ -1,0 +1,15 @@
+nombre: "Capacidad 3 con los tres asientos ocupados"
+tablero:
+  zona: America/Mexico_City
+  capacidad: 3
+  horario:
+    lunes-viernes: ["09:00-18:00"]
+servicio: {"duracion": 30, "intervalo": 30}
+ahora: "2026-09-14T06:00:00-06:00"
+existentes:
+  - {"tipo": "cita", "inicio": "2026-09-14T10:00:00-06:00", "fin": "2026-09-14T10:30:00-06:00", "asiento": 1}
+  - {"tipo": "cita", "inicio": "2026-09-14T10:00:00-06:00", "fin": "2026-09-14T10:30:00-06:00", "asiento": 2}
+  - {"tipo": "cita", "inicio": "2026-09-14T10:00:00-06:00", "fin": "2026-09-14T10:30:00-06:00", "asiento": 3}
+consulta: { desde: "2026-09-14", hasta: "2026-09-14" }
+esperado:
+  "2026-09-14": {"excluye": ["10:00"], "incluye": ["09:30", "10:30"], "total": 17}

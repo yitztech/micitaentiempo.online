@@ -1,0 +1,100 @@
+# Capa de pruebas sobre compose.prod.yml: misma topología que producción,
+# con imágenes construidas en local, puertos locales y Mailpit.
+#   docker compose -f compose.prod.yml -f compose.ci.yml --env-file .env.ci up -d --build
+services:
+  gateway:
+    build: { context: ., dockerfile: services/gateway/Dockerfile, args: { RELEASE_SHA: "${RELEASE_SHA:-ci}" } }
+    ports: ["8080:80"]
+    environment:
+      # Las pruebas hacen muchas altas desde la misma IP.
+      RATE_AUTH: ${RATE_AUTH:-600r/m}
+      RATE_PUBLIC: ${RATE_PUBLIC:-6000r/m}
+      RATE_MCP: ${RATE_MCP:-6000r/m}
+      RATE_ICS: 600r/m
+      BURST_AUTH: "500"
+      BURST_PUBLIC: "2000"
+  web:
+    build: { context: ., dockerfile: services/web/Dockerfile, args: { RELEASE_SHA: "${RELEASE_SHA:-ci}" } }
+    environment:
+      HOST_LANG_MAP: ${HOST_LANG_MAP:-}
+  api:
+    build: { context: ., dockerfile: services/api/Dockerfile, args: { RELEASE_SHA: "${RELEASE_SHA:-ci}" } }
+    environment:
+      HOST_LANG_MAP: ${HOST_LANG_MAP:-}
+      TEST_MODE: ${TEST_MODE:-}
+      # Canales contra el servidor de captura: valores falsos, nunca reales (repositorio público).
+      TELEGRAM_BOT_TOKEN: "000000:token-de-prueba"
+      TELEGRAM_BOT_USERNAME: mcet_pruebas_bot
+      TELEGRAM_API_URL: http://captura:4010/telegram
+      SLACK_CLIENT_ID: cliente-de-prueba
+      SLACK_CLIENT_SECRET: secreto-de-prueba
+      SLACK_API_URL: http://captura:4010/slack
+      SLACK_AUTHORIZE_URL: http://localhost:4010/slack/authorize
+      WHATSAPP_TOKEN: token-de-prueba
+      WHATSAPP_PHONE_NUMBER_ID: "000000000000000"
+      WHATSAPP_API_URL: http://captura:4010/whatsapp
+      # Stripe queda apagado (como producción); los escenarios lo encienden contra la captura.
+      STRIPE_FAKE_URL: http://captura:4010
+      # MCP: los documentos CIMD de clientes *.example los sirve la captura.
+      CIMD_FAKE_URL: http://captura:4010
+      # Google y Microsoft contra la captura (OAuth y API); el navegador va a localhost:4010.
+      GOOGLE_CLIENT_ID: cliente-google-de-prueba
+      GOOGLE_CLIENT_SECRET: secreto-google-de-prueba
+      GOOGLE_AUTHORIZE_URL: http://localhost:4010/google/authorize
+      GOOGLE_TOKEN_URL: http://captura:4010/google/token
+      MS_CLIENT_ID: cliente-ms-de-prueba
+      MS_CLIENT_SECRET: secreto-ms-de-prueba
+      MS_AUTHORIZE_URL: http://localhost:4010/ms/authorize
+      MS_TOKEN_URL: http://captura:4010/ms/token
+    depends_on:
+      captura: { condition: service_healthy }
+  calendar:
+    build: { context: ., dockerfile: services/calendar/Dockerfile, args: { RELEASE_SHA: "${RELEASE_SHA:-ci}" } }
+    environment:
+      TEST_MODE: ${TEST_MODE:-}
+      GOOGLE_CLIENT_ID: cliente-google-de-prueba
+      GOOGLE_CLIENT_SECRET: secreto-google-de-prueba
+      GOOGLE_API_URL: http://captura:4010/google
+      GOOGLE_TOKEN_URL: http://captura:4010/google/token
+      MS_CLIENT_ID: cliente-ms-de-prueba
+      MS_CLIENT_SECRET: secreto-ms-de-prueba
+      MS_GRAPH_URL: http://captura:4010/graph
+      MS_TOKEN_URL: http://captura:4010/ms/token
+      ICLOUD_CALDAV_URL: http://radicale:5232/
+    depends_on:
+      captura: { condition: service_healthy }
+      radicale: { condition: service_healthy }
+  postgres:
+    build: { context: ., dockerfile: services/postgres/Dockerfile }
+  mailpit:
+    image: axllent/mailpit:v1.31.4
+    mem_limit: 64m
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: "1"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "1"
+    ports: ["8025:8025"]
+    networks: [frontend]
+  # Imita Telegram, Slack y WhatsApp (tests/fakes/captura.mjs): nada sale a terceros en las pruebas.
+  captura:
+    image: node:24.21.0-alpine3.24
+    mem_limit: 64m
+    command: ["node", "/app/captura.mjs"]
+    volumes: ["./tests/fakes:/app:ro"]
+    ports: ["4010:4010"]
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, "http://127.0.0.1:4010/healthz"]
+      interval: 5s
+      retries: 10
+    networks: [frontend]
+  # Doble de iCloud (CalDAV real): tests/fakes/radicale.conf.
+  radicale:
+    image: tomsquest/docker-radicale:3.8.1.1
+    mem_limit: 96m
+    volumes: ["./tests/fakes/radicale.conf:/config/config:ro"]
+    tmpfs: [/data]
+    ports: ["5232:5232"]
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, "http://127.0.0.1:5232/.web/"]
+      interval: 5s
+      retries: 12
+    networks: [frontend, backend]

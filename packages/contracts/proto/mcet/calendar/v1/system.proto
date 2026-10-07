@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package mcet.calendar.v1;
+
+import "mcet/common/v1/actor.proto";
+
+// Operaciones de sistema del motor.
+service SystemService {
+  // Comprueba la conexión y devuelve el actor tal y como lo ve el motor.
+  rpc Ping(PingRequest) returns (PingResponse);
+}
+
+message PingRequest {}
+
+message PingResponse {
+  string revision = 1;
+  mcet.common.v1.Actor actor = 2;
+}

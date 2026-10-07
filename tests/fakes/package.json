@@ -1,0 +1,7 @@
+{
+  "name": "@mcet/fakes",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Servidor de captura para probar Telegram, Slack y WhatsApp sin terceros (solo pruebas)."
+}

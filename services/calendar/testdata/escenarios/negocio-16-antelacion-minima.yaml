@@ -1,0 +1,11 @@
+nombre: "Antelación mínima de 60 min"
+tablero:
+  zona: America/Mexico_City
+  capacidad: 1
+  horario:
+    lunes-viernes: ["09:00-18:00"]
+servicio: {"duracion": 30, "intervalo": 30, "antelacion_minima": 60}
+ahora: "2026-09-14T09:20:00-06:00"
+consulta: { desde: "2026-09-14", hasta: "2026-09-14" }
+esperado:
+  "2026-09-14": {"primero": "10:30", "excluye": ["10:00"]}
