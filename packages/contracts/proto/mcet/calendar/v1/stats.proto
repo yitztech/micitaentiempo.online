@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package mcet.calendar.v1;
+
+import "google/protobuf/timestamp.proto";
+
+// Estadísticas de un tablero (panel y MCP).
+service StatsService {
+  rpc GetStats(GetStatsRequest) returns (GetStatsResponse);
+}
+
+message GetStatsRequest {
+  string calendar_id = 1;
+  google.protobuf.Timestamp from = 2;
+  google.protobuf.Timestamp to = 3;
+}
+
+message CountByKey {
+  string key = 1;
+  int32 count = 2;
+}
+
+message GetStatsResponse {
+  // Citas confirmadas (incluye las ya atendidas).
+  int32 confirmed = 1;
+  int32 cancelled = 2;
+  int32 attended = 3;
+  int32 no_show = 4;
+  // Clientes finales distintos con cita confirmada.
+  int32 customers = 5;
+  int32 booked_minutes = 6;
+  int32 blocked_minutes = 7;
+  // Claves: id del servicio ("" = sin servicio), día ISO 1-7 y hora 0-23 en la zona del tablero,
+  // canal de alta (panel, embed, public, mcp, sync, system).
+  repeated CountByKey by_service = 8;
+  repeated CountByKey by_weekday = 9;
+  repeated CountByKey by_hour = 10;
+  repeated CountByKey by_via = 11;
+}

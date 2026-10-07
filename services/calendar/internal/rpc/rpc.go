@@ -97,5 +97,6 @@ func Mount(mux *http.ServeMux, o Options) {
 		mux.Handle(calendarv1connect.NewServiceCatalogServiceHandler(engine.ServiceCatalogServer{Engine: e}, interceptors))
 		mux.Handle(calendarv1connect.NewAvailabilityServiceHandler(engine.AvailabilityServer{Engine: e}, interceptors))
 		mux.Handle(calendarv1connect.NewEventServiceHandler(engine.EventServer{Engine: e}, interceptors))
+		mux.Handle(calendarv1connect.NewStatsServiceHandler(engine.StatsServer{Engine: e}, interceptors))
 	}
 }

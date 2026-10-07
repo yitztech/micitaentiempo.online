@@ -173,17 +173,27 @@ func TestReservasSinDobleReserva(t *testing.T) {
 
 	// El hold no confirmado caduca a los 10 minutos y su asiento vuelve a estar libre.
 	f.clk.Set(f.clk.Now().Add(11 * time.Minute))
-	if _, err := f.ev.ConfirmHold(beto, &calendarv1.ConfirmHoldRequest{Id: other.GetId(), HolderId: other.GetCreatedBy()}); reason(err) != "hold_expired" {
-		t.Fatalf("hold caducado: %v", err)
-	}
 	if got := f.list(f.owner, start, f.at(9, 16, 0, 0)); len(got) != 1 {
 		t.Fatalf("tras caducar, personal ve %d", len(got))
 	}
 	if _, err := f.ev.HoldSlot(customer(f.ctx, uid(3)), &calendarv1.HoldSlotRequest{CalendarId: f.cal, ServiceId: f.svc, Start: start}); err != nil {
 		t.Fatalf("apartar tras caducar: %v", err)
 	}
-	if n, err := store.ExpireHolds(f.ctx, f.e.Store.Pool, "", f.clk.Now().Add(time.Hour)); err != nil || n != 1 {
-		t.Fatalf("limpieza de holds: %d %v", n, err)
+	// Confirmar tarde revalida: aquí el asiento ya lo tomó otro.
+	if _, err := f.ev.ConfirmHold(beto, &calendarv1.ConfirmHoldRequest{Id: other.GetId(), HolderId: other.GetCreatedBy()}); reason(err) != "hold_expired" {
+		t.Fatalf("hold caducado y ocupado: %v", err)
+	}
+	// …y aquí sigue libre, así que se confirma.
+	late, err := f.ev.HoldSlot(customer(f.ctx, uid(5)), &calendarv1.HoldSlotRequest{CalendarId: f.cal, ServiceId: f.svc, Start: f.at(9, 15, 16, 0)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	f.clk.Set(f.clk.Now().Add(15 * time.Minute))
+	if _, err := store.ExpireHolds(f.ctx, f.e.Store.Pool, "", f.clk.Now()); err != nil {
+		t.Fatal(err)
+	}
+	if got, err := f.ev.ConfirmHold(beto, &calendarv1.ConfirmHoldRequest{Id: late.GetId(), HolderId: late.GetCreatedBy()}); err != nil || got.GetStatus() != "confirmed" || got.GetCancelledAt() != nil {
+		t.Fatalf("hold caducado pero libre: %v %v", got, err)
 	}
 
 	// Fuera de horario, en minutos raros o sin servicio: no se aparta.
@@ -216,6 +226,13 @@ func TestReservasSinDobleReserva(t *testing.T) {
 	}
 	if b, err := f.ev.ListCustomerBookings(ana, &calendarv1.ListCustomerBookingsRequest{}); err != nil || len(b.GetEvents()) != 0 {
 		t.Fatalf("mis citas tras cancelar: %v %v", b, err)
+	}
+	st, err := engine.StatsServer{Engine: f.e}.GetStats(f.owner, &calendarv1.GetStatsRequest{CalendarId: f.cal, From: f.at(9, 1, 0, 0), To: f.at(10, 1, 0, 0)})
+	if err != nil || st.GetConfirmed() != 1 || st.GetCancelled() != 1 || st.GetCustomers() != 1 || st.GetByVia()[0].GetKey() != "public" {
+		t.Fatalf("estadísticas: %v %v", st, err)
+	}
+	if _, err := (engine.StatsServer{Engine: f.e}).GetStats(as(f.ctx, "observer", org), &calendarv1.GetStatsRequest{CalendarId: f.cal, From: f.at(9, 1, 0, 0), To: f.at(10, 1, 0, 0)}); connect.CodeOf(err) != connect.CodePermissionDenied {
+		t.Fatalf("observador viendo estadísticas: %v", err)
 	}
 }
 

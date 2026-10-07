@@ -211,18 +211,20 @@ func ListCustomerEvents(ctx context.Context, q DBTX, customerUserID, orgID strin
 
 // EventChange es un cambio de un evento con concurrencia optimista.
 type EventChange struct {
-	Start, End      *time.Time
-	Seat            *int
-	Status          *string
-	Title           *string
-	Attendee        *Attendee
-	InternalNotes   *string
-	Attendance      *string
-	IsException     *bool
-	CancelReason    *string
-	CustomerUserID  *string
-	CustomerNotes   *string
-	ClearHold       bool
+	Start, End     *time.Time
+	Seat           *int
+	Status         *string
+	Title          *string
+	Attendee       *Attendee
+	InternalNotes  *string
+	Attendance     *string
+	IsException    *bool
+	CancelReason   *string
+	CustomerUserID *string
+	CustomerNotes  *string
+	ClearHold      bool
+	// Reopen revive un hold caducado: borra la cancelación.
+	Reopen          bool
 	BumpICal        bool
 	ExpectedVersion int
 	// Now es el instante de la cancelación (reloj del motor).
@@ -248,8 +250,9 @@ func UpdateEvent(ctx context.Context, q DBTX, id string, c EventChange) (Event, 
 		seat = coalesce($4, seat), status = coalesce($5, status), title = coalesce($6, title),
 		attendee = coalesce($7::jsonb, attendee), internal_notes = coalesce($8, internal_notes),
 		attendance = case when $9::text is null then attendance else nullif($9, '') end,
-		is_exception = coalesce($10, is_exception), cancel_reason = coalesce($11, cancel_reason),
-		cancelled_at = coalesce($12, cancelled_at),
+		is_exception = coalesce($10, is_exception),
+		cancel_reason = case when $18 then null else coalesce($11, cancel_reason) end,
+		cancelled_at = case when $18 then null else coalesce($12, cancelled_at) end,
 		hold_expires_at = case when $13 then null else hold_expires_at end,
 		ical_sequence = ical_sequence + case when $14 then 1 else 0 end,
 		customer_user_id = coalesce(nullif($16, '')::uuid, customer_user_id),
@@ -257,7 +260,7 @@ func UpdateEvent(ctx context.Context, q DBTX, id string, c EventChange) (Event, 
 		version = version + 1, updated_at = now()
 		where id = $1 and ($15 = 0 or version = $15) returning `+eventColumns,
 		id, c.Start, c.End, c.Seat, c.Status, c.Title, attendee, c.InternalNotes, c.Attendance, c.IsException,
-		c.CancelReason, cancelledAt, c.ClearHold, c.BumpICal, c.ExpectedVersion, c.CustomerUserID, c.CustomerNotes)
+		c.CancelReason, cancelledAt, c.ClearHold, c.BumpICal, c.ExpectedVersion, c.CustomerUserID, c.CustomerNotes, c.Reopen)
 	out, err := scanEvent(row)
 	var pg *pgconn.PgError
 	switch {

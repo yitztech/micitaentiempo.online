@@ -407,6 +407,7 @@ func (s EventServer) HoldSlot(ctx context.Context, req *calendarv1.HoldSlotReque
 }
 
 // ConfirmHold convierte el hold en cita del cliente final verificado que presenta el titular.
+// Si el hold caducó, revalida: se confirma si el horario sigue siendo reservable.
 func (s EventServer) ConfirmHold(ctx context.Context, req *calendarv1.ConfirmHoldRequest) (*calendarv1.Event, error) {
 	a, err := actorOf(ctx)
 	if err != nil {
@@ -429,24 +430,56 @@ func (s EventServer) ConfirmHold(ctx context.Context, req *calendarv1.ConfirmHol
 	if err != nil {
 		return nil, err
 	}
+	// Lo necesario para revalidar se lee fuera de la transacción (ver slotAvailable).
+	var in *availability.Input
+	if sv, err := s.Store.GetService(ctx, c.ID, held.ServiceID); err == nil && sv.Active && c.Status == "active" {
+		if built, err := s.BuildInput(ctx, c, sv, held.Start, held.Start.Add(time.Minute), nil); err == nil {
+			in = &built
+		}
+	}
 	var out store.Event
 	err = s.Store.InTx(ctx, func(tx pgx.Tx) error {
+		if err := store.LockCalendar(ctx, tx, c.ID); err != nil {
+			return err
+		}
 		ev, err := store.GetEventForUpdate(ctx, tx, req.GetId())
 		if err != nil {
 			return eventErr(err)
 		}
-		if ev.Status == "confirmed" && ev.CustomerUserID == a.UserID && ev.CreatedBy == req.GetHolderId() {
+		holder := req.GetHolderId() != "" && ev.CreatedBy == req.GetHolderId()
+		if holder && ev.Status == "confirmed" && ev.CustomerUserID == a.UserID {
 			out = ev // reintento
 			return nil
 		}
-		if ev.Status != "held" || ev.CreatedBy != req.GetHolderId() || req.GetHolderId() == "" {
+		revivable := ev.Status == "cancelled" && ev.CancelReason == "hold_expired"
+		if !holder || (ev.Status != "held" && !revivable) {
 			return fail(connect.CodeNotFound, "hold_not_found", "hold")
 		}
-		if expiredHold(ev, s.Clock.Now()) {
-			return fail(connect.CodeFailedPrecondition, "hold_expired", "el horario apartado caducó")
-		}
+		now := s.Clock.Now()
 		status, customer := "confirmed", a.UserID
 		ch := store.EventChange{Status: &status, ClearHold: true, CustomerUserID: &customer}
+		if revivable || expiredHold(ev, now) {
+			if in == nil {
+				return fail(connect.CodeFailedPrecondition, "hold_expired", "el horario apartado caducó")
+			}
+			if _, err := store.ExpireHolds(ctx, tx, c.ID, now); err != nil {
+				return err
+			}
+			occ := txOccupancy{tx: tx, now: now, exclude: ev.ID}
+			ok, err := s.slotAvailable(ctx, *in, c.ID, ev.Start, occ)
+			if err != nil {
+				return err
+			}
+			appts, blocks, err := occ.Load(ctx, c.ID, ev.Start.Add(-24*time.Hour), ev.End.Add(24*time.Hour))
+			if err != nil {
+				return err
+			}
+			seat, reason := pickSeat(c.Capacity, appts, blocks, ev.Start, ev.End, minutes(ev.BufferBeforeMin), minutes(ev.BufferAfterMin))
+			if !ok || reason != "" {
+				return fail(connect.CodeFailedPrecondition, "hold_expired", "el horario apartado caducó y ya no está libre")
+			}
+			ch.Seat, ch.Reopen = &seat, true
+		}
 		if req.GetAttendee() != nil {
 			att := attendeeOf(req.GetAttendee())
 			ch.Attendee = &att
