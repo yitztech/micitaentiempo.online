@@ -13,7 +13,7 @@ Estado verificado entre julio y octubre de 2026; revisar en cada fuente al imple
 |---|---|---|---|---|
 | Claude (claude.ai, Desktop, móvil, Cowork) | Conector personalizado por URL; opcionalmente, directorio de Anthropic | DCR (por defecto) u otras vías | `https://claude.ai/api/mcp/auth_callback` | Sigue las especificaciones de autorización 2025-03-26, 2025-06-18 y 2025-11-25; resultado ≤ ~150 000 caracteres y 240 s por llamada; no usa suscripciones a recursos ni sampling ([docs](https://claude.com/docs/connectors/building)) |
 | Claude Code | `claude mcp add --transport http mi-cita https://micitaentiempo.online/mcp` | DCR | Loopback | Resultado ≤ 25 000 tokens por defecto |
-| ChatGPT | Modo desarrollador y apps; directorio de apps tras revisión | CIMD (preferido) o DCR; PKCE `S256`; `resource` copiado a `aud`; `iss` (RFC 9207) | `https://chatgpt.com/connector_platform_oauth_redirect` (con `iss`) o `https://chatgpt.com/connector/oauth/{callback_id}` | Pide `securitySchemes` por herramienta y `_meta["mcp/www_authenticate"]` en errores de autenticación; recomienda `offline_access` ([docs](https://developers.openai.com/apps-sdk/build/auth)). Qué planes permiten escritura: confirmarlo en la ayuda de OpenAI al implementar |
+| ChatGPT | Las apps de ChatGPT son servidores MCP. Dos vías: **modo desarrollador** (añadir por URL), con soporte MCP completo y escritura en beta para ChatGPT Business, Enterprise y Edu en la web ([ayuda](https://help.openai.com/en/articles/12584461-developer-mode-and-mcp-apps-in-chatgpt)); o **directorio de apps** tras revisión (envíos abiertos desde el 2025-12-17), que lo pone al alcance de usuarios sin modo desarrollador | CIMD (preferido) o DCR; PKCE `S256`; `resource` copiado a `aud`; `iss` (RFC 9207) | `https://chatgpt.com/connector_platform_oauth_redirect` (con `iss`) o `https://chatgpt.com/connector/oauth/{callback_id}` | Pide `securitySchemes` por herramienta y `_meta["mcp/www_authenticate"]` en errores de autenticación; recomienda `offline_access` ([docs](https://developers.openai.com/apps-sdk/build/auth)). En cuentas individuales (Plus) el modo desarrollador puede no estar disponible: para esos negocios, la vía es el directorio |
 | Gemini Enterprise (Business Edition) | El administrador añade el servidor en *Team → Connected Apps → Add MCP Server* | Cliente OAuth registrado a mano (`client_id` y `client_secret`) | `https://vertexaisearch.cloud.google.com/oauth-redirect` | Solo Streamable HTTP; función pre-GA al 2026-09-15 ([ayuda](https://support.google.com/g/answer/17106276)) |
 | Gemini CLI | `httpUrl` en `settings.json` | Descubrimiento OAuth | Loopback | ([docs](https://geminicli.com/docs/tools/mcp-server/)) |
 | App de consumo de Gemini | — | — | — | No admite servidores MCP personalizados a la fecha de verificación; la página «Conecta tu IA» lo explica |
@@ -134,11 +134,27 @@ descripción en el idioma del usuario.
   el conector MCP de la API de Claude con `claude-opus-5-5`; se comprueban hechos esperados (número de
   citas, nombres de servicios) y se limita el gasto por ejecución.
 
-## 6.7 Publicación (opcional)
+## 6.7 Publicación en directorios (recomendada para ChatGPT)
 
-Los negocios pueden usar el servidor por URL sin ninguna revisión. Para aparecer en los directorios:
-directorio de conectores de Anthropic (revisión de nombres, descripciones, anotaciones y política de
-privacidad) y directorio de apps de ChatGPT. Ambos piden una cuenta de prueba con datos de ejemplo.
+En Claude, cualquier negocio puede añadir el servidor por URL sin revisión. En ChatGPT, por URL solo se
+puede con modo desarrollador (planes de empresa); para llegar a negocios con cuentas individuales hay que
+publicar en el directorio de apps. Requisitos de OpenAI
+([envío](https://developers.openai.com/apps-sdk/deploy/submission)):
+
+- Organización verificada (individual o empresa) en la plataforma de desarrolladores de OpenAI.
+- URL de la web, de soporte, de privacidad y de condiciones.
+- Cinco casos de prueba positivos y tres negativos, con las herramientas y resultados esperados.
+- Cuenta de prueba con datos de ejemplo, **sin MFA ni enlaces mágicos** (una cuenta de negocio con correo y
+  contraseña de este sistema lo cumple).
+- Vídeo de demostración, descripciones y anotaciones de herramientas correctas, y verificación del dominio
+  del servidor MCP.
+
+El directorio de conectores de Anthropic pide algo parecido (nombres, descripciones, anotaciones, política
+de privacidad y cuenta de prueba). Ambos envíos son opcionales y van en F12.
+
+**Riesgo y calendario:** MCP no añade contenedores ni coste de IA para la plataforma y llega en F11, al
+final. Si hiciera falta recortar alcance, F11 puede pasar a post-lanzamiento sin afectar a ninguna otra
+fase.
 
 ## 6.8 Post-lanzamiento
 

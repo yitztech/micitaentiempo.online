@@ -42,8 +42,8 @@ automatizados (`09-pruebas.md`).
 |---|---|---|
 | RF-01 | Registro de negocios con Google o con correo y contraseña | Se guarda nombre completo, correo (es el usuario) y contraseña como hash Argon2id; nunca en claro |
 | RF-02 | Verificar que el correo es válido | Formato correcto, dominio con registros MX (o A/AAAA), dominio no desechable y enlace o código de verificación obligatorio antes de usar el panel. Con Google se acepta `email_verified` |
-| RF-03 | Prueba gratuita de 1 mes | 30 días sin tarjeta desde el registro; avisos a 7 y 3 días; al vencer, el tablero pasa a solo lectura y deja de aceptar reservas |
-| RF-04 | Planes | **Personal** US$5/mes: 1 tablero. **Sucursales** US$20/mes: hasta 10 tableros |
+| RF-03 | Prueba gratuita de 1 mes | 30 días sin tarjeta desde el registro; avisos a 7 y 3 días; al vencer, el tablero pasa a solo lectura y deja de aceptar reservas. Mientras Stripe no esté configurado, la prueba no vence (§1.9) |
+| RF-04 | Planes | **Personal** US$5/mes: 1 tablero. **Sucursales** US$20/mes: hasta 10 tableros. Solo suscripción; el cobro con Stripe se implementa completo y queda sin configurar |
 | RF-05 | Primer tablero al registrarse | Asistente de alta que crea el tablero con su configuración |
 | RF-06 | Bloqueos al crear el tablero | Zona horaria, horario laboral por día, descansos con nombre (desayuno, comida, otros), feriados y festivos de uno o varios países (y región), días cerrados y excepciones por fecha |
 | RF-07 | Compartir y embeber | Enlace público del tablero e incrustación en cualquier landing (iframe directo o script con modos en línea, ventana emergente y botón flotante) |
@@ -143,7 +143,8 @@ La aplican el `api` (guardas) y el motor en Go (segunda barrera). Las pruebas la
 
 ## 1.8 Fuera de alcance de la primera versión
 
-- Pagos de los clientes finales al negocio por cita (Stripe Connect). Queda como pregunta abierta.
+- Pagos por cita de los clientes finales al negocio (Stripe Connect): pospuesto. De momento, solo
+  suscripción (decisión del 2026-10-06).
 - Aplicaciones móviles nativas. La web es responsive y puede instalarse como PWA más adelante.
 - API pública con claves y webhooks salientes para terceros (post-lanzamiento; el embed y MCP cubren el caso inicial).
 - Sincronización bidireccional completa que acepte cambios hechos fuera (mover una cita en Google y que se
@@ -153,21 +154,27 @@ La aplican el `api` (guardas) y el motor en Go (segunda barrera). Las pruebas la
 - Stripe Checkout alojado sin marca de Stripe: el pago usa Embedded Checkout dentro de nuestra página; Stripe
   muestra su pie mínimo, inevitable.
 
-## 1.9 Preguntas abiertas
+## 1.9 Decisiones confirmadas y preguntas abiertas
 
-Cada una tiene una decisión por defecto para no bloquear la ejecución.
+**Confirmadas por el usuario el 2026-10-06:**
+
+| Tema | Decisión |
+|---|---|
+| Cobro por cita (Stripe Connect) | Pospuesto. De momento, solo suscripción |
+| Stripe | Se implementa completo (planes, Checkout, webhooks, estados), pero **sin configurar y sin valores reales**. Sin claves, «Contratar» muestra «Disponible pronto» y la prueba gratuita no vence. Se activa más adelante con el procedimiento de `05-negocio-api.md` §5.5 |
+| Impuestos (Stripe Tax) | Se decide al activar Stripe; el interruptor `STRIPE_TAX_ENABLED` queda apagado |
+| WhatsApp | El canal se implementa y queda **desactivado, sin valores reales**, hasta tener la cuenta de WhatsApp Business. No aparece en las preferencias mientras tanto |
+| Copias de seguridad y seguridad del servidor | Las gestiona la plataforma con su propio sistema; el proyecto no añade nada por ahora |
+
+**Abiertas**, con su decisión por defecto para no bloquear la ejecución:
 
 | Pregunta | Decisión por defecto |
 |---|---|
-| ¿Los negocios cobrarán a sus clientes por cita (Stripe Connect)? | No en la v1 |
-| ¿Precios con impuestos incluidos? ¿Se usa Stripe Tax (IVA 16 % MX, GST/HST CA, sales tax EE. UU.)? | Precios sin impuestos y Stripe Tax activado; confirmar con contabilidad |
 | Límite de editores y observadores por tablero | 10 |
-| ¿Quién aporta la cuenta de WhatsApp Business (Meta) y el número? | El canal WhatsApp queda desactivado hasta tener cuenta verificada y plantillas aprobadas |
-| Cupo de mensajes de WhatsApp por plan (cada mensaje cuesta) | 300 al mes en Personal y 1 500 en Sucursales; el resto, solo correo y panel |
-| Verificación de Google OAuth para permisos de Calendar (sensibles) | Se solicita en F12; hasta entonces, modo prueba con un máximo de 100 usuarios |
+| Cupo de mensajes de WhatsApp por plan (cada mensaje cuesta) | Al activarlo: 300 al mes en Personal y 1 500 en Sucursales |
+| Verificación de Google OAuth para permisos de Calendar | Se solicita en F12; hasta entonces, modo de prueba con un máximo de 100 usuarios |
 | ¿Se acepta la contraseña específica de app de Apple para iCloud? | Sí; es el único método de CalDAV en iCloud |
 | Retención de datos tras vencer la prueba o cancelar | 90 días en solo lectura; después, borrado con aviso previo |
 | ¿Páginas de reserva indexables? | `noindex` por defecto; opción por tablero en post-lanzamiento |
 | Chatbot para clientes finales del estudio técnico | Post-lanzamiento, reutilizando las herramientas MCP |
-| Copias más frecuentes que la nocturna (WAL u horaria), como pide el estudio | Solicitarlo a la plataforma antes del lanzamiento |
 | Logotipo y nombre comercial definitivos | Se trabaja con los tokens de diseño de `07-frontend.md` y un logotipo provisional |

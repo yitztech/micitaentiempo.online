@@ -24,6 +24,8 @@ nada.
   como puerta para desplegar.
 - **Producción** cumple el contrato de la plataforma; **desarrollo local** usa el mismo reparto con recarga
   en caliente.
+- **Decisiones del 2026-10-06:** solo suscripción (sin cobro por cita); Stripe y WhatsApp se implementan
+  pero quedan **sin configurar y sin valores reales**; las copias de seguridad son cosa de la plataforma.
 
 ## Documentos
 
@@ -54,7 +56,7 @@ nada.
 | Feriados | Datos de `date-holidays` generados y embebidos en Go | Cobertura de unos 200 países con regiones |
 | Sincronización | Feeds ICS + conexión directa con Google, Microsoft e iCloud; nuestro sistema es la fuente de verdad | Cumple «sincronizar con los tres» sin la complejidad de la bidireccional completa |
 | Identidad | Better Auth, una instancia por dominio | Sesiones por dominio; OAuth 2.1 para MCP en la misma pieza |
-| Cobro | Stripe Embedded Checkout; prueba de 30 días sin tarjeta | Menos fricción y sin salir de la marca |
+| Cobro | Solo suscripción. Stripe Embedded Checkout implementado y apagado hasta tener claves; mientras tanto, «Disponible pronto» y la prueba no vence | Decisión del 2026-10-06; activarlo será solo configuración |
 | MCP | Dentro de `api`, SDK v2, CIMD + DCR + clientes estáticos | Compatible con Claude, ChatGPT y Gemini Enterprise sin otro contenedor |
 | Pruebas | playwright-bdd con Gherkin en español sobre la topología de producción | Escenarios legibles que bloquean despliegues rotos |
 
@@ -111,14 +113,14 @@ riesgo (F0, F1, F6, F7 y F8). Se fija con `/model` y `/effort xhigh` (o `high`) 
 - [ ] F6 · Frontend base en español e inglés
 - [ ] F7 · Panel, reserva, «Mis citas» y embed
 - [ ] F8 · Avisos multicanal y recordatorios
-- [ ] F9 · Planes, prueba gratuita y facturación
+- [ ] F9 · Planes, prueba gratuita y facturación (Stripe listo, sin configurar)
 - [ ] F10 · Sincronización con Google, Outlook y Apple
 - [ ] F11 · MCP: conecta tu IA
 - [ ] F12 · Endurecimiento y lanzamiento
 - [ ] F13 · Post-lanzamiento (opcional)
 
-Las preguntas abiertas, con su decisión por defecto, están en
-[01-requisitos.md §1.9](01-requisitos.md#19-preguntas-abiertas).
+Las decisiones confirmadas y las preguntas abiertas (con su decisión por defecto) están en
+[01-requisitos.md §1.9](01-requisitos.md#19-decisiones-confirmadas-y-preguntas-abiertas).
 
 ## Fuentes
 

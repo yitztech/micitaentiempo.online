@@ -179,26 +179,32 @@ capturas aprobadas; axe sin violaciones serias.
 - [ ] Ingreso → difusión → destinatarios → preferencias → canales (`05-negocio-api.md` §5.6).
 - [ ] Correos de todos los eventos (es y en, `.ics`, `List-Unsubscribe`); bandeja del panel con SSE.
 - [ ] Telegram (enlace del bot), Slack (OAuth `incoming-webhook`) y WhatsApp (verificación, plantillas,
-      cupo), activables por variable de entorno.
+      cupo), activables por variable de entorno. WhatsApp queda **implementado y desactivado, sin valores
+      reales** (decisión del 2026-10-06), probado contra el servidor de captura.
 - [ ] Recordatorios a 24 h y 1 h; registro de entregas; reintentos; aviso si un canal falla.
 - [ ] Pantalla de preferencias.
 
 **Aceptación:** escenarios de aviso a propietario y observadores en su idioma, vinculación de Telegram,
 recordatorios con reloj controlado, sin aviso al autor y un solo aviso por cambio de serie.
 
-## F9 · Planes, prueba gratuita y facturación — L · Opus 5.5 `xhigh`
+## F9 · Planes, prueba gratuita y facturación (Stripe listo, sin configurar) — L · Opus 5.5 `xhigh`
 
-**Objetivo:** RF-03 y RF-04.
+**Objetivo:** RF-03 y RF-04. Solo suscripción; Stripe implementado completo pero **sin configurar y sin
+valores reales** (decisión del 2026-10-06).
 
 - [ ] Script de Stripe por `lookup_key`; Embedded Checkout con días de prueba restantes; webhooks
       idempotentes que releen la suscripción.
 - [ ] Máquina de estados de la organización y efectos de `read_only` en `api`, `calendar` y `web`.
 - [ ] Cambio de plan (bajar exige un solo tablero activo), cancelar y reanudar, método de pago, facturas.
-- [ ] Avisos de fin de prueba (7 y 3 días) y de pago fallido; Stripe Tax con interruptor.
-- [ ] CSP y `Permissions-Policy` de las rutas de facturación.
+- [ ] Avisos de fin de prueba (7 y 3 días) y de pago fallido; Stripe Tax con interruptor apagado.
+- [ ] CSP y `Permissions-Policy` de las rutas de facturación, aplicadas solo con Stripe activo.
+- [ ] Modo sin Stripe (`05-negocio-api.md` §5.5): «Disponible pronto», la prueba no vence, límites del plan
+      aplicados, script `org:set-plan`.
+- [ ] Procedimiento «Activar Stripe» en `docs/operacion.md` y script `billing:activate`.
 
-**Aceptación:** escenarios de contratar Personal, pago fallido → solo lectura, prueba vencida y bajada de
-plan; reenvío de webhooks sin efectos dobles; eventos fuera de orden bien resueltos.
+**Aceptación:** escenario `@humo` sin Stripe (como producción); con `stripe-mock`, escenarios de contratar
+Personal, pago fallido → solo lectura, prueba vencida y bajada de plan; reenvío de webhooks sin efectos
+dobles; eventos fuera de orden bien resueltos; ninguna clave real en el repositorio ni en CI.
 
 ## F10 · Sincronización con Google, Outlook y Apple — XL · Opus 5.5 `xhigh`
 
@@ -238,12 +244,15 @@ cambio externo restaurado, credencial revocada y contenido de los feeds.
       verificación de cabeceras y CSP; escaneo de secretos del historial.
 - [ ] k6 con los límites de memoria; `docker stats` bajo carga; ajuste de PostgreSQL.
 - [ ] Catálogo completo de escenarios en verde (nocturno), capturas y accesibilidad.
-- [ ] Legales finales en es y en: privacidad (incluye MCP, IA de terceros y encargados: Stripe, Meta, Slack,
-      Telegram, Google, Microsoft, Apple), condiciones y acuerdo de encargo de datos para negocios.
-- [ ] Verificación de Google OAuth, verificación de editor en Microsoft, Stripe en modo real, plantillas de
-      WhatsApp aprobadas, app de Slack distribuible, perfil del bot de Telegram.
-- [ ] Simulacro de restauración y `docs/operacion.md` (desplegar, volver atrás, rotar secretos, incidentes,
-      restaurar).
+- [ ] Legales finales en es y en: privacidad (incluye MCP, IA de terceros y los encargados activos: Google,
+      Microsoft, Apple, Slack, Telegram; Stripe y Meta se añaden al activarlos), condiciones y acuerdo de
+      encargo de datos para negocios.
+- [ ] Verificación de Google OAuth, verificación de editor en Microsoft, app de Slack distribuible, perfil
+      del bot de Telegram. (Stripe y WhatsApp siguen sin configurar: se activan más adelante con su
+      procedimiento.)
+- [ ] `docs/operacion.md`: desplegar, volver atrás, rotar secretos, incidentes, activar Stripe, activar
+      WhatsApp. Las copias de seguridad son de la plataforma.
+- [ ] (Opcional) Envío al directorio de apps de ChatGPT y al de conectores de Claude (`06-mcp.md` §6.7).
 - [ ] Lista §8.13 completa, primer despliegue, `TRUSTED_PROXY_CIDR`, humo en producción.
 
 **Aceptación:** `/version.json` y `/api/healthz` con el SHA desplegado; `@humo-produccion` en verde; lista
@@ -251,7 +260,9 @@ cambio externo restaurado, credencial revocada y contenido de los feeds.
 
 ## F13 · Post-lanzamiento (opcional, priorizar con datos)
 
-Ideas de DayOtter (`11-dayotter.md`): aviso «voy tarde», horarios recomendados, panel de analítica y CSV,
-reparto entre profesionales de una sucursal. Además: API pública v1 con claves y webhooks salientes, MCP
-Apps, sincronización bidireccional completa, MCP para clientes finales, asistente dentro de la app,
-passkeys, PWA, cobro por cita con Stripe Connect, páginas de reserva indexables y francés de Canadá.
+Cuando se decida: **activar Stripe** y **activar WhatsApp** con sus procedimientos (solo configuración,
+el código ya está). Ideas de DayOtter (`11-dayotter.md`): aviso «voy tarde», horarios recomendados, panel
+de analítica y CSV, reparto entre profesionales de una sucursal. Además: API pública v1 con claves y
+webhooks salientes, MCP Apps, sincronización bidireccional completa, MCP para clientes finales, asistente
+dentro de la app, passkeys, PWA, cobro por cita con Stripe Connect (pospuesto el 2026-10-06), páginas de
+reserva indexables y francés de Canadá.

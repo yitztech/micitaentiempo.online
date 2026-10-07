@@ -38,7 +38,17 @@ fuera de los catálogos.
 6. Sesiones por dominio: si alguien con sesión cambia de idioma, el otro dominio le pide entrar de nuevo;
    la interfaz lo explica antes de cambiar.
 7. Correos y avisos en el idioma guardado en la cuenta y desde su dominio (lo hace `api` con los mismos
-   catálogos).
+   catálogos y las credenciales SMTP de ese idioma).
+8. Login con Google con los dos orígenes y las dos URI de retorno en el mismo cliente OAuth
+   (`05-negocio-api.md` §5.2).
+9. Privacidad y condiciones publicadas en cada dominio (`/privacidad` y `/condiciones`; `/privacy` y `/terms`).
+10. Newsletter en el Listmonk del idioma (`LISTMONK_URL` / `LISTMONK_URL_EN`).
+11. Fechas en UTC en la base de datos y mostradas en la zona horaria guardada en la cuenta
+    (`02-arquitectura.md` §2.9).
+
+Además del README: el embed, MCP, los mensajes de error, los avisos de WhatsApp, Slack y Telegram, los
+`.ics` y los nombres de feriados salen en el idioma del dominio o de la cuenta; los escenarios
+automatizados se ejecutan en los dos idiomas (`09-pruebas.md` §9.2).
 
 **Mapa de rutas** (`packages/i18n/routes.ts`; un id, dos rutas, el mismo módulo):
 
@@ -231,15 +241,26 @@ idioma; contraste comprobado en CI con axe.
 ## 7.10 Seguridad del frontend
 
 - CSP por petición con nonce, generada en `entry.server`: `script-src 'self' 'nonce-…'` más el origen de
-  Umami; en facturación, además `https://js.stripe.com`, `frame-src https://js.stripe.com
-  https://checkout.stripe.com` y `connect-src https://api.stripe.com`.
+  Umami; en facturación y solo con Stripe activo, además `https://js.stripe.com`, `frame-src
+  https://js.stripe.com https://checkout.stripe.com` y `connect-src https://api.stripe.com`.
 - `frame-ancestors 'none'` en todo salvo `/embed/*` (política del tablero).
 - `Permissions-Policy` con `payment=()` salvo en facturación (`payment=(self "https://js.stripe.com")`).
 - `Cross-Origin-Opener-Policy: same-origin`; en el embed, `same-origin-allow-popups` (Google en ventana).
 - Sin tokens en `localStorage`: cookies `HttpOnly` en el sitio; en el embed, memoria + `sessionStorage`.
 - Redirecciones tras el inicio de sesión solo a rutas relativas propias.
 
-## 7.11 Analítica
+## 7.11 Funciones que dependen de configuración
+
+`web` consulta `GET /api/public/v1/features` y adapta la interfaz a lo que esté configurado:
+
+| Integración sin configurar | Qué ve el usuario |
+|---|---|
+| Stripe (decisión del 2026-10-06: sin configurar por ahora) | Precios y planes visibles; «Contratar» muestra «Disponible pronto»; «Periodo de prueba» sin cuenta atrás; ningún script de Stripe |
+| WhatsApp (sin configurar por ahora) | La opción no aparece en preferencias ni en canales |
+| Google, Microsoft, Slack, Telegram | El botón correspondiente no aparece (Google: solo correo y contraseña para entrar) |
+| Listmonk | Sin casilla de newsletter |
+
+## 7.12 Analítica
 
 Umami sin cookies, una sola web para los dos dominios: `web` inserta el script con nonce cuando existen
 `UMAMI_SCRIPT_URL` y `UMAMI_WEBSITE_ID` (la plantilla lo hacía en nginx; con CSP por nonce es más seguro

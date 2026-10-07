@@ -117,6 +117,26 @@ Los límites viven en código (`billing/plans.ts`) y se exponen al frontend; los
 por `lookup_key` (`personal_monthly_usd`, `branches_monthly_usd`), creados por un script idempotente
 (`pnpm --filter api stripe:setup`), así no hacen falta variables con ids de precio.
 
+**Stripe listo, sin configurar (decisión del 2026-10-06).** Solo hay suscripción (sin cobro por cita) y
+por ahora no se configura Stripe:
+
+- Todo el código de facturación se implementa y se prueba con `stripe-mock` y webhooks firmados por las
+  pruebas. Ningún archivo del repo, `.env.example` ni CI contiene claves reales.
+- La facturación se activa sola cuando existen `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` y
+  `STRIPE_PUBLISHABLE_KEY`. Sin ellas:
+  - Precios y planes se muestran igual; «Contratar» dice «Disponible pronto».
+  - Al registrarse se elige plan y se aplican sus límites (1 o 10 tableros).
+  - La prueba gratuita **no vence**: el trabajo de fin de prueba no hace nada y la interfaz muestra
+    «Periodo de prueba» sin cuenta atrás.
+  - No se carga ningún script de Stripe ni se amplía la CSP.
+  - Un script de operación (`pnpm --filter api org:set-plan <org> personal|branches`) cambia plan o estado
+    a mano si hace falta.
+- **Activar Stripe más adelante** (`docs/operacion.md`): crear la cuenta, ejecutar `stripe:setup` en modo
+  prueba y luego real, registrar el endpoint `https://micitaentiempo.online/api/webhooks/stripe`, entregar
+  las tres claves a la plataforma por canal seguro, decidir impuestos (`STRIPE_TAX_ENABLED`), redesplegar y
+  ejecutar `billing:activate`, que fija la fecha de fin de prueba de las organizaciones existentes (por
+  defecto, 30 días desde la activación) y les avisa por correo.
+
 **Estados de la organización:**
 
 ```mermaid
@@ -178,7 +198,7 @@ el correo está activo por defecto; WhatsApp, Slack y Telegram requieren vincula
 |---|---|---|---|
 | Panel | Siempre | Fila en `notifications` + evento SSE | Contador de no leídos, marcar como leído, 90 días de retención |
 | Correo | Correo verificado | SMTP de la plataforma con credenciales y remitente del idioma del destinatario | Plantillas React Email es/en, texto plano alternativo, `.ics` en reservas, `List-Unsubscribe` de un clic (RFC 8058) en avisos no esenciales |
-| WhatsApp | Teléfono E.164 verificado con código enviado por WhatsApp (plantilla de autenticación) | WhatsApp Business Cloud API (Meta), plantillas de utilidad aprobadas en es y en | Cupo mensual por plan; gestionar bajas («STOP»); requiere cuenta de Meta verificada |
+| WhatsApp | Teléfono E.164 verificado con código enviado por WhatsApp (plantilla de autenticación) | WhatsApp Business Cloud API (Meta), plantillas de utilidad aprobadas en es y en | **Implementado y desactivado, sin valores reales** (decisión del 2026-10-06): se activa solo cuando existen las variables `WHATSAPP_*`; hasta entonces no aparece en las preferencias. Al activarlo: cuenta de Meta verificada, plantillas aprobadas, cupo mensual por plan y gestión de bajas («STOP») |
 | Slack | «Añadir a Slack» (OAuth v2, permiso `incoming-webhook`); el usuario elige canal | Webhook entrante con Block Kit | URL cifrada con `APP_ENC_KEY`; si Slack devuelve 404/410, se desactiva y se avisa en el panel |
 | Telegram | Botón que abre `https://t.me/<bot>?start=<token de 10 min>`; el bot recibe `/start` y vincula el chat | `sendMessage` con HTML escapado | Webhook con `X-Telegram-Bot-Api-Secret-Token`; si el usuario bloquea el bot, se desactiva |
 
@@ -213,6 +233,7 @@ clientes finales.
 | IA (MCP) | `GET /api/v1/ai/connections`, `DELETE /api/v1/ai/connections/:id`, `POST /api/v1/ai/static-clients` (Gemini Enterprise) |
 | Pública (embed) | `GET /api/public/v1/calendars/:slug`, `GET …/:slug/availability`, `POST …/:slug/holds`, `POST /api/public/v1/otp/send`, `POST /api/public/v1/otp/verify`, `POST /api/public/v1/holds/:id/confirm`, `GET /api/public/v1/my/bookings`, `PATCH/POST cancel /api/public/v1/my/bookings/:id` |
 | Newsletter | `POST /api/public/v1/newsletter` → `POST /api/public/subscription` del Listmonk del idioma |
+| Funciones activas | `GET /api/public/v1/features` → qué integraciones están configuradas (Google, Microsoft, Stripe, Slack, Telegram, WhatsApp, Listmonk) para que la interfaz oculte o desactive lo que falta |
 | Salud | `GET /api/healthz` → `{"status":"ok","revision":"<sha>"}` |
 
 Las reservas del embed llevan `Idempotency-Key`. Las respuestas públicas nunca incluyen datos de otros
@@ -238,6 +259,11 @@ clientes finales.
 Variables (ver la tabla completa en `08-infraestructura.md` §8.8): idiomas y URLs, SMTP por idioma,
 Listmonk por idioma, base de datos, `BETTER_AUTH_SECRET`, secretos RPC, `APP_ENC_KEY`, `ALTCHA_HMAC_KEY`,
 Google, Microsoft, Stripe, Slack, Telegram, WhatsApp y `TEST_MODE` (prohibida en producción).
+
+Cada integración de terceros se activa sola cuando existen todas sus variables. Si faltan, `api` arranca
+igual, registra en el log qué está desactivado y la expone en `/api/public/v1/features`. Una configuración
+a medias (p. ej., `STRIPE_SECRET_KEY` sin `STRIPE_WEBHOOK_SECRET`) impide arrancar, para no cobrar sin
+recibir los webhooks.
 
 Memoria: `mem_limit: 384m`, `NODE_OPTIONS=--max-old-space-size=256`; pool de `pg` de 15 conexiones y 5 para
 pg-boss.

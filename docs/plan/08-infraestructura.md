@@ -191,7 +191,7 @@ services:
       retries: 10
     networks: [frontend, backend]
 
-  # El backup de la plataforma vuelca cada contenedor PostgreSQL en marcha (confirmar que detecta la imagen propia).
+  # El backup de la plataforma vuelca cada contenedor PostgreSQL en marcha.
   postgres:
     image: ${IMAGE_PREFIX:?Define IMAGE_PREFIX}-postgres:${IMAGE_TAG:-main}
     restart: unless-stopped
@@ -276,7 +276,7 @@ Se parte de `gateway/` de la plantilla y se añade:
 - **Cabeceras:** el gateway pone HSTS, `X-Content-Type-Options` y `Referrer-Policy`. CSP,
   `X-Frame-Options`/`frame-ancestors`, `Permissions-Policy` y COOP las pone cada servicio, porque dependen
   de la página (nonce, embed, Stripe). La inserción de Umami por `sub_filter` de la plantilla se sustituye
-  por la de `web` (`07-frontend.md` §7.11).
+  por la de `web` (`07-frontend.md` §7.12).
 
 ## 8.6 Imagen de PostgreSQL
 
@@ -354,13 +354,14 @@ pnpm lint && pnpm typecheck
 | `TELEGRAM_WEBHOOK_SECRET` | api | Generada | Sí |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | api, calendar | Tercero (Google Cloud), canal seguro | No (sin ellas, no hay Google) |
 | `MS_CLIENT_ID`, `MS_CLIENT_SECRET` | api, calendar | Tercero (Microsoft Entra) | No |
-| `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_TAX_ENABLED` | api, web | Tercero (Stripe) | No (sin ellas, no se puede contratar) |
+| `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_TAX_ENABLED` | api, web | Tercero (Stripe). **Sin configurar por ahora** (decisión del 2026-10-06): vacías en producción | No (sin ellas, «Contratar» muestra «Disponible pronto» y la prueba no vence) |
 | `SLACK_CLIENT_ID`, `SLACK_CLIENT_SECRET` | api | Tercero (Slack) | No |
 | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_BOT_USERNAME` | api | Tercero (BotFather) | No |
-| `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_APP_SECRET`, `WHATSAPP_VERIFY_TOKEN` | api | Tercero (Meta) | No |
+| `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_APP_SECRET`, `WHATSAPP_VERIFY_TOKEN` | api | Tercero (Meta). **Sin configurar por ahora** (decisión del 2026-10-06): vacías en producción | No (sin ellas, el canal no aparece) |
 
-Los secretos generados deben tener al menos 32 bytes aleatorios. `.env.example` lista todas con valores
-ficticios.
+Los secretos generados deben tener al menos 32 bytes aleatorios. `.env.example` lista todas: los secretos
+propios con valores ficticios de desarrollo y las claves de terceros **vacías**. Ningún valor real entra en
+el repositorio.
 
 ## 8.9 CI/CD
 
@@ -388,10 +389,13 @@ imágenes con SBOM y procedencia.
 
 ## 8.11 Copias de seguridad
 
-- La plataforma vuelca cada noche todos los contenedores PostgreSQL y los copia fuera del servidor.
-- Con suscripciones y citas en juego, pedir copias continuas (WAL) o cada hora (lo propuso el estudio).
-- **Simulacro de restauración** en F12: descargar un volcado, restaurarlo en local y pasar los escenarios de
-  humo; documentarlo en `docs/operacion.md`.
+Las copias y la seguridad del servidor las gestiona la plataforma con su propio sistema (confirmado por el
+usuario el 2026-10-06); el proyecto no añade servicios de copia. Lo que sí hace el proyecto:
+
+- Todo el estado durable vive en PostgreSQL (incluidas las colas), dentro del volumen `postgres-data`.
+- La imagen propia de PostgreSQL es la oficial con configuración horneada: mismo binario y mismo
+  `POSTGRES_USER`, así que se vuelca igual que una imagen `postgres` estándar.
+- Opcional, post-lanzamiento: simulacro de restauración en local con un volcado y los escenarios de humo.
 
 ## 8.12 Observabilidad
 
@@ -413,11 +417,12 @@ imágenes con SBOM y procedencia.
 - [ ] Nombres de los secretos que debe generar la plataforma (§8.8, origen «Generada»).
 - [ ] Archivos subidos: solo logotipos en PostgreSQL; ningún volumen de archivos.
 - [ ] DayOtter: no se usa (decisión del estudio y de este plan).
-- [ ] Claves de terceros entregadas por canal seguro: Google, Microsoft, Stripe, Slack, Telegram, WhatsApp.
-- [ ] Orígenes de terceros para la CSP: Stripe (`js.stripe.com`, `checkout.stripe.com`, `api.stripe.com`) y Umami.
+- [ ] Claves de terceros entregadas por canal seguro: Google, Microsoft, Slack y Telegram. **Stripe y
+      WhatsApp no se configuran por ahora** (decisión del 2026-10-06): sus variables quedan vacías.
+- [ ] Orígenes de terceros para la CSP: Umami. Los de Stripe se añaden cuando se active.
 - [ ] Páginas de privacidad y condiciones en los dos dominios.
 - [ ] Cliente OAuth de Google con los dos orígenes y las dos URI de retorno (login y calendario).
-- [ ] Endpoint de webhooks de Stripe y webhook de Telegram registrados en el dominio principal.
-- [ ] Confirmar con la plataforma: copia que detecta la imagen propia de PostgreSQL, copias más frecuentes,
-      monitor de `/healthz` y forma de fijar `IMAGE_TAG` para volver atrás.
+- [ ] Webhook de Telegram registrado en el dominio principal.
 - [ ] Tras el primer arranque: medir `TRUSTED_PROXY_CIDR` y ponerlo en la ficha del cliente.
+
+Copias de seguridad y seguridad del servidor: a cargo de la plataforma (§8.11), sin tareas para el proyecto.

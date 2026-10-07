@@ -105,7 +105,7 @@ Característica: Reserva desde el widget embebido
 | Google login | Servidor OIDC simulado (p. ej. `mock-oauth2-server`) configurado como proveedor en `TEST_MODE` |
 | Google Calendar y Microsoft Graph | Dobles HTTP propios (`tests/fakes/`), con estado, que imitan los endpoints usados; las URL base del motor apuntan a ellos |
 | iCloud | Servidor CalDAV real en contenedor (Radicale) |
-| Stripe | `stripe-mock` para las llamadas y webhooks firmados por el propio arnés con el secreto de pruebas |
+| Stripe | Dos configuraciones: **sin claves** (como producción por ahora) y **con `stripe-mock`** (claves ficticias, URL base del API apuntando al mock solo con `TEST_MODE`, webhooks firmados por el propio arnés). Nunca claves reales |
 | WhatsApp, Slack, Telegram | Servidor de captura que registra las peticiones salientes y simula respuestas y errores |
 | MCP | Pasos que actúan como un cliente MCP real (`@modelcontextprotocol/client` 2.3.1), incluido el flujo OAuth con CIMD y DCR |
 | Informes | HTML de Playwright e informe Cucumber; trazas, vídeos y capturas de los fallos como artefactos de CI |
@@ -133,7 +133,7 @@ locales. Así las pruebas corren contra la misma topología que producción.
 | Cuentas | Se rechazan dominios sin MX y correos desechables | | RF-02 |
 | Cuentas | Registro e inicio de sesión con Google | `@critico` | RF-01 |
 | Cuentas | La sesión de un dominio no vale en el otro | | RF-16 |
-| Prueba | La prueba de 30 días se activa al registrarse; avisos a 7 y 3 días; al vencer, solo lectura | `@critico` | RF-03 |
+| Prueba | Con facturación activada (`stripe-mock`): la prueba de 30 días se activa al registrarse; avisos a 7 y 3 días; al vencer, solo lectura | `@critico` | RF-03 |
 | Tableros | El asistente crea el tablero con horario, comida, desayuno y feriados de México | `@critico` | RF-05, RF-06 |
 | Tableros | Personal no deja crear un segundo tablero; Sucursales permite 10 y no 11 | | RF-04 |
 | Feriados | Feriados de EE. UU. y Canadá (con región) bloquean; «abrimos ese día» los desbloquea | | RF-06 |
@@ -151,12 +151,14 @@ locales. Así las pruebas corren contra la misma topología que producción.
 | Avisos | Al modificar un evento, propietario y observadores reciben aviso en el panel y por correo, cada uno en su idioma | `@critico` | RF-13 |
 | Avisos | Vincular Telegram con el enlace del bot y recibir el aviso | | RF-14 |
 | Avisos | Recordatorios a 24 h y 1 h; no se envían si la cita se canceló | | RF-22 |
+| Avisos | Sin WhatsApp configurado, el canal no aparece; con el servidor de captura, se envía la plantilla en el idioma del usuario | | RF-14 |
 | Sincronización | El feed ICS del tablero tiene los eventos; el del cliente final, solo sus citas | | RF-15 |
 | Sincronización | Ocupado en Google bloquea horarios; la reserva aparece en el calendario de la app | | RF-15 |
 | Sincronización | Mover en Google un evento nuestro se restaura y avisa al propietario | | RF-15 |
 | Sincronización | Credencial revocada: estado «Reconectar» y aviso | | RF-15 |
-| Facturación | Contratar Personal; el webhook activa la suscripción | `@critico` | RF-04 |
-| Facturación | Pago fallido → aviso → solo lectura tras 7 días | | RF-04 |
+| Facturación | Sin Stripe configurado (como en producción por ahora): planes visibles, «Contratar» muestra «Disponible pronto», la prueba no vence y se respetan los límites del plan | `@critico @humo` | RF-03, RF-04 |
+| Facturación | Con `stripe-mock`: contratar Personal; el webhook activa la suscripción | | RF-04 |
+| Facturación | Con `stripe-mock`: pago fallido → aviso → solo lectura tras 7 días | | RF-04 |
 | MCP | Conectar un cliente MCP con CIMD y consentimiento; la IA lista tableros y huecos | `@critico` | RF-18 |
 | MCP | La IA crea un evento con `calendar:write`; con solo lectura, se le niega | | RF-18 |
 | MCP | Un token de otra organización no ve nada | `@critico` | RF-18 |
