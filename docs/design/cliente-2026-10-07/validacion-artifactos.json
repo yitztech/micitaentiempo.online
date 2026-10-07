@@ -1,0 +1,133 @@
+{
+  "date": "2026-10-07",
+  "branch": "design/propuesta-frontend-cliente",
+  "sourceRevision": "cfb28fa760680f9745317185d944af45ff398b72",
+  "runtimeRevision": "ci",
+  "scope": "Documentación y recursos visuales; sin cambios de aplicación",
+  "localLinks": "pass",
+  "markdownWhitespace": "pass",
+  "imageSignatures": "pass",
+  "acceptedScreenshots": 14,
+  "concepts": 3,
+  "images": [
+    {
+      "file": "capturas/01-inicio-escritorio.jpg",
+      "width": 1856,
+      "height": 2599,
+      "bytes": 232655,
+      "sha256": "5d103cbf886092f6133fd1fcf6181f31b538a447a52ea81c928a9529f50de468"
+    },
+    {
+      "file": "capturas/02-precios.jpg",
+      "width": 1856,
+      "height": 1823,
+      "bytes": 146573,
+      "sha256": "d28d936361e6d4d4b6a0a9d1c8dfcc8872cd7da98ff6b80fdb60c8e12975314d"
+    },
+    {
+      "file": "capturas/03-reserva-no-disponible.jpg",
+      "width": 1871,
+      "height": 929,
+      "bytes": 24879,
+      "sha256": "27ea7b1f78a730c7db81498b9155b88cbfe9183c3b7d1945eac991a4b2714974"
+    },
+    {
+      "file": "capturas/04-mis-citas-acceso.jpg",
+      "width": 1871,
+      "height": 929,
+      "bytes": 35902,
+      "sha256": "8da192e2fc295bf66dce170bcf93e208c29e49c4f3e1c2c52d6e6b9da8843f9e"
+    },
+    {
+      "file": "capturas/05-registro-movil.jpg",
+      "width": 375,
+      "height": 995,
+      "bytes": 36525,
+      "sha256": "69641938af6f1df8a68731afa2cfc62cf99d8a8bca4db569dbec6c52b207c7ee"
+    },
+    {
+      "file": "capturas/06-inicio-movil.jpg",
+      "width": 375,
+      "height": 812,
+      "bytes": 35429,
+      "sha256": "8dfa738b5d8581d3d495be066d5c31eebbbdcb82e8cad5f7f99f568da37462f8"
+    },
+    {
+      "file": "capturas/07-reserva-movil.jpg",
+      "width": 375,
+      "height": 984,
+      "bytes": 32880,
+      "sha256": "6817405ac241e1f0aa5b7f20b15a0140f8d379156d2976036338b439ceb8764e"
+    },
+    {
+      "file": "capturas/08-reserva-datos-movil.jpg",
+      "width": 375,
+      "height": 1069,
+      "bytes": 35899,
+      "sha256": "7dd5c906c44abf9b3ed6dffc899b48f74fd4c0980e36dd621763449b193f2705"
+    },
+    {
+      "file": "capturas/09-reserva-escritorio.jpg",
+      "width": 1440,
+      "height": 1024,
+      "bytes": 43604,
+      "sha256": "e627418b9a2cd18d2e8afc482cc100d59b680f9b62f8bd0e144cd1919ad49387"
+    },
+    {
+      "file": "capturas/10-funciones.jpg",
+      "width": 1856,
+      "height": 1847,
+      "bytes": 184316,
+      "sha256": "22f3321423600639ab408fcce719b6470309639808e6f1dcbfe720f2c6152fa0"
+    },
+    {
+      "file": "capturas/11-preguntas-frecuentes.jpg",
+      "width": 1856,
+      "height": 1576,
+      "bytes": 104581,
+      "sha256": "0b7f2b56429b15489b298d85cf2f9f98cc1cd746d31f15f30d6dd3710f9bdcfe"
+    },
+    {
+      "file": "capturas/12-contacto.jpg",
+      "width": 1856,
+      "height": 1304,
+      "bytes": 65444,
+      "sha256": "f670179a305cdcb9ef6be22a430b132867aa6c018e118377732b9c66e30d9196"
+    },
+    {
+      "file": "capturas/13-conecta-tu-ia.jpg",
+      "width": 1856,
+      "height": 2171,
+      "bytes": 215314,
+      "sha256": "9251475803dfe11201534d9c730d7c17d05d6eb6885cea2397bc203745c4bd3f"
+    },
+    {
+      "file": "capturas/14-entrar.jpg",
+      "width": 1871,
+      "height": 929,
+      "bytes": 31638,
+      "sha256": "35b08d8af44c27306d088bae5620b3194afc097f78860b6c80a788cf9062a3ae"
+    },
+    {
+      "file": "propuestas/01-agenda-con-contexto.png",
+      "width": 1487,
+      "height": 1058,
+      "bytes": 1272710,
+      "sha256": "994ffe4aec5543756cf58115f17e7b9194cbd240f137be4d8ecf5aa487269db6"
+    },
+    {
+      "file": "propuestas/02-reserva-guiada.png",
+      "width": 1487,
+      "height": 1058,
+      "bytes": 1252577,
+      "sha256": "deecea09ad13e2023a74a794e87883e80259d4d3c5048afe4fd99a0d2e99ee83"
+    },
+    {
+      "file": "propuestas/03-proximo-horario.png",
+      "width": 1487,
+      "height": 1058,
+      "bytes": 1276572,
+      "sha256": "54ccc71363feada7d9025cdd763aa9e01739d094899241c5c617b325df2c145f"
+    }
+  ]
+}
