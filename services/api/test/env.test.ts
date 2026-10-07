@@ -1,0 +1,32 @@
+import { describe, expect, it } from "vitest";
+import { loadEnv } from "../src/config/env.js";
+
+const base = {
+  SITE_URL: "http://micitaentiempo.localhost:8080",
+  SITE_URL_EN: "http://myappointmentontime.localhost:8080",
+  DB_PASSWORD: "x",
+};
+
+describe("loadEnv", () => {
+  it("acepta la configuración mínima y deriva los dominios", () => {
+    const env = loadEnv(base);
+    expect(env.PORT).toBe(3000);
+    expect(env.site.siteUrl.en).toBe("http://myappointmentontime.localhost:8080");
+  });
+
+  it("falla si falta la contraseña de la base de datos", () => {
+    expect(() => loadEnv({ ...base, DB_PASSWORD: "" })).toThrow(/DB_PASSWORD/);
+  });
+
+  it("prohíbe TEST_MODE con dominios reales", () => {
+    expect(() =>
+      loadEnv({
+        ...base,
+        TEST_MODE: "1",
+        SITE_URL: "https://micitaentiempo.online",
+        SITE_URL_EN: "https://myappointmentontime.online",
+      }),
+    ).toThrow(/TEST_MODE/);
+    expect(() => loadEnv({ ...base, TEST_MODE: "1" })).not.toThrow();
+  });
+});

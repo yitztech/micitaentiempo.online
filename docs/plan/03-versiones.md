@@ -118,7 +118,7 @@ otro (p. ej., `@nestjs/swagger` a TypeScript 6), usa la última compatible y an�
 |---|---|---|
 | `react` · `react-dom` | 19.3.0 | |
 | `react-router` · `@react-router/dev` · `@react-router/node` · `@react-router/serve` | 8.4.0 | Modo framework; exige Node ≥ 22.22, React ≥ 19.2.7 y Vite ≥ 7 |
-| `vite` | 8.3.3 | |
+| `vite` | 8.3.2 | 8.3.3 salió el 2026-10-06 y `minimumReleaseAge` (24 h) la bloquea; subir en el siguiente PR |
 | `typescript` (web y paquetes compartidos) | 7.0.2 | El código compartido debe compilar también con 6.0.3 (lo consume `api`) |
 | `tailwindcss` · `@tailwindcss/vite` | 4.3.3 | |
 | `shadcn` (CLI) · `radix-ui` | 4.21.3 · 1.7.0 | |

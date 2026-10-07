@@ -1,0 +1,113 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  DESARROLLO LOCAL: misma topología que producción con recarga en caliente.
+#    cp .env.example .env && docker compose up --watch
+#  Español: http://micitaentiempo.localhost:8080 · Inglés: http://myappointmentontime.localhost:8080
+#  Correos: http://localhost:8025 (Mailpit)
+# ─────────────────────────────────────────────────────────────────────────────
+x-site: &site
+  IDIOMAS: ${IDIOMAS:-es,en}
+  SITE_URL: ${SITE_URL:-http://micitaentiempo.localhost:8080}
+  SITE_URL_ES: ${SITE_URL_ES:-http://micitaentiempo.localhost:8080}
+  SITE_URL_EN: ${SITE_URL_EN:-http://myappointmentontime.localhost:8080}
+  HOST_LANG_MAP: ${HOST_LANG_MAP:-micitaentiempo.localhost:es,myappointmentontime.localhost:en}
+
+services:
+  gateway:
+    build: { context: ., dockerfile: services/gateway/Dockerfile, args: { RELEASE_SHA: dev } }
+    ports: ["8080:80"]
+    environment:
+      TRUSTED_PROXY_CIDR: 0.0.0.0/0
+    depends_on: [web, api, calendar]
+    develop:
+      watch:
+        - { path: services/gateway, action: rebuild }
+
+  web:
+    build: { context: ., dockerfile: services/web/Dockerfile, target: dev }
+    ports: ["24678:24678"]   # HMR de Vite
+    environment:
+      <<: *site
+      API_INTERNAL_URL: http://api:3000
+    develop:
+      watch:
+        - { path: services/web, target: /repo/services/web, action: sync, ignore: [node_modules, build, .react-router] }
+        - { path: packages/i18n/src, target: /repo/packages/i18n/src, action: sync+exec, exec: { command: pnpm --filter @mcet/i18n build } }
+        - { path: services/web/package.json, action: rebuild }
+        - { path: pnpm-lock.yaml, action: rebuild }
+
+  api:
+    build: { context: ., dockerfile: services/api/Dockerfile, target: dev }
+    environment:
+      <<: *site
+      DB_HOST: postgres
+      DB_PASSWORD: ${API_DB_PASSWORD:-dev-api}
+      CALENDAR_RPC_URL: http://calendar:8081
+      SMTP_HOST: mailpit
+      SMTP_PORT: "1025"
+      SMTP_SECURE: "false"
+      SMTP_USER: dev
+      SMTP_PASSWORD: dev
+      MAIL_FROM: Mi Cita en Tiempo <no-reply@micitaentiempo.localhost>
+      SMTP_USER_EN: dev
+      SMTP_PASSWORD_EN: dev
+      MAIL_FROM_EN: My Appointment On Time <no-reply@myappointmentontime.localhost>
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-dev-better-auth-secret-change-me-0000000000}
+      APP_ENC_KEY: ${APP_ENC_KEY:-dev-app-enc-key-change-me-00000000000000000}
+      ALTCHA_HMAC_KEY: ${ALTCHA_HMAC_KEY:-dev-altcha-hmac-key-change-me-000000000000}
+      RPC_SECRET_API_TO_CALENDAR: ${RPC_SECRET_API_TO_CALENDAR:-dev-rpc-api-to-calendar-000000000000000000}
+      RPC_SECRET_CALENDAR_TO_API: ${RPC_SECRET_CALENDAR_TO_API:-dev-rpc-calendar-to-api-000000000000000000}
+      TEST_MODE: "1"
+      LOG_LEVEL: debug
+    env_file: [{ path: .env, required: false }]
+    depends_on:
+      postgres: { condition: service_healthy }
+    develop:
+      watch:
+        - { path: services/api/src, target: /repo/services/api/src, action: sync }
+        - { path: services/api/drizzle, target: /repo/services/api/drizzle, action: sync }
+        - { path: packages/i18n/src, target: /repo/packages/i18n/src, action: sync+exec, exec: { command: pnpm --filter @mcet/i18n build } }
+        - { path: services/api/package.json, action: rebuild }
+        - { path: pnpm-lock.yaml, action: rebuild }
+
+  calendar:
+    build: { context: ., dockerfile: services/calendar/Dockerfile, args: { RELEASE_SHA: dev } }
+    environment:
+      DB_HOST: postgres
+      DB_PASSWORD: ${CALENDAR_DB_PASSWORD:-dev-calendar}
+      PUBLIC_URL_ES: http://micitaentiempo.localhost:8080
+      PUBLIC_URL_EN: http://myappointmentontime.localhost:8080
+      API_RPC_URL: http://api:3001
+      RPC_SECRET_API_TO_CALENDAR: ${RPC_SECRET_API_TO_CALENDAR:-dev-rpc-api-to-calendar-000000000000000000}
+      RPC_SECRET_CALENDAR_TO_API: ${RPC_SECRET_CALENDAR_TO_API:-dev-rpc-calendar-to-api-000000000000000000}
+      CALENDAR_TOKEN_ENC_KEY: ${CALENDAR_TOKEN_ENC_KEY:-dev-calendar-token-enc-key-0000000000000000}
+      TEST_MODE: "1"
+      LOG_LEVEL: debug
+    depends_on:
+      postgres: { condition: service_healthy }
+    develop:
+      watch:
+        - { path: services/calendar, action: rebuild, ignore: [bin] }
+
+  postgres:
+    build: { context: ., dockerfile: services/postgres/Dockerfile }
+    ports: ["5432:5432"]
+    environment:
+      POSTGRES_DB: micita
+      POSTGRES_USER: micita
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dev-postgres}
+      API_DB_PASSWORD: ${API_DB_PASSWORD:-dev-api}
+      CALENDAR_DB_PASSWORD: ${CALENDAR_DB_PASSWORD:-dev-calendar}
+    volumes:
+      - postgres-dev:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U micita -d micita"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  mailpit:
+    image: axllent/mailpit:v1.31.4
+    ports: ["8025:8025"]
+
+volumes:
+  postgres-dev:

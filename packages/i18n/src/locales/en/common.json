@@ -1,0 +1,23 @@
+{
+  "site": {
+    "name": "My Appointment On Time",
+    "tagline": "Your booking calendar, always on time.",
+    "description": "Booking calendar for businesses: share your schedule, take appointments and sync with Google, Outlook and Apple."
+  },
+  "home": {
+    "title": "Bookings without calls or messages",
+    "lead": "Share your schedule or embed it on your website. Your clients book on their own and you get every appointment instantly.",
+    "comingSoon": "Coming soon"
+  },
+  "language": {
+    "switchTo": "Español",
+    "switchToLabel": "View this site in Spanish"
+  },
+  "errors": {
+    "notFoundTitle": "Page not found",
+    "notFoundBody": "This address doesn't exist or has changed.",
+    "serverTitle": "Something went wrong",
+    "serverBody": "Please try again in a few minutes.",
+    "backHome": "Back to home"
+  }
+}

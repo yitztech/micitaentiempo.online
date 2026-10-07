@@ -1,0 +1,113 @@
+# Gateway detrás del proxy de la plataforma (Traefik).
+# Traefik termina TLS; este nginx escucha en HTTP (80) y reparte por ruta.
+# Las variables ${...} las sustituye el entrypoint de nginx al arrancar.
+
+# Docker cambia la IP de un contenedor al recrearlo: con `resolve` nginx sigue la IP nueva.
+resolver 127.0.0.11 valid=10s ipv6=off;
+upstream web_upstream      { zone web_upstream 64k;      server web:3000 resolve;      keepalive 16; }
+upstream api_upstream      { zone api_upstream 64k;      server api:3000 resolve;      keepalive 16; }
+upstream calendar_upstream { zone calendar_upstream 64k; server calendar:8080 resolve; keepalive 8; }
+
+# ── IP real: solo se confía en X-Forwarded-For si llega de la red de Traefik ──
+set_real_ip_from ${TRUSTED_PROXY_CIDR};
+real_ip_header X-Forwarded-For;
+real_ip_recursive on;
+
+# Protocolo original: Traefik ya terminó TLS
+map $http_x_forwarded_proto $forwarded_proto { default $scheme; https https; }
+
+# ── Límites de peticiones por IP real (los finos los aplica api) ──
+limit_req_zone $binary_remote_addr zone=auth:10m   rate=10r/m;
+limit_req_zone $binary_remote_addr zone=public:10m rate=120r/m;
+limit_req_zone $binary_remote_addr zone=mcp:10m    rate=120r/m;
+limit_req_zone $binary_remote_addr zone=ics:10m    rate=30r/m;
+limit_req_status 429;
+
+server {
+    listen 80;
+    server_name _;
+    client_max_body_size 256k;
+
+    location = /healthz {
+        access_log off;
+        default_type text/plain;
+        return 200 'ok';
+    }
+
+    # Commit desplegado: el workflow lo consulta para saber que la versión nueva ya sirve
+    location = /version.json {
+        default_type application/json;
+        add_header Cache-Control "no-store" always;
+        return 200 '{"revision":"${RELEASE_SHA}"}';
+    }
+
+    # ── api (NestJS) ──
+    location /api/auth/ {
+        limit_req zone=auth burst=10 nodelay;
+        include /etc/nginx/snippets/proxy-headers.conf;
+        include /etc/nginx/snippets/security-headers.conf;
+        proxy_pass http://api_upstream;
+    }
+    location /api/public/ {
+        limit_req zone=public burst=40 nodelay;
+        include /etc/nginx/snippets/proxy-headers.conf;
+        include /etc/nginx/snippets/security-headers.conf;
+        proxy_pass http://api_upstream;
+    }
+    location /api/webhooks/ {
+        client_max_body_size 1m;
+        include /etc/nginx/snippets/proxy-headers.conf;
+        proxy_pass http://api_upstream;
+    }
+    location = /api/v1/stream {
+        include /etc/nginx/snippets/proxy-headers.conf;
+        include /etc/nginx/snippets/security-headers.conf;
+        include /etc/nginx/snippets/stream.conf;
+        proxy_read_timeout 1h;
+        proxy_pass http://api_upstream;
+    }
+    location /api/ {
+        include /etc/nginx/snippets/proxy-headers.conf;
+        include /etc/nginx/snippets/security-headers.conf;
+        proxy_pass http://api_upstream;
+    }
+    location = /mcp {
+        limit_req zone=mcp burst=40 nodelay;
+        include /etc/nginx/snippets/proxy-headers.conf;
+        include /etc/nginx/snippets/security-headers.conf;
+        include /etc/nginx/snippets/stream.conf;
+        proxy_read_timeout 5m;
+        proxy_pass http://api_upstream;
+    }
+    location /.well-known/ {
+        include /etc/nginx/snippets/proxy-headers.conf;
+        include /etc/nginx/snippets/security-headers.conf;
+        proxy_pass http://api_upstream;
+    }
+
+    # ── calendar (Go): avisos de proveedores y feeds ICS ──
+    location /hooks/ {
+        client_max_body_size 1m;
+        include /etc/nginx/snippets/proxy-headers.conf;
+        proxy_pass http://calendar_upstream;
+    }
+    location /ics/ {
+        limit_req zone=ics burst=10 nodelay;
+        include /etc/nginx/snippets/proxy-headers.conf;
+        include /etc/nginx/snippets/security-headers.conf;
+        proxy_pass http://calendar_upstream;
+    }
+
+    # ── web (React SSR) ──
+    location /assets/ {
+        include /etc/nginx/snippets/proxy-headers.conf;
+        include /etc/nginx/snippets/security-headers.conf;
+        add_header Cache-Control "public, max-age=31536000, immutable" always;
+        proxy_pass http://web_upstream;
+    }
+    location / {
+        include /etc/nginx/snippets/proxy-headers.conf;
+        include /etc/nginx/snippets/security-headers.conf;
+        proxy_pass http://web_upstream;
+    }
+}

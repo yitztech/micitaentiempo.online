@@ -1,0 +1,23 @@
+{
+  "site": {
+    "name": "Mi Cita en Tiempo",
+    "tagline": "Tu agenda de citas, siempre a tiempo.",
+    "description": "Calendario de reservas para negocios: comparte tu agenda, recibe citas y sincroniza con Google, Outlook y Apple."
+  },
+  "home": {
+    "title": "Reservas sin llamadas ni mensajes",
+    "lead": "Comparte tu agenda o insértala en tu web. Tus clientes reservan solos y tú recibes cada cita al instante.",
+    "comingSoon": "Muy pronto"
+  },
+  "language": {
+    "switchTo": "English",
+    "switchToLabel": "Ver este sitio en inglés"
+  },
+  "errors": {
+    "notFoundTitle": "Página no encontrada",
+    "notFoundBody": "La dirección no existe o ha cambiado.",
+    "serverTitle": "Algo salió mal",
+    "serverBody": "Inténtalo de nuevo en unos minutos.",
+    "backHome": "Volver al inicio"
+  }
+}

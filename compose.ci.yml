@@ -1,0 +1,27 @@
+# Capa de pruebas sobre compose.prod.yml: misma topología que producción,
+# con imágenes construidas en local, puertos locales y Mailpit.
+#   docker compose -f compose.prod.yml -f compose.ci.yml --env-file .env.ci up -d --build
+services:
+  gateway:
+    build: { context: ., dockerfile: services/gateway/Dockerfile, args: { RELEASE_SHA: "${RELEASE_SHA:-ci}" } }
+    ports: ["8080:80"]
+  web:
+    build: { context: ., dockerfile: services/web/Dockerfile, args: { RELEASE_SHA: "${RELEASE_SHA:-ci}" } }
+    environment:
+      HOST_LANG_MAP: ${HOST_LANG_MAP:-}
+  api:
+    build: { context: ., dockerfile: services/api/Dockerfile, args: { RELEASE_SHA: "${RELEASE_SHA:-ci}" } }
+    environment:
+      HOST_LANG_MAP: ${HOST_LANG_MAP:-}
+      TEST_MODE: ${TEST_MODE:-}
+  calendar:
+    build: { context: ., dockerfile: services/calendar/Dockerfile, args: { RELEASE_SHA: "${RELEASE_SHA:-ci}" } }
+    environment:
+      TEST_MODE: ${TEST_MODE:-}
+  postgres:
+    build: { context: ., dockerfile: services/postgres/Dockerfile }
+  mailpit:
+    image: axllent/mailpit:v1.31.4
+    mem_limit: 64m
+    ports: ["8025:8025"]
+    networks: [frontend]
