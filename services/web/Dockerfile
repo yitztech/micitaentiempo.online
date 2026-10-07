@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # Imagen de `web`. Se construye desde la raíz del repositorio:
 #   docker build -f services/web/Dockerfile --build-arg RELEASE_SHA=<sha> .
-FROM node:24.21.0-alpine3.24 AS base
+FROM node:26.10.0-alpine3.24 AS base
 RUN npm install -g pnpm@12.9.1
 WORKDIR /repo
 
@@ -24,7 +24,7 @@ RUN pnpm --filter "@mcet/web..." build \
  && find /out/node_modules -type d -path "*/fastify/test" -prune -exec rm -rf {} + \
  && ! find /out -iname "*esbuild*" | grep .
 
-FROM node:24.21.0-alpine3.24
+FROM node:26.10.0-alpine3.24
 ARG RELEASE_SHA=dev
 ENV NODE_ENV=production \
     RELEASE_SHA=${RELEASE_SHA} \
