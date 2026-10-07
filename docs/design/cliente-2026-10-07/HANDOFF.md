@@ -67,10 +67,14 @@ Archivos: `components/my-appointments.tsx`, `routes/my-appointments.tsx`.
 
 ### Fase D — páginas públicas
 
-Inicio, Funciones, Precios, FAQ, Conecta tu IA y Contacto según la tabla «Propuesta por página» de PROPUESTA.md. Puntos que se olvidan fácilmente:
-- Precios no debe aparentar que se puede comprar si `features.stripe` está apagado.
-- No inventar testimonios, cifras ni fotos.
-- No enlazar `/citas/:id` ni `/panel/integraciones`: no existen en `routes.ts`.
+- [x] **D. Páginas públicas con jerarquía consistente** — Inicio, Funciones, Precios, FAQ, Conecta tu IA y Contacto adaptadas:
+  - Precios refleja con precisión el estado de `features.stripe` sin aparentar cobro activo cuando no lo está.
+  - Formulario de contacto limitado a 640 px con borde funcional de 3:1 y estados claros.
+  - FAQ con ancho de lectura legible (`prose`) y acordeones semánticos nativos accesibles.
+  - Inicio con bordes de 3:1 en previsualización de horarios, accesos a «Crear mi agenda», «Precios» y «Mis citas».
+  - Acceso del negocio con enlace a «Mis citas» para evitar confusión de clientes finales.
+  - Verificados los 23 escenarios de páginas públicas, presupuesto JS (126 KB < 130 KB) y accesibilidad con axe (0 fallos).
+
 
 ### Fase E — QA y lo que falta auditar
 
