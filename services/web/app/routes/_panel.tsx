@@ -1,9 +1,10 @@
 import { pathFor } from "@mcet/i18n";
-import { Bell, CalendarDays, Home, LogOut, Menu, Plus, Users, X } from "lucide-react";
+import { Bell, BellRing, CalendarDays, Home, LogOut, Menu, Plus, Users, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation, useRouteLoaderData } from "react-router";
 import { LanguageLink } from "~/components/language-link";
 import { Logo } from "~/components/logo";
+import { NotificationBell } from "~/components/notification-bell";
 import { postJson } from "~/lib/api-client";
 import { cx, useRoot } from "~/lib/i18n";
 import { panelGet, panelGetOptional } from "~/lib/panel.server";
@@ -68,8 +69,16 @@ export default function PanelLayout({ loaderData }: Route.ComponentProps) {
           {p.nav.newCalendar}
         </NavLink>
       ) : null}
+      <NavLink to={pathFor("inbox", site.lang)} className={(a) => cx("mt-4", item(a))}>
+        <Bell aria-hidden className="size-5" />
+        {p.nav.inbox}
+      </NavLink>
+      <NavLink to={pathFor("notificationSettings", site.lang)} className={item}>
+        <BellRing aria-hidden className="size-5" />
+        {p.nav.notificationSettings}
+      </NavLink>
       {staff ? (
-        <NavLink to={pathFor("customers", site.lang)} className={(a) => cx("mt-4", item(a))}>
+        <NavLink to={pathFor("customers", site.lang)} className={item}>
           <Users aria-hidden className="size-5" />
           {p.nav.customers}
         </NavLink>
@@ -121,17 +130,7 @@ export default function PanelLayout({ loaderData }: Route.ComponentProps) {
           <div className="lg:hidden">
             <Logo />
           </div>
-          <details className="relative">
-            <summary
-              className="flex size-11 cursor-pointer list-none items-center justify-center rounded-full hover:bg-surface-2 [&::-webkit-details-marker]:hidden"
-              aria-label={p.bell.label}
-            >
-              <Bell aria-hidden className="size-5" />
-            </summary>
-            <div className="absolute right-0 mt-2 w-72 rounded-[var(--radius-card)] border border-border bg-surface p-4 text-[15px] text-muted shadow-[var(--shadow-soft)]">
-              {p.bell.empty}
-            </div>
-          </details>
+          <NotificationBell />
         </header>
         <div id="panel-cajon" hidden={!open} className="border-b border-border bg-surface p-4 lg:hidden">
           {nav}

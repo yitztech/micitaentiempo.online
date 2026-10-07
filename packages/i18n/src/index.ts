@@ -5,12 +5,14 @@ export { default as authEn } from "./locales/en/auth.json" with { type: "json" }
 export { default as bookingEn } from "./locales/en/booking.json" with { type: "json" };
 export { default as en } from "./locales/en/common.json" with { type: "json" };
 export { default as emailsEn } from "./locales/en/emails.json" with { type: "json" };
+export { default as noticesEn } from "./locales/en/notices.json" with { type: "json" };
 export { default as panelEn } from "./locales/en/panel.json" with { type: "json" };
 export { default as publicEn } from "./locales/en/public.json" with { type: "json" };
 export { default as authEs } from "./locales/es/auth.json" with { type: "json" };
 export { default as bookingEs } from "./locales/es/booking.json" with { type: "json" };
 export { default as es } from "./locales/es/common.json" with { type: "json" };
 export { default as emailsEs } from "./locales/es/emails.json" with { type: "json" };
+export { default as noticesEs } from "./locales/es/notices.json" with { type: "json" };
 export { default as panelEs } from "./locales/es/panel.json" with { type: "json" };
 export { default as publicEs } from "./locales/es/public.json" with { type: "json" };
 export * from "./routes.ts";

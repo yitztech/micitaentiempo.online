@@ -60,7 +60,13 @@ Then("la página carga como mucho {int} KB de JavaScript comprimido", async ({ p
   await page.waitForLoadState("networkidle");
   // encodedBodySize: tamaño comprimido de cada script, aunque venga de la caché.
   const total = await page.evaluate(() =>
-    (performance.getEntriesByType("resource") as PerformanceResourceTiming[])
+    (
+      performance.getEntriesByType("resource") as unknown as Array<{
+        initiatorType: string;
+        name: string;
+        encodedBodySize: number;
+      }>
+    )
       .filter((e) => e.initiatorType === "script" || /\.js(\?|$)/.test(e.name))
       .reduce((n, e) => n + e.encodedBodySize, 0),
   );

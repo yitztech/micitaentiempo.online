@@ -1,0 +1,52 @@
+{
+  "staff": {
+    "booking.created": "{{customer}} reservó {{service}} para el {{when}} en «{{calendar}}».",
+    "booking.cancelled": "Se canceló la cita de {{customer}} del {{when}} en «{{calendar}}».",
+    "booking.rescheduled": "La cita de {{customer}} en «{{calendar}}» pasó al {{when}}.",
+    "event.created": "Hay una cita nueva el {{when}} en «{{calendar}}»: {{title}}.",
+    "event.updated": "Se cambió «{{title}}» del {{when}} en «{{calendar}}».",
+    "event.rescheduled": "«{{title}}» pasó al {{when}} en «{{calendar}}».",
+    "event.cancelled": "Se canceló «{{title}}» del {{when}} en «{{calendar}}».",
+    "series.created": "Se creó la serie «{{title}}» desde el {{when}} en «{{calendar}}».",
+    "series.updated": "Se cambió la serie «{{title}}» en «{{calendar}}».",
+    "series.cancelled": "Se canceló la serie «{{title}}» en «{{calendar}}».",
+    "series.instances_skipped": "Algunas fechas de la serie «{{title}}» no se crearon porque estaban ocupadas.",
+    "channel.failed": "No pudimos enviarte avisos por {{channel}}. Revisa la conexión en tus preferencias.",
+    "block.created": "Se bloqueó el {{when}} en «{{calendar}}»: {{title}}.",
+    "block.updated": "Se cambió el bloqueo del {{when}} en «{{calendar}}».",
+    "block.rescheduled": "El bloqueo de «{{calendar}}» pasó al {{when}}.",
+    "block.cancelled": "Se quitó el bloqueo del {{when}} en «{{calendar}}»."
+  },
+  "customer": {
+    "booking.created": "Tu cita de {{service}} en «{{calendar}}» quedó para el {{when}}.",
+    "booking.cancelled": "Tu cita de {{service}} del {{when}} en «{{calendar}}» fue cancelada.",
+    "booking.rescheduled": "Tu cita de {{service}} en «{{calendar}}» ahora es el {{when}}.",
+    "reminder": "Te recordamos tu cita de {{service}} el {{when}} en «{{calendar}}»."
+  },
+  "subjects": {
+    "staff": "Aviso de «{{calendar}}»",
+    "booking.created": "Tu cita está confirmada",
+    "booking.cancelled": "Tu cita fue cancelada",
+    "booking.rescheduled": "Tu cita cambió de hora",
+    "reminder": "Recordatorio de tu cita: {{when}}"
+  },
+  "preview": "Novedades de tu agenda en Mi Cita en Tiempo",
+  "address": "Dirección: {{address}}",
+  "reason": "Motivo: {{reason}}",
+  "manage": "Ver o cambiar mis citas",
+  "openPanel": "Abrir el panel",
+  "unsubscribe": "Dejar de recibir estos avisos por correo",
+  "unsubscribed": "Listo, ya no recibirás estos avisos por correo.",
+  "someone": "Un cliente",
+  "untitled": "Sin título",
+  "service": "su cita",
+  "channels": {
+    "email": "correo",
+    "telegram": "Telegram",
+    "slack": "Slack",
+    "whatsapp": "WhatsApp",
+    "panel": "panel"
+  },
+  "telegramLinked": "Listo: recibirás aquí los avisos de Mi Cita en Tiempo.",
+  "whatsappCode": "Tu código de Mi Cita en Tiempo es {{code}}."
+}

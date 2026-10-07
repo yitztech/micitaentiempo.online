@@ -10,7 +10,9 @@
     "settings": "Settings",
     "team": "Team",
     "newCalendar": "New board",
-    "menu": "Dashboard menu"
+    "menu": "Dashboard menu",
+    "inbox": "Notifications",
+    "notificationSettings": "Notification preferences"
   },
   "bell": {
     "label": "Notifications",
@@ -271,5 +273,51 @@
     "validation_failed": "Check the highlighted fields.",
     "invalid_timezone": "Choose a valid time zone.",
     "google_required": "Editors need a Google account with that email."
+  },
+  "inbox": {
+    "seoTitle": "Notifications",
+    "title": "Notifications",
+    "markAll": "Mark all as read",
+    "empty": "You have no notifications.",
+    "unread": "{{n}} unread",
+    "seeAll": "See all notifications",
+    "new": "New"
+  },
+  "prefs": {
+    "seoTitle": "Notification preferences",
+    "title": "Notification preferences",
+    "lead": "Choose how we notify you about each thing. The dashboard always shows staff notifications.",
+    "group": "Notification",
+    "groups": {
+      "bookings": "New bookings",
+      "changes": "Changes and cancellations",
+      "reminders": "Reminders",
+      "billing": "Billing",
+      "system": "System notices"
+    },
+    "channels": {
+      "email": "Email",
+      "telegram": "Telegram",
+      "slack": "Slack",
+      "whatsapp": "WhatsApp"
+    },
+    "connections": "Connections",
+    "connect": "Connect",
+    "disconnect": "Disconnect",
+    "connected": "Connected: {{label}}",
+    "disabled": "Disconnected because sending failed. Connect it again.",
+    "notConnected": "Not connected",
+    "telegramHelp": "Open Telegram and tap “Start” to link your account.",
+    "openTelegram": "Open Telegram",
+    "phone": "WhatsApp phone",
+    "sendCode": "Send code",
+    "code": "Code",
+    "verify": "Verify",
+    "mutes": "Muted boards",
+    "save": "Save",
+    "saved": "Preferences saved.",
+    "slackOk": "Slack is connected.",
+    "slackError": "Couldn't connect Slack.",
+    "whatsappOk": "WhatsApp is connected."
   }
 }

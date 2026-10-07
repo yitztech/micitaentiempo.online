@@ -241,3 +241,118 @@ export const auditLog = app.table(
   },
   (t) => [index("audit_log_org").on(t.orgId, t.createdAt)],
 );
+
+// ── Avisos (docs/plan/05-negocio-api.md §5.6) ──
+
+/** Avisos del panel (bandeja con contador de no leídos; se conservan 90 días). */
+export const notifications = app.table(
+  "notifications",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    orgId: text("org_id"),
+    calendarId: text("calendar_id"),
+    type: text("type").notNull(),
+    params: jsonb("params").notNull().$type<Record<string, unknown>>(),
+    readAt: timestamp("read_at", { withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => [index("notifications_user").on(t.userId, t.createdAt)],
+);
+
+/** Preferencias: grupo × canal (sin fila = valor por defecto). */
+export const notificationPreferences = app.table(
+  "notification_preferences",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    group: text("group").notNull(),
+    channel: text("channel").notNull(),
+    enabled: boolean("enabled").notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.group, t.channel] })],
+);
+
+/** Tableros silenciados por un usuario. */
+export const notificationMutes = app.table(
+  "notification_mutes",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    calendarId: text("calendar_id").notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.calendarId] })],
+);
+
+/** Canales vinculados (Telegram, Slack, WhatsApp); los datos van cifrados con APP_ENC_KEY. */
+export const notificationChannels = app.table(
+  "notification_channels",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    channel: text("channel", { enum: ["telegram", "slack", "whatsapp"] }).notNull(),
+    status: text("status", { enum: ["pending", "active", "disabled"] }).notNull(),
+    secret: text("secret").notNull(),
+    label: text("label"),
+    updatedAt: updatedAt(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.channel] })],
+);
+
+/** Tokens de un solo uso para vincular canales (Telegram /start, código de WhatsApp, estado OAuth de Slack). */
+export const channelLinkTokens = app.table("channel_link_tokens", {
+  tokenHash: text("token_hash").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  channel: text("channel").notNull(),
+  data: jsonb("data").$type<Record<string, unknown>>(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+});
+
+/**
+ * Cola de entregas: una fila por destinatario y canal, idempotente por `dedupe_key`
+ * (`event_id + usuario + canal`). La reclama el worker con FOR UPDATE SKIP LOCKED.
+ */
+export const notificationDeliveries = app.table(
+  "notification_deliveries",
+  {
+    id: text("id").primaryKey(),
+    dedupeKey: text("dedupe_key").notNull().unique(),
+    userId: text("user_id"),
+    orgId: text("org_id"),
+    channel: text("channel", { enum: ["email", "telegram", "slack", "whatsapp"] }).notNull(),
+    template: text("template").notNull(),
+    payload: jsonb("payload").notNull().$type<Record<string, unknown>>(),
+    status: text("status", { enum: ["pending", "sent", "failed"] })
+      .notNull()
+      .default("pending"),
+    attempts: integer("attempts").notNull().default(0),
+    nextAttemptAt: timestamp("next_attempt_at", { withTimezone: true }).notNull(),
+    lastError: text("last_error"),
+    sentAt: timestamp("sent_at", { withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => [index("deliveries_due").on(t.status, t.nextAttemptAt)],
+);
+
+/** Recordatorios de citas (24 h y 1 h antes); se revalidan contra el motor al dispararse. */
+export const reminders = app.table(
+  "reminders",
+  {
+    eventId: text("event_id").notNull(),
+    offsetMin: integer("offset_min").notNull(),
+    calendarId: text("calendar_id").notNull(),
+    orgId: text("org_id").notNull(),
+    startAt: timestamp("start_at", { withTimezone: true }).notNull(),
+    dueAt: timestamp("due_at", { withTimezone: true }).notNull(),
+    sentAt: timestamp("sent_at", { withTimezone: true }),
+    cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
+  },
+  (t) => [primaryKey({ columns: [t.eventId, t.offsetMin] }), index("reminders_due").on(t.dueAt)],
+);

@@ -22,6 +22,13 @@
       "when": 1791342525934,
       "tag": "0002_identidad",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791360200900,
+      "tag": "0003_avisos",
+      "breakpoints": true
     }
   ]
 }

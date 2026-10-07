@@ -1,4 +1,4 @@
-import { emailsEn, emailsEs, en, es, interpolate, type Lang } from "@mcet/i18n";
+import { emailsEn, emailsEs, en, es, interpolate, type Lang, noticesEn, noticesEs } from "@mcet/i18n";
 import { Button, Text } from "@react-email/components";
 import { render } from "@react-email/render";
 import { Layout, styles } from "./layout.js";
@@ -6,6 +6,7 @@ import { Layout, styles } from "./layout.js";
 type Catalog = typeof emailsEs;
 const CATALOG: Record<Lang, Catalog> = { es: emailsEs, en: emailsEn };
 const BRAND: Record<Lang, string> = { es: es.site.name, en: en.site.name };
+const NOTICES_EMAIL: Record<Lang, typeof noticesEs> = { es: noticesEs, en: noticesEn };
 
 export interface RenderedEmail {
   subject: string;
@@ -104,6 +105,60 @@ export async function contactEmail(
       <Text style={{ ...styles.text, whiteSpace: "pre-wrap" }}>{p.message}</Text>
       {p.newsletter ? <Text style={styles.muted}>{t.contact.newsletterYes}</Text> : null}
       <Text style={styles.muted}>{t.contact.replyHint}</Text>
+    </Layout>,
+  );
+}
+
+/** Aviso al personal del negocio (no esencial: lleva enlace para darse de baja). */
+export async function staffNoticeEmail(
+  lang: Lang,
+  p: { calendar: string; text: string; url: string; unsubscribeUrl: string },
+) {
+  const n = NOTICES_EMAIL[lang];
+  return finish(
+    interpolate(n.subjects.staff, { calendar: p.calendar }),
+    <Layout lang={lang} brand={BRAND[lang]} preview={n.preview} footer={CATALOG[lang].footer}>
+      <Text style={styles.text}>{p.text}</Text>
+      <Button href={p.url} style={styles.button}>
+        {n.openPanel}
+      </Button>
+      <Text style={styles.muted}>
+        <a href={p.unsubscribeUrl}>{n.unsubscribe}</a>
+      </Text>
+    </Layout>,
+  );
+}
+
+/** Correo al cliente final (confirmación, cambio, cancelación o recordatorio). */
+export async function customerNoticeEmail(
+  lang: Lang,
+  p: {
+    subject: string;
+    text: string;
+    name?: string | null;
+    address?: string | null;
+    reason?: string | null;
+    manageUrl: string;
+    unsubscribeUrl?: string;
+  },
+) {
+  const n = NOTICES_EMAIL[lang];
+  const t = CATALOG[lang];
+  return finish(
+    p.subject,
+    <Layout lang={lang} brand={BRAND[lang]} preview={p.subject} footer={t.footer}>
+      <Text style={styles.text}>{greeting(t, p.name ?? undefined)}</Text>
+      <Text style={styles.text}>{p.text}</Text>
+      {p.address ? <Text style={styles.muted}>{interpolate(n.address, { address: p.address })}</Text> : null}
+      {p.reason ? <Text style={styles.muted}>{interpolate(n.reason, { reason: p.reason })}</Text> : null}
+      <Button href={p.manageUrl} style={styles.button}>
+        {n.manage}
+      </Button>
+      {p.unsubscribeUrl ? (
+        <Text style={styles.muted}>
+          <a href={p.unsubscribeUrl}>{n.unsubscribe}</a>
+        </Text>
+      ) : null}
     </Layout>,
   );
 }

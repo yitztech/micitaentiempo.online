@@ -72,6 +72,10 @@ export class PanelController {
     });
     res.write("retry: 5000\n\n");
     const unsubscribe = this.bus.subscribe((c) => {
+      if (c.userId) {
+        if (c.userId === user.id) res.write(`event: notification\ndata: {}\n\n`);
+        return;
+      }
       if (!calendars.has(c.calendarId)) return;
       res.write(`event: change\ndata: ${JSON.stringify({ ...c, mine: c.actorUserId === user.id })}\n\n`);
     });

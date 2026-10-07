@@ -23,7 +23,7 @@ services/api/src/
   mcp/                       # servidor MCP y configuración OAuth (06-mcp.md)
   newsletter/                # alta en Listmonk
   audit/                     # registro de auditoría
-  jobs/                      # pg-boss: colas, horarios, reintentos
+  notifications/             # avisos: difusión, cola propia de entregas y recordatorios (ADR 0015)
   internal-rpc/              # EventIngress (Connect sobre Fastify, puerto 3001)
   health/                    # /api/healthz (con revisión) y /readyz
   db/                        # Drizzle: esquema app, migraciones SQL versionadas
@@ -202,8 +202,8 @@ el correo está activo por defecto; WhatsApp, Slack y Telegram requieren vincula
 | Slack | «Añadir a Slack» (OAuth v2, permiso `incoming-webhook`); el usuario elige canal | Webhook entrante con Block Kit | URL cifrada con `APP_ENC_KEY`; si Slack devuelve 404/410, se desactiva y se avisa en el panel |
 | Telegram | Botón que abre `https://t.me/<bot>?start=<token de 10 min>`; el bot recibe `/start` y vincula el chat | `sendMessage` con HTML escapado | Webhook con `X-Telegram-Bot-Api-Secret-Token`; si el usuario bloquea el bot, se desactiva |
 
-**Recordatorios:** al recibir `booking.created` o `booking.rescheduled`, se programan trabajos de pg-boss a
-24 h y 1 h (configurable por tablero) con clave única por cita y desfase. Al dispararse, consultan la cita
+**Recordatorios** (cola propia, ADR 0015): al recibir `booking.created` o `booking.rescheduled`, se programan
+recordatorios a 24 h y 1 h (configurable por tablero) con clave única por cita y desfase. Al dispararse, consultan la cita
 en `calendar` y solo envían si sigue confirmada y con la misma hora.
 
 **Entrega:** un trabajo por destinatario y canal, clave de idempotencia `event_id + usuario + canal`, 5
@@ -271,5 +271,5 @@ igual, registra en el log qué está desactivado y la expone en `/api/public/v1/
 a medias (p. ej., `STRIPE_SECRET_KEY` sin `STRIPE_WEBHOOK_SECRET`) impide arrancar, para no cobrar sin
 recibir los webhooks.
 
-Memoria: `mem_limit: 384m`, `NODE_OPTIONS=--max-old-space-size=256`; pool de `pg` de 15 conexiones y 5 para
-pg-boss.
+Memoria: `mem_limit: 384m`, `NODE_OPTIONS=--max-old-space-size=256`; pool de `pg` de 15 conexiones (la cola de
+avisos usa el mismo pool; ADR 0015).

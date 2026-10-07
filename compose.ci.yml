@@ -22,6 +22,19 @@ services:
     environment:
       HOST_LANG_MAP: ${HOST_LANG_MAP:-}
       TEST_MODE: ${TEST_MODE:-}
+      # Canales contra el servidor de captura: valores falsos, nunca reales (repositorio público).
+      TELEGRAM_BOT_TOKEN: "000000:token-de-prueba"
+      TELEGRAM_BOT_USERNAME: mcet_pruebas_bot
+      TELEGRAM_API_URL: http://captura:4010/telegram
+      SLACK_CLIENT_ID: cliente-de-prueba
+      SLACK_CLIENT_SECRET: secreto-de-prueba
+      SLACK_API_URL: http://captura:4010/slack
+      SLACK_AUTHORIZE_URL: http://localhost:4010/slack/authorize
+      WHATSAPP_TOKEN: token-de-prueba
+      WHATSAPP_PHONE_NUMBER_ID: "000000000000000"
+      WHATSAPP_API_URL: http://captura:4010/whatsapp
+    depends_on:
+      captura: { condition: service_healthy }
   calendar:
     build: { context: ., dockerfile: services/calendar/Dockerfile, args: { RELEASE_SHA: "${RELEASE_SHA:-ci}" } }
     environment:
@@ -35,4 +48,16 @@ services:
       MP_SMTP_AUTH_ACCEPT_ANY: "1"
       MP_SMTP_AUTH_ALLOW_INSECURE: "1"
     ports: ["8025:8025"]
+    networks: [frontend]
+  # Imita Telegram, Slack y WhatsApp (tests/fakes/captura.mjs): nada sale a terceros en las pruebas.
+  captura:
+    image: node:24.21.0-alpine3.24
+    mem_limit: 64m
+    command: ["node", "/app/captura.mjs"]
+    volumes: ["./tests/fakes:/app:ro"]
+    ports: ["4010:4010"]
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, "http://127.0.0.1:4010/healthz"]
+      interval: 5s
+      retries: 10
     networks: [frontend]

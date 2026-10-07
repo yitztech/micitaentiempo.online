@@ -38,6 +38,8 @@ export default [
     ...page("calendarSettings", "routes/calendar-settings.tsx"),
     ...page("calendarTeam", "routes/calendar-team.tsx"),
     ...page("customers", "routes/customers.tsx"),
+    ...page("inbox", "routes/inbox.tsx"),
+    ...page("notificationSettings", "routes/notification-settings.tsx"),
   ]),
   ...page("booking", "routes/booking.tsx"),
   ...page("myAppointments", "routes/my-appointments.tsx"),

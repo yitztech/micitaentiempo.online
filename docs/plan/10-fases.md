@@ -178,13 +178,13 @@ capturas aprobadas; axe sin violaciones serias.
 
 **Objetivo:** RF-13, RF-14 y RF-22.
 
-- [ ] Ingreso → difusión → destinatarios → preferencias → canales (`05-negocio-api.md` §5.6).
-- [ ] Correos de todos los eventos (es y en, `.ics`, `List-Unsubscribe`); bandeja del panel con SSE.
-- [ ] Telegram (enlace del bot), Slack (OAuth `incoming-webhook`) y WhatsApp (verificación, plantillas,
+- [x] Ingreso → difusión → destinatarios → preferencias → canales (`05-negocio-api.md` §5.6).
+- [x] Correos de todos los eventos (es y en, `.ics`, `List-Unsubscribe`); bandeja del panel con SSE.
+- [x] Telegram (enlace del bot), Slack (OAuth `incoming-webhook`) y WhatsApp (verificación, plantillas,
       cupo), activables por variable de entorno. WhatsApp queda **implementado y desactivado, sin valores
       reales** (decisión del 2026-10-06), probado contra el servidor de captura.
-- [ ] Recordatorios a 24 h y 1 h; registro de entregas; reintentos; aviso si un canal falla.
-- [ ] Pantalla de preferencias.
+- [x] Recordatorios a 24 h y 1 h; registro de entregas; reintentos; aviso si un canal falla.
+- [x] Pantalla de preferencias.
 
 **Aceptación:** escenarios de aviso a propietario y observadores en su idioma, vinculación de Telegram,
 recordatorios con reloj controlado, sin aviso al autor y un solo aviso por cambio de serie.

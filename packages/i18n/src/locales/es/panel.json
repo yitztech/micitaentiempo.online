@@ -10,7 +10,9 @@
     "settings": "Ajustes",
     "team": "Equipo",
     "newCalendar": "Nuevo tablero",
-    "menu": "Menú del panel"
+    "menu": "Menú del panel",
+    "inbox": "Avisos",
+    "notificationSettings": "Preferencias de avisos"
   },
   "bell": {
     "label": "Avisos",
@@ -271,5 +273,51 @@
     "validation_failed": "Revisa los datos marcados.",
     "invalid_timezone": "Elige una zona horaria válida.",
     "google_required": "Los editores deben tener cuenta de Google con ese correo."
+  },
+  "inbox": {
+    "seoTitle": "Avisos",
+    "title": "Avisos",
+    "markAll": "Marcar todo como leído",
+    "empty": "No tienes avisos.",
+    "unread": "{{n}} sin leer",
+    "seeAll": "Ver todos los avisos",
+    "new": "Nuevo"
+  },
+  "prefs": {
+    "seoTitle": "Preferencias de avisos",
+    "title": "Preferencias de avisos",
+    "lead": "Elige por dónde te avisamos de cada cosa. El panel siempre muestra los avisos del personal.",
+    "group": "Aviso",
+    "groups": {
+      "bookings": "Reservas nuevas",
+      "changes": "Cambios y cancelaciones",
+      "reminders": "Recordatorios",
+      "billing": "Facturación",
+      "system": "Avisos del sistema"
+    },
+    "channels": {
+      "email": "Correo",
+      "telegram": "Telegram",
+      "slack": "Slack",
+      "whatsapp": "WhatsApp"
+    },
+    "connections": "Conexiones",
+    "connect": "Conectar",
+    "disconnect": "Desconectar",
+    "connected": "Conectado: {{label}}",
+    "disabled": "Se desconectó porque falló el envío. Vuelve a conectarlo.",
+    "notConnected": "Sin conectar",
+    "telegramHelp": "Abre Telegram y pulsa «Iniciar» para vincular tu cuenta.",
+    "openTelegram": "Abrir Telegram",
+    "phone": "Teléfono de WhatsApp",
+    "sendCode": "Enviar código",
+    "code": "Código",
+    "verify": "Verificar",
+    "mutes": "Tableros silenciados",
+    "save": "Guardar",
+    "saved": "Preferencias guardadas.",
+    "slackOk": "Slack quedó conectado.",
+    "slackError": "No se pudo conectar Slack.",
+    "whatsappOk": "WhatsApp quedó conectado."
   }
 }
