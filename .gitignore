@@ -16,3 +16,4 @@ tests/escenarios/.features-gen/
 /services/calendar/bin/
 /services/calendar/calendar
 cucumber-report*/
+.cc-writes/

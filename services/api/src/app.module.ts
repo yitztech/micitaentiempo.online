@@ -7,6 +7,7 @@ import { DbModule } from "./db/db.module.js";
 import { EventsModule } from "./events/events.module.js";
 import { HealthController } from "./health/health.controller.js";
 import { InternalRpcModule } from "./internal-rpc/internal-rpc.module.js";
+import { SiteController } from "./site/site.controller.js";
 import { TestSupportController } from "./test-support/test-support.controller.js";
 
 /** Los endpoints /__test solo existen con TEST_MODE (y loadEnv lo prohíbe con dominios reales). */
@@ -29,6 +30,6 @@ const testControllers = process.env.TEST_MODE ? [TestSupportController] : [];
     CalendarsModule,
     EventsModule,
   ],
-  controllers: [HealthController, ...testControllers],
+  controllers: [HealthController, SiteController, ...testControllers],
 })
 export class AppModule {}

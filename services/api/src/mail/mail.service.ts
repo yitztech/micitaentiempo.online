@@ -18,6 +18,7 @@ export interface MailMessage {
   text: string;
   attachments?: MailAttachment[];
   headers?: Record<string, string>;
+  replyTo?: string;
 }
 
 /** Correo transaccional con el remitente y las credenciales del dominio del idioma (README). */
@@ -43,6 +44,11 @@ export class MailService {
     };
   }
 
+  /** Buzón del dominio del idioma (el remitente): recibe los mensajes de contacto. */
+  inbox(lang: Lang): string {
+    return this.transports[lang].from;
+  }
+
   async send(msg: MailMessage): Promise<void> {
     const { transporter, from } = this.transports[msg.lang];
     await transporter.sendMail({
@@ -53,6 +59,7 @@ export class MailService {
       text: msg.text,
       attachments: msg.attachments,
       headers: msg.headers,
+      replyTo: msg.replyTo,
     });
     this.logger.log({ lang: msg.lang, subject: msg.subject }, "correo enviado");
   }

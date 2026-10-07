@@ -3,7 +3,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 const root = join(import.meta.dirname, "locales");
-const langs = readdirSync(root);
+const langs = readdirSync(root).filter((d) => /^[a-z]{2}$/.test(d));
 
 function keys(obj: unknown, prefix = ""): string[] {
   if (typeof obj !== "object" || obj === null) return [prefix];

@@ -91,3 +91,16 @@ export async function invitationEmail(
     </Layout>,
   );
 }
+
+export async function contactEmail(lang: Lang, p: { name: string; email: string; message: string; newsletter: boolean }) {
+  const t = CATALOG[lang];
+  return finish(
+    interpolate(t.contact.subject, { name: p.name }),
+    <Layout lang={lang} brand={BRAND[lang]} preview={t.contact.preview} footer={t.footer}>
+      <Text style={styles.text}>{interpolate(t.contact.intro, { name: p.name, email: p.email })}</Text>
+      <Text style={{ ...styles.text, whiteSpace: "pre-wrap" }}>{p.message}</Text>
+      {p.newsletter ? <Text style={styles.muted}>{t.contact.newsletterYes}</Text> : null}
+      <Text style={styles.muted}>{t.contact.replyHint}</Text>
+    </Layout>,
+  );
+}

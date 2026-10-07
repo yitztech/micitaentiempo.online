@@ -45,6 +45,18 @@ const EnvSchema = z.object({
   ALTCHA_HMAC_KEY: z.string().min(32, "debe tener al menos 32 caracteres"),
   GOOGLE_CLIENT_ID: optional,
   GOOGLE_CLIENT_SECRET: optional,
+  // Integraciones opcionales: sin valor, la función queda desactivada (05-negocio-api.md §5.9).
+  MS_CLIENT_ID: optional,
+  MS_CLIENT_SECRET: optional,
+  STRIPE_SECRET_KEY: optional,
+  SLACK_CLIENT_ID: optional,
+  TELEGRAM_BOT_TOKEN: optional,
+  WHATSAPP_TOKEN: optional,
+  WHATSAPP_PHONE_NUMBER_ID: optional,
+  LISTMONK_URL: optional,
+  LISTMONK_LIST_UUID: optional,
+  LISTMONK_URL_EN: optional,
+  LISTMONK_LIST_UUID_EN: optional,
   TEST_MODE: optional,
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
 });

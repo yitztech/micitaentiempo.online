@@ -11,13 +11,51 @@
   },
   "language": {
     "switchTo": "English",
-    "switchToLabel": "Ver este sitio en inglés"
+    "switchToLabel": "Ver este sitio en inglés",
+    "sessionNote": "El sitio en inglés tiene su propia sesión: si entraste aquí, allá tendrás que entrar de nuevo."
+  },
+  "nav": {
+    "main": "Principal",
+    "features": "Funciones",
+    "pricing": "Precios",
+    "faq": "Preguntas frecuentes",
+    "connectAi": "Conecta tu IA",
+    "contact": "Contacto",
+    "signIn": "Entrar",
+    "signUp": "Empieza gratis",
+    "dashboard": "Ir al panel",
+    "openMenu": "Abrir menú",
+    "closeMenu": "Cerrar menú",
+    "skipToContent": "Saltar al contenido"
+  },
+  "footer": {
+    "product": "Producto",
+    "legal": "Legal",
+    "privacy": "Privacidad",
+    "terms": "Condiciones",
+    "credits": "Créditos",
+    "rights": "© {{year}} Mi Cita en Tiempo",
+    "madeFor": "Agenda en línea para negocios de servicios, en español e inglés."
+  },
+  "ui": {
+    "loading": "Cargando…",
+    "required": "Obligatorio",
+    "optional": "Opcional",
+    "showPassword": "Mostrar contraseña",
+    "hidePassword": "Ocultar contraseña",
+    "close": "Cerrar",
+    "back": "Volver",
+    "continue": "Continuar",
+    "or": "o",
+    "sending": "Enviando…",
+    "comingSoon": "Disponible pronto"
   },
   "errors": {
     "notFoundTitle": "Página no encontrada",
     "notFoundBody": "La dirección no existe o ha cambiado.",
     "serverTitle": "Algo salió mal",
     "serverBody": "Inténtalo de nuevo en unos minutos.",
-    "backHome": "Volver al inicio"
+    "backHome": "Volver al inicio",
+    "errorCode": "Código {{code}}"
   }
 }

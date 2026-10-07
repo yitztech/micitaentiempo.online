@@ -8,6 +8,7 @@
     "typecheck": "bddgen && tsc -p tsconfig.json"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
     "@mcet/i18n": "workspace:*",
     "@mcet/tsconfig": "workspace:*",
     "@playwright/test": "1.63.0",

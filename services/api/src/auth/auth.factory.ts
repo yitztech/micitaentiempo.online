@@ -44,7 +44,12 @@ const PWNED_MESSAGE: Record<Lang, string> = {
 };
 
 /** Rutas que envían correos a direcciones nuevas: exigen ALTCHA. */
-const ALTCHA_PATHS = new Set(["/sign-up/email", "/email-otp/send-verification-otp", "/forget-password"]);
+const ALTCHA_PATHS = new Set([
+  "/sign-up/email",
+  "/email-otp/send-verification-otp",
+  "/request-password-reset",
+  "/forget-password",
+]);
 
 /** Rutas de Better Auth que reciben un correo nuevo y deben validarlo (RF-02). */
 const EMAIL_PATHS = new Set(["/sign-up/email", "/email-otp/send-verification-otp", "/sign-in/email-otp"]);
@@ -144,6 +149,8 @@ export function createAuth(lang: Lang, { env, db, mail, verifyAltcha }: AuthDeps
         "/sign-up/email": { window: 60 * 60, max: 5 },
         "/email-otp/send-verification-otp": { window: 60 * 60, max: 5 },
         "/forget-password": { window: 60 * 60, max: 5 },
+        "/request-password-reset": { window: 60 * 60, max: 5 },
+        "/send-verification-email": { window: 60 * 60, max: 5 },
       },
     },
     hooks: {

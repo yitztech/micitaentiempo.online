@@ -147,11 +147,21 @@ export class MembersService {
   /** Datos públicos de una invitación (para la pantalla de aceptación). */
   async preview(token: string) {
     const inv = await this.find(token);
+    const [inviter] = await this.db
+      .select({ name: users.name })
+      .from(users)
+      .where(eq(users.id, inv.invitedBy));
+    const cal = await this.calendar
+      .client(CalendarService)
+      .getCalendar({ id: inv.calendarId }, asActor({ actor: { role: "system", via: "system" } }))
+      .catch(() => undefined);
     return {
       role: inv.role,
       requiresGoogle: inv.requiresGoogle,
       emailHint: inv.email.replace(/^(.).*(@.*)$/, "$1…$2"),
       expiresAt: inv.expiresAt.toISOString(),
+      calendarName: cal?.name ?? null,
+      inviterName: inviter?.name ?? null,
     };
   }
 

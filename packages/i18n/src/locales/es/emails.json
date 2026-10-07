@@ -30,6 +30,16 @@
     "googleNote": "Para aceptar, entra con la cuenta de Google de {{email}}.",
     "button": "Aceptar la invitación",
     "expires": "La invitación caduca en 7 días.",
-    "roles": { "editor": "editor", "observer": "observador" }
+    "roles": {
+      "editor": "editor",
+      "observer": "observador"
+    }
+  },
+  "contact": {
+    "subject": "Mensaje de contacto de {{name}}",
+    "preview": "Nuevo mensaje desde el formulario de contacto",
+    "intro": "{{name}} ({{email}}) escribió desde el formulario de contacto:",
+    "newsletterYes": "Pidió recibir novedades por correo.",
+    "replyHint": "Responde a este correo para contestarle."
   }
 }

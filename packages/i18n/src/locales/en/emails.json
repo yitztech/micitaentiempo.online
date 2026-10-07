@@ -30,6 +30,16 @@
     "googleNote": "To accept, sign in with the Google account for {{email}}.",
     "button": "Accept the invitation",
     "expires": "The invitation expires in 7 days.",
-    "roles": { "editor": "an editor", "observer": "a viewer" }
+    "roles": {
+      "editor": "an editor",
+      "observer": "a viewer"
+    }
+  },
+  "contact": {
+    "subject": "Contact message from {{name}}",
+    "preview": "New message from the contact form",
+    "intro": "{{name}} ({{email}}) wrote from the contact form:",
+    "newsletterYes": "They asked to receive product news by email.",
+    "replyHint": "Reply to this email to answer them."
   }
 }

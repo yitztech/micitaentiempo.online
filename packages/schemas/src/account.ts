@@ -16,3 +16,19 @@ export const UpdateMe = z
   .partial()
   .strict();
 export type UpdateMe = z.infer<typeof UpdateMe>;
+
+/** Formulario de contacto de las páginas públicas. */
+export const ContactMessage = z
+  .object({
+    name: z.string().trim().min(1).max(120),
+    email: z.string().trim().min(3).max(254),
+    message: z.string().trim().min(10).max(4000),
+    newsletter: z.boolean().default(false),
+  })
+  .strict();
+export type ContactMessage = z.infer<typeof ContactMessage>;
+
+export const NewsletterSignup = z
+  .object({ email: z.string().trim().min(3).max(254), name: z.string().trim().max(120).optional() })
+  .strict();
+export type NewsletterSignup = z.infer<typeof NewsletterSignup>;

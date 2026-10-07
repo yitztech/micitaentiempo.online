@@ -2,22 +2,60 @@
   "site": {
     "name": "My Appointment On Time",
     "tagline": "Your booking calendar, always on time.",
-    "description": "Booking calendar for businesses: share your schedule, take appointments and sync with Google, Outlook and Apple."
+    "description": "Booking calendar for businesses: share your schedule, get appointments and sync with Google, Outlook and Apple."
   },
   "home": {
-    "title": "Bookings without calls or messages",
+    "title": "Bookings without calls or texts",
     "lead": "Share your schedule or embed it on your website. Your clients book on their own and you get every appointment instantly.",
     "comingSoon": "Coming soon"
   },
   "language": {
     "switchTo": "Español",
-    "switchToLabel": "View this site in Spanish"
+    "switchToLabel": "View this site in Spanish",
+    "sessionNote": "The Spanish site has its own session: if you signed in here, you will need to sign in again there."
+  },
+  "nav": {
+    "main": "Main",
+    "features": "Features",
+    "pricing": "Pricing",
+    "faq": "FAQ",
+    "connectAi": "Connect your AI",
+    "contact": "Contact",
+    "signIn": "Sign in",
+    "signUp": "Start free",
+    "dashboard": "Go to dashboard",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "skipToContent": "Skip to content"
+  },
+  "footer": {
+    "product": "Product",
+    "legal": "Legal",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "credits": "Credits",
+    "rights": "© {{year}} My Appointment On Time",
+    "madeFor": "Online scheduling for service businesses, in English and Spanish."
+  },
+  "ui": {
+    "loading": "Loading…",
+    "required": "Required",
+    "optional": "Optional",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "close": "Close",
+    "back": "Back",
+    "continue": "Continue",
+    "or": "or",
+    "sending": "Sending…",
+    "comingSoon": "Coming soon"
   },
   "errors": {
     "notFoundTitle": "Page not found",
-    "notFoundBody": "This address doesn't exist or has changed.",
+    "notFoundBody": "The address doesn't exist or has changed.",
     "serverTitle": "Something went wrong",
     "serverBody": "Please try again in a few minutes.",
-    "backHome": "Back to home"
+    "backHome": "Back to home",
+    "errorCode": "Code {{code}}"
   }
 }
