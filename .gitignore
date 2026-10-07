@@ -13,3 +13,4 @@ blob-report/
 tests/escenarios/.features-gen/
 *.tsbuildinfo
 /services/calendar/bin/
+/services/calendar/calendar
