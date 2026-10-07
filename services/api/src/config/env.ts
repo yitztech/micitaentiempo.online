@@ -22,6 +22,9 @@ const EnvSchema = z.object({
   DB_USER: z.string().default("api"),
   DB_PASSWORD: z.string().min(1),
   DB_POOL_MAX: z.coerce.number().int().default(15),
+  CALENDAR_RPC_URL: z.url().default("http://calendar:8081"),
+  RPC_SECRET_API_TO_CALENDAR: z.string().min(32, "debe tener al menos 32 caracteres"),
+  RPC_SECRET_CALENDAR_TO_API: z.string().min(32, "debe tener al menos 32 caracteres"),
   TEST_MODE: optional,
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
 });

@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package mcet.api.v1;
+
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+import "mcet/common/v1/actor.proto";
+
+// Entrada de eventos de dominio del motor hacia api (outbox, ADR 0004).
+service EventIngressService {
+  // Idempotente por event_id: un reintento devuelve duplicate = true.
+  rpc Publish(PublishRequest) returns (PublishResponse);
+}
+
+message DomainEvent {
+  // UUIDv7.
+  string event_id = 1;
+  // p. ej. "booking.created" (docs/plan/04-motor-calendario.md §4.8).
+  string type = 2;
+  google.protobuf.Timestamp occurred_at = 3;
+  string org_id = 4;
+  string calendar_id = 5;
+  mcet.common.v1.Actor actor = 6;
+  // Datos del sujeto del evento (evento, serie, reserva…).
+  google.protobuf.Struct subject = 7;
+  int32 version = 8;
+}
+
+message PublishRequest {
+  DomainEvent event = 1;
+}
+
+message PublishResponse {
+  bool duplicate = 1;
+}

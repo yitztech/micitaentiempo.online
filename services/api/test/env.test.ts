@@ -5,6 +5,8 @@ const base = {
   SITE_URL: "http://micitaentiempo.localhost:8080",
   SITE_URL_EN: "http://myappointmentontime.localhost:8080",
   DB_PASSWORD: "x",
+  RPC_SECRET_API_TO_CALENDAR: "a".repeat(32),
+  RPC_SECRET_CALENDAR_TO_API: "b".repeat(32),
 };
 
 describe("loadEnv", () => {

@@ -24,6 +24,11 @@ type Config struct {
 	PublicURLEN  string
 	LogLevel     string
 	TestMode     bool
+	// Secretos del JWT interno (ADR 0003).
+	RPCSecretAPIToCalendar string
+	RPCSecretCalendarToAPI string
+	// URL del RPC interno de api (eventos de dominio).
+	APIRPCURL string
 }
 
 // productionHosts nunca pueden usarse con TEST_MODE.
@@ -59,10 +64,17 @@ func Load() (Config, error) {
 		PublicURLEN:  env("PUBLIC_URL_EN", ""),
 		LogLevel:     env("LOG_LEVEL", "info"),
 		TestMode:     env("TEST_MODE", "") != "",
+
+		RPCSecretAPIToCalendar: os.Getenv("RPC_SECRET_API_TO_CALENDAR"),
+		RPCSecretCalendarToAPI: os.Getenv("RPC_SECRET_CALENDAR_TO_API"),
+		APIRPCURL:              env("API_RPC_URL", "http://api:3001"),
 	}
 	var errs []error
 	if c.DBPassword == "" {
 		errs = append(errs, errors.New("falta DB_PASSWORD"))
+	}
+	if len(c.RPCSecretAPIToCalendar) < 32 || len(c.RPCSecretCalendarToAPI) < 32 {
+		errs = append(errs, errors.New("RPC_SECRET_API_TO_CALENDAR y RPC_SECRET_CALENDAR_TO_API deben tener al menos 32 caracteres"))
 	}
 	for _, u := range []string{c.PublicURLES, c.PublicURLEN} {
 		if u == "" {

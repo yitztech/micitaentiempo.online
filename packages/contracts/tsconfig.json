@@ -1,0 +1,5 @@
+{
+  "extends": "@mcet/tsconfig/library.json",
+  "compilerOptions": { "allowImportingTsExtensions": true, "noEmit": true },
+  "include": ["gen"]
+}

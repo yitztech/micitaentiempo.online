@@ -6,17 +6,23 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
 	_ "time/tzdata" // respaldo de la base de zonas horarias si la imagen no la trae
 
+	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/auth"
+	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/clock"
 	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/config"
 	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/db"
 	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/httpapi"
+	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/outbox"
+	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/rpc"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -65,7 +71,10 @@ func migrate() error {
 		return err
 	}
 	defer pool.Close()
-	return db.Migrate(ctx, pool, newLogger(cfg.LogLevel))
+	if err := db.Migrate(ctx, pool, newLogger(cfg.LogLevel)); err != nil {
+		return err
+	}
+	return outbox.Migrate(ctx, pool)
 }
 
 func serve() error {
@@ -86,9 +95,35 @@ func serve() error {
 	if err := db.Migrate(ctx, pool, log); err != nil {
 		return err
 	}
+	if err := outbox.Migrate(ctx, pool); err != nil {
+		return fmt.Errorf("migraciones de River: %w", err)
+	}
+
+	signer, err := auth.NewSigner(cfg.RPCSecretCalendarToAPI, auth.IssuerCalendar, auth.AudienceAPI)
+	if err != nil {
+		return err
+	}
+	jobs, err := outbox.NewClient(pool, outbox.Config{APIURL: cfg.APIRPCURL, Signer: signer, Logger: log})
+	if err != nil {
+		return err
+	}
+	if err := jobs.Start(ctx); err != nil {
+		return fmt.Errorf("arranque de River: %w", err)
+	}
+
+	internalMux := httpapi.InternalMux(pool)
+	rpcOpts := rpc.Options{
+		Revision: revision,
+		Verifier: auth.NewVerifier(cfg.RPCSecretAPIToCalendar, auth.IssuerAPI, auth.AudienceCalendar),
+	}
+	if cfg.TestMode {
+		log.Warn("TEST_MODE activo: reloj controlable expuesto en el puerto interno")
+		rpcOpts.TestClock = &clock.Settable{}
+	}
+	rpc.Mount(internalMux, rpcOpts)
 
 	public := httpapi.NewServer(cfg.PublicAddr, httpapi.PublicMux(revision))
-	internal := httpapi.NewServer(cfg.InternalAddr, httpapi.InternalMux(pool))
+	internal := httpapi.NewServer(cfg.InternalAddr, internalMux)
 	g, gctx := errgroup.WithContext(ctx)
 	for _, srv := range []*http.Server{public, internal} {
 		g.Go(func() error {
@@ -103,7 +138,7 @@ func serve() error {
 		<-gctx.Done()
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 		defer cancel()
-		return errors.Join(public.Shutdown(shutdownCtx), internal.Shutdown(shutdownCtx))
+		return errors.Join(public.Shutdown(shutdownCtx), internal.Shutdown(shutdownCtx), jobs.Stop(shutdownCtx))
 	})
 	return g.Wait()
 }
@@ -114,13 +149,23 @@ func healthcheck() error {
 	if addr == "" {
 		addr = ":8080"
 	}
+	_, portText, err := net.SplitHostPort(addr)
+	if err != nil {
+		return fmt.Errorf("PUBLIC_ADDR: %w", err)
+	}
+	port, err := strconv.Atoi(portText)
+	if err != nil || port < 1 || port > 65535 {
+		return fmt.Errorf("puerto no válido en PUBLIC_ADDR: %q", portText)
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "http://127.0.0.1"+addr+"/healthz", nil)
+	// Siempre localhost y un puerto numérico validado: no hay destino controlable desde fuera.
+	url := fmt.Sprintf("http://127.0.0.1:%d/healthz", port)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil) //nolint:gosec // destino fijo en localhost
 	if err != nil {
 		return err
 	}
-	res, err := http.DefaultClient.Do(req)
+	res, err := http.DefaultClient.Do(req) //nolint:gosec // destino fijo en localhost
 	if err != nil {
 		return err
 	}

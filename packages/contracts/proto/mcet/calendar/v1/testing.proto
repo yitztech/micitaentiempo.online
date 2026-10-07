@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package mcet.calendar.v1;
+
+import "google/protobuf/timestamp.proto";
+
+// Solo existe con TEST_MODE: reloj controlable para las pruebas por escenarios.
+service TestingService {
+  rpc SetClock(SetClockRequest) returns (SetClockResponse);
+}
+
+message SetClockRequest {
+  // Instante que pasa a ser «ahora». Vacío = volver al reloj real.
+  google.protobuf.Timestamp now = 1;
+}
+
+message SetClockResponse {
+  google.protobuf.Timestamp now = 1;
+}

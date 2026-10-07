@@ -83,7 +83,8 @@ reposo dentro de los límites (`docker stats`).
       `problem+json`.
 - [ ] River en `calendar`; job `deliver_domain_event`; `EventIngress.Publish` en `api:3001` con
       `inbound_events` para deduplicar.
-- [ ] Propagación de `X-Request-Id` y trazas OpenTelemetry.
+- [ ] Propagación de `X-Request-Id` (gateway → api → calendar → api). El SDK de OpenTelemetry y su exportador se
+      completan en F12, cuando haya un colector donde enviarlas.
 - [ ] `TEST_MODE`: reloj controlable y semillas (`/__test/*`), con el bloqueo de arranque en dominios reales.
 
 **Aceptación:** prueba de integración `api` → `calendar` con actor; un evento publicado llega una sola vez

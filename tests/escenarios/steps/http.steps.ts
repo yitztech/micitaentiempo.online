@@ -22,3 +22,15 @@ Then("la respuesta JSON tiene el campo {string}", ({ estado }, campo: string) =>
 Then("la respuesta contiene {string}", ({ estado }, texto: string) => {
   expect(String(estado.body)).toContain(texto);
 });
+
+When("se fija el reloj del sistema en {string}", async ({ request, estado }, iso: string) => {
+  const res = await request.post(`${sitio.es}/api/__test/clock`, { data: { now: iso } });
+  estado.status = res.status();
+  estado.body = await res.text();
+});
+
+When("se fija el reloj del sistema en la hora real", async ({ request, estado }) => {
+  const res = await request.post(`${sitio.es}/api/__test/clock`, { data: { now: null } });
+  estado.status = res.status();
+  estado.body = await res.text();
+});

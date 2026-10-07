@@ -3,6 +3,11 @@ import { LoggerModule } from "nestjs-pino";
 import { ConfigModule } from "./config/config.module.js";
 import { DbModule } from "./db/db.module.js";
 import { HealthController } from "./health/health.controller.js";
+import { InternalRpcModule } from "./internal-rpc/internal-rpc.module.js";
+import { TestSupportController } from "./test-support/test-support.controller.js";
+
+/** Los endpoints /__test solo existen con TEST_MODE (y loadEnv lo prohíbe con dominios reales). */
+const testControllers = process.env.TEST_MODE ? [TestSupportController] : [];
 
 @Module({
   imports: [
@@ -16,7 +21,8 @@ import { HealthController } from "./health/health.controller.js";
       },
     }),
     DbModule,
+    InternalRpcModule,
   ],
-  controllers: [HealthController],
+  controllers: [HealthController, ...testControllers],
 })
 export class AppModule {}

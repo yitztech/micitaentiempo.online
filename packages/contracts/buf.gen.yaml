@@ -1,0 +1,18 @@
+# Genera el código de los contratos internos (se versiona; CI comprueba que está al día).
+version: v2
+clean: true
+plugins:
+  - local: ["go", "-C", "../../services/calendar", "tool", "protoc-gen-go"]
+    out: ../../services/calendar/gen
+    opt: [paths=source_relative]
+  - local: ["go", "-C", "../../services/calendar", "tool", "protoc-gen-connect-go"]
+    out: ../../services/calendar/gen
+    opt: [paths=source_relative, simple]
+  - local: protoc-gen-es
+    out: gen
+    opt: [target=ts, import_extension=ts]
+managed:
+  enabled: true
+  override:
+    - file_option: go_package_prefix
+      value: github.com/yitztech/micitaentiempo.online/services/calendar/gen
