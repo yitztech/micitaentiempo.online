@@ -55,9 +55,7 @@
   },
   "overrides": [
     {
-      "includes": [
-        "services/api/**"
-      ],
+      "includes": ["services/api/**"],
       "linter": {
         "rules": {
           "correctness": {
