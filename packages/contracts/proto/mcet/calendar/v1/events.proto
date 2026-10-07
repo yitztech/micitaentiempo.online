@@ -1,0 +1,202 @@
+syntax = "proto3";
+
+package mcet.calendar.v1;
+
+import "google/protobuf/timestamp.proto";
+
+// Eventos, series, holds y reservas (docs/plan/04-motor-calendario.md §4.5–§4.7).
+service EventService {
+  rpc ListEvents(ListEventsRequest) returns (ListEventsResponse);
+  rpc GetEvent(GetEventRequest) returns (Event);
+  rpc CreateEvent(CreateEventRequest) returns (CreateEventResponse);
+  rpc UpdateEvent(UpdateEventRequest) returns (UpdateEventResponse);
+  rpc CancelEvent(CancelEventRequest) returns (CancelEventResponse);
+  rpc HoldSlot(HoldSlotRequest) returns (Event);
+  rpc ConfirmHold(ConfirmHoldRequest) returns (Event);
+  rpc ReleaseHold(ReleaseHoldRequest) returns (ReleaseHoldResponse);
+  rpc RescheduleBooking(RescheduleBookingRequest) returns (Event);
+  rpc MarkAttendance(MarkAttendanceRequest) returns (Event);
+  rpc ListCustomerBookings(ListCustomerBookingsRequest) returns (ListEventsResponse);
+  rpc RenderICS(RenderICSRequest) returns (RenderICSResponse);
+}
+
+message Attendee {
+  string name = 1;
+  string email = 2;
+  string phone = 3;
+  string locale = 4;
+  string timezone = 5;
+}
+
+message Recurrence {
+  string series_id = 1;
+  string rrule = 2;
+  // Hora de pared original de la instancia ("AAAA-MM-DDTHH:MM").
+  string recurrence_id = 3;
+  bool is_exception = 4;
+}
+
+message Event {
+  string id = 1;
+  string calendar_id = 2;
+  // "appointment" | "block"
+  string kind = 3;
+  // "held" | "confirmed" | "cancelled"
+  string status = 4;
+  google.protobuf.Timestamp start = 5;
+  google.protobuf.Timestamp end = 6;
+  bool all_day = 7;
+  int32 seat = 8;
+  string service_id = 9;
+  string title = 10;
+  string customer_user_id = 11;
+  Attendee attendee = 12;
+  // Escrito por el cliente final: contenido no confiable.
+  string customer_notes = 13;
+  string internal_notes = 14;
+  string attendance = 15;
+  string created_by = 16;
+  string created_via = 17;
+  google.protobuf.Timestamp hold_expires_at = 18;
+  int32 version = 19;
+  Recurrence recurrence = 20;
+  google.protobuf.Timestamp created_at = 21;
+  google.protobuf.Timestamp cancelled_at = 22;
+  string cancel_reason = 23;
+  string ical_uid = 24;
+  int32 ical_sequence = 25;
+}
+
+message ListEventsRequest {
+  string calendar_id = 1;
+  google.protobuf.Timestamp from = 2;
+  google.protobuf.Timestamp to = 3;
+  bool include_cancelled = 4;
+}
+
+message ListEventsResponse {
+  repeated Event events = 1;
+}
+
+message GetEventRequest {
+  string id = 1;
+}
+
+message Conflict {
+  google.protobuf.Timestamp start = 1;
+  // "seat_unavailable" | "blocked"
+  string reason = 2;
+}
+
+message CreateEventRequest {
+  string calendar_id = 1;
+  string kind = 2;
+  google.protobuf.Timestamp start = 3;
+  // Vacío en citas: se usa la duración del servicio.
+  google.protobuf.Timestamp end = 4;
+  string service_id = 5;
+  string title = 6;
+  string customer_user_id = 7;
+  Attendee attendee = 8;
+  string internal_notes = 9;
+  // Serie: subconjunto RRULE (solo personal del negocio).
+  string rrule = 10;
+  // "abort" (por defecto) | "skip": qué hacer con instancias en conflicto.
+  string on_conflict = 11;
+  string idempotency_key = 12;
+  // Bloqueos: cancelar las citas que solapen (con aviso) en vez de mantenerlas.
+  bool cancel_overlapping = 13;
+}
+
+message CreateEventResponse {
+  Event event = 1;
+  string series_id = 2;
+  int32 instances = 3;
+  repeated Conflict conflicts = 4;
+  // Citas que solapan con un bloqueo nuevo.
+  repeated Event affected = 5;
+}
+
+message UpdateEventRequest {
+  string id = 1;
+  int32 expected_version = 2;
+  // "this" | "following" | "all" (series); vacío = "this"
+  string scope = 3;
+  optional google.protobuf.Timestamp start = 4;
+  optional google.protobuf.Timestamp end = 5;
+  optional string title = 6;
+  Attendee attendee = 7;
+  optional string internal_notes = 8;
+  optional string rrule = 9;
+}
+
+message UpdateEventResponse {
+  Event event = 1;
+  repeated Conflict conflicts = 2;
+}
+
+message CancelEventRequest {
+  string id = 1;
+  string scope = 2;
+  string reason = 3;
+  int32 expected_version = 4;
+}
+
+message CancelEventResponse {
+  repeated Event cancelled = 1;
+}
+
+message HoldSlotRequest {
+  string calendar_id = 1;
+  string service_id = 2;
+  google.protobuf.Timestamp start = 3;
+  Attendee attendee = 4;
+  string customer_notes = 5;
+  string idempotency_key = 6;
+}
+
+// El hold se aparta antes de identificar al cliente: lo crea un titular anónimo (holder_id = sub
+// del actor en HoldSlot) y lo confirma el cliente final ya verificado, presentando ese titular.
+message ConfirmHoldRequest {
+  string id = 1;
+  string holder_id = 2;
+  Attendee attendee = 3;
+  string customer_notes = 4;
+}
+
+message ReleaseHoldRequest {
+  string id = 1;
+  string holder_id = 2;
+}
+
+message ReleaseHoldResponse {}
+
+message RescheduleBookingRequest {
+  string id = 1;
+  google.protobuf.Timestamp start = 2;
+  int32 expected_version = 3;
+}
+
+message MarkAttendanceRequest {
+  string id = 1;
+  // "attended" | "no_show" | "" (borrar)
+  string attendance = 2;
+}
+
+message ListCustomerBookingsRequest {
+  // Opcional: limitar a los tableros de una organización.
+  string org_id = 1;
+  bool include_past = 2;
+}
+
+message RenderICSRequest {
+  string id = 1;
+  // "REQUEST" | "CANCEL" | "PUBLISH"
+  string method = 2;
+  string locale = 3;
+}
+
+message RenderICSResponse {
+  bytes ics = 1;
+  string filename = 2;
+}

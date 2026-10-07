@@ -113,6 +113,8 @@ type Config struct {
 	Logger *slog.Logger
 	// Workers adicionales de otros paquetes (sincronización, series…).
 	Register func(*river.Workers)
+	// Periodic son los jobs periódicos (holds caducados, series…).
+	Periodic []*river.PeriodicJob
 }
 
 // NewClient crea el cliente de River con el worker de entrega registrado.
@@ -132,6 +134,7 @@ func NewClient(pool *pgxpool.Pool, cfg Config) (*river.Client[pgx.Tx], error) {
 			river.QueueDefault: {MaxWorkers: 10},
 			QueueOutbox:        {MaxWorkers: 5},
 		},
-		Workers: workers,
+		Workers:      workers,
+		PeriodicJobs: cfg.Periodic,
 	})
 }

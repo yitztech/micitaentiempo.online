@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"connectrpc.com/connect"
+	"github.com/jackc/pgx/v5"
+	"github.com/riverqueue/river"
 	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/auth"
 	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/clock"
 	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/holidays"
@@ -20,8 +22,10 @@ type Engine struct {
 	Store    *store.Store
 	Holidays *holidays.Catalog
 	Clock    clock.Clock
-	// Occupancy aporta citas y bloqueos (F5); nil = sin ocupación.
+	// Occupancy aporta citas y bloqueos al cálculo de huecos; nil = sin ocupación.
 	Occupancy Occupancy
+	// Jobs encola eventos de dominio en la misma transacción (outbox); nil = no se emiten.
+	Jobs *river.Client[pgx.Tx]
 }
 
 // fail crea un error Connect con un motivo estable ("motivo: detalle") que api traduce a problem+json.

@@ -16,6 +16,7 @@ import (
 	"time"
 	_ "time/tzdata" // respaldo de la base de zonas horarias si la imagen no la trae
 
+	"github.com/riverqueue/river"
 	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/auth"
 	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/clock"
 	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/config"
@@ -106,14 +107,6 @@ func serve() error {
 	if err != nil {
 		return err
 	}
-	jobs, err := outbox.NewClient(pool, outbox.Config{APIURL: cfg.APIRPCURL, Signer: signer, Logger: log})
-	if err != nil {
-		return err
-	}
-	if err := jobs.Start(ctx); err != nil {
-		return fmt.Errorf("arranque de River: %w", err)
-	}
-
 	internalMux := httpapi.InternalMux(pool)
 	rpcOpts := rpc.Options{
 		Revision: revision,
@@ -129,7 +122,21 @@ func serve() error {
 		settable := &clock.Settable{}
 		rpcOpts.TestClock, clk = settable, settable
 	}
-	rpcOpts.Engine = &engine.Engine{Store: store.New(pool), Holidays: catalog, Clock: clk}
+	eng := &engine.Engine{Store: store.New(pool), Holidays: catalog, Clock: clk}
+	eng.Occupancy = eng.DefaultOccupancy()
+	jobs, err := outbox.NewClient(pool, outbox.Config{
+		APIURL: cfg.APIRPCURL, Signer: signer, Logger: log,
+		Register: func(w *river.Workers) { engine.RegisterWorkers(w, eng) },
+		Periodic: engine.PeriodicJobs(),
+	})
+	if err != nil {
+		return err
+	}
+	eng.Jobs = jobs
+	if err := jobs.Start(ctx); err != nil {
+		return fmt.Errorf("arranque de River: %w", err)
+	}
+	rpcOpts.Engine = eng
 	rpc.Mount(internalMux, rpcOpts)
 
 	public := httpapi.NewServer(cfg.PublicAddr, httpapi.PublicMux(revision))

@@ -63,6 +63,7 @@ type Service struct {
 
 // Appointment es una cita (confirmada o en hold) que ocupa un asiento.
 type Appointment struct {
+	ID           string
 	Interval     domain.Interval
 	Seat         int
 	ServiceID    string

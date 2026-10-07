@@ -19,7 +19,7 @@ import (
 const org = "0192f3c4-0000-7000-8000-00000000aaaa"
 
 func as(ctx context.Context, role, orgID string) context.Context {
-	return auth.WithActor(ctx, auth.Verified{Actor: auth.ActorClaims{UserID: "u1", OrgID: orgID, Role: role}})
+	return auth.WithActor(ctx, auth.Verified{Actor: auth.ActorClaims{UserID: "0192f3c4-0000-7000-8000-00000000cafe", OrgID: orgID, Role: role}})
 }
 
 func TestTableroCompleto(t *testing.T) {
