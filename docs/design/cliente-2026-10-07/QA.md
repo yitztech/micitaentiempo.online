@@ -9,6 +9,7 @@ Rama `design/propuesta-frontend-cliente`. Gemini implementó las fases A–D y l
 - El panel español fallaba a 768 px con `undefined.toLocaleLowerCase` al generar la ayuda de «Hoy» para la vista personalizada de tres días. Se añadieron texto y ayudas traducidas de esa vista y del botón Hoy. Se verificó el calendario autenticado en todos los anchos de la matriz. La API `buttons` corresponde a [FullCalendar 7](https://fullcalendar.io/docs/upgrading-from-v6-js).
 - Los tests de enlaces ahora esperan estilos y el cierre del menú tras navegar; el cambio de idioma pulsa el enlace visible. La página anfitriona de pruebas de embed incluye viewport móvil, evitando una falsa pantalla de 980 px en la emulación de Pixel 8.
 - CI incluye ahora los escenarios `@qa-diseno` y `@enlaces`, además de `@humo` y `@critico`.
+- La primera ejecución remota detectó una espera insuficiente en el nuevo test de foco: la traza mostraba ALTCHA todavía comprobando al agotar los cinco segundos. Se alinearon las dos esperas asíncronas de ese test con los 30 segundos que ya usa el recorrido de reserva, conservando las comprobaciones de foco y campo OTP.
 
 ## Resultados y entorno
 
@@ -25,6 +26,7 @@ El web comprobado anuncia `qa-110219a-working`; imagen `sha256:595917e80fb00dbb7
 | Primera pasada BDD completa | 155 casos: 153 aprobados y 2 fallidos por una expectativa de texto incorrecta en el nuevo test de iframe |
 | Repetición de los 2 casos de iframe | 2 aprobados tras esperar el texto real «Consulta general · Consultas»; no se modificó la aplicación para resolverlos |
 | Pasada aislada `reloj` | 8 aprobados |
+| Repetición del caso de foco tras corregir las esperas de CI | 6 aprobados: tres ejecuciones en escritorio y tres en móvil |
 | Total de casos locales aprobados | 163 distintos, en ejecuciones complementarias; no se presenta la primera pasada como completamente verde |
 | Humo de producción de solo lectura | 2 aprobados: ambos dominios, versión, salud, cabeceras, robots/sitemap y descubrimiento MCP |
 

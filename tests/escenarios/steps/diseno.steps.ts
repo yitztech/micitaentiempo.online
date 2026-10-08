@@ -143,8 +143,10 @@ Then("el horario se elige con teclado y el foco avanza a los datos", async ({ pa
 });
 
 Then("el foco y los anuncios de verificación son accesibles", async ({ page, $testInfo }) => {
-  await expect(page.locator("#titulo-verificar")).toBeFocused();
-  await expect(page.getByLabel("Código")).toBeVisible();
+  // Apartar el horario y enviar el OTP resuelven dos pruebas ALTCHA. En CI pueden tardar
+  // más que los cinco segundos de una aserción normal, igual que en el recorrido de reserva.
+  await expect(page.locator("#titulo-verificar")).toBeFocused({ timeout: 30_000 });
+  await expect(page.getByLabel("Código")).toBeVisible({ timeout: 30_000 });
   await expect(page.getByLabel("Código")).toHaveAttribute("autocomplete", "one-time-code");
   // El contador cambia cada segundo; no debe estar en un área que el lector anuncie continuamente.
   const contador = page.locator("p").filter({ hasText: /Apartamos tu horario/ });
