@@ -63,8 +63,28 @@ export function LinkButton({
   return <Link {...props} className={buttonClass(variant, size, className)} />;
 }
 
-export function Container({ className, ...props }: ComponentProps<"div">) {
-  return <div {...props} className={cx("mx-auto w-full max-w-6xl px-4 sm:px-6", className)} />;
+/**
+ * Anchos de contenedor (docs/design/cliente-2026-10-07/PROPUESTA.md § Sistema visual).
+ * `cx` solo concatena: no pases `max-w-*` en className, elige aquí la variante.
+ * - page: páginas públicas y reserva (1152 px).
+ * - prose: lectura larga, FAQ, legales y Mis citas (~70ch).
+ * - form: formularios de una columna como Contacto (640 px de contenido).
+ * - auth: tarjetas de acceso (448 px).
+ */
+const containerWidths = {
+  page: "max-w-6xl",
+  booking: "max-w-4xl",
+  prose: "max-w-3xl",
+  form: "max-w-[calc(40rem+2rem)] sm:max-w-[calc(40rem+3rem)]",
+  auth: "max-w-md",
+} as const;
+
+export function Container({
+  className,
+  width = "page",
+  ...props
+}: ComponentProps<"div"> & { width?: keyof typeof containerWidths }) {
+  return <div {...props} className={cx("mx-auto w-full px-4 sm:px-6", containerWidths[width], className)} />;
 }
 
 export function Card({ className, ...props }: ComponentProps<"div">) {
@@ -128,7 +148,7 @@ interface FieldProps extends Omit<ComponentProps<"input">, "id"> {
 }
 
 const inputClass =
-  "block min-h-11 w-full rounded-[var(--radius-field)] border border-border bg-surface px-3 text-base text-text placeholder:text-muted/70 focus:border-primary focus:outline-none focus-visible:outline-3 focus-visible:outline-primary aria-[invalid=true]:border-danger";
+  "block min-h-11 w-full rounded-[var(--radius-field)] border border-border-field bg-surface px-3 text-base text-text placeholder:text-muted/70 focus:border-primary focus:outline-none focus-visible:outline-3 focus-visible:outline-primary aria-[invalid=true]:border-danger";
 
 /** Campo con etiqueta, ayuda y error asociados (aria-describedby). */
 export function Field({ label, hint, error, optional, className, type, ...props }: FieldProps) {

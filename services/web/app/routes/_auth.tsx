@@ -8,7 +8,7 @@ export default function AuthLayout() {
   return (
     <div className="flex min-h-dvh flex-col">
       <header>
-        <Container className="flex h-16 items-center justify-between">
+        <Container className="flex min-h-16 items-center justify-between gap-3 py-2">
           <Logo />
           <LanguageLink />
         </Container>

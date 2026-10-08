@@ -43,6 +43,7 @@ export function SiteFooter() {
           ["connectAi", n.connectAi],
           ["faq", n.faq],
           ["contact", n.contact],
+          ["myAppointments", n.myAppointments],
         ])}
         {col(f.legal, [
           ["privacy", f.privacy],

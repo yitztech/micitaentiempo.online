@@ -122,15 +122,25 @@ export default function SignIn() {
       title={s.title}
       lead={s.lead}
       footer={
-        <>
-          {s.noAccount}{" "}
-          <Link
-            to={pathFor("signUp", site.lang)}
-            className="font-medium text-primary underline underline-offset-2"
-          >
-            {t.common.nav.signUp}
-          </Link>
-        </>
+        <div className="space-y-2">
+          <div>
+            {s.noAccount}{" "}
+            <Link
+              to={pathFor("signUp", site.lang)}
+              className="font-medium text-primary underline underline-offset-2"
+            >
+              {t.common.nav.signUp}
+            </Link>
+          </div>
+          <div className="border-t border-border pt-2 text-sm text-muted">
+            <Link
+              to={pathFor("myAppointments", site.lang)}
+              className="text-muted hover:text-primary underline underline-offset-2"
+            >
+              {t.common.nav.myAppointments}
+            </Link>
+          </div>
+        </div>
       }
     >
       <GoogleButton callbackURL={next} />

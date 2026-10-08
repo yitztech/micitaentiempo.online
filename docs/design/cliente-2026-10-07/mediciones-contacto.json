@@ -1,0 +1,33 @@
+{
+  "container": [
+    {
+      "classes": "mx-auto w-full max-w-6xl px-4 sm:px-6 max-w-2xl py-14 sm:py-20",
+      "maxWidth": "1152px",
+      "width": 1152
+    }
+  ],
+  "fields": [
+    {
+      "border": "rgb(228, 225, 218)",
+      "font": "16px",
+      "height": 44,
+      "label": "_R_7j5_",
+      "width": 1104
+    },
+    {
+      "border": "rgb(228, 225, 218)",
+      "font": "16px",
+      "height": 44,
+      "label": "_R_bj5_",
+      "width": 1104
+    },
+    {
+      "border": "rgb(228, 225, 218)",
+      "font": "16px",
+      "height": 128,
+      "label": "_R_fj5_",
+      "width": 1104
+    }
+  ],
+  "viewport": 1871
+}

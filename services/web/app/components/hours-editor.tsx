@@ -60,7 +60,8 @@ export function shiftsFromWeek(week: DayHours[], breakLabel: string): ScheduleVi
   );
 }
 
-const time = "min-h-11 rounded-[var(--radius-field)] border border-border bg-surface px-2 text-base tabular";
+const time =
+  "min-h-11 rounded-[var(--radius-field)] border border-border-field bg-surface px-2 text-base tabular";
 
 /** Editor de horario semanal: abierto/cerrado, horas y un descanso por día. */
 export function HoursEditor({ week, onChange }: { week: DayHours[]; onChange: (w: DayHours[]) => void }) {

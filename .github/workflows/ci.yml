@@ -140,8 +140,8 @@ jobs:
       - run: pnpm --filter @mcet/escenarios exec playwright install --with-deps chromium webkit
       # Los pasos importan paquetes del monorepo (p. ej. @mcet/i18n): se compilan antes.
       - run: pnpm --filter "@mcet/escenarios^..." build
-      - name: Escenarios @humo y @critico
-        run: pnpm --filter @mcet/escenarios exec ./correr.sh --grep "@humo|@critico"
+      - name: Escenarios @humo, @critico, diseño y navegación
+        run: pnpm --filter @mcet/escenarios exec ./correr.sh --grep "@humo|@critico|@qa-diseno|@enlaces"
       - name: Logs si falla
         if: failure()
         run: docker compose -p ci logs --no-color | tail -n 300

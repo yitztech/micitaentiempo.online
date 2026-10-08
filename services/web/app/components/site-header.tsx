@@ -7,11 +7,12 @@ import { LanguageLink } from "./language-link";
 import { Logo } from "./logo";
 import { buttonClass, Container, LinkButton } from "./ui";
 
-const NAV: Array<{ id: RouteId; key: "features" | "pricing" | "faq" | "connectAi" }> = [
+// Conecta tu IA sigue en el pie y desde Funciones (PROPUESTA.md § Arquitectura de navegación):
+// la cabecera deja sitio a Mis citas y al acceso del negocio sin partir etiquetas en dos líneas.
+const NAV: Array<{ id: RouteId; key: "features" | "pricing" | "help" }> = [
   { id: "features", key: "features" },
   { id: "pricing", key: "pricing" },
-  { id: "connectAi", key: "connectAi" },
-  { id: "faq", key: "faq" },
+  { id: "faq", key: "help" },
 ];
 
 export function SiteHeader() {
@@ -21,29 +22,36 @@ export function SiteHeader() {
   // biome-ignore lint/correctness/useExhaustiveDependencies: cerrar el menú al cambiar de página
   useEffect(() => setOpen(false), [pathname]);
   const n = t.common.nav;
+  const navLinkClass = ({ isActive }: { isActive: boolean }) =>
+    cx(
+      "inline-flex min-h-11 items-center whitespace-nowrap rounded-[var(--radius-field)] px-3 text-[15px] hover:bg-surface-2",
+      isActive && "font-semibold text-primary",
+    );
   const links = NAV.map(({ id, key }) => (
-    <NavLink
-      key={id}
-      to={pathFor(id, site.lang)}
-      className={({ isActive }) =>
-        cx(
-          "inline-flex min-h-11 items-center rounded-[var(--radius-field)] px-3 text-[15px] hover:bg-surface-2",
-          isActive && "font-semibold text-primary",
-        )
-      }
-    >
+    <NavLink key={id} to={pathFor(id, site.lang)} className={navLinkClass}>
       {n[key]}
     </NavLink>
   ));
+  // Tres intenciones (PROPUESTA.md § Arquitectura de navegación): conocer el producto (links),
+  // consultar una reserva (Mis citas, para clientes finales) y administrar el negocio (account).
+  const myAppointments = (
+    <NavLink to={pathFor("myAppointments", site.lang)} className={navLinkClass}>
+      {n.myAppointments}
+    </NavLink>
+  );
   const account = hasSession ? (
     <LinkButton to={pathFor("dashboard", site.lang)}>{n.dashboard}</LinkButton>
   ) : (
     <>
-      <NavLink to={pathFor("signIn", site.lang)} className={buttonClass("ghost")}>
-        {n.signIn}
+      <NavLink to={pathFor("signIn", site.lang)} className={buttonClass("ghost", "md", "whitespace-nowrap")}>
+        {n.businessSignIn}
       </NavLink>
-      <LinkButton to={pathFor("signUp", site.lang)} data-umami-event="sign_up_started">
-        {n.signUp}
+      <LinkButton
+        to={pathFor("signUp", site.lang)}
+        className="whitespace-nowrap"
+        data-umami-event="sign_up_started"
+      >
+        {n.createAgenda}
       </LinkButton>
     </>
   );
@@ -62,6 +70,7 @@ export function SiteHeader() {
         </nav>
         <div className="hidden items-center gap-2 lg:flex">
           <LanguageLink />
+          {myAppointments}
           {account}
         </div>
         <button
@@ -78,6 +87,7 @@ export function SiteHeader() {
       <div id="menu-movil" hidden={!open} className="border-t border-border bg-background lg:hidden">
         <Container className="flex flex-col gap-1 py-4">
           <nav aria-label={n.main} className="flex flex-col gap-1">
+            {myAppointments}
             {links}
           </nav>
           <div className="mt-3 flex flex-col gap-2 border-t border-border pt-4">

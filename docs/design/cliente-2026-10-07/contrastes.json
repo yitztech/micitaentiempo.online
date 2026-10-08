@@ -1,0 +1,44 @@
+[
+  {
+    "uso": "Primario sobre blanco",
+    "frente": "#1D6F86",
+    "fondo": "#FFFFFF",
+    "ratio": 5.72
+  },
+  {
+    "uso": "Texto sobre Arena",
+    "frente": "#1F2A30",
+    "fondo": "#FAF8F4",
+    "ratio": 13.82
+  },
+  {
+    "uso": "Texto secundario sobre Arena",
+    "frente": "#55626B",
+    "fondo": "#FAF8F4",
+    "ratio": 5.92
+  },
+  {
+    "uso": "Borde actual sobre blanco",
+    "frente": "#E4E1DA",
+    "fondo": "#FFFFFF",
+    "ratio": 1.31
+  },
+  {
+    "uso": "Borde propuesto sobre blanco",
+    "frente": "#7D898E",
+    "fondo": "#FFFFFF",
+    "ratio": 3.6
+  },
+  {
+    "uso": "Borde propuesto sobre Arena",
+    "frente": "#7D898E",
+    "fondo": "#FAF8F4",
+    "ratio": 3.39
+  },
+  {
+    "uso": "Primario oscuro sobre fondo",
+    "frente": "#5FB3C8",
+    "fondo": "#0F1A1F",
+    "ratio": 7.38
+  }
+]

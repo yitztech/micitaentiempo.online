@@ -1,9 +1,22 @@
 {
   "seoTitle": "Reservar en {{name}}",
-  "steps": ["Servicio", "Día", "Hora", "Tus datos", "Confirmación"],
+  "steps": ["Servicio", "Fecha y hora", "Tus datos", "Confirmación"],
   "service": {
     "title": "Elige un servicio",
     "minutes": "{{n}} min"
+  },
+  "slotStep": {
+    "title": "Elige fecha y hora",
+    "continue": "Continuar con este horario",
+    "selection": "Tu selección",
+    "pick": "Elige una hora para continuar.",
+    "selected": "seleccionado"
+  },
+  "summary": {
+    "label": "Resumen de tu cita",
+    "duration": "Duración: {{n}} min",
+    "tz": "Hora de {{tz}}",
+    "location": "Dirección"
   },
   "date": {
     "title": "Elige un día",
@@ -11,7 +24,10 @@
     "next": "Mes siguiente",
     "none": "No hay horarios libres este mes.",
     "available": "con horarios",
-    "unavailable": "sin horarios"
+    "unavailable": "sin horarios",
+    "nextMonth": "Ver siguiente mes",
+    "error": "No pudimos cargar los horarios. Revisa tu conexión e inténtalo otra vez.",
+    "retry": "Reintentar"
   },
   "time": {
     "title": "Elige una hora",
@@ -31,14 +47,18 @@
     "notes": "Nota para el negocio",
     "submit": "Apartar este horario",
     "held": "Apartamos tu horario. Tienes {{time}} para confirmarlo.",
-    "expired": "Tu horario apartado caducó. Elige otra vez."
+    "expired": "Tu horario apartado caducó. Elige otra vez.",
+    "lead": "Apartaremos el horario mientras confirmas tu correo."
   },
   "verify": {
     "title": "Confirma tu correo",
     "sent": "Te enviamos un código de 6 dígitos a {{email}}.",
     "code": "Código",
     "confirm": "Confirmar reserva",
-    "resend": "Enviar otro código"
+    "resend": "Enviar otro código",
+    "changeEmail": "Corregir correo",
+    "heldShort": "Horario apartado",
+    "oneMinute": "Queda un minuto para confirmar tu horario."
   },
   "done": {
     "title": "¡Cita confirmada!",
@@ -47,7 +67,8 @@
     "addOutlook": "Añadir a Outlook",
     "downloadIcs": "Descargar .ics",
     "myAppointments": "Ver mis citas",
-    "another": "Reservar otra cita"
+    "another": "Reservar otra cita",
+    "addTo": "Añadir a tu calendario"
   },
   "taken": "Alguien acaba de reservar ese horario. Elige otro.",
   "change": "Cambiar",
@@ -68,6 +89,11 @@
     "cancelled": "Cita cancelada.",
     "reschedule": "Cambiar hora",
     "rescheduled": "Cambiamos tu cita.",
+    "nextAppointment": "Próxima cita",
+    "currentSchedule": "Horario actual",
+    "newSchedule": "Nuevo horario propuesto",
+    "confirmReschedule": "Confirmar nuevo horario",
+    "cancelReschedule": "Mantener horario actual",
     "addToCalendar": "Añadir al calendario",
     "signOut": "Salir",
     "noticeRule": "Puedes cambiarla o cancelarla hasta {{hours}} h antes.",
@@ -99,5 +125,6 @@
     "validation_failed": "Revisa los datos.",
     "google_failed": "No pudimos verificarte con Google. Usa el código por correo.",
     "google_blocked": "Tu navegador bloqueó la ventana de Google. Permite ventanas emergentes o usa el código por correo."
-  }
+  },
+  "noServices": "Este negocio todavía no tiene servicios para reservar en línea."
 }

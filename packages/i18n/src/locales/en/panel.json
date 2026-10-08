@@ -101,6 +101,9 @@
   "weekdays": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
   "calendar": {
     "seoTitle": "Calendar",
+    "threeDays": "3 days",
+    "threeDaysHint": "Three-day view",
+    "todayHint": "Go to today",
     "newAppointment": "New appointment",
     "newBlock": "Block time",
     "boardTz": "Board time zone: {{tz}}",

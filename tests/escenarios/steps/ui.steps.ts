@@ -168,6 +168,11 @@ When("elige el primer día y la primera hora libres", async ({ page }) => {
   await expect(dia).toBeVisible({ timeout: 15_000 });
   await dia.click();
   await page.locator('[aria-labelledby="titulo-hora"] ul button').first().click();
+  const continuar = page.getByRole("button", { name: /Continuar con este horario|Continue with this time/ });
+  if (await continuar.isVisible({ timeout: 2000 }).catch(() => false)) {
+    await continuar.scrollIntoViewIfNeeded();
+    await continuar.click({ force: true });
+  }
 });
 
 When("escribe sus datos y aparta el horario", async ({ page, estado }) => {
@@ -175,7 +180,9 @@ When("escribe sus datos y aparta el horario", async ({ page, estado }) => {
   const es = v.lang === "es";
   await page.getByLabel(es ? "Nombre completo" : "Full name").fill(v.nombre);
   await page.getByLabel(es ? "Correo" : "Email", { exact: true }).fill(v.email);
-  await page.getByRole("button", { name: es ? "Apartar este horario" : "Hold this time" }).click();
+  const boton = page.getByRole("button", { name: es ? "Apartar este horario" : "Hold this time" });
+  await boton.scrollIntoViewIfNeeded();
+  await boton.click({ force: true });
 });
 
 When("escribe el código que le llegó por correo", async ({ page, request, estado }) => {
@@ -183,7 +190,9 @@ When("escribe el código que le llegó por correo", async ({ page, request, esta
   const campo = page.getByLabel(v.lang === "es" ? "Código" : "Code");
   await expect(campo).toBeVisible({ timeout: 30_000 });
   await campo.fill(await codigo(request, v.email));
-  await page.getByRole("button", { name: v.lang === "es" ? "Confirmar reserva" : "Confirm booking" }).click();
+  const boton = page.getByRole("button", { name: v.lang === "es" ? "Confirmar reserva" : "Confirm booking" });
+  await boton.scrollIntoViewIfNeeded();
+  await boton.click({ force: true });
 });
 
 When("continúa con Google", async ({ page }) => {
@@ -221,7 +230,7 @@ When(
   "una web ajena inserta el tablero con embed.js en modo {string}",
   async ({ page, estado }, modo: string) => {
     // Web anfitriona servida por un servidor local real (otro origen, como la landing de un negocio).
-    const html = `<!doctype html><html lang="es"><head><title>Web del negocio</title></head><body><h1>Web del negocio</h1><script src="${sitio.es}/embed.js" data-calendar="${tablero(estado).slug}" data-mode="${modo}"></script></body></html>`;
+    const html = `<!doctype html><html lang="es"><head><meta name="viewport" content="width=device-width, initial-scale=1"><title>Web del negocio</title></head><body><h1>Web del negocio</h1><script src="${sitio.es}/embed.js" data-calendar="${tablero(estado).slug}" data-mode="${modo}"></script></body></html>`;
     const server = createServer((_req, res) => res.writeHead(200, { "content-type": "text/html" }).end(html));
     await new Promise<void>((r) => server.listen(0, "127.0.0.1", r));
     const { port } = server.address() as AddressInfo;

@@ -1,0 +1,37 @@
+- dialog "New appointment":
+  - heading "New appointment" [level=2]
+  - button "Close"
+  - group:
+    - text: Type
+    - combobox "Type":
+      - option "Appointment" [selected]
+      - option "Time block"
+    - text: Service
+    - combobox "Service":
+      - option "No service (set the end time)"
+      - option "Consulta general · 30 min" [selected]
+    - text: Date
+    - textbox "Date": 2026-10-07
+    - text: Start
+    - textbox "Start": 21:05
+    - text: Title(Optional)
+    - textbox "Title(Optional)"
+    - text: Client name(Optional)
+    - textbox "Client name(Optional)"
+    - text: Client email(Optional)
+    - textbox "Client email(Optional)"
+    - text: Client phone(Optional)
+    - textbox "Client phone(Optional)"
+    - text: Internal notes
+    - textbox "Internal notes"
+    - paragraph: Only your team sees them.
+    - group "Repeat":
+      - text: Repeat Repeat
+      - combobox "Repeat":
+        - option "Doesn't repeat" [selected]
+        - option "Every day"
+        - option "Every week"
+        - option "Every month, same date"
+        - option "Every month, same weekday"
+        - option "Every year"
+  - button "Save"

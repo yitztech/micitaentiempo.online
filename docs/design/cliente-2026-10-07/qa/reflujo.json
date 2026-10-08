@@ -1,0 +1,968 @@
+[
+  {
+    "escenario": "Reflujo y contraste de la página \"/\" en \"es\"",
+    "medidas": [
+      {
+        "url": "http://micitaentiempo.localhost:8080/",
+        "colorScheme": "light",
+        "width": 320,
+        "viewport": 305,
+        "contenido": 305,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/",
+        "colorScheme": "light",
+        "width": 390,
+        "viewport": 375,
+        "contenido": 375,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/",
+        "colorScheme": "light",
+        "width": 768,
+        "viewport": 753,
+        "contenido": 753,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/",
+        "colorScheme": "light",
+        "width": 1440,
+        "viewport": 1425,
+        "contenido": 1425,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/",
+        "colorScheme": "dark",
+        "width": 320,
+        "viewport": 305,
+        "contenido": 305,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/",
+        "colorScheme": "dark",
+        "width": 390,
+        "viewport": 375,
+        "contenido": 375,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/",
+        "colorScheme": "dark",
+        "width": 768,
+        "viewport": 753,
+        "contenido": 753,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/",
+        "colorScheme": "dark",
+        "width": 1440,
+        "viewport": 1425,
+        "contenido": 1425,
+        "fuera": []
+      }
+    ]
+  },
+  {
+    "escenario": "Reflujo y contraste de la página \"/\" en \"en\"",
+    "medidas": [
+      {
+        "url": "http://myappointmentontime.localhost:8080/",
+        "colorScheme": "light",
+        "width": 320,
+        "viewport": 305,
+        "contenido": 305,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/",
+        "colorScheme": "light",
+        "width": 390,
+        "viewport": 375,
+        "contenido": 375,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/",
+        "colorScheme": "light",
+        "width": 768,
+        "viewport": 753,
+        "contenido": 753,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/",
+        "colorScheme": "light",
+        "width": 1440,
+        "viewport": 1425,
+        "contenido": 1425,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/",
+        "colorScheme": "dark",
+        "width": 320,
+        "viewport": 305,
+        "contenido": 305,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/",
+        "colorScheme": "dark",
+        "width": 390,
+        "viewport": 375,
+        "contenido": 375,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/",
+        "colorScheme": "dark",
+        "width": 768,
+        "viewport": 753,
+        "contenido": 753,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/",
+        "colorScheme": "dark",
+        "width": 1440,
+        "viewport": 1425,
+        "contenido": 1425,
+        "fuera": []
+      }
+    ]
+  },
+  {
+    "escenario": "Reflujo y contraste de la página \"/contacto\" en \"es\"",
+    "medidas": [
+      {
+        "url": "http://micitaentiempo.localhost:8080/contacto",
+        "colorScheme": "light",
+        "width": 320,
+        "viewport": 305,
+        "contenido": 305,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/contacto",
+        "colorScheme": "light",
+        "width": 390,
+        "viewport": 375,
+        "contenido": 375,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/contacto",
+        "colorScheme": "light",
+        "width": 768,
+        "viewport": 753,
+        "contenido": 753,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/contacto",
+        "colorScheme": "light",
+        "width": 1440,
+        "viewport": 1425,
+        "contenido": 1425,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/contacto",
+        "colorScheme": "dark",
+        "width": 320,
+        "viewport": 305,
+        "contenido": 305,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/contacto",
+        "colorScheme": "dark",
+        "width": 390,
+        "viewport": 375,
+        "contenido": 375,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/contacto",
+        "colorScheme": "dark",
+        "width": 768,
+        "viewport": 753,
+        "contenido": 753,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/contacto",
+        "colorScheme": "dark",
+        "width": 1440,
+        "viewport": 1425,
+        "contenido": 1425,
+        "fuera": []
+      }
+    ]
+  },
+  {
+    "escenario": "Reflujo y contraste de la página \"/contact\" en \"en\"",
+    "medidas": [
+      {
+        "url": "http://myappointmentontime.localhost:8080/contact",
+        "colorScheme": "light",
+        "width": 320,
+        "viewport": 305,
+        "contenido": 305,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/contact",
+        "colorScheme": "light",
+        "width": 390,
+        "viewport": 375,
+        "contenido": 375,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/contact",
+        "colorScheme": "light",
+        "width": 768,
+        "viewport": 753,
+        "contenido": 753,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/contact",
+        "colorScheme": "light",
+        "width": 1440,
+        "viewport": 1425,
+        "contenido": 1425,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/contact",
+        "colorScheme": "dark",
+        "width": 320,
+        "viewport": 305,
+        "contenido": 305,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/contact",
+        "colorScheme": "dark",
+        "width": 390,
+        "viewport": 375,
+        "contenido": 375,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/contact",
+        "colorScheme": "dark",
+        "width": 768,
+        "viewport": 753,
+        "contenido": 753,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/contact",
+        "colorScheme": "dark",
+        "width": 1440,
+        "viewport": 1425,
+        "contenido": 1425,
+        "fuera": []
+      }
+    ]
+  },
+  {
+    "escenario": "Reflujo y contraste de la página \"/preguntas-frecuentes\" en \"es\"",
+    "medidas": [
+      {
+        "url": "http://micitaentiempo.localhost:8080/preguntas-frecuentes",
+        "colorScheme": "light",
+        "width": 320,
+        "viewport": 305,
+        "contenido": 305,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/preguntas-frecuentes",
+        "colorScheme": "light",
+        "width": 390,
+        "viewport": 375,
+        "contenido": 375,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/preguntas-frecuentes",
+        "colorScheme": "light",
+        "width": 768,
+        "viewport": 753,
+        "contenido": 753,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/preguntas-frecuentes",
+        "colorScheme": "light",
+        "width": 1440,
+        "viewport": 1425,
+        "contenido": 1425,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/preguntas-frecuentes",
+        "colorScheme": "dark",
+        "width": 320,
+        "viewport": 305,
+        "contenido": 305,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/preguntas-frecuentes",
+        "colorScheme": "dark",
+        "width": 390,
+        "viewport": 375,
+        "contenido": 375,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/preguntas-frecuentes",
+        "colorScheme": "dark",
+        "width": 768,
+        "viewport": 753,
+        "contenido": 753,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/preguntas-frecuentes",
+        "colorScheme": "dark",
+        "width": 1440,
+        "viewport": 1425,
+        "contenido": 1425,
+        "fuera": []
+      }
+    ]
+  },
+  {
+    "escenario": "Reflujo y contraste de la página \"/faq\" en \"en\"",
+    "medidas": [
+      {
+        "url": "http://myappointmentontime.localhost:8080/faq",
+        "colorScheme": "light",
+        "width": 320,
+        "viewport": 305,
+        "contenido": 305,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/faq",
+        "colorScheme": "light",
+        "width": 390,
+        "viewport": 375,
+        "contenido": 375,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/faq",
+        "colorScheme": "light",
+        "width": 768,
+        "viewport": 753,
+        "contenido": 753,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/faq",
+        "colorScheme": "light",
+        "width": 1440,
+        "viewport": 1425,
+        "contenido": 1425,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/faq",
+        "colorScheme": "dark",
+        "width": 320,
+        "viewport": 305,
+        "contenido": 305,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/faq",
+        "colorScheme": "dark",
+        "width": 390,
+        "viewport": 375,
+        "contenido": 375,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/faq",
+        "colorScheme": "dark",
+        "width": 768,
+        "viewport": 753,
+        "contenido": 753,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/faq",
+        "colorScheme": "dark",
+        "width": 1440,
+        "viewport": 1425,
+        "contenido": 1425,
+        "fuera": []
+      }
+    ]
+  },
+  {
+    "escenario": "Reflujo y contraste de la página \"/privacidad\" en \"es\"",
+    "medidas": [
+      {
+        "url": "http://micitaentiempo.localhost:8080/privacidad",
+        "colorScheme": "light",
+        "width": 320,
+        "viewport": 305,
+        "contenido": 305,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/privacidad",
+        "colorScheme": "light",
+        "width": 390,
+        "viewport": 375,
+        "contenido": 375,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/privacidad",
+        "colorScheme": "light",
+        "width": 768,
+        "viewport": 753,
+        "contenido": 753,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/privacidad",
+        "colorScheme": "light",
+        "width": 1440,
+        "viewport": 1425,
+        "contenido": 1425,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/privacidad",
+        "colorScheme": "dark",
+        "width": 320,
+        "viewport": 305,
+        "contenido": 305,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/privacidad",
+        "colorScheme": "dark",
+        "width": 390,
+        "viewport": 375,
+        "contenido": 375,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/privacidad",
+        "colorScheme": "dark",
+        "width": 768,
+        "viewport": 753,
+        "contenido": 753,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/privacidad",
+        "colorScheme": "dark",
+        "width": 1440,
+        "viewport": 1425,
+        "contenido": 1425,
+        "fuera": []
+      }
+    ]
+  },
+  {
+    "escenario": "Reflujo y contraste de la página \"/terms\" en \"en\"",
+    "medidas": [
+      {
+        "url": "http://myappointmentontime.localhost:8080/terms",
+        "colorScheme": "light",
+        "width": 320,
+        "viewport": 305,
+        "contenido": 305,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/terms",
+        "colorScheme": "light",
+        "width": 390,
+        "viewport": 375,
+        "contenido": 375,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/terms",
+        "colorScheme": "light",
+        "width": 768,
+        "viewport": 753,
+        "contenido": 753,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/terms",
+        "colorScheme": "light",
+        "width": 1440,
+        "viewport": 1425,
+        "contenido": 1425,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/terms",
+        "colorScheme": "dark",
+        "width": 320,
+        "viewport": 305,
+        "contenido": 305,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/terms",
+        "colorScheme": "dark",
+        "width": 390,
+        "viewport": 375,
+        "contenido": 375,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/terms",
+        "colorScheme": "dark",
+        "width": 768,
+        "viewport": 753,
+        "contenido": 753,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/terms",
+        "colorScheme": "dark",
+        "width": 1440,
+        "viewport": 1425,
+        "contenido": 1425,
+        "fuera": []
+      }
+    ]
+  },
+  {
+    "escenario": "Reflujo y contraste de la página \"/entrar\" en \"es\"",
+    "medidas": [
+      {
+        "url": "http://micitaentiempo.localhost:8080/entrar",
+        "colorScheme": "light",
+        "width": 320,
+        "viewport": 320,
+        "contenido": 320,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/entrar",
+        "colorScheme": "light",
+        "width": 390,
+        "viewport": 390,
+        "contenido": 390,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/entrar",
+        "colorScheme": "light",
+        "width": 768,
+        "viewport": 768,
+        "contenido": 768,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/entrar",
+        "colorScheme": "light",
+        "width": 1440,
+        "viewport": 1440,
+        "contenido": 1440,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/entrar",
+        "colorScheme": "dark",
+        "width": 320,
+        "viewport": 320,
+        "contenido": 320,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/entrar",
+        "colorScheme": "dark",
+        "width": 390,
+        "viewport": 390,
+        "contenido": 390,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/entrar",
+        "colorScheme": "dark",
+        "width": 768,
+        "viewport": 768,
+        "contenido": 768,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/entrar",
+        "colorScheme": "dark",
+        "width": 1440,
+        "viewport": 1440,
+        "contenido": 1440,
+        "fuera": []
+      }
+    ]
+  },
+  {
+    "escenario": "Reflujo y contraste de la página \"/sign-in\" en \"en\"",
+    "medidas": [
+      {
+        "url": "http://myappointmentontime.localhost:8080/sign-in",
+        "colorScheme": "light",
+        "width": 320,
+        "viewport": 320,
+        "contenido": 320,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/sign-in",
+        "colorScheme": "light",
+        "width": 390,
+        "viewport": 390,
+        "contenido": 390,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/sign-in",
+        "colorScheme": "light",
+        "width": 768,
+        "viewport": 768,
+        "contenido": 768,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/sign-in",
+        "colorScheme": "light",
+        "width": 1440,
+        "viewport": 1440,
+        "contenido": 1440,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/sign-in",
+        "colorScheme": "dark",
+        "width": 320,
+        "viewport": 320,
+        "contenido": 320,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/sign-in",
+        "colorScheme": "dark",
+        "width": 390,
+        "viewport": 390,
+        "contenido": 390,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/sign-in",
+        "colorScheme": "dark",
+        "width": 768,
+        "viewport": 768,
+        "contenido": 768,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/sign-in",
+        "colorScheme": "dark",
+        "width": 1440,
+        "viewport": 1440,
+        "contenido": 1440,
+        "fuera": []
+      }
+    ]
+  },
+  {
+    "escenario": "Reflujo y contraste de la página \"/citas\" en \"es\"",
+    "medidas": [
+      {
+        "url": "http://micitaentiempo.localhost:8080/citas",
+        "colorScheme": "light",
+        "width": 320,
+        "viewport": 320,
+        "contenido": 320,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/citas",
+        "colorScheme": "light",
+        "width": 390,
+        "viewport": 390,
+        "contenido": 390,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/citas",
+        "colorScheme": "light",
+        "width": 768,
+        "viewport": 768,
+        "contenido": 768,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/citas",
+        "colorScheme": "light",
+        "width": 1440,
+        "viewport": 1440,
+        "contenido": 1440,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/citas",
+        "colorScheme": "dark",
+        "width": 320,
+        "viewport": 320,
+        "contenido": 320,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/citas",
+        "colorScheme": "dark",
+        "width": 390,
+        "viewport": 390,
+        "contenido": 390,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/citas",
+        "colorScheme": "dark",
+        "width": 768,
+        "viewport": 768,
+        "contenido": 768,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/citas",
+        "colorScheme": "dark",
+        "width": 1440,
+        "viewport": 1440,
+        "contenido": 1440,
+        "fuera": []
+      }
+    ]
+  },
+  {
+    "escenario": "Reflujo y contraste de la página \"/appointments\" en \"en\"",
+    "medidas": [
+      {
+        "url": "http://myappointmentontime.localhost:8080/appointments",
+        "colorScheme": "light",
+        "width": 320,
+        "viewport": 320,
+        "contenido": 320,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/appointments",
+        "colorScheme": "light",
+        "width": 390,
+        "viewport": 390,
+        "contenido": 390,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/appointments",
+        "colorScheme": "light",
+        "width": 768,
+        "viewport": 768,
+        "contenido": 768,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/appointments",
+        "colorScheme": "light",
+        "width": 1440,
+        "viewport": 1440,
+        "contenido": 1440,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/appointments",
+        "colorScheme": "dark",
+        "width": 320,
+        "viewport": 320,
+        "contenido": 320,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/appointments",
+        "colorScheme": "dark",
+        "width": 390,
+        "viewport": 390,
+        "contenido": 390,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/appointments",
+        "colorScheme": "dark",
+        "width": 768,
+        "viewport": 768,
+        "contenido": 768,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/appointments",
+        "colorScheme": "dark",
+        "width": 1440,
+        "viewport": 1440,
+        "contenido": 1440,
+        "fuera": []
+      }
+    ]
+  },
+  {
+    "escenario": "Panel autenticado con nombre largo en \"es\"",
+    "medidas": [
+      {
+        "url": "http://micitaentiempo.localhost:8080/panel/calendarios/01a11979-4a5c-7e1a-b5a1-40ea7e0af997",
+        "colorScheme": "light",
+        "width": 320,
+        "viewport": 320,
+        "contenido": 320,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/panel/calendarios/01a11979-4a5c-7e1a-b5a1-40ea7e0af997",
+        "colorScheme": "light",
+        "width": 390,
+        "viewport": 390,
+        "contenido": 390,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/panel/calendarios/01a11979-4a5c-7e1a-b5a1-40ea7e0af997",
+        "colorScheme": "light",
+        "width": 768,
+        "viewport": 753,
+        "contenido": 753,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/panel/calendarios/01a11979-4a5c-7e1a-b5a1-40ea7e0af997",
+        "colorScheme": "light",
+        "width": 1440,
+        "viewport": 1425,
+        "contenido": 1425,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/panel/calendarios/01a11979-4a5c-7e1a-b5a1-40ea7e0af997",
+        "colorScheme": "dark",
+        "width": 320,
+        "viewport": 320,
+        "contenido": 320,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/panel/calendarios/01a11979-4a5c-7e1a-b5a1-40ea7e0af997",
+        "colorScheme": "dark",
+        "width": 390,
+        "viewport": 390,
+        "contenido": 390,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/panel/calendarios/01a11979-4a5c-7e1a-b5a1-40ea7e0af997",
+        "colorScheme": "dark",
+        "width": 768,
+        "viewport": 753,
+        "contenido": 753,
+        "fuera": []
+      },
+      {
+        "url": "http://micitaentiempo.localhost:8080/panel/calendarios/01a11979-4a5c-7e1a-b5a1-40ea7e0af997",
+        "colorScheme": "dark",
+        "width": 1440,
+        "viewport": 1425,
+        "contenido": 1425,
+        "fuera": []
+      }
+    ]
+  },
+  {
+    "escenario": "Panel autenticado con nombre largo en \"en\"",
+    "medidas": [
+      {
+        "url": "http://myappointmentontime.localhost:8080/dashboard/calendars/01a11979-4da0-7852-b14b-19a865128f2c",
+        "colorScheme": "light",
+        "width": 320,
+        "viewport": 320,
+        "contenido": 320,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/dashboard/calendars/01a11979-4da0-7852-b14b-19a865128f2c",
+        "colorScheme": "light",
+        "width": 390,
+        "viewport": 390,
+        "contenido": 390,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/dashboard/calendars/01a11979-4da0-7852-b14b-19a865128f2c",
+        "colorScheme": "light",
+        "width": 768,
+        "viewport": 753,
+        "contenido": 753,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/dashboard/calendars/01a11979-4da0-7852-b14b-19a865128f2c",
+        "colorScheme": "light",
+        "width": 1440,
+        "viewport": 1425,
+        "contenido": 1425,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/dashboard/calendars/01a11979-4da0-7852-b14b-19a865128f2c",
+        "colorScheme": "dark",
+        "width": 320,
+        "viewport": 320,
+        "contenido": 320,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/dashboard/calendars/01a11979-4da0-7852-b14b-19a865128f2c",
+        "colorScheme": "dark",
+        "width": 390,
+        "viewport": 390,
+        "contenido": 390,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/dashboard/calendars/01a11979-4da0-7852-b14b-19a865128f2c",
+        "colorScheme": "dark",
+        "width": 768,
+        "viewport": 753,
+        "contenido": 753,
+        "fuera": []
+      },
+      {
+        "url": "http://myappointmentontime.localhost:8080/dashboard/calendars/01a11979-4da0-7852-b14b-19a865128f2c",
+        "colorScheme": "dark",
+        "width": 1440,
+        "viewport": 1425,
+        "contenido": 1425,
+        "fuera": []
+      }
+    ]
+  }
+]

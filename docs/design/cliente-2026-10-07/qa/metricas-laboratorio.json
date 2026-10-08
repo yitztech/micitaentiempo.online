@@ -1,0 +1,284 @@
+{
+  "dateUTC": "2026-10-08T03:13:36.055Z",
+  "browser": "153.0.8010.12",
+  "webVitals": "6.2.3",
+  "environment": "Build de producción local; sin limitar CPU ni red; contexto nuevo por muestra; dos muestras por ruta/ancho. No RUM ni p75.",
+  "results": [
+    {
+      "url": "http://micitaentiempo.localhost:8080/",
+      "width": 390,
+      "sample": 1,
+      "interaction": "abrir y cerrar navegación móvil",
+      "metrics": {
+        "LCP": {
+          "value": 112,
+          "rating": "good",
+          "entries": 1
+        },
+        "CLS": {
+          "value": 0,
+          "rating": "good",
+          "entries": 0
+        },
+        "INP": {
+          "value": 72,
+          "rating": "good",
+          "entries": 2
+        }
+      }
+    },
+    {
+      "url": "http://micitaentiempo.localhost:8080/",
+      "width": 390,
+      "sample": 2,
+      "interaction": "abrir y cerrar navegación móvil",
+      "metrics": {
+        "LCP": {
+          "value": 100,
+          "rating": "good",
+          "entries": 1
+        },
+        "CLS": {
+          "value": 0,
+          "rating": "good",
+          "entries": 0
+        },
+        "INP": {
+          "value": 88,
+          "rating": "good",
+          "entries": 4
+        }
+      }
+    },
+    {
+      "url": "http://micitaentiempo.localhost:8080/",
+      "width": 1440,
+      "sample": 1,
+      "interaction": "clic sobre título estático (INP no representa un flujo completo)",
+      "metrics": {
+        "LCP": {
+          "value": 96,
+          "rating": "good",
+          "entries": 1
+        },
+        "CLS": {
+          "value": 0,
+          "rating": "good",
+          "entries": 0
+        },
+        "INP": {
+          "value": 16,
+          "rating": "good",
+          "entries": 1
+        }
+      }
+    },
+    {
+      "url": "http://micitaentiempo.localhost:8080/",
+      "width": 1440,
+      "sample": 2,
+      "interaction": "clic sobre título estático (INP no representa un flujo completo)",
+      "metrics": {
+        "LCP": {
+          "value": 100,
+          "rating": "good",
+          "entries": 1
+        },
+        "CLS": {
+          "value": 0,
+          "rating": "good",
+          "entries": 0
+        },
+        "INP": {
+          "value": 16,
+          "rating": "good",
+          "entries": 1
+        }
+      }
+    },
+    {
+      "url": "http://myappointmentontime.localhost:8080/",
+      "width": 390,
+      "sample": 1,
+      "interaction": "abrir y cerrar navegación móvil",
+      "metrics": {
+        "LCP": {
+          "value": 76,
+          "rating": "good",
+          "entries": 1
+        },
+        "CLS": {
+          "value": 0,
+          "rating": "good",
+          "entries": 0
+        },
+        "INP": {
+          "value": 72,
+          "rating": "good",
+          "entries": 4
+        }
+      }
+    },
+    {
+      "url": "http://myappointmentontime.localhost:8080/",
+      "width": 390,
+      "sample": 2,
+      "interaction": "abrir y cerrar navegación móvil",
+      "metrics": {
+        "LCP": {
+          "value": 160,
+          "rating": "good",
+          "entries": 1
+        },
+        "CLS": {
+          "value": 0,
+          "rating": "good",
+          "entries": 0
+        },
+        "INP": {
+          "value": 72,
+          "rating": "good",
+          "entries": 4
+        }
+      }
+    },
+    {
+      "url": "http://myappointmentontime.localhost:8080/",
+      "width": 1440,
+      "sample": 1,
+      "interaction": "clic sobre título estático (INP no representa un flujo completo)",
+      "metrics": {
+        "LCP": {
+          "value": 132,
+          "rating": "good",
+          "entries": 1
+        },
+        "CLS": {
+          "value": 0,
+          "rating": "good",
+          "entries": 0
+        },
+        "INP": {
+          "value": 16,
+          "rating": "good",
+          "entries": 1
+        }
+      }
+    },
+    {
+      "url": "http://myappointmentontime.localhost:8080/",
+      "width": 1440,
+      "sample": 2,
+      "interaction": "clic sobre título estático (INP no representa un flujo completo)",
+      "metrics": {
+        "LCP": {
+          "value": 84,
+          "rating": "good",
+          "entries": 1
+        },
+        "CLS": {
+          "value": 0,
+          "rating": "good",
+          "entries": 0
+        },
+        "INP": {
+          "value": 16,
+          "rating": "good",
+          "entries": 1
+        }
+      }
+    },
+    {
+      "url": "http://micitaentiempo.localhost:8080/reservar/consultas-57c73",
+      "width": 390,
+      "sample": 1,
+      "interaction": "clic sobre título estático (INP no representa un flujo completo)",
+      "metrics": {
+        "LCP": {
+          "value": 84,
+          "rating": "good",
+          "entries": 1
+        },
+        "CLS": {
+          "value": 0,
+          "rating": "good",
+          "entries": 0
+        },
+        "INP": {
+          "value": 32,
+          "rating": "good",
+          "entries": 1
+        }
+      }
+    },
+    {
+      "url": "http://micitaentiempo.localhost:8080/reservar/consultas-57c73",
+      "width": 390,
+      "sample": 2,
+      "interaction": "clic sobre título estático (INP no representa un flujo completo)",
+      "metrics": {
+        "LCP": {
+          "value": 100,
+          "rating": "good",
+          "entries": 1
+        },
+        "CLS": {
+          "value": 0,
+          "rating": "good",
+          "entries": 0
+        },
+        "INP": {
+          "value": 16,
+          "rating": "good",
+          "entries": 1
+        }
+      }
+    },
+    {
+      "url": "http://micitaentiempo.localhost:8080/reservar/consultas-57c73",
+      "width": 1440,
+      "sample": 1,
+      "interaction": "clic sobre título estático (INP no representa un flujo completo)",
+      "metrics": {
+        "LCP": {
+          "value": 96,
+          "rating": "good",
+          "entries": 1
+        },
+        "CLS": {
+          "value": 0,
+          "rating": "good",
+          "entries": 0
+        },
+        "INP": {
+          "value": 16,
+          "rating": "good",
+          "entries": 1
+        }
+      }
+    },
+    {
+      "url": "http://micitaentiempo.localhost:8080/reservar/consultas-57c73",
+      "width": 1440,
+      "sample": 2,
+      "interaction": "clic sobre título estático (INP no representa un flujo completo)",
+      "metrics": {
+        "LCP": {
+          "value": 84,
+          "rating": "good",
+          "entries": 1
+        },
+        "CLS": {
+          "value": 0,
+          "rating": "good",
+          "entries": 0
+        },
+        "INP": {
+          "value": 16,
+          "rating": "good",
+          "entries": 1
+        }
+      }
+    }
+  ]
+}

@@ -1,8 +1,7 @@
 import { pathFor } from "@mcet/i18n";
 import { MapPin } from "lucide-react";
 import { BookingFlow } from "~/components/booking-flow";
-import { LanguageLink } from "~/components/language-link";
-import { Logo } from "~/components/logo";
+import { ClientHeader } from "~/components/client-header";
 import { Container } from "~/components/ui";
 import { fmt, useRoot } from "~/lib/i18n";
 import { loadPublicCalendar } from "~/lib/public-calendar.server";
@@ -25,14 +24,9 @@ export default function BookingPage({ loaderData }: Route.ComponentProps) {
   const { calendar } = loaderData;
   return (
     <div className="min-h-dvh">
-      <header className="border-b border-border">
-        <Container className="flex h-16 items-center justify-between">
-          <Logo />
-          <LanguageLink />
-        </Container>
-      </header>
+      <ClientHeader />
       <main id="contenido">
-        <Container className="max-w-4xl py-8 sm:py-12">
+        <Container width="booking" className="py-8 sm:py-12">
           <h1 className="text-3xl font-semibold tracking-tight">{calendar.name}</h1>
           {calendar.address ? (
             <p className="mt-2 flex items-center gap-2 text-muted">

@@ -73,8 +73,9 @@ const MATCHERS = (Object.keys(ROUTES) as RouteId[]).flatMap((id) =>
 export function matchRoute(
   pathname: string,
 ): { id: RouteId; lang: Lang; params: Record<string, string> } | null {
+  const clean = pathname.replace(/\.data$/, "");
   for (const m of MATCHERS) {
-    const r = m.re.exec(pathname);
+    const r = m.re.exec(clean);
     if (r) return { id: m.id, lang: m.lang, params: { ...(r.groups ?? {}) } };
   }
   return null;

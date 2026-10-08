@@ -18,7 +18,7 @@ export function Select({
         {...props}
         id={id}
         aria-describedby={hint ? `${id}-hint` : undefined}
-        className="mt-1.5 block min-h-11 w-full rounded-[var(--radius-field)] border border-border bg-surface px-3 text-base text-text"
+        className="mt-1.5 block min-h-11 w-full rounded-[var(--radius-field)] border border-border-field bg-surface px-3 text-base text-text"
       >
         {children}
       </select>

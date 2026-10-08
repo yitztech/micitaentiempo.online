@@ -54,26 +54,25 @@ export default function Embed({ loaderData }: Route.ComponentProps) {
     <main id="contenido" className="mx-auto max-w-4xl p-4 sm:p-6">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-xl font-semibold">{calendar.name}</h1>
-        <div
-          role="tablist"
-          className="flex rounded-[var(--radius-field)] border border-border p-1 text-[15px]"
+        <nav
+          aria-label={t.common.nav.main}
+          className="flex gap-1 rounded-[var(--radius-field)] border border-border p-1 text-[15px]"
         >
           {(["book", "mine"] as const).map((v) => (
             <button
               key={v}
               type="button"
-              role="tab"
-              aria-selected={view === v}
+              aria-pressed={view === v}
               onClick={() => setView(v)}
               className={cx(
-                "min-h-10 rounded-md px-3",
-                view === v ? "bg-primary text-on-primary" : "hover:bg-surface-2",
+                "min-h-11 rounded-[var(--radius-field)] px-4 font-medium transition-colors select-none",
+                view === v ? "bg-primary text-on-primary" : "text-text hover:bg-surface-2",
               )}
             >
               {v === "book" ? t.booking.embed.book : t.booking.embed.myAppointments}
             </button>
           ))}
-        </div>
+        </nav>
       </div>
       {view === "book" ? (
         <BookingFlow

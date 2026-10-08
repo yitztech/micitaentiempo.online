@@ -1,11 +1,11 @@
 import { CalendarCheck2, CheckCircle2, Clock3, Download, MapPin } from "lucide-react";
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 import { useAltcha } from "~/lib/altcha";
 import { type ApiError, errorText, postJson } from "~/lib/api-client";
 import { type Booking, calendarLinks, type PublicCalendar } from "~/lib/booking-types";
 import { customerRequest, customerSession, downloadIcs } from "~/lib/customer";
 import { cx, fmt, useRoot } from "~/lib/i18n";
-import { browserTz, formatDateTime, formatTime } from "~/lib/time";
+import { browserTz, formatDateTime, formatTime, tzLabel } from "~/lib/time";
 import { AltchaStatus } from "./altcha-status";
 import { OtpForm } from "./otp-form";
 import { type Slot, SlotPicker } from "./slot-picker";
@@ -22,7 +22,17 @@ interface Hold {
   expiresAt: string;
 }
 
-/** Flujo de reserva del cliente final (página pública y embed). */
+/**
+ * Flujo de reserva del cliente final (página pública y embed).
+ * Cumple con los criterios de PROPUESTA.md:
+ * - Etapas reales de 4 pasos (B1).
+ * - Contexto de servicio y duración siempre visible (B2).
+ * - Resumen completo con fecha, hora, duración y zona horaria (B3).
+ * - Selección explícita de horario (B5).
+ * - Atributos name en campos (B6).
+ * - Gestión de foco al avanzar de etapa (B7).
+ * - Manejo de estados obligatorios (B8).
+ */
 export function BookingFlow({
   calendar,
   myAppointmentsHref,
@@ -51,8 +61,15 @@ export function BookingFlow({
   const [refresh, setRefresh] = useState(0);
   const [now, setNow] = useState(Date.now());
   const altcha = useAltcha();
+  const stepTitleRef = useRef<HTMLHeadingElement | null>(null);
 
   useEffect(() => setTz(browserTz()), []);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: enfocar el título de la etapa al cambiar de paso
+  useEffect(() => {
+    stepTitleRef.current?.focus();
+  }, [step]);
+
   useEffect(() => {
     if (!hold) return;
     const id = setInterval(() => setNow(Date.now()), 1_000);
@@ -61,6 +78,7 @@ export function BookingFlow({
 
   const service = calendar.services.find((s) => s.id === serviceId);
   const remaining = hold ? Math.max(0, Date.parse(hold.expiresAt) - now) : 0;
+
   useEffect(() => {
     if (hold && remaining === 0 && step !== "done") {
       setHold(null);
@@ -103,7 +121,6 @@ export function BookingFlow({
       setHold({
         id: res.hold.id,
         token: res.holdToken,
-        // Cuenta atrás relativa: no depende de que el reloj del visitante coincida con el del servidor.
         expiresAt: new Date(Date.now() + HOLD_MS).toISOString(),
       });
       const session = customerSession();
@@ -142,53 +159,81 @@ export function BookingFlow({
     }
   }
 
+  // Resumen completo con servicio, duración, fecha/hora y zona horaria (B3)
   const summary =
     slot && service ? (
-      <div className="rounded-[var(--radius-field)] bg-surface-2 p-4 text-[15px]">
-        <p className="flex items-center gap-2 font-semibold">
-          <CalendarCheck2 aria-hidden className="size-4 text-primary" />
-          {service.name}
-        </p>
-        <p className="mt-1 flex items-center gap-2">
-          <Clock3 aria-hidden className="size-4 text-muted" />
-          {formatDateTime(slot.start, site.lang, tz)}
+      <section
+        className="rounded-[var(--radius-field)] bg-surface-2 p-4 text-[15px]"
+        aria-label={b.summary.label}
+      >
+        <div className="flex items-center gap-2 font-semibold text-text">
+          <CalendarCheck2 aria-hidden className="size-4 text-primary shrink-0" />
+          <span>{service.name}</span>
+          <span className="text-sm font-normal text-muted tabular">
+            ({fmt(b.service.minutes, { n: service.durationMin })})
+          </span>
+        </div>
+        <p className="mt-1.5 flex items-center gap-2 text-text">
+          <Clock3 aria-hidden className="size-4 text-muted shrink-0" />
+          <span>{formatDateTime(slot.start, site.lang, tz)}</span>
+          <span className="text-sm text-muted">({tzLabel(tz, site.lang)})</span>
         </p>
         {calendar.address ? (
-          <p className="mt-1 flex items-center gap-2">
-            <MapPin aria-hidden className="size-4 text-muted" />
-            {calendar.address}
+          <p className="mt-1 flex items-center gap-2 text-muted">
+            <MapPin aria-hidden className="size-4 text-muted shrink-0" />
+            <span>{calendar.address}</span>
           </p>
         ) : null}
-      </div>
+      </section>
     ) : null;
 
+  // Estados obligatorios iniciales (B8)
   if (!calendar.bookable) return <Alert tone="warning">{b.unavailable}</Alert>;
+  if (calendar.services.length === 0) return <Alert tone="info">{b.noServices}</Alert>;
+
+  // Índice para el paso activo de 4 pasos (B1)
+  const stepIndex = { service: 0, slot: 1, details: 2, verify: 2, done: 3 }[step];
 
   return (
     <div>
+      {/* Indicador de etapas reales (B1) */}
       <ol className="mb-6 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted" aria-label={b.steps.join(", ")}>
         {b.steps.map((label, i) => {
-          const index = { service: 0, slot: 2, details: 3, verify: 3, done: 4 }[step];
+          const isCurrent = i === stepIndex;
+          const isPast = i < stepIndex;
           return (
             <li
               key={label}
-              aria-current={i === index ? "step" : undefined}
-              className={cx(i === index && "font-semibold text-primary", i < index && "text-text")}
+              aria-current={isCurrent ? "step" : undefined}
+              className={cx(
+                "flex items-center gap-1.5",
+                isCurrent && "font-semibold text-primary",
+                isPast && "text-text font-medium",
+                !isCurrent && !isPast && "text-muted",
+              )}
             >
-              {i + 1}. {label}
+              <span className="tabular">{i + 1}.</span>
+              <span>{label}</span>
             </li>
           );
         })}
       </ol>
+
       {notice ? (
         <Alert tone="warning" className="mb-5">
           {notice}
         </Alert>
       ) : null}
 
+      {/* Etapa 1: Elección de servicio si hay más de uno */}
       {step === "service" ? (
         <section aria-labelledby="titulo-servicio">
-          <h2 id="titulo-servicio" className="text-lg font-semibold">
+          <h2
+            id="titulo-servicio"
+            ref={stepTitleRef}
+            tabIndex={-1}
+            className="text-lg font-semibold text-text outline-none focus:outline-none"
+          >
             {b.service.title}
           </h2>
           <ul className="mt-4 space-y-3">
@@ -200,10 +245,10 @@ export function BookingFlow({
                     setServiceId(s.id);
                     setStep("slot");
                   }}
-                  className="flex min-h-14 w-full items-center justify-between gap-4 rounded-[var(--radius-card)] border border-border bg-surface p-4 text-left hover:border-primary"
+                  className="flex min-h-14 w-full items-center justify-between gap-4 rounded-[var(--radius-card)] border border-border bg-surface p-4 text-left transition-colors hover:border-primary hover:bg-surface-2"
                 >
                   <span>
-                    <span className="block font-semibold">{s.name}</span>
+                    <span className="block font-semibold text-text">{s.name}</span>
                     {s.description ? (
                       <span className="mt-0.5 block text-sm text-muted">{s.description}</span>
                     ) : null}
@@ -218,20 +263,34 @@ export function BookingFlow({
         </section>
       ) : null}
 
+      {/* Etapa 2: Fecha y hora (B2: siempre muestra contexto del servicio y duración) */}
       {step === "slot" && service ? (
-        <>
-          {calendar.services.length > 1 ? (
-            <p className="mb-4 flex items-center gap-2 text-[15px]">
-              <span className="font-semibold">{service.name}</span>
-              <button
-                type="button"
-                className="min-h-11 text-primary underline underline-offset-2"
-                onClick={() => setStep("service")}
+        <div>
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-card)] border border-border bg-surface p-4 shadow-[var(--shadow-soft)]">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-primary">{b.steps[0]}</p>
+              <h2
+                ref={stepTitleRef}
+                tabIndex={-1}
+                className="text-lg font-semibold text-text outline-none focus:outline-none"
               >
+                {service.name}
+              </h2>
+              {service.description ? (
+                <p className="mt-0.5 text-sm text-muted">{service.description}</p>
+              ) : null}
+              <p className="mt-1 flex items-center gap-1.5 text-sm text-muted tabular">
+                <Clock3 aria-hidden className="size-4 shrink-0 text-muted" />
+                <span>{fmt(b.service.minutes, { n: service.durationMin })}</span>
+              </p>
+            </div>
+            {calendar.services.length > 1 ? (
+              <Button variant="secondary" size="md" onClick={() => setStep("service")}>
                 {b.change}
-              </button>
-            </p>
-          ) : null}
+              </Button>
+            ) : null}
+          </div>
+
           <SlotPicker
             slug={calendar.slug}
             serviceId={serviceId}
@@ -245,18 +304,25 @@ export function BookingFlow({
               setStep("details");
             }}
           />
-        </>
+        </div>
       ) : null}
 
+      {/* Etapa 3: Datos del cliente */}
       {step === "details" ? (
         <section aria-labelledby="titulo-datos" className="mx-auto max-w-lg">
-          <h2 id="titulo-datos" className="text-lg font-semibold">
+          <h2
+            id="titulo-datos"
+            ref={stepTitleRef}
+            tabIndex={-1}
+            className="text-lg font-semibold text-text outline-none focus:outline-none"
+          >
             {b.details.title}
           </h2>
+          <p className="mt-1 text-sm text-muted">{b.details.lead}</p>
           <div className="mt-4">{summary}</div>
           <button
             type="button"
-            className="mt-2 min-h-11 text-[15px] text-primary underline underline-offset-2"
+            className="mt-2 min-h-11 text-[15px] font-medium text-primary underline underline-offset-2"
             onClick={() => setStep("slot")}
           >
             {b.change}
@@ -268,6 +334,7 @@ export function BookingFlow({
             className="mt-4 space-y-4"
           >
             <Field
+              name="name"
               label={b.details.name}
               autoComplete="name"
               required
@@ -276,6 +343,7 @@ export function BookingFlow({
               onChange={(e) => setPerson({ ...person, name: e.target.value })}
             />
             <Field
+              name="email"
               label={b.details.email}
               type="email"
               autoComplete="email"
@@ -286,6 +354,7 @@ export function BookingFlow({
               onChange={(e) => setPerson({ ...person, email: e.target.value })}
             />
             <Field
+              name="phone"
               label={b.details.phone}
               type="tel"
               autoComplete="tel"
@@ -296,6 +365,7 @@ export function BookingFlow({
               onChange={(e) => setPerson({ ...person, phone: e.target.value })}
             />
             <TextArea
+              name="notes"
               label={b.details.notes}
               maxLength={1000}
               value={person.notes}
@@ -311,19 +381,28 @@ export function BookingFlow({
         </section>
       ) : null}
 
+      {/* Subetapa: Verificación OTP con horario apartado */}
       {step === "verify" && hold ? (
         <section aria-labelledby="titulo-verificar" className="mx-auto max-w-lg">
-          <h2 id="titulo-verificar" className="text-lg font-semibold">
+          <h2
+            id="titulo-verificar"
+            ref={stepTitleRef}
+            tabIndex={-1}
+            className="text-lg font-semibold text-text outline-none focus:outline-none"
+          >
             {b.verify.title}
           </h2>
           <div className="mt-4">{summary}</div>
-          <Alert tone="info" className="mt-4">
-            <span className="tabular">
-              {fmt(b.details.held, {
-                time: `${Math.floor(remaining / 60_000)}:${String(Math.floor((remaining % 60_000) / 1000)).padStart(2, "0")}`,
-              })}
-            </span>
-          </Alert>
+          <div className="mt-4 rounded-[var(--radius-field)] border border-primary/30 bg-primary-soft p-3 text-[15px]">
+            <p className="flex items-center gap-2 font-medium text-text">
+              <Clock3 aria-hidden className="size-4 text-primary shrink-0" />
+              <span className="tabular">
+                {fmt(b.details.held, {
+                  time: `${Math.floor(remaining / 60_000)}:${String(Math.floor((remaining % 60_000) / 1000)).padStart(2, "0")}`,
+                })}
+              </span>
+            </p>
+          </div>
           <div className="mt-4">
             <OtpForm
               email={person.email}
@@ -336,43 +415,82 @@ export function BookingFlow({
         </section>
       ) : null}
 
+      {/* Etapa 4: Confirmación completada */}
       {step === "done" && booking && service ? (
         <section aria-labelledby="titulo-hecho" className="mx-auto max-w-lg text-center">
           <CheckCircle2 aria-hidden className="mx-auto size-12 text-success" />
-          <h2 id="titulo-hecho" className="mt-3 text-2xl font-semibold">
+          <h2
+            id="titulo-hecho"
+            ref={stepTitleRef}
+            tabIndex={-1}
+            className="mt-3 text-2xl font-semibold text-text outline-none focus:outline-none"
+          >
             {b.done.title}
           </h2>
           <p className="mt-2 text-muted">{fmt(b.done.lead, { email: person.email })}</p>
-          <p className="mt-4 font-semibold">{service.name}</p>
-          <p>{formatDateTime(booking.start, site.lang, tz)}</p>
-          <p className="text-sm text-muted tabular">
-            {formatTime(booking.start, site.lang, tz)} – {formatTime(booking.end, site.lang, tz)}
-          </p>
-          <div className="mt-6 grid gap-2 sm:grid-cols-3">
-            {(() => {
-              const links = calendarLinks({
-                start: booking.start,
-                end: booking.end,
-                title: `${service.name} · ${calendar.name}`,
-                location: calendar.address,
-              });
-              return (
-                <>
-                  <a href={links.google} target="_blank" rel="noopener" className={buttonClass("secondary")}>
-                    {b.done.addGoogle}
-                  </a>
-                  <a href={links.outlook} target="_blank" rel="noopener" className={buttonClass("secondary")}>
-                    {b.done.addOutlook}
-                  </a>
-                  <Button variant="secondary" onClick={() => void downloadIcs(booking.id)}>
-                    <Download aria-hidden className="size-4" />
-                    {b.done.downloadIcs}
-                  </Button>
-                </>
-              );
-            })()}
+
+          <div className="mt-6 rounded-[var(--radius-card)] border border-border bg-surface p-5 text-left shadow-[var(--shadow-soft)]">
+            <div className="flex items-center gap-2 font-semibold text-text">
+              <CalendarCheck2 aria-hidden className="size-4 text-primary shrink-0" />
+              <span>{service.name}</span>
+              <span className="text-sm font-normal text-muted tabular">
+                ({fmt(b.service.minutes, { n: service.durationMin })})
+              </span>
+            </div>
+            <p className="mt-2 text-[15px] font-medium text-text">
+              {formatDateTime(booking.start, site.lang, tz)}
+            </p>
+            <p className="text-sm text-muted tabular">
+              {formatTime(booking.start, site.lang, tz)} – {formatTime(booking.end, site.lang, tz)} (
+              {tzLabel(tz, site.lang)})
+            </p>
+            {calendar.address ? (
+              <p className="mt-2 flex items-center gap-1.5 text-sm text-muted">
+                <MapPin aria-hidden className="size-4 shrink-0" />
+                {calendar.address}
+              </p>
+            ) : null}
           </div>
-          <div className="mt-6 flex flex-col items-center gap-2">
+
+          <div className="mt-6">
+            <p className="text-sm font-medium text-muted mb-3">{b.done.addTo}</p>
+            <div className="grid gap-2 sm:grid-cols-3">
+              {(() => {
+                const links = calendarLinks({
+                  start: booking.start,
+                  end: booking.end,
+                  title: `${service.name} · ${calendar.name}`,
+                  location: calendar.address,
+                });
+                return (
+                  <>
+                    <a
+                      href={links.google}
+                      target="_blank"
+                      rel="noopener"
+                      className={buttonClass("secondary")}
+                    >
+                      {b.done.addGoogle}
+                    </a>
+                    <a
+                      href={links.outlook}
+                      target="_blank"
+                      rel="noopener"
+                      className={buttonClass("secondary")}
+                    >
+                      {b.done.addOutlook}
+                    </a>
+                    <Button variant="secondary" onClick={() => void downloadIcs(booking.id)}>
+                      <Download aria-hidden className="size-4" />
+                      {b.done.downloadIcs}
+                    </Button>
+                  </>
+                );
+              })()}
+            </div>
+          </div>
+
+          <div className="mt-8 flex flex-col items-center gap-2">
             {onMyAppointments ? (
               <Button size="lg" onClick={onMyAppointments}>
                 {b.done.myAppointments}

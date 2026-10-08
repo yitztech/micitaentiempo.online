@@ -16,6 +16,8 @@
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
   --color-border: var(--border);
+  /* Contorno de campos y controles (≥3:1, WCAG 1.4.11); --border queda para separadores. */
+  --color-border-field: var(--border-field);
   --color-text: var(--text);
   --color-muted: var(--text-muted);
   --color-success: var(--success);
@@ -42,6 +44,7 @@
   --surface: #ffffff;
   --surface-2: #f3f0ea;
   --border: #e4e1da;
+  --border-field: #7d898e; /* 3,60:1 blanco · 3,39:1 Arena · 3,16:1 surface-2 */
   --text: #1f2a30;
   --text-muted: #55626b;
   --success: #2e7d5b;
@@ -63,6 +66,7 @@
     --surface: #16232a;
     --surface-2: #1b2b33;
     --border: #2a3b44;
+    --border-field: #6b818a; /* 3,92:1 surface · 4,32:1 fondo · 3,56:1 surface-2 */
     --text: #e8eef0;
     --text-muted: #a9b7be;
     --success: #6cc49a;
@@ -84,6 +88,7 @@
   --surface: #16232a;
   --surface-2: #1b2b33;
   --border: #2a3b44;
+  --border-field: #6b818a;
   --text: #e8eef0;
   --text-muted: #a9b7be;
   --success: #6cc49a;

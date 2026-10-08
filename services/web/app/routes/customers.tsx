@@ -47,7 +47,7 @@ export default function Customers({ loaderData }: Route.ComponentProps) {
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder={c.search}
-          className="min-h-11 w-full rounded-[var(--radius-field)] border border-border bg-surface pl-9 pr-3 text-base"
+          className="min-h-11 w-full rounded-[var(--radius-field)] border border-border-field bg-surface pl-9 pr-3 text-base"
         />
       </label>
       {list.length === 0 ? (

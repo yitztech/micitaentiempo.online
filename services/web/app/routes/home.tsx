@@ -81,7 +81,7 @@ function BookingPreview() {
               className={
                 i === 2
                   ? "rounded-[var(--radius-field)] bg-primary py-2.5 text-center text-sm font-semibold text-on-primary tabular"
-                  : "rounded-[var(--radius-field)] border border-border py-2.5 text-center text-sm tabular"
+                  : "rounded-[var(--radius-field)] border border-border-field py-2.5 text-center text-sm tabular text-text"
               }
             >
               {time}

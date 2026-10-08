@@ -33,6 +33,16 @@ describe("rutas traducidas", () => {
       params: { id: "abc" },
     });
   });
+  it.each([
+    ["/privacidad.data", "privacy", "es"],
+    ["/privacy.data", "privacy", "en"],
+    ["/condiciones.data", "terms", "es"],
+    ["/terms.data", "terms", "en"],
+    ["/creditos.data", "credits", "es"],
+    ["/credits.data", "credits", "en"],
+  ])("reconoce las peticiones de navegación a %s", (pathname, id, lang) => {
+    expect(matchRoute(pathname)).toMatchObject({ id, lang });
+  });
   it("exige los parámetros", () => {
     expect(() => pathFor("booking", "es")).toThrow();
     expect(pathFor("booking", "en", { slug: "a b" })).toBe("/book/a%20b");

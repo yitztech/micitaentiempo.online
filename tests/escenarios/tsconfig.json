@@ -1,6 +1,11 @@
 {
   "extends": "@mcet/tsconfig/library.json",
-  "compilerOptions": { "types": ["node"], "module": "preserve", "moduleResolution": "bundler" },
+  "compilerOptions": {
+    "types": ["node"],
+    "lib": ["es2024", "dom"],
+    "module": "preserve",
+    "moduleResolution": "bundler"
+  },
   "include": ["**/*.ts"],
   "exclude": ["node_modules", ".features-gen"]
 }
