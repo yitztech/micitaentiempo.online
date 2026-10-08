@@ -2,13 +2,14 @@
 
 Fecha: 7 de octubre de 2026. Rama: `design/propuesta-frontend-cliente`, creada desde `cfb28fa`.
 
-**Estado: propuesta para revisión; no implementada.** La aplicación conserva su código. Esta entrega contiene la auditoría, tres conceptos visuales y el alcance de implementación recomendado.
+**Estado actualizado, 7 de octubre de 2026: implementación local y QA.** Gemini implementó las fases A–D y añadió escenarios de reserva; Codex corrigió las regresiones de navegación, cabeceras y calendario y amplió la validación. La publicación sigue en una revisión anterior. Consulta [QA y pendientes actuales](QA.md); las imágenes de conceptos y la auditoría original se conservan como registro.
 
 Recomiendo evolucionar la identidad existente hacia una **reserva con contexto**: identificar negocio, servicio, duración y zona horaria antes de elegir; mostrar una etapa real por cada decisión; facilitar el regreso a Mis citas. En las páginas comerciales, sustituir la repetición de tarjetas por una demostración del recorrido y beneficios jerarquizados.
 
 ## Entregables
 
-- **[Traspaso para el siguiente agente: tareas pendientes y cómo verificarlas](HANDOFF.md).** Empieza por aquí si vas a implementar.
+- **[Traspaso: implementación, validación y pendientes](HANDOFF.md).** Empieza por aquí para continuar.
+- [QA actual: resultados, regresiones corregidas y límites](QA.md).
 - [Propuesta por página, sistema visual, fases y aceptación](PROPUESTA.md).
 - [Auditoría con 14 capturas inspeccionadas](AUDITORIA.md).
 - [Validación y límites de la evidencia](VALIDACION.md).

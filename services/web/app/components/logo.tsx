@@ -26,9 +26,12 @@ export function LogoMark({ className = "size-8" }: { className?: string }) {
 export function Logo() {
   const { site, t } = useRoot();
   return (
-    <Link to={pathFor("home", site.lang)} className="flex items-center gap-2.5 font-semibold tracking-tight">
-      <LogoMark />
-      <span className="whitespace-nowrap text-[17px]">{t.common.site.name}</span>
+    <Link
+      to={pathFor("home", site.lang)}
+      className="flex min-w-0 items-center gap-2.5 font-semibold tracking-tight"
+    >
+      <LogoMark className="size-8 shrink-0" />
+      <span className="min-w-0 text-[17px] leading-tight">{t.common.site.name}</span>
     </Link>
   );
 }

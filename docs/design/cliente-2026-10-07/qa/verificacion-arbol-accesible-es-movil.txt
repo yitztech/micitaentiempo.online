@@ -1,0 +1,20 @@
+- main:
+  - heading "Consultas" [level=1]
+  - list "Servicio, Fecha y hora, Tus datos, Confirmación":
+    - listitem: 1. Servicio
+    - listitem: 2. Fecha y hora
+    - listitem: 3. Tus datos
+    - listitem: 4. Confirmación
+  - region "Confirma tu correo":
+    - heading "Confirma tu correo" [level=2]
+    - region "Resumen de tu cita":
+      - text: Consulta general (30 min)
+      - paragraph: Jueves, 8 de octubre, 9:00 a.m. (hora estándar central)
+    - paragraph: Apartamos tu horario. Tienes 9:56 para confirmarlo.
+    - status: Te enviamos un código de 6 dígitos a carla-e15a0026@escenarios.test.
+    - text: Código
+    - textbox "Código"
+    - button "Confirmar reserva"
+    - button "Enviar otro código"
+    - button "Continuar con Google"
+  - paragraph: Reservas con Mi Cita en Tiempo

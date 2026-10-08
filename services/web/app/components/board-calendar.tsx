@@ -11,6 +11,7 @@ import "@fullcalendar/react/themes/classic/palette.css";
 import "./board-calendar.css";
 import type { Lang } from "@mcet/i18n";
 import { useEffect, useState } from "react";
+import { useT } from "~/lib/i18n";
 import type { EventView, ScheduleView } from "~/lib/panel-types";
 
 interface Props {
@@ -64,6 +65,7 @@ function viewFor(width: number) {
 
 /** Calendario del tablero (solo en el cliente): citas, bloqueos, feriados de fondo y horario. */
 export function BoardCalendar(props: Props) {
+  const t = useT().panel.calendar;
   const {
     lang,
     calendarId,
@@ -143,6 +145,10 @@ export function BoardCalendar(props: Props) {
         timeZone={tz}
         initialView={views.initial}
         views={{ timeGridThreeDay: { type: "timeGrid", duration: { days: 3 } } }}
+        // La vista personalizada necesita texto y ayuda propios en FullCalendar 7. El locale
+        // español falla si recibe una unidad sin etiqueta al generar el botón «Hoy».
+        buttons={{ timeGridThreeDay: { text: t.threeDays, hint: t.threeDaysHint } }}
+        todayHint={t.todayHint}
         headerToolbar={{ left: "prev,next today", center: "title", right: views.right }}
         height="auto"
         nowIndicator

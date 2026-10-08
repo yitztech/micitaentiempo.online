@@ -1,5 +1,7 @@
 # Validación de la propuesta
 
+> Actualización del 7 de octubre de 2026: este documento conserva la validación de la propuesta original. La implementación y sus comprobaciones posteriores están en [QA.md](QA.md). Los pendientes y límites que siguen describen la entrega original, no el estado actual.
+
 ## Skills aplicadas
 
 - **Product Design: audit**: captura, inspección y notas asociadas a cada pantalla. Se conservaron 14 capturas válidas; la captura de Mis citas durante carga fue reemplazada por su estado estable.

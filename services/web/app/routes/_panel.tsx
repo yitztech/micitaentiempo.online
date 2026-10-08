@@ -146,7 +146,7 @@ export default function PanelLayout({ loaderData }: Route.ComponentProps) {
         <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-background/95 px-3 backdrop-blur lg:justify-end lg:px-6">
           <button
             type="button"
-            className="inline-flex size-11 items-center justify-center rounded-[var(--radius-field)] hover:bg-surface-2 lg:hidden"
+            className="inline-flex size-11 shrink-0 items-center justify-center rounded-[var(--radius-field)] hover:bg-surface-2 lg:hidden"
             aria-expanded={open}
             aria-controls="panel-cajon"
             aria-label={open ? t.common.nav.closeMenu : p.nav.menu}
@@ -154,7 +154,7 @@ export default function PanelLayout({ loaderData }: Route.ComponentProps) {
           >
             {open ? <X aria-hidden className="size-6" /> : <Menu aria-hidden className="size-6" />}
           </button>
-          <div className="lg:hidden">
+          <div className="mx-2 min-w-0 flex-1 lg:hidden">
             <Logo />
           </div>
           <NotificationBell />

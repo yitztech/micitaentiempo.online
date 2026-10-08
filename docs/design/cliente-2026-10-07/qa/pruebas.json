@@ -1,0 +1,54 @@
+[
+  {
+    "informe": "final",
+    "inicioUTC": 1791428717944,
+    "duracionMs": 101015.442,
+    "estadisticas": {
+      "total": 155,
+      "expected": 153,
+      "unexpected": 2,
+      "flaky": 0,
+      "skipped": 0,
+      "ok": false
+    }
+  },
+  {
+    "informe": "embed",
+    "inicioUTC": 1791429011336,
+    "duracionMs": 7987.049999999999,
+    "estadisticas": {
+      "total": 2,
+      "expected": 2,
+      "unexpected": 0,
+      "flaky": 0,
+      "skipped": 0,
+      "ok": true
+    }
+  },
+  {
+    "informe": "reloj",
+    "inicioUTC": 1791429028825,
+    "duracionMs": 18633.290999999997,
+    "estadisticas": {
+      "total": 8,
+      "expected": 8,
+      "unexpected": 0,
+      "flaky": 0,
+      "skipped": 0,
+      "ok": true
+    }
+  },
+  {
+    "informe": "produccion",
+    "inicioUTC": 1791428745529,
+    "duracionMs": 1520.29,
+    "estadisticas": {
+      "total": 2,
+      "expected": 2,
+      "unexpected": 0,
+      "flaky": 0,
+      "skipped": 0,
+      "ok": true
+    }
+  }
+]

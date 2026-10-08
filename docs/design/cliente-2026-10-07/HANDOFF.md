@@ -7,11 +7,11 @@ Documento para el siguiente agente. Léelo completo antes de tocar código. Fech
 | Aspecto | Estado |
 |---|---|
 | Rama | `design/propuesta-frontend-cliente` |
-| Código de la app | **Implementado y verificado en su totalidad (Fases A–E).** |
+| Código de la app | Fases A–D implementadas; QA local ampliada, con límites manuales y externos explícitos |
 | Auditoría | Hecha: 14 capturas + 12 hallazgos de código ([AUDITORIA.md](AUDITORIA.md)) |
 | Propuesta | Sistema visual, páginas, flujo de reserva, fases A–E, criterios D01–D20 ([PROPUESTA.md](PROPUESTA.md)) |
 | Concepto visual | Implementado concepto 1: «Agenda con contexto» |
-| Pruebas y QA | 100% aprobadas: Biome lint, TypeScript typecheck, Go tests, unit tests y escenarios Playwright BDD |
+| Pruebas y QA | 172 unitarias, Go con `-race`, 163 casos BDD aprobados en ejecuciones complementarias y 2 pruebas de humo de producción; [evidencia y alcance](QA.md) |
 
 
 ## 2. Lectura obligatoria (en este orden)
@@ -75,18 +75,14 @@ Archivos: `components/my-appointments.tsx`, `routes/my-appointments.tsx`.
   - Verificados los 23 escenarios de páginas públicas, presupuesto JS (126 KB < 130 KB) y accesibilidad con axe (0 fallos).
 
 
-### Fase E — QA y verificación completada
+### Fase E — QA local; comprobaciones manuales y externas pendientes
 
-- [x] **E1. Validación de criterios de aceptación D01–D20**:
-  - D01–D03: Comprobados anchos (390, 768, 1024, 1440 px) sin desbordamiento horizontal y navegación diferenciada en ES/EN.
-  - D04–D05: Contraste no textual validado (tokens `--color-border-field` ≥3:1 en claro y oscuro) y foco de teclado en avance de etapas.
-  - D06–D08: Servicio persistente con duración, etapas unificadas y zonas horarias explícitas.
-  - D09–D13: Selección deliberada con botón «Continuar con este horario», atributos `name`, estados de error vs. mes vacío y resumen de confirmación con exportación ICS.
-  - D14–D15: Mis citas con recuperación ante fallo de red (sin spinner infinito), panel de revisión previo a reprogramar y confirmación de cancelación.
-  - D16: Embed con controles accesibles de 44 px y `aria-pressed`.
-  - D17–D20: Presupuesto JS verificado (126 KB en portada, cumpliendo límite <130 KB) y suite de axe sin violaciones graves o críticas (0 errores).
-- [x] **E2. Capturas actualizadas**: Regeneradas las capturas de la auditoría en `docs/design/cliente-2026-10-07/capturas/` directamente sobre el build actualizado.
-- [x] **E3. Suite completa de pruebas**: Pasaron todas las pruebas unitarias, Go (`services/calendar`) y los escenarios de Playwright BDD (`reserva-ui.feature`, `paginas-publicas.feature`, `dominios.feature`, `panel.feature`, `cuentas.feature`, `mcp.feature`, etc.).
+- [x] **E1. Reflujo y accesibilidad automatizada:** 14 páginas/estados ES/EN, incluido panel autenticado con nombre largo, en 320/390/768/1440 px y claro/oscuro. 112 comprobaciones de reflujo y 56 auditorías axe sin violaciones graves/críticas. Navegación por teclado, avance de etapas y contención/restauración del foco del diálogo comprobados.
+- [x] **E2. Evidencia actual:** capturas nuevas en `qa/capturas/`, medidas en `qa/reflujo.json` y capturas de regresiones previas en `qa/regresiones/`. La carpeta `capturas/` sigue siendo referencia histórica de la auditoría.
+- [x] **E3. Recorridos locales:** OTP, alta, panel, confirmación, reprogramación, cancelación, errores inducidos, navegación legal ES/EN y reserva en iframe de otro origen con sesión, altura dinámica y evento al anfitrión. 163 casos BDD aprobados; detalle de las ejecuciones en [QA.md](QA.md).
+- [x] **E4. Rendimiento de laboratorio:** JS comprimido de portada 126 KB y reserva 133 KB dentro de sus presupuestos; 12 muestras locales de LCP/INP/CLS guardadas. No son métricas de visitantes ni certificación de producción.
+- [ ] **E5. Validación manual:** lector de pantalla real, zoom nativo 200/400 %, Safari/iOS y Chrome/Android físicos. El viewport de 320 px y los árboles accesibles automatizados no acreditan estas pruebas.
+- [ ] **E6. Integraciones reales y publicación:** Google está desactivado en producción; validar Google y MCP desde un cliente externo exige cuenta/entorno de prueba. La rama no se ha desplegado. CI debe verificarse sobre el commit publicado en la rama antes de integrar.
 
 
 ## 4. Cómo verificar cada fase

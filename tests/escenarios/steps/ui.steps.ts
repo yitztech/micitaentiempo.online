@@ -230,7 +230,7 @@ When(
   "una web ajena inserta el tablero con embed.js en modo {string}",
   async ({ page, estado }, modo: string) => {
     // Web anfitriona servida por un servidor local real (otro origen, como la landing de un negocio).
-    const html = `<!doctype html><html lang="es"><head><title>Web del negocio</title></head><body><h1>Web del negocio</h1><script src="${sitio.es}/embed.js" data-calendar="${tablero(estado).slug}" data-mode="${modo}"></script></body></html>`;
+    const html = `<!doctype html><html lang="es"><head><meta name="viewport" content="width=device-width, initial-scale=1"><title>Web del negocio</title></head><body><h1>Web del negocio</h1><script src="${sitio.es}/embed.js" data-calendar="${tablero(estado).slug}" data-mode="${modo}"></script></body></html>`;
     const server = createServer((_req, res) => res.writeHead(200, { "content-type": "text/html" }).end(html));
     await new Promise<void>((r) => server.listen(0, "127.0.0.1", r));
     const { port } = server.address() as AddressInfo;

@@ -1,0 +1,37 @@
+- dialog "Nueva cita":
+  - heading "Nueva cita" [level=2]
+  - button "Cerrar"
+  - group:
+    - text: Tipo
+    - combobox "Tipo":
+      - option "Cita" [selected]
+      - option "Bloqueo"
+    - text: Servicio
+    - combobox "Servicio":
+      - option "Sin servicio (indica la hora de fin)"
+      - option "Consulta general · 30 min" [selected]
+    - text: Fecha
+    - textbox "Fecha": 2026-10-07
+    - text: Inicio
+    - textbox "Inicio": 21:05
+    - text: Título(Opcional)
+    - textbox "Título(Opcional)"
+    - text: Nombre del cliente(Opcional)
+    - textbox "Nombre del cliente(Opcional)"
+    - text: Correo del cliente(Opcional)
+    - textbox "Correo del cliente(Opcional)"
+    - text: Teléfono del cliente(Opcional)
+    - textbox "Teléfono del cliente(Opcional)"
+    - text: Notas internas
+    - textbox "Notas internas"
+    - paragraph: Solo las ve tu equipo.
+    - group "Repetir":
+      - text: Repetir Repetir
+      - combobox "Repetir":
+        - option "No se repite" [selected]
+        - option "Cada día"
+        - option "Cada semana"
+        - option "Cada mes, el mismo día"
+        - option "Cada mes, el mismo día de la semana"
+        - option "Cada año"
+  - button "Guardar"

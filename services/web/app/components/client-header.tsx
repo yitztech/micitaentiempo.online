@@ -21,9 +21,9 @@ export function ClientHeader({ showMyAppointments = true }: { showMyAppointments
       >
         {n.skipToContent}
       </a>
-      <Container className="flex h-16 items-center justify-between gap-2">
+      <Container className="flex min-h-16 flex-wrap items-center justify-between gap-x-3 gap-y-1 py-2">
         <Logo />
-        <div className="flex items-center gap-1">
+        <div className="ml-auto flex max-w-full flex-wrap items-center gap-1">
           {showMyAppointments ? (
             <NavLink to={pathFor("myAppointments", site.lang)} className={buttonClass("ghost")}>
               {n.myAppointments}

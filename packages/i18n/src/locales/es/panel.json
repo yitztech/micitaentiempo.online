@@ -101,6 +101,9 @@
   "weekdays": ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"],
   "calendar": {
     "seoTitle": "Calendario",
+    "threeDays": "3 días",
+    "threeDaysHint": "Vista de tres días",
+    "todayHint": "Ir a hoy",
     "newAppointment": "Nueva cita",
     "newBlock": "Bloquear horario",
     "boardTz": "Horario del tablero: {{tz}}",
