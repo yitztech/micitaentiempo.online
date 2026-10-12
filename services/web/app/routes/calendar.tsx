@@ -67,8 +67,8 @@ export default function CalendarPage({ loaderData }: Route.ComponentProps) {
   return (
     <div>
       <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{board.name}</h1>
+        <div className="min-w-0 flex-1">
+          <h1 className="text-2xl font-semibold tracking-tight break-words">{board.name}</h1>
           <p className="mt-1 text-sm text-muted">
             {fmt(c.boardTz, { tz: tzLabel(board.timezone, site.lang) })}
             {myTz !== board.timezone ? ` · ${fmt(c.yourTz, { tz: tzLabel(myTz, site.lang) })}` : ""}
