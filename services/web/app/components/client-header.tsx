@@ -1,5 +1,7 @@
 import { pathFor } from "@mcet/i18n";
+import { useEffect, useState } from "react";
 import { NavLink } from "react-router";
+import { customerSession } from "~/lib/customer";
 import { useRoot } from "~/lib/i18n";
 import { LanguageLink } from "./language-link";
 import { Logo } from "./logo";
@@ -7,11 +9,17 @@ import { buttonClass, Container } from "./ui";
 
 /**
  * Cabecera mínima para el cliente final (reserva y Mis citas).
- * PROPUESTA.md § Arquitectura de navegación: enlace de salto, Mis citas e idioma, sin la
- * navegación comercial. `showMyAppointments` se apaga en la propia página de Mis citas.
+ * Solo muestra "Mis citas" si el usuario tiene sesión activa (cliente o negocio).
  */
 export function ClientHeader({ showMyAppointments = true }: { showMyAppointments?: boolean }) {
-  const { site, t } = useRoot();
+  const { site, t, hasSession } = useRoot();
+  const [hasCustomer, setHasCustomer] = useState(false);
+
+  useEffect(() => {
+    setHasCustomer(Boolean(customerSession()));
+  }, []);
+
+  const isLoggedIn = hasSession || hasCustomer;
   const n = t.common.nav;
   return (
     <header className="border-b border-border">
@@ -24,7 +32,7 @@ export function ClientHeader({ showMyAppointments = true }: { showMyAppointments
       <Container className="flex min-h-16 flex-wrap items-center justify-between gap-x-3 gap-y-1 py-2">
         <Logo />
         <div className="ml-auto flex max-w-full flex-wrap items-center gap-1">
-          {showMyAppointments ? (
+          {showMyAppointments && isLoggedIn ? (
             <NavLink to={pathFor("myAppointments", site.lang)} className={buttonClass("ghost")}>
               {n.myAppointments}
             </NavLink>

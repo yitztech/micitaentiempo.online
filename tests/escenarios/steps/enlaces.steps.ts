@@ -105,3 +105,9 @@ Then("el documento legal tiene el título {string} y contenido", async ({ page }
   await expect(page.getByRole("heading", { level: 1, name: titulo, exact: true })).toBeVisible();
   await expect(page.locator(".prose-legal p").first()).toBeVisible();
 });
+
+Then("no aparece el enlace {string} en la cabecera", async ({ page }, texto: string) => {
+  await abrirMenuSiHaceFalta(page);
+  const enlace = page.locator("header").getByRole("link", { name: texto });
+  await expect(enlace).toHaveCount(0);
+});

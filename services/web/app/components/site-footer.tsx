@@ -1,12 +1,21 @@
 import { interpolate, pathFor, type RouteId } from "@mcet/i18n";
+import { useEffect, useState } from "react";
 import { Link } from "react-router";
+import { customerSession } from "~/lib/customer";
 import { useRoot } from "~/lib/i18n";
 import { LanguageLink } from "./language-link";
 import { LogoMark } from "./logo";
 import { Container } from "./ui";
 
 export function SiteFooter() {
-  const { site, t } = useRoot();
+  const { site, t, hasSession } = useRoot();
+  const [hasCustomer, setHasCustomer] = useState(false);
+
+  useEffect(() => {
+    setHasCustomer(Boolean(customerSession()));
+  }, []);
+
+  const isLoggedIn = hasSession || hasCustomer;
   const f = t.common.footer;
   const n = t.common.nav;
   const col = (title: string, items: Array<[RouteId, string]>) => (
@@ -26,6 +35,14 @@ export function SiteFooter() {
       </ul>
     </div>
   );
+  const productLinks: Array<[RouteId, string]> = [
+    ["features", n.features],
+    ["pricing", n.pricing],
+    ["connectAi", n.connectAi],
+    ["faq", n.faq],
+    ["contact", n.contact],
+    ...(isLoggedIn ? ([["myAppointments", n.myAppointments]] as Array<[RouteId, string]>) : []),
+  ];
   return (
     <footer className="mt-24 border-t border-border bg-surface">
       <Container className="grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-4">
@@ -37,14 +54,7 @@ export function SiteFooter() {
           <p className="mt-3 max-w-sm text-[15px] text-muted">{f.madeFor}</p>
           <LanguageLink className="-ml-2 mt-4" />
         </div>
-        {col(f.product, [
-          ["features", n.features],
-          ["pricing", n.pricing],
-          ["connectAi", n.connectAi],
-          ["faq", n.faq],
-          ["contact", n.contact],
-          ["myAppointments", n.myAppointments],
-        ])}
+        {col(f.product, productLinks)}
         {col(f.legal, [
           ["privacy", f.privacy],
           ["terms", f.terms],
