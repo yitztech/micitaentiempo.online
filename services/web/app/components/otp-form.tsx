@@ -1,9 +1,7 @@
 import { type FormEvent, useEffect, useRef, useState } from "react";
-import { useAltcha } from "~/lib/altcha";
 import { errorText, postJson } from "~/lib/api-client";
 import { setCustomerSession } from "~/lib/customer";
 import { fmt, useT } from "~/lib/i18n";
-import { AltchaStatus } from "./altcha-status";
 import { GoogleVerify } from "./google-verify";
 import { Alert, Button, Field } from "./ui";
 
@@ -26,7 +24,6 @@ export function OtpForm({
 }) {
   const t = useT();
   const b = t.booking;
-  const altcha = useAltcha();
   const [email, setEmail] = useState(given ?? "");
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -36,8 +33,7 @@ export function OtpForm({
     setBusy(true);
     setError(null);
     try {
-      const token = await altcha.token();
-      await postJson("/api/public/v1/otp/send", { email: to }, { "x-altcha": token });
+      await postJson("/api/public/v1/otp/send", { email: to });
       setSent(true);
     } catch (err) {
       setError(errorText(b.errors, err));
@@ -85,7 +81,6 @@ export function OtpForm({
             e.preventDefault();
             void send(email.trim());
           }}
-          onFocus={() => void altcha.start().catch(() => undefined)}
           className="space-y-4"
         >
           {given ? null : (
@@ -98,7 +93,6 @@ export function OtpForm({
               onChange={(e) => setEmail(e.target.value)}
             />
           )}
-          <AltchaStatus state={altcha.state} onRetry={() => void altcha.start().catch(() => undefined)} />
           {error ? <Alert tone="danger">{error}</Alert> : null}
           <Button type="submit" size="lg" className="w-full" loading={busy}>
             {b.my.sendCode}

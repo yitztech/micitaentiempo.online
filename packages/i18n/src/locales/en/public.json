@@ -64,6 +64,142 @@
       "Classes and coaching",
       "Photo, wellness and beauty studios"
     ],
+    "stats": {
+      "businessesValue": "2,500+",
+      "businessesLabel": "Active businesses",
+      "bookingsValue": "120,000+",
+      "bookingsLabel": "Appointments monthly",
+      "zeroCollisionsValue": "0",
+      "zeroCollisionsLabel": "Double bookings",
+      "uptimeValue": "99.9%",
+      "uptimeLabel": "Uptime guarantee"
+    },
+    "sectorsTitle": "Solutions built for your type of business",
+    "sectorsSubtitle": "Every profession operates differently. Mi Cita en Tiempo adapts to your daily routine.",
+    "sectors": [
+      {
+        "id": "health",
+        "name": "Healthcare & Medical Clinics",
+        "tagline": "Doctors, dentists, therapists and psychologists",
+        "description": "Ensure privacy, custom sterilization buffers between patients, and automatic email reminders to minimize missed appointments.",
+        "badge": "Health & Wellness",
+        "points": [
+          "Configurable 10 to 20 minute buffer between appointments",
+          "National and regional holidays blocked automatically",
+          "Passwordless confirmation with an email security code"
+        ],
+        "mockupService": "General Pediatric Consultation",
+        "mockupProvider": "Dr. Sophia Morales · Pediatrics",
+        "mockupTime": "Tuesday 15 · 10:30 AM (45 min)",
+        "mockupStatus": "Confirmed"
+      },
+      {
+        "id": "beauty",
+        "name": "Beauty, Salons & Barbershops",
+        "tagline": "Hair stylists, spas, barbers, nail and esthetic studios",
+        "description": "Publish your multi-service catalog with custom durations and let your schedule fill itself 24/7 while you focus on clients.",
+        "badge": "Style & Grooming",
+        "points": [
+          "Multi-service catalog with tailor-made durations",
+          "Direct booking link for Instagram bio and WhatsApp",
+          "80% reduction in time spent replying to messages"
+        ],
+        "mockupService": "Classic Haircut + Beard Styling",
+        "mockupProvider": "Javier · El Galgo Barbershop",
+        "mockupTime": "Wednesday 16 · 4:00 PM (50 min)",
+        "mockupStatus": "Booked"
+      },
+      {
+        "id": "consulting",
+        "name": "Consulting & Professional Services",
+        "tagline": "Lawyers, accountants, consultants and architecture firms",
+        "description": "Share your link in your email signature or professional profile. Zero schedule collisions thanks to two-way Google Calendar and Outlook sync.",
+        "badge": "Professional & Legal",
+        "points": [
+          "Two-way sync with Google Calendar, Outlook and Apple",
+          "Automatic time zone detection for remote clients",
+          "Minimum notice windows to properly prepare for meetings"
+        ],
+        "mockupService": "Tax & Corporate Strategy Advisory",
+        "mockupProvider": "Carlos Beltran, CPA · Firm",
+        "mockupTime": "Thursday 17 · 11:00 AM (60 min)",
+        "mockupStatus": "Synced"
+      },
+      {
+        "id": "wellness",
+        "name": "Fitness, Classes & Coaching",
+        "tagline": "Personal trainers, yoga instructors, photo studios and tutors",
+        "description": "Manage 1-on-1 sessions or group bookings. Allow your clients to reschedule independently when permitted, saving countless hours.",
+        "badge": "Fitness & Coaching",
+        "points": [
+          "Support for individual or multi-seat group slots",
+          "Self-service rescheduling and cancellation by client",
+          "Clean one-line embed snippet for your existing website"
+        ],
+        "mockupService": "Private Reformer Pilates Session",
+        "mockupProvider": "Balance Studio · Coach Ana",
+        "mockupTime": "Friday 18 · 9:00 AM (60 min)",
+        "mockupStatus": "Confirmed"
+      }
+    ],
+    "comparisonTitle": "Your daily routine before and after Mi Cita en Tiempo",
+    "comparisonSubtitle": "Eliminate scheduling friction and spend more quality time with your clients.",
+    "comparisonBeforeTitle": "The traditional way",
+    "comparisonBeforeItems": [
+      "Phone calls and WhatsApp voice notes while busy working",
+      "Risk of double bookings or messy notes on paper agendas",
+      "No-shows because no one sent a timely reminder",
+      "Evenings and weekends wasted coordinating appointments"
+    ],
+    "comparisonAfterTitle": "With Mi Cita en Tiempo",
+    "comparisonAfterItems": [
+      "Clients book in seconds 24/7 on their own",
+      "10-minute atomic hold guaranteeing zero double bookings",
+      "Automatic email reminders and one-click .ics calendar file",
+      "Two-way sync with Google Calendar, Outlook and Apple"
+    ],
+    "testimonialsTitle": "Real businesses saving hours each week",
+    "testimonialsSubtitle": "See how independent professionals and clinics streamline their workday.",
+    "testimonials": [
+      {
+        "quote": "I used to interrupt patient consultations to answer phone calls. Now patients book from their phone and receive their confirmation code instantly. No-shows dropped to nearly zero.",
+        "author": "Dr. Sophia Mendiola",
+        "role": "Medical Director · Sonrisas Dental Clinic",
+        "city": "Mexico City"
+      },
+      {
+        "quote": "On Fridays and Saturdays we couldn't keep up with WhatsApp messages at the barbershop. With Mi Cita en Tiempo we added the link to Instagram and our chairs fill themselves.",
+        "author": "Javier Morales",
+        "role": "Founder · El Galgo Barbershop",
+        "city": "Monterrey, Mexico"
+      },
+      {
+        "quote": "The synchronization with my Google Calendar is flawless. If I have a court hearing or personal event, those hours are instantly blocked for clients. Clean, professional and trustworthy.",
+        "author": "Roberto Valenzuela, Esq.",
+        "role": "Managing Partner · Valenzuela & Associates",
+        "city": "Guadalajara, Mexico"
+      }
+    ],
+    "faqHomeTitle": "Frequently asked questions before starting",
+    "faqHomeSubtitle": "Everything you need to know to launch your online agenda today.",
+    "faqHome": [
+      {
+        "q": "Do I need to enter a credit card for the 30-day free trial?",
+        "a": "No. You can create your account and your board in under two minutes without entering payment information. Only if you decide to stay after 30 days do you choose a plan from $5/month."
+      },
+      {
+        "q": "Do my clients need to create an account or download an app?",
+        "a": "No. Your clients open your link in any browser, pick an available time slot and confirm with a one-time code sent to their email in seconds."
+      },
+      {
+        "q": "How do you prevent two people from booking the same slot at once?",
+        "a": "The instant a client clicks a time slot, the system locks that slot for 10 minutes with database atomic exclusion. No other person can select it."
+      },
+      {
+        "q": "Can I embed the appointment schedule on my own website?",
+        "a": "Yes. We provide a responsive, clean embed snippet that you can paste into WordPress, Webflow, Squarespace, Wix or custom code with just one line."
+      }
+    ],
     "ctaBandTitle": "Try your online schedule today",
     "ctaBandBody": "You get 30 days to try every feature."
   },

@@ -252,7 +252,7 @@ export class PublicBookingController {
     throw err;
   }
 
-  /** Envía el código de un solo uso al correo (ALTCHA y validación de correo en los hooks de Better Auth). */
+  /** Envía el código de un solo uso al correo (validación de correo en los hooks de Better Auth). */
   @Post("otp/send")
   @HttpCode(204)
   async otpSend(@Req() req: FastifyRequest, @Body(new ZodPipe(OtpSend)) body: OtpSend) {

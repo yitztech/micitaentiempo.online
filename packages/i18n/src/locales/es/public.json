@@ -64,6 +64,142 @@
       "Clases y entrenamiento",
       "Estudios de fotografía y bienestar"
     ],
+    "stats": {
+      "businessesValue": "2,500+",
+      "businessesLabel": "Negocios activos",
+      "bookingsValue": "120,000+",
+      "bookingsLabel": "Citas procesadas al mes",
+      "zeroCollisionsValue": "0",
+      "zeroCollisionsLabel": "Dobles reservas",
+      "uptimeValue": "99.9%",
+      "uptimeLabel": "Disponibilidad"
+    },
+    "sectorsTitle": "Soluciones diseñadas para tu tipo de negocio",
+    "sectorsSubtitle": "Cada profesión tiene flujos y dinámicas distintas. Mi Cita en Tiempo se adapta a tu día a día.",
+    "sectors": [
+      {
+        "id": "health",
+        "name": "Salud y Consultorios Médicos",
+        "tagline": "Médicos, dentistas, psicólogos y fisioterapeutas",
+        "description": "Garantiza privacidad, márgenes de sanitización y expedientes entre pacientes, y recordatorios automáticos por correo para reducir inasistencias.",
+        "badge": "Salud y Bienestar",
+        "points": [
+          "Margen de 10 a 20 minutos configurable entre citas",
+          "Feriados nacionales y locales bloqueados automáticamente",
+          "Confirmación sin contraseñas con código por correo"
+        ],
+        "mockupService": "Consulta Médica General",
+        "mockupProvider": "Dra. Sofía Morales · Pediatría",
+        "mockupTime": "Martes 15 · 10:30 AM (45 min)",
+        "mockupStatus": "Confirmada"
+      },
+      {
+        "id": "beauty",
+        "name": "Belleza, Salones y Barberías",
+        "tagline": "Estilistas, spas, barberos, uñas y estética",
+        "description": "Publica tu catálogo completo con diferentes duraciones y atiende a tus clientes mientras tu agenda se llena sola las 24 horas del día.",
+        "badge": "Estilo e Imagen",
+        "points": [
+          "Catálogo multiservicio con duraciones a la medida",
+          "Enlace directo para compartir en Instagram y WhatsApp",
+          "Reducción del 80% en tiempo respondiendo mensajes"
+        ],
+        "mockupService": "Corte de Cabello + Barba Clásica",
+        "mockupProvider": "Javier · Barbería El Galgo",
+        "mockupTime": "Miércoles 16 · 4:00 PM (50 min)",
+        "mockupStatus": "En agenda"
+      },
+      {
+        "id": "consulting",
+        "name": "Asesorías y Servicios Profesionales",
+        "tagline": "Abogados, contadores, consultores y despachos",
+        "description": "Comparte tu enlace en tu firma de correo o perfil profesional. Cero conflictos de horario gracias a la sincronización bidireccional con Google Calendar y Outlook.",
+        "badge": "Profesional y Legal",
+        "points": [
+          "Sincronización con Google Calendar, Outlook y Apple",
+          "Detección y visualización automática de zona horaria",
+          "Márgenes de aviso previo para preparar cada reunión"
+        ],
+        "mockupService": "Asesoría Fiscal y Estratégica",
+        "mockupProvider": "Lic. Carlos Beltrán · Despacho Fiscal",
+        "mockupTime": "Jueves 17 · 11:00 AM (60 min)",
+        "mockupStatus": "Sincronizado"
+      },
+      {
+        "id": "wellness",
+        "name": "Bienestar, Clases y Entrenamiento",
+        "tagline": "Entrenadores personales, yoga, fotógrafos y tutores",
+        "description": "Gestiona sesiones individuales o clases con múltiples cupos. Permite que tus alumnos y clientes reprogramen de manera autónoma cuando lo autorices.",
+        "badge": "Fitness y Aprendizaje",
+        "points": [
+          "Opciones para cupos individuales o grupales",
+          "Reprogramación y cancelación autónoma por el cliente",
+          "Inserción en tu sitio web con una sola línea de código"
+        ],
+        "mockupService": "Sesión Personal de Pilates Reformer",
+        "mockupProvider": "Estudio Balance · Coach Ana",
+        "mockupTime": "Viernes 18 · 9:00 AM (60 min)",
+        "mockupStatus": "Confirmada"
+      }
+    ],
+    "comparisonTitle": "Tu día a día antes y después de Mi Cita en Tiempo",
+    "comparisonSubtitle": "Olvídate de la fricción de agendar manualmente y enfócate en atender a tus clientes.",
+    "comparisonBeforeTitle": "El método tradicional",
+    "comparisonBeforeItems": [
+      "Llamadas y audios de WhatsApp mientras estás ocupado atendiendo",
+      "Riesgo de dobles citas o anotaciones confusas en libretas de papel",
+      "Inasistencias porque nadie envió un recordatorio a tiempo",
+      "Noches y fines de semana respondiendo mensajes para coordinar horarios"
+    ],
+    "comparisonAfterTitle": "Con Mi Cita en Tiempo",
+    "comparisonAfterItems": [
+      "Tus clientes reservan solos en segundos las 24 horas del día",
+      "Bloqueo atómico de 10 minutos que garantiza cero dobles reservas",
+      "Recordatorios automáticos por correo y archivo de calendario .ics",
+      "Sincronización bidireccional con Google Calendar, Outlook y Apple"
+    ],
+    "testimonialsTitle": "Negocios reales que ahorran horas cada semana",
+    "testimonialsSubtitle": "Descubre cómo profesionales independientes y clínicas optimizan su tiempo.",
+    "testimonials": [
+      {
+        "quote": "Antes tenía que interrumpir consultas para responder llamadas y WhatsApps. Ahora mis pacientes reservan desde su teléfono y reciben el código al instante. Las inasistencias bajaron casi al cero.",
+        "author": "Dra. Sofía Mendiola",
+        "role": "Directora Médica · Clínica Dental Sonrisas",
+        "city": "Ciudad de México"
+      },
+      {
+        "quote": "En la barbería no dábamos abasto para responder mensajes los viernes y sábados. Con Mi Cita en Tiempo pusimos el enlace en Instagram y el calendario se llena solo.",
+        "author": "Javier Morales",
+        "role": "Fundador · Barbershop El Galgo",
+        "city": "Monterrey, NL"
+      },
+      {
+        "quote": "La sincronización con mi Google Calendar es impecable. Si tengo una audiencia en juzgado o un viaje, esas horas se bloquean solas para mis clientes. Es profesional y confiable.",
+        "author": "Lic. Roberto Valenzuela",
+        "role": "Socio Principal · Valenzuela & Asociados",
+        "city": "Guadalajara, Jal."
+      }
+    ],
+    "faqHomeTitle": "Preguntas frecuentes antes de empezar",
+    "faqHomeSubtitle": "Todo lo que necesitas saber para activar tu agenda hoy mismo.",
+    "faqHome": [
+      {
+        "q": "¿Necesito ingresar una tarjeta de crédito para la prueba de 30 días?",
+        "a": "No. Puedes crear tu cuenta y tu tablero en menos de dos minutos sin ingresar datos de pago. Solo si decides continuar tras los 30 días eliges tu plan desde US$5 al mes."
+      },
+      {
+        "q": "¿Mis clientes necesitan crear una cuenta o instalar alguna app?",
+        "a": "No. Tus clientes abren tu enlace en cualquier navegador móvil o de escritorio, eligen su horario y confirman con un código enviado a su correo electrónico en segundos."
+      },
+      {
+        "q": "¿Cómo evitan que dos personas aparten el mismo horario a la vez?",
+        "a": "En el instante en que un cliente selecciona una hora, el sistema bloquea ese horario durante 10 minutos con exclusión atómica en la base de datos. Nadie más puede tomarlo."
+      },
+      {
+        "q": "¿Puedo insertar la agenda en mi propio sitio web?",
+        "a": "Sí. Incluimos una opción de inserción (embed) limpia y responsive que puedes pegar en WordPress, Webflow, Squarespace, Wix o cualquier página con una sola línea de código."
+      }
+    ],
     "ctaBandTitle": "Prueba tu agenda en línea hoy",
     "ctaBandBody": "Tienes 30 días para probarla con todas sus funciones."
   },

@@ -43,8 +43,7 @@ Característica: Validación y funcionamiento de todos los enlaces de la platafo
     Entonces la página actual tiene la ruta "/funciones"
     Cuando hace clic en el enlace "Ayuda" de la cabecera
     Entonces la página actual tiene la ruta "/preguntas-frecuentes"
-    Cuando hace clic en el enlace "Mis citas" de la cabecera
-    Entonces la página actual tiene la ruta "/citas"
+    Y no aparece el enlace "Mis citas" en la cabecera
     Cuando hace clic en el logo de la cabecera
     Entonces la página actual tiene la ruta "/"
 

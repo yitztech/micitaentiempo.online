@@ -2,6 +2,7 @@ import { pathFor, type RouteId } from "@mcet/i18n";
 import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router";
+import { customerSession } from "~/lib/customer";
 import { cx, useRoot } from "~/lib/i18n";
 import { LanguageLink } from "./language-link";
 import { Logo } from "./logo";
@@ -17,8 +18,14 @@ const NAV: Array<{ id: RouteId; key: "features" | "pricing" | "help" }> = [
 
 export function SiteHeader() {
   const { site, t, hasSession } = useRoot();
+  const [hasCustomer, setHasCustomer] = useState(false);
   const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
+
+  useEffect(() => {
+    setHasCustomer(Boolean(customerSession()));
+  }, []);
+
   // biome-ignore lint/correctness/useExhaustiveDependencies: cerrar el menú al cambiar de página
   useEffect(() => setOpen(false), [pathname]);
   const n = t.common.nav;
@@ -32,13 +39,13 @@ export function SiteHeader() {
       {n[key]}
     </NavLink>
   ));
-  // Tres intenciones (PROPUESTA.md § Arquitectura de navegación): conocer el producto (links),
-  // consultar una reserva (Mis citas, para clientes finales) y administrar el negocio (account).
-  const myAppointments = (
+  // Si no se ha iniciado sesión (ni negocio ni cliente), no se muestra "Mis citas"
+  const isLoggedIn = hasSession || hasCustomer;
+  const myAppointments = isLoggedIn ? (
     <NavLink to={pathFor("myAppointments", site.lang)} className={navLinkClass}>
       {n.myAppointments}
     </NavLink>
-  );
+  ) : null;
   const account = hasSession ? (
     <LinkButton to={pathFor("dashboard", site.lang)}>{n.dashboard}</LinkButton>
   ) : (
