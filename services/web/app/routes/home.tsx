@@ -34,6 +34,19 @@ const ICONS = [CalendarCheck2, ShieldCheck, Globe2, Clock3, CalendarSync, Sparkl
 
 const SECTOR_ICONS = [Stethoscope, Scissors, Briefcase, Activity];
 
+const SECTOR_IMAGES = [
+  "/images/sectors/sector-salud.jpg",
+  "/images/sectors/sector-belleza.jpg",
+  "/images/sectors/sector-asesoria.jpg",
+  "/images/sectors/sector-bienestar.jpg",
+];
+
+const TESTIMONIAL_AVATARS = [
+  "/images/testimonials/dra-elena-ramos.jpg",
+  "/images/testimonials/sofia-benitez.jpg",
+  "/images/testimonials/roberto-mendez.jpg",
+];
+
 /** Datos estructurados de la portada (SoftwareApplication y Organization). */
 function StructuredData() {
   const { site, t, nonce } = useRoot();
@@ -97,12 +110,16 @@ function HeroPreview() {
         {/* Cabecera del negocio ficticio con valoración */}
         <div className="flex items-center justify-between border-b border-border/60 pb-4">
           <div className="flex items-center gap-3">
-            <div className="flex size-11 items-center justify-center rounded-full bg-gradient-to-tr from-primary to-secondary text-on-primary shadow-sm">
-              <CalendarCheck2 className="size-5" />
-            </div>
+            <img
+              src="/images/testimonials/dr-carlos-mendoza.jpg"
+              alt="Dr. Carlos Mendoza"
+              width={44}
+              height={44}
+              className="size-11 rounded-full object-cover ring-2 ring-primary/20 shadow-xs"
+            />
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-semibold text-text">{t.common.site.name}</span>
+                <span className="font-semibold text-text">Dr. Carlos Mendoza</span>
                 <span className="inline-block size-2 rounded-full bg-success" title="En línea" />
               </div>
               <p className="text-xs text-muted">{h.previewService}</p>
@@ -245,15 +262,34 @@ export default function Home() {
             {/* Micro prueba social en el Hero */}
             <div className="mt-8 flex items-center gap-3 border-t border-border/60 pt-5">
               <div className="flex -space-x-2 overflow-hidden">
-                <span className="inline-flex size-8 items-center justify-center rounded-full bg-primary text-xs font-semibold text-on-primary ring-2 ring-surface">
-                  SM
-                </span>
-                <span className="inline-flex size-8 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-on-primary ring-2 ring-surface">
-                  JM
-                </span>
-                <span className="inline-flex size-8 items-center justify-center rounded-full bg-accent text-xs font-semibold text-on-primary ring-2 ring-surface">
-                  RV
-                </span>
+                <img
+                  src="/images/testimonials/dra-elena-ramos.jpg"
+                  alt="Dra. Elena Ramos"
+                  width={32}
+                  height={32}
+                  className="inline-block size-8 rounded-full object-cover ring-2 ring-surface shadow-xs"
+                />
+                <img
+                  src="/images/testimonials/sofia-benitez.jpg"
+                  alt="Sofía Benítez"
+                  width={32}
+                  height={32}
+                  className="inline-block size-8 rounded-full object-cover ring-2 ring-surface shadow-xs"
+                />
+                <img
+                  src="/images/testimonials/roberto-mendez.jpg"
+                  alt="Lic. Roberto Méndez"
+                  width={32}
+                  height={32}
+                  className="inline-block size-8 rounded-full object-cover ring-2 ring-surface shadow-xs"
+                />
+                <img
+                  src="/images/testimonials/dr-carlos-mendoza.jpg"
+                  alt="Dr. Carlos Mendoza"
+                  width={32}
+                  height={32}
+                  className="inline-block size-8 rounded-full object-cover ring-2 ring-surface shadow-xs"
+                />
               </div>
               <div className="text-xs text-muted">
                 <div className="flex items-center gap-0.5">
@@ -376,44 +412,52 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Maqueta representativa de la cita para este sector */}
-              <div className="rounded-xl border border-border bg-surface-2 p-6">
-                <div className="flex items-center justify-between border-b border-border pb-3">
-                  <div className="flex items-center gap-2">
-                    <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-on-primary">
-                      <SectorIcon className="size-4" />
+              {/* Fotografía ambiental del sector y Maqueta representativa de la cita */}
+              <div className="space-y-4">
+                <div className="relative overflow-hidden rounded-xl border border-border/80 shadow-md">
+                  <img
+                    src={SECTOR_IMAGES[activeSector] ?? SECTOR_IMAGES[0]}
+                    alt={currentSector.name}
+                    width={640}
+                    height={360}
+                    className="h-44 w-full object-cover sm:h-52"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent pointer-events-none" />
+                  <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-full bg-surface/90 px-3 py-1 text-xs font-semibold text-text shadow-xs backdrop-blur-xs">
+                    <SectorIcon className="size-3.5 text-primary" />
+                    <span>{currentSector.badge}</span>
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-border bg-surface-2 p-5 shadow-xs">
+                  <div className="flex items-center justify-between border-b border-border pb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="flex size-7 items-center justify-center rounded-lg bg-primary text-on-primary">
+                        <SectorIcon className="size-3.5" />
+                      </span>
+                      <span className="text-xs font-semibold uppercase tracking-wider text-muted">
+                        Vista de la cita
+                      </span>
+                    </div>
+                    <span className="rounded-full bg-success-soft px-2.5 py-0.5 text-xs font-semibold text-success">
+                      {currentSector.mockupStatus}
                     </span>
-                    <span className="text-xs font-semibold uppercase tracking-wider text-muted">
-                      Vista de la cita
-                    </span>
                   </div>
-                  <span className="rounded-full bg-success-soft px-2.5 py-0.5 text-xs font-semibold text-success">
-                    {currentSector.mockupStatus}
-                  </span>
-                </div>
 
-                <div className="mt-4">
-                  <p className="text-lg font-bold text-text">{currentSector.mockupService}</p>
-                  <p className="text-sm text-muted">{currentSector.mockupProvider}</p>
-                </div>
+                  <div className="mt-3">
+                    <p className="text-base font-bold text-text">{currentSector.mockupService}</p>
+                    <p className="text-xs text-muted">{currentSector.mockupProvider}</p>
+                  </div>
 
-                <div className="mt-5 space-y-2 rounded-lg border border-border/80 bg-surface p-3.5 text-sm">
-                  <div className="flex items-center gap-2 text-text font-medium">
-                    <Calendar className="size-4 text-primary" />
-                    <span>{currentSector.mockupTime}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-muted">
-                    <Clock3 className="size-3.5" />
-                    <span>Margen automático de atención configurado</span>
-                  </div>
-                </div>
-
-                <div className="mt-5 flex gap-2">
-                  <div className="flex-1 rounded-[var(--radius-field)] border border-primary/30 bg-primary/5 py-2 text-center text-xs font-semibold text-primary">
-                    Añadida al calendario
-                  </div>
-                  <div className="flex-1 rounded-[var(--radius-field)] border border-border bg-surface py-2 text-center text-xs font-semibold text-muted">
-                    Reprogramar en 1 clic
+                  <div className="mt-3 flex items-center justify-between rounded-lg border border-border/80 bg-surface px-3 py-2 text-xs">
+                    <div className="flex items-center gap-2 text-text font-medium">
+                      <Calendar className="size-3.5 text-primary" />
+                      <span>{currentSector.mockupTime}</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-[11px] text-muted">
+                      <Clock3 className="size-3" />
+                      <span>Margen automático</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -548,8 +592,8 @@ export default function Home() {
           </div>
 
           <div className="mt-12 grid gap-6 md:grid-cols-3">
-            {testimonials.map((t) => (
-              <Card key={t.author} className="flex flex-col justify-between p-7">
+            {testimonials.map((item, idx) => (
+              <Card key={item.author} className="flex flex-col justify-between p-7">
                 <div>
                   <div className="flex items-center gap-1">
                     {[...Array(5)].map((_, i) => (
@@ -557,12 +601,21 @@ export default function Home() {
                       <Star key={i} className="size-4 fill-warning text-warning" />
                     ))}
                   </div>
-                  <blockquote className="mt-4 text-sm leading-relaxed text-text">"{t.quote}"</blockquote>
+                  <blockquote className="mt-4 text-sm leading-relaxed text-text">"{item.quote}"</blockquote>
                 </div>
-                <div className="mt-6 border-t border-border pt-4">
-                  <p className="font-semibold text-text">{t.author}</p>
-                  <p className="text-xs text-primary">{t.role}</p>
-                  <p className="mt-0.5 text-xs text-muted">{t.city}</p>
+                <div className="mt-6 flex items-center gap-3.5 border-t border-border pt-4">
+                  <img
+                    src={TESTIMONIAL_AVATARS[idx] ?? TESTIMONIAL_AVATARS[0]}
+                    alt={item.author}
+                    width={44}
+                    height={44}
+                    className="size-11 rounded-full object-cover ring-2 ring-primary/20 shadow-xs shrink-0"
+                  />
+                  <div>
+                    <p className="font-semibold text-text">{item.author}</p>
+                    <p className="text-xs text-primary">{item.role}</p>
+                    <p className="mt-0.5 text-xs text-muted">{item.city}</p>
+                  </div>
                 </div>
               </Card>
             ))}
