@@ -2,13 +2,10 @@ import { pathFor } from "@mcet/i18n";
 import {
   Activity,
   ArrowRight,
-  BellRing,
   Briefcase,
   Calendar,
-  CalendarCheck2,
   CalendarSync,
   CheckCircle2,
-  ChevronDown,
   Clock3,
   Globe2,
   Scissors,
@@ -17,7 +14,6 @@ import {
   Star,
   Stethoscope,
   XCircle,
-  Zap,
 } from "lucide-react";
 import { useState } from "react";
 import { Badge, Card, Container, LinkButton } from "~/components/ui";
@@ -30,7 +26,7 @@ export const meta = (args: Route.MetaArgs) =>
 
 export const headers = () => publicCacheHeaders;
 
-const ICONS = [CalendarCheck2, ShieldCheck, Globe2, Clock3, CalendarSync, Sparkles];
+const ICONS = [Calendar, ShieldCheck, Globe2, Clock3, CalendarSync, Sparkles];
 
 const SECTOR_ICONS = [Stethoscope, Scissors, Briefcase, Activity];
 
@@ -119,7 +115,7 @@ function HeroPreview() {
             />
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-semibold text-text">Dr. Carlos Mendoza</span>
+                <span className="font-semibold text-text">{h.previewProvider}</span>
                 <span className="inline-block size-2 rounded-full bg-success" title="En línea" />
               </div>
               <p className="text-xs text-muted">{h.previewService}</p>
@@ -134,7 +130,7 @@ function HeroPreview() {
         {/* Selector de fecha */}
         <div className="mt-4 flex items-center justify-between text-sm">
           <span className="font-medium text-text capitalize">{h.previewDay}</span>
-          <span className="text-xs text-muted">Zona horaria: America/Mexico_City</span>
+          <span className="text-xs text-muted">{h.previewTimezone}</span>
         </div>
 
         {/* Cuadrícula de horarios con interactividad visual */}
@@ -166,19 +162,17 @@ function HeroPreview() {
         </div>
 
         {/* Estado de confirmación instantánea */}
-        <div className="mt-5 rounded-[var(--radius-field)] border border-success/30 bg-success-soft p-3 text-sm">
-          <div className="flex items-center gap-2 font-medium text-success">
-            <CheckCircle2 className="size-4 shrink-0" />
+        <div className="mt-5 rounded-[var(--radius-field)] border border-success/40 bg-success-soft p-3 text-sm">
+          <div className="flex items-center gap-2 font-medium text-text">
+            <CheckCircle2 className="size-4 shrink-0 text-success" />
             <span>{h.previewConfirm}</span>
           </div>
-          <p className="mt-1 text-xs text-text/80">
-            Código de seguridad enviado al correo. Archivo de calendario adjunto.
-          </p>
+          <p className="mt-1 text-xs text-text/80">{h.previewSecurity}</p>
         </div>
 
         {/* Integraciones soportadas */}
         <div className="mt-4 flex items-center justify-between border-t border-border/50 pt-3 text-[11px] text-muted">
-          <span>Sincronización automática:</span>
+          <span>{h.previewSync}</span>
           <div className="flex items-center gap-2 font-medium text-text">
             <span>Google</span>
             <span>·</span>
@@ -194,8 +188,8 @@ function HeroPreview() {
         aria-hidden
         className="pointer-events-none absolute -top-4 -left-4 hidden rounded-full border border-border bg-surface px-3 py-1.5 text-xs font-semibold shadow-lg sm:flex sm:items-center sm:gap-1.5"
       >
-        <Zap className="size-3.5 text-accent" />
-        <span>0 dobles reservas</span>
+        <ShieldCheck className="size-3.5 text-success" />
+        <span>{h.previewNoCollisions}</span>
       </div>
 
       {/* Insignia flotante inferior derecha */}
@@ -203,8 +197,8 @@ function HeroPreview() {
         aria-hidden
         className="pointer-events-none absolute -bottom-4 -right-2 hidden rounded-full border border-border bg-surface px-3.5 py-1.5 text-xs font-semibold text-text shadow-lg sm:flex sm:items-center sm:gap-1.5"
       >
-        <BellRing className="size-3.5 text-primary" />
-        <span>Recordatorio 24h antes</span>
+        <Clock3 className="size-3.5 text-primary" />
+        <span>{h.previewReminder}</span>
       </div>
     </div>
   );
@@ -235,7 +229,7 @@ export default function Home() {
         <Container className="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
           <div>
             <Badge>
-              <BellRing aria-hidden className="size-4" />
+              <Clock3 aria-hidden className="size-4" />
               {h.eyebrow}
             </Badge>
             <h1 className="mt-5 text-4xl font-semibold tracking-tight text-text sm:text-5xl lg:text-6xl">
@@ -255,7 +249,7 @@ export default function Home() {
               <span className="hidden sm:inline">·</span>
               <span className="flex items-center gap-1 text-text">
                 <ShieldCheck className="size-4 text-success" />
-                <span>Cancela en cualquier momento</span>
+                <span>{h.cancelAnytime}</span>
               </span>
             </div>
 
@@ -299,7 +293,7 @@ export default function Home() {
                   ))}
                   <span className="ml-1 font-semibold text-text">4.9 / 5</span>
                 </div>
-                <span>Más de 2,500 negocios gestionando sus citas cada día</span>
+                <span>{h.socialProof}</span>
               </div>
             </div>
           </div>
@@ -345,7 +339,7 @@ export default function Home() {
           <div className="mx-auto max-w-2xl text-center">
             <Badge className="mx-auto">
               <Sparkles aria-hidden className="size-3.5" />
-              <span>Para cada industria</span>
+              <span>{h.sectorsBadge}</span>
             </Badge>
             <h2
               id="sectores-titulo"
@@ -406,7 +400,7 @@ export default function Home() {
                     size="md"
                     className="inline-flex items-center gap-2"
                   >
-                    <span>Crear agenda para mi negocio</span>
+                    <span>{h.sectorsCta}</span>
                     <ArrowRight className="size-4" />
                   </LinkButton>
                 </div>
@@ -436,10 +430,10 @@ export default function Home() {
                         <SectorIcon className="size-3.5" />
                       </span>
                       <span className="text-xs font-semibold uppercase tracking-wider text-muted">
-                        Vista de la cita
+                        {h.mockupView}
                       </span>
                     </div>
-                    <span className="rounded-full bg-success-soft px-2.5 py-0.5 text-xs font-semibold text-success">
+                    <span className="rounded-full border border-success/40 bg-success-soft px-2.5 py-0.5 text-xs font-semibold text-text">
                       {currentSector.mockupStatus}
                     </span>
                   </div>
@@ -456,7 +450,7 @@ export default function Home() {
                     </div>
                     <div className="flex items-center gap-1 text-[11px] text-muted">
                       <Clock3 className="size-3" />
-                      <span>Margen automático</span>
+                      <span>{h.mockupMargin}</span>
                     </div>
                   </div>
                 </div>
@@ -470,7 +464,7 @@ export default function Home() {
       <section aria-labelledby="destacados" className="border-t border-border/60 bg-surface py-20 sm:py-24">
         <Container>
           <div className="max-w-2xl">
-            <Badge>Funciones principales</Badge>
+            <Badge>{h.featuresBadge}</Badge>
             <h2 id="destacados" className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">
               {h.highlightsTitle}
             </h2>
@@ -555,7 +549,7 @@ export default function Home() {
             <h2 id="pasos" className="text-3xl font-semibold tracking-tight sm:text-4xl">
               {h.stepsTitle}
             </h2>
-            <p className="mt-3 text-muted">Empieza a recibir citas en menos de dos minutos.</p>
+            <p className="mt-3 text-muted">{h.stepsSubtitle}</p>
           </div>
           <ol className="mt-12 grid gap-8 md:grid-cols-3">
             {h.steps.map((step, i) => (
@@ -581,7 +575,7 @@ export default function Home() {
       <section aria-labelledby="testimonios-titulo" className="py-20 sm:py-24">
         <Container>
           <div className="mx-auto max-w-2xl text-center">
-            <Badge className="mx-auto">Experiencias reales</Badge>
+            <Badge className="mx-auto">{h.testimonialsBadge}</Badge>
             <h2
               id="testimonios-titulo"
               className="mt-4 text-3xl font-semibold tracking-tight text-text sm:text-4xl"
@@ -642,9 +636,11 @@ export default function Home() {
                 key={item.q}
                 className="group rounded-[var(--radius-card)] border border-border bg-background p-5 open:bg-surface open:shadow-sm"
               >
-                <summary className="flex cursor-pointer items-center justify-between font-semibold text-text">
+                <summary className="flex cursor-pointer items-center justify-between font-semibold text-text list-none [&::-webkit-details-marker]:hidden">
                   <span>{item.q}</span>
-                  <ChevronDown className="size-5 text-muted transition-transform group-open:rotate-180" />
+                  <span aria-hidden className="text-xs text-muted transition-transform group-open:rotate-180">
+                    ▼
+                  </span>
                 </summary>
                 <p className="mt-3 text-sm leading-relaxed text-muted">{item.a}</p>
               </details>
@@ -664,7 +660,7 @@ export default function Home() {
             <div className="relative z-10 flex flex-col items-start justify-between gap-8 sm:flex-row sm:items-center">
               <div className="max-w-xl">
                 <span className="inline-block rounded-full bg-white/20 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-white">
-                  Prueba 30 días gratis
+                  {h.bannerBadge}
                 </span>
                 <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">{h.ctaBandTitle}</h2>
                 <p className="mt-2 text-base text-white/90">{h.ctaBandBody}</p>
@@ -673,7 +669,7 @@ export default function Home() {
                 to={pathFor("signUp", site.lang)}
                 size="lg"
                 variant="secondary"
-                className="whitespace-nowrap border-transparent bg-white text-primary shadow-lg hover:bg-surface-2"
+                className="whitespace-nowrap shadow-lg"
                 data-umami-event="sign_up_started"
               >
                 {h.ctaPrimary}
