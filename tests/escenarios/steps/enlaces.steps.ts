@@ -83,11 +83,11 @@ When("hace clic en el logo de la cabecera", async ({ page }) => {
 
 When("cambia de idioma usando el enlace de idioma de la cabecera", async ({ page }) => {
   await abrirMenuSiHaceFalta(page);
-  const selectorBtn = page.locator("header button[aria-haspopup='true']");
+  const selectorBtn = page.locator("header button[aria-haspopup='true']:visible").first();
   if (await selectorBtn.isVisible()) {
     await selectorBtn.click();
     const otroIdioma = page.url().includes("myappointmentontime") || page.url().includes("/en") ? "es" : "en";
-    const opcion = page.locator(`header a[hreflang='${otroIdioma}']`);
+    const opcion = page.locator(`header a[hreflang='${otroIdioma}']:visible`).first();
     await expect(opcion).toBeVisible({ timeout: 10_000 });
     const destino = await opcion.getAttribute("href");
     expect(destino).toBeTruthy();
@@ -102,7 +102,7 @@ When("cambia de idioma usando el enlace de idioma de la cabecera", async ({ page
     await page.waitForLoadState("load");
     return;
   }
-  const enlace = page.locator("header a[hreflang]:visible");
+  const enlace = page.locator("header a[hreflang]:visible").first();
   await expect(enlace).toBeVisible({ timeout: 10_000 });
   const destino = await enlace.getAttribute("href");
   expect(destino).toBeTruthy();
@@ -113,10 +113,10 @@ When("cambia de idioma usando el enlace de idioma de la cabecera", async ({ page
 
 When("cambia al idioma {string} usando el selector de idioma", async ({ page }, targetLang: string) => {
   await abrirMenuSiHaceFalta(page);
-  const selectorBtn = page.locator("header button[aria-haspopup='true']");
+  const selectorBtn = page.locator("header button[aria-haspopup='true']:visible").first();
   await expect(selectorBtn).toBeVisible({ timeout: 10_000 });
   await selectorBtn.click();
-  const opcion = page.locator(`header a[hreflang='${targetLang}']`);
+  const opcion = page.locator(`header a[hreflang='${targetLang}']:visible`).first();
   await expect(opcion).toBeVisible({ timeout: 10_000 });
   const destino = await opcion.getAttribute("href");
   expect(destino).toBeTruthy();
