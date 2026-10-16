@@ -1,4 +1,5 @@
 # language: es
+@frontend
 @panel @cuenta
 Característica: Panel → Cuenta
   Cada persona gestiona su perfil y su contraseña, y puede exportar o borrar sus datos (RNF-06).

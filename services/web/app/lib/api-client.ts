@@ -21,6 +21,15 @@ export async function apiRequest<T = unknown>(
   body?: unknown,
   headers: Record<string, string> = {},
 ): Promise<T> {
+  let validated = body;
+  try {
+    if (body !== undefined) {
+      const { validateRequest } = await import("./validation");
+      validated = validateRequest(method, path, body);
+    }
+  } catch {
+    throw { status: 400, code: "validation_failed" } satisfies ApiError;
+  }
   let res: Response;
   try {
     res = await fetch(path, {
@@ -30,7 +39,7 @@ export async function apiRequest<T = unknown>(
         ...(body === undefined ? {} : { "content-type": "application/json" }),
         ...headers,
       },
-      body: body === undefined ? undefined : JSON.stringify(body),
+      body: body === undefined ? undefined : JSON.stringify(validated),
       credentials: "same-origin",
     });
   } catch {

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { Country, TimeZone } from "./common.ts";
+import { freeText, Label, singleLine } from "./text.ts";
 
 const Hhmm = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$|^24:00$/, "hora HH:MM");
 const IsoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "fecha AAAA-MM-DD");
@@ -17,13 +18,13 @@ export const TimeRange = z.object({ start: Hhmm, end: Hhmm }).strict();
 
 export const CreateCalendar = z
   .object({
-    name: z.string().trim().min(1).max(120),
+    name: Label,
     timezone: TimeZone,
     slug: Slug.optional(),
     capacity: z.number().int().min(1).max(50).default(1),
     country: Country.optional(),
     subdivision: Subdivision.optional(),
-    address: z.string().trim().max(240).optional(),
+    address: singleLine(240).optional(),
   })
   .strict();
 export type CreateCalendar = z.infer<typeof CreateCalendar>;
@@ -37,13 +38,13 @@ export const EmbedPolicy = z
 
 export const UpdateCalendar = z
   .object({
-    name: z.string().trim().min(1).max(120),
+    name: Label,
     slug: Slug,
     timezone: TimeZone,
     capacity: z.number().int().min(1).max(50),
     country: Country.or(z.literal("")),
     subdivision: Subdivision.or(z.literal("")),
-    address: z.string().trim().max(240),
+    address: singleLine(240),
     embedPolicy: EmbedPolicy,
     cancelMinNoticeMinutes: z.number().int().min(0).max(43_200),
   })
@@ -56,7 +57,7 @@ export const Shift = z
     weekday: z.number().int().min(1).max(7),
     kind: z.enum(["open", "break"]),
     range: TimeRange,
-    label: z.string().trim().max(60).optional(),
+    label: singleLine(60).optional(),
   })
   .strict();
 
@@ -67,7 +68,7 @@ export const DateOverride = z
   .object({
     kind: z.enum(["closed", "custom", "open_on_holiday"]),
     intervals: z.array(TimeRange).max(10).default([]),
-    note: z.string().trim().max(200).optional(),
+    note: singleLine(200).optional(),
   })
   .strict();
 export type DateOverride = z.infer<typeof DateOverride>;
@@ -94,7 +95,7 @@ export type HolidayPolicies = z.infer<typeof HolidayPolicies>;
 
 export const CustomHoliday = z
   .object({
-    name: z.string().trim().min(1).max(120),
+    name: Label,
     date: IsoDate.optional(),
     monthDay: z
       .string()
@@ -109,9 +110,9 @@ export const HolidayRange = z.object({ from: IsoDate, to: IsoDate }).strict();
 
 export const Service = z
   .object({
-    name: z.object({ es: z.string().trim().max(120), en: z.string().trim().max(120) }).partial(),
+    name: z.object({ es: singleLine(120), en: singleLine(120) }).partial(),
     description: z
-      .object({ es: z.string().trim().max(1000), en: z.string().trim().max(1000) })
+      .object({ es: freeText(1000).trim(), en: freeText(1000).trim() })
       .partial()
       .default({}),
     durationMin: z.number().int().min(5).max(720),

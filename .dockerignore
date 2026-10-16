@@ -13,5 +13,6 @@
 **/test-results
 docs
 tests
+services/mobile
 *.md
 !content/**/*.md

@@ -59,9 +59,11 @@ Then(
     await abrir.press("Enter");
     const dialogo = page.getByRole("dialog");
     await expect(dialogo).toBeVisible();
-    for (let i = 0; i < 15; i++) {
-      await page.keyboard.press("Tab");
-      expect(await dialogo.evaluate((el) => el.contains(document.activeElement))).toBe(true);
+    for (const key of ["Tab", "Shift+Tab"]) {
+      for (let i = 0; i < 20; i++) {
+        await page.keyboard.press(key);
+        expect(await dialogo.evaluate((el) => el.contains(document.activeElement))).toBe(true);
+      }
     }
     await $testInfo.attach("dialogo-arbol-accesible", {
       body: Buffer.from(await dialogo.ariaSnapshot()),

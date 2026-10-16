@@ -1,0 +1,79 @@
+{
+  "site": {
+    "name": "Mon Rendez-vous À L'heure",
+    "tagline": "Votre calendrier de rendez-vous, toujours à l'heure.",
+    "description": "Calendrier de réservation pour entreprises : partagez vos disponibilités, recevez des rendez-vous et synchronisez avec Google, Outlook et Apple."
+  },
+  "home": {
+    "title": "Réservations sans appels ni messages",
+    "lead": "Partagez votre calendrier ou intégrez-le à votre site web. Vos clients réservent en toute autonomie et vous recevez chaque rendez-vous instantanément.",
+    "comingSoon": "Bientôt disponible"
+  },
+  "language": {
+    "switchTo": "Français",
+    "switchToLabel": "Voir ce site en français",
+    "sessionNote": "Ce site a sa propre session : si vous vous êtes connecté ailleurs, vous devrez vous reconnecter ici."
+  },
+  "nav": {
+    "main": "Principal",
+    "features": "Fonctionnalités",
+    "pricing": "Tarifs",
+    "faq": "FAQ",
+    "help": "Aide",
+    "connectAi": "Connectez votre IA",
+    "contact": "Contact",
+    "signIn": "Connexion",
+    "signUp": "Commencez gratuitement",
+    "myAppointments": "Mes rendez-vous",
+    "businessSignIn": "Accès entreprise",
+    "createAgenda": "Créer mon calendrier",
+    "dashboard": "Tableau de bord",
+    "openMenu": "Ouvrir le menu",
+    "closeMenu": "Fermer le menu",
+    "skipToContent": "Passer au contenu"
+  },
+  "footer": {
+    "product": "Produit",
+    "legal": "Légal",
+    "privacy": "Confidentialité",
+    "terms": "Conditions",
+    "credits": "Crédits",
+    "rights": "© {{year}} Mon Rendez-vous À L'heure",
+    "madeFor": "Calendrier en ligne pour les entreprises de services."
+  },
+  "ui": {
+    "loading": "Chargement…",
+    "required": "Obligatoire",
+    "optional": "Facultatif",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe",
+    "close": "Fermer",
+    "back": "Retour",
+    "continue": "Continuer",
+    "or": "ou",
+    "sending": "Envoi en cours…",
+    "comingSoon": "Bientôt disponible",
+    "invalidText": "Vérifiez la longueur et supprimez les caractères de contrôle ou les balises."
+  },
+  "errors": {
+    "notFoundTitle": "Page non trouvée",
+    "notFoundBody": "Cette adresse n'existe pas ou a été déplacée.",
+    "serverTitle": "Une erreur est survenue",
+    "serverBody": "Veuillez réessayer dans quelques instants.",
+    "backHome": "Retour à l'accueil",
+    "errorCode": "Code {{code}}"
+  },
+  "aiScopes": {
+    "openid": "Saber que eres tú",
+    "profile": "Ver quién eres, tu organización, plan y roles",
+    "email": "Ver tu correo",
+    "offline_access": "Mantener la conexión sin volver a iniciar sesión",
+    "calendar:read": "Ver tableros, ajustes, eventos, huecos libres y feriados",
+    "calendar:write": "Crear, cambiar y cancelar eventos y bloqueos",
+    "customers:read": "Ver los datos de contacto de tus clientes (sin esto se ocultan)",
+    "stats:read": "Ver estadísticas",
+    "settings:write": "Cambiar horario, descansos y excepciones (solo propietario)",
+    "billing:read": "Ver plan, prueba y facturas (solo propietario)",
+    "notifications:read": "Ver avisos recientes"
+  }
+}

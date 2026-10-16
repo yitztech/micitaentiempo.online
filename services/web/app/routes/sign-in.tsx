@@ -55,6 +55,28 @@ export default function SignIn() {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
     const email = String(form.get("email") ?? "").trim();
+    const password = String(form.get("password") ?? "");
+
+    // Validaciones de formato, longitud y caracteres
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!email || email.length < 5 || email.length > 254 || !emailRegex.test(email)) {
+      setError({ text: t.auth.errors.invalid_format, tone: "danger" });
+      return;
+    }
+    if (!password || password.length < 8) {
+      setError({ text: t.auth.errors.password_too_short, tone: "danger" });
+      return;
+    }
+    if (password.length > 128) {
+      setError({ text: t.auth.errors.password_too_long, tone: "danger" });
+      return;
+    }
+    // biome-ignore lint/suspicious/noControlCharactersInRegex: validación de caracteres de control
+    if (/[\u0000-\u001f\u007f-\u009f]/.test(password)) {
+      setError({ text: t.auth.errors.validation_failed, tone: "danger" });
+      return;
+    }
+
     setBusy(true);
     setError(null);
     try {
@@ -62,7 +84,7 @@ export default function SignIn() {
       const oauthQuery = signedOAuthQuery(window.location.search);
       const res = await postJson<OAuthRedirect & { twoFactorRedirect?: boolean }>("/api/auth/sign-in/email", {
         email,
-        password: String(form.get("password") ?? ""),
+        password,
         ...(oauthQuery ? { oauth_query: oauthQuery } : {}),
       });
       if (res?.twoFactorRedirect) {
@@ -145,13 +167,24 @@ export default function SignIn() {
     >
       <GoogleButton callbackURL={next} />
       <form method="post" onSubmit={onSubmit} className="space-y-5">
-        <Field label={t.auth.fields.email} name="email" type="email" autoComplete="email" required />
+        <Field
+          label={t.auth.fields.email}
+          name="email"
+          type="email"
+          autoComplete="email"
+          required
+          minLength={5}
+          maxLength={254}
+          pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}"
+        />
         <Field
           label={t.auth.fields.password}
           name="password"
           type="password"
           autoComplete="current-password"
           required
+          minLength={8}
+          maxLength={128}
         />
         <div className="-mt-2 text-right">
           <Link

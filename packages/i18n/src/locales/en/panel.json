@@ -276,7 +276,7 @@
     "plan_limit": "You've reached your plan's limit.",
     "permission_denied": "You don't have permission to do this.",
     "org_read_only": "Your account is read-only.",
-    "validation_failed": "Check the highlighted fields.",
+    "validation_failed": "Check the fields: text is invalid or exceeds the allowed length.",
     "invalid_timezone": "Choose a valid time zone.",
     "google_required": "Editors need a Google account with that email."
   },

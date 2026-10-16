@@ -1,4 +1,5 @@
 # language: es
+@backend
 @plataforma @humo
 Característica: Comunicación interna entre api y el motor
   api llama al motor con un actor firmado; el motor no acepta llamadas sin él.

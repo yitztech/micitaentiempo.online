@@ -43,6 +43,13 @@
       "when": 1791362800805,
       "tag": "0005_mcp",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792120548515,
+      "tag": "0006_text_validation",
+      "breakpoints": true
     }
   ]
 }

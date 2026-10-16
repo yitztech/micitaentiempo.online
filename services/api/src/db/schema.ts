@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import {
   bigint,
   boolean,
+  check,
   index,
   integer,
   jsonb,
@@ -47,21 +48,31 @@ export const inboundEvents = app.table(
 
 // ── Better Auth (las claves del objeto son los modelos que espera el adaptador) ──
 
-export const user = app.table("users", {
-  id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  email: text("email").notNull().unique(),
-  emailVerified: boolean("email_verified").notNull().default(false),
-  image: text("image"),
-  createdAt: createdAt(),
-  updatedAt: updatedAt(),
-  twoFactorEnabled: boolean("two_factor_enabled").default(false),
-  locale: text("locale").default("es"),
-  timezone: text("timezone").default("UTC"),
-  timeFormat: text("time_format").default("24h"),
-  weekStart: integer("week_start").default(1),
-  country: text("country"),
-});
+export const user = app.table(
+  "users",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    email: text("email").notNull().unique(),
+    emailVerified: boolean("email_verified").notNull().default(false),
+    image: text("image"),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+    twoFactorEnabled: boolean("two_factor_enabled").default(false),
+    locale: text("locale").default("es"),
+    timezone: text("timezone").default("UTC"),
+    timeFormat: text("time_format").default("24h"),
+    weekStart: integer("week_start").default(1),
+    country: text("country"),
+  },
+  (t) => [
+    check(
+      "users_name_text",
+      sql`app.valid_text(${t.name}, 120, false) AND (${t.name} = '' OR length(btrim(${t.name})) > 0)`,
+    ),
+    check("users_email_length", sql`length(${t.email}) BETWEEN 3 AND 254`),
+  ],
+);
 
 export const session = app.table(
   "sessions",
@@ -167,7 +178,13 @@ export const organizations = app.table(
     updatedAt: updatedAt(),
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
   },
-  (t) => [uniqueIndex("organizations_owner").on(t.ownerUserId).where(sql`deleted_at is null`)],
+  (t) => [
+    uniqueIndex("organizations_owner").on(t.ownerUserId).where(sql`deleted_at is null`),
+    check(
+      "organizations_name_text",
+      sql`app.valid_text(${t.name}, 120, false) AND length(btrim(${t.name})) > 0`,
+    ),
+  ],
 );
 
 /** Miembros por tablero: propietario, editor u observador (01-requisitos.md §1.6). */

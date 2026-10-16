@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const Lang = z.enum(["es", "en"]);
+export const Lang = z.enum(["es", "en", "fr", "pt", "de", "it"]);
 
 /** Zona horaria IANA válida para Intl (la valida también el motor con time.LoadLocation). */
 export const TimeZone = z.string().refine((tz) => {

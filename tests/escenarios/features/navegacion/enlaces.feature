@@ -1,4 +1,5 @@
 # language: es
+@frontend
 @enlaces @publico
 Característica: Validación y funcionamiento de todos los enlaces de la plataforma
   Cada enlace presente en la interfaz debe apuntar a un destino válido, responder con código HTTP exitoso

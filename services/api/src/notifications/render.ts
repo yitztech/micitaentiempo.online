@@ -1,6 +1,22 @@
-import { interpolate, type Lang, noticesEn, noticesEs } from "@mcet/i18n";
+import {
+  interpolate,
+  type Lang,
+  noticesDe,
+  noticesEn,
+  noticesEs,
+  noticesFr,
+  noticesIt,
+  noticesPt,
+} from "@mcet/i18n";
 
-export const NOTICES: Record<Lang, typeof noticesEs> = { es: noticesEs, en: noticesEn };
+export const NOTICES: Record<Lang, typeof noticesEs> = {
+  es: noticesEs,
+  en: noticesEn,
+  fr: noticesFr,
+  pt: noticesPt,
+  de: noticesDe,
+  it: noticesIt,
+};
 
 /** Parámetros de un aviso; se guardan sin traducir y se escriben en el idioma de cada destinatario. */
 export interface NoticeParams {

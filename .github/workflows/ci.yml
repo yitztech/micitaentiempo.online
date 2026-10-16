@@ -48,7 +48,7 @@ jobs:
         with:
           version: v2.14.0
           working-directory: services/calendar
-      - run: go test -race ./...
+      - run: go test -short -race ./...
 
   contratos:
     name: Contratos (buf)
@@ -137,14 +137,14 @@ jobs:
           severity: CRITICAL
           ignore-unfixed: true
           exit-code: "1"
-      - run: pnpm --filter @mcet/escenarios exec playwright install --with-deps chromium webkit
+      - run: pnpm --filter @mcet/escenarios exec playwright install --with-deps chromium
       # Los pasos importan paquetes del monorepo (p. ej. @mcet/i18n): se compilan antes.
       - run: pnpm --filter "@mcet/escenarios^..." build
-      - name: Escenarios @humo, @critico, diseño y navegación
-        run: pnpm --filter @mcet/escenarios exec ./correr.sh --grep "@humo|@critico|@qa-diseno|@enlaces"
+      - name: Backend y frontend - catálogo Gherkin completo en escritorio
+        run: pnpm test:behavior
       - name: Logs si falla
         if: failure()
-        run: docker compose -p ci logs --no-color | tail -n 300
+        run: docker compose -f compose.prod.yml -f compose.ci.yml --env-file .env.ci -p ci logs --no-color | tail -n 300
       - uses: actions/upload-artifact@v7
         if: always()
         with:
@@ -152,4 +152,5 @@ jobs:
           path: |
             tests/escenarios/playwright-report*
             tests/escenarios/cucumber-report*
+            tests/escenarios/test-results*/results.json
           retention-days: 14

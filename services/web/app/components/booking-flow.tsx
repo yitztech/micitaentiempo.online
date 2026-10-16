@@ -9,7 +9,7 @@ import { browserTz, formatDateTime, formatTime, tzLabel } from "~/lib/time";
 import { AltchaStatus } from "./altcha-status";
 import { OtpForm } from "./otp-form";
 import { type Slot, SlotPicker } from "./slot-picker";
-import { Alert, Button, buttonClass, Field, TextArea } from "./ui";
+import { Alert, Button, buttonClass, Field, PhoneField, TextArea } from "./ui";
 
 /** Lo que dura un horario apartado (igual que el motor). */
 const HOLD_MS = 10 * 60_000;
@@ -353,13 +353,11 @@ export function BookingFlow({
               value={person.email}
               onChange={(e) => setPerson({ ...person, email: e.target.value })}
             />
-            <Field
+            <PhoneField
               name="phone"
               label={b.details.phone}
-              type="tel"
               autoComplete="tel"
               optional
-              pattern="\+[1-9][0-9 ]{6,18}"
               hint={b.details.phoneHint}
               value={person.phone}
               onChange={(e) => setPerson({ ...person, phone: e.target.value })}

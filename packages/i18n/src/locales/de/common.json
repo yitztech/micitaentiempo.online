@@ -1,0 +1,79 @@
+{
+  "site": {
+    "name": "Mein Termin Pünktlich",
+    "tagline": "Ihr Terminkalender, immer pünktlich.",
+    "description": "Buchungskalender für Unternehmen: Teilen Sie Ihren Zeitplan, erhalten Sie Termine und synchronisieren Sie mit Google, Outlook und Apple."
+  },
+  "home": {
+    "title": "Buchungen ohne Anrufe oder Nachrichten",
+    "lead": "Teilen Sie Ihren Kalender oder binden Sie ihn in Ihre Website ein. Ihre Kunden buchen selbstständig und Sie erhalten jeden Termin sofort.",
+    "comingSoon": "Demnächst verfügbar"
+  },
+  "language": {
+    "switchTo": "Deutsch",
+    "switchToLabel": "Diese Website auf Deutsch anzeigen",
+    "sessionNote": "Diese Website hat ihre eigene Sitzung: Wenn Sie sich auf einer anderen angemeldet haben, müssen Sie sich hier erneut anmelden."
+  },
+  "nav": {
+    "main": "Hauptseite",
+    "features": "Funktionen",
+    "pricing": "Preise",
+    "faq": "FAQ",
+    "help": "Hilfe",
+    "connectAi": "Verbinden Sie Ihre KI",
+    "contact": "Kontakt",
+    "signIn": "Anmelden",
+    "signUp": "Kostenlos starten",
+    "myAppointments": "Meine Termine",
+    "businessSignIn": "Unternehmenszugang",
+    "createAgenda": "Kalender erstellen",
+    "dashboard": "Dashboard",
+    "openMenu": "Menü öffnen",
+    "closeMenu": "Menü schließen",
+    "skipToContent": "Zum Inhalt springen"
+  },
+  "footer": {
+    "product": "Produkt",
+    "legal": "Rechtliches",
+    "privacy": "Datenschutz",
+    "terms": "AGB",
+    "credits": "Impressum",
+    "rights": "© {{year}} Mein Termin Pünktlich",
+    "madeFor": "Online-Buchungskalender für Dienstleistungsunternehmen."
+  },
+  "ui": {
+    "loading": "Wird geladen…",
+    "required": "Erforderlich",
+    "optional": "Optional",
+    "showPassword": "Passwort anzeigen",
+    "hidePassword": "Passwort verbergen",
+    "close": "Schließen",
+    "back": "Zurück",
+    "continue": "Weiter",
+    "or": "oder",
+    "sending": "Wird gesendet…",
+    "comingSoon": "Demnächst verfügbar",
+    "invalidText": "Überprüfen Sie die Länge und entfernen Sie Steuerzeichen oder Tags."
+  },
+  "errors": {
+    "notFoundTitle": "Seite nicht gefunden",
+    "notFoundBody": "Die Adresse existiert nicht oder wurde verschoben.",
+    "serverTitle": "Etwas ist schiefgelaufen",
+    "serverBody": "Bitte versuchen Sie es in wenigen Minuten erneut.",
+    "backHome": "Zurück zur Startseite",
+    "errorCode": "Code {{code}}"
+  },
+  "aiScopes": {
+    "openid": "Saber que eres tú",
+    "profile": "Ver quién eres, tu organización, plan y roles",
+    "email": "Ver tu correo",
+    "offline_access": "Mantener la conexión sin volver a iniciar sesión",
+    "calendar:read": "Ver tableros, ajustes, eventos, huecos libres y feriados",
+    "calendar:write": "Crear, cambiar y cancelar eventos y bloqueos",
+    "customers:read": "Ver los datos de contacto de tus clientes (sin esto se ocultan)",
+    "stats:read": "Ver estadísticas",
+    "settings:write": "Cambiar horario, descansos y excepciones (solo propietario)",
+    "billing:read": "Ver plan, prueba y facturas (solo propietario)",
+    "notifications:read": "Ver avisos recientes"
+  }
+}

@@ -276,7 +276,7 @@
     "plan_limit": "Llegaste al límite de tu plan.",
     "permission_denied": "No tienes permiso para hacer esto.",
     "org_read_only": "Tu cuenta está en solo lectura.",
-    "validation_failed": "Revisa los datos marcados.",
+    "validation_failed": "Revisa los campos: contienen texto no válido o exceden la longitud permitida.",
     "invalid_timezone": "Elige una zona horaria válida.",
     "google_required": "Los editores deben tener cuenta de Google con ese correo."
   },

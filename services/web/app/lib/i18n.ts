@@ -1,13 +1,13 @@
-import { en, es, interpolate, type Lang } from "@mcet/i18n";
+import { de, en, es, fr, interpolate, it, type Lang, pt } from "@mcet/i18n";
 import { useRouteLoaderData } from "react-router";
 import type { loader as rootLoader } from "~/root";
 
 export type Messages = typeof es;
-const COMMON: Record<Lang, Messages> = { es, en };
+const COMMON: Record<Lang, Messages> = { es, en, fr, pt, de, it };
 
 /** Textos comunes (para el límite de errores, que puede no tener datos del loader raíz). */
 export function messages(lang: Lang): Messages {
-  return COMMON[lang];
+  return COMMON[lang] ?? COMMON.es;
 }
 
 export { interpolate as fmt };

@@ -1,4 +1,5 @@
 # language: es
+@backend
 @plataforma @humo
 Característica: Contrato con la plataforma
   La plataforma da un despliegue por bueno cuando el gateway responde y sirve el commit desplegado.

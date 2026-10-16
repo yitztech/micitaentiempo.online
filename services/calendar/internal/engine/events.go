@@ -231,7 +231,7 @@ func (s EventServer) draft(ctx context.Context, c store.Calendar, a auth.ActorCl
 	if req.GetStart() == nil {
 		return store.Event{}, fail(connect.CodeInvalidArgument, "invalid_range", "falta el inicio")
 	}
-	if len([]rune(req.GetTitle())) > maxTitle || len([]rune(req.GetInternalNotes())) > maxNotes {
+	if !validText(req.GetTitle(), maxTitle, false) || !validText(req.GetInternalNotes(), maxNotes, true) || !validAttendee(req.GetAttendee()) {
 		return store.Event{}, fail(connect.CodeInvalidArgument, "too_long", "título o notas demasiado largos")
 	}
 	d := store.Event{
@@ -341,7 +341,7 @@ func (s EventServer) HoldSlot(ctx context.Context, req *calendarv1.HoldSlotReque
 	if req.GetStart() == nil {
 		return nil, fail(connect.CodeInvalidArgument, "invalid_range", "falta el inicio")
 	}
-	if len([]rune(req.GetCustomerNotes())) > maxNotes {
+	if !validText(req.GetCustomerNotes(), 1000, true) || !validAttendee(req.GetAttendee()) {
 		return nil, fail(connect.CodeInvalidArgument, "too_long", "notas demasiado largas")
 	}
 	start := req.GetStart().AsTime().UTC()
@@ -420,7 +420,7 @@ func (s EventServer) ConfirmHold(ctx context.Context, req *calendarv1.ConfirmHol
 	if err := validID(req.GetId()); err != nil {
 		return nil, err
 	}
-	if len([]rune(req.GetCustomerNotes())) > maxNotes {
+	if !validText(req.GetCustomerNotes(), 1000, true) || !validAttendee(req.GetAttendee()) {
 		return nil, fail(connect.CodeInvalidArgument, "too_long", "notas demasiado largas")
 	}
 	held, err := store.GetEvent(ctx, s.Store.Pool, req.GetId())

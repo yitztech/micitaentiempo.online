@@ -1,0 +1,7 @@
+node_modules/
+.expo/
+# Carpetas nativas generadas por `expo prebuild` desde app.json (Continuous Native Generation)
+/android/
+/ios/
+# Drivers de Appium instalados localmente
+/.appium/

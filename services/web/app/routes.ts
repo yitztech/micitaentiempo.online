@@ -1,11 +1,17 @@
-import { ROUTES, type RouteId } from "@mcet/i18n";
+import { LANGS, ROUTES, type RouteId } from "@mcet/i18n";
 import { index, layout, type RouteConfig, route } from "@react-router/dev/routes";
 
-/** Registra una página en sus dos rutas traducidas (un id por idioma, el mismo módulo). */
+/** Registra una página en sus rutas traducidas (un id por cada variante distinta, el mismo módulo). */
 function page(id: RouteId, file: string) {
-  const { es, en } = ROUTES[id];
-  if (es === en) return [route(es, file, { id })];
-  return [route(es, file, { id: `${id}-es` }), route(en, file, { id: `${id}-en` })];
+  const routesForId = ROUTES[id];
+  const paths = new Map<string, string>();
+  for (const lang of LANGS) {
+    const p = routesForId[lang];
+    if (!paths.has(p)) {
+      paths.set(p, `${id}-${lang}`);
+    }
+  }
+  return Array.from(paths.entries()).map(([p, routeId]) => route(p, file, { id: routeId }));
 }
 
 export default [

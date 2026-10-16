@@ -43,6 +43,9 @@ func exdateSet(ts []time.Time) map[string]bool {
 }
 
 func parseRule(s string) (recurrence.Rule, error) {
+	if !validText(s, 300, false) {
+		return recurrence.Rule{}, fail(connect.CodeInvalidArgument, "invalid_rrule", "regla no válida")
+	}
 	r, err := recurrence.Parse(s)
 	if err != nil {
 		return r, fail(connect.CodeInvalidArgument, "invalid_rrule", "%v", err)
@@ -251,7 +254,7 @@ func (s EventServer) UpdateEvent(ctx context.Context, req *calendarv1.UpdateEven
 	if ev.Status == "cancelled" || ev.Status == "held" {
 		return nil, fail(connect.CodeFailedPrecondition, "not_editable", "evento %s", ev.Status)
 	}
-	if len([]rune(req.GetTitle())) > maxTitle || len([]rune(req.GetInternalNotes())) > maxNotes {
+	if !validText(req.GetTitle(), maxTitle, false) || !validText(req.GetInternalNotes(), maxNotes, true) || !validAttendee(req.GetAttendee()) {
 		return nil, fail(connect.CodeInvalidArgument, "too_long", "título o notas demasiado largos")
 	}
 	scope := req.GetScope()
@@ -523,7 +526,7 @@ func (s EventServer) CancelEvent(ctx context.Context, req *calendarv1.CancelEven
 	if customer && scope != "this" {
 		return nil, fail(connect.CodePermissionDenied, "permission_denied", "un cliente final cancela de una en una")
 	}
-	if len([]rune(req.GetReason())) > maxNotes {
+	if !validText(req.GetReason(), 500, true) {
 		return nil, fail(connect.CodeInvalidArgument, "too_long", "motivo demasiado largo")
 	}
 	resp := &calendarv1.CancelEventResponse{}

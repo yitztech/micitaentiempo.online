@@ -81,6 +81,9 @@ func (s ScheduleServer) SetWeeklyHours(ctx context.Context, req *calendarv1.SetW
 	}
 	var shifts []store.Shift
 	for _, sh := range req.GetShifts() {
+		if !validText(sh.GetLabel(), 60, false) {
+			return nil, fail(connect.CodeInvalidArgument, "validation_failed", "etiqueta no válida")
+		}
 		if sh.GetWeekday() < 1 || sh.GetWeekday() > 7 || (sh.GetKind() != "open" && sh.GetKind() != "break") {
 			return nil, fail(connect.CodeInvalidArgument, "invalid_shift", "día %d tipo %q", sh.GetWeekday(), sh.GetKind())
 		}
@@ -104,6 +107,9 @@ func (s ScheduleServer) UpsertDateOverride(ctx context.Context, req *calendarv1.
 		return nil, err
 	}
 	o := req.GetOverride()
+	if !validText(o.GetNote(), 200, false) {
+		return nil, fail(connect.CodeInvalidArgument, "validation_failed", "nota no válida")
+	}
 	if _, err := domain.ParseDate(o.GetDate()); err != nil {
 		return nil, fail(connect.CodeInvalidArgument, "invalid_date", "%v", err)
 	}
@@ -176,7 +182,7 @@ func (s ScheduleServer) UpsertCustomHoliday(ctx context.Context, req *calendarv1
 		return nil, err
 	}
 	h := req.GetHoliday()
-	if l := len([]rune(h.GetName())); l < 1 || l > 120 {
+	if !validName(h.GetName()) {
 		return nil, fail(connect.CodeInvalidArgument, "invalid_name", "nombre de 1 a 120 caracteres")
 	}
 	if (h.GetDate() == "") == (h.GetMonthDay() == "") {

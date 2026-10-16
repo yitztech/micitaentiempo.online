@@ -1,4 +1,5 @@
 import type { Lang } from "@mcet/i18n";
+import { FullName } from "@mcet/schemas";
 import type { Auth } from "../auth/auth.factory.js";
 import type { Env } from "../config/env.js";
 
@@ -25,25 +26,34 @@ export function identityOf(idToken: unknown, clientId: string, testMode: boolean
   if (typeof p.email !== "string" || p.email_verified !== true) return null;
   if (p.aud !== clientId) return null;
   if (!testMode && !GOOGLE_ISSUERS.has(String(p.iss))) return null;
-  return { email: p.email.toLowerCase(), name: typeof p.name === "string" ? p.name : "" };
+  const rawName = typeof p.name === "string" ? p.name : "";
+  const parsedName = FullName.safeParse(rawName);
+  return { email: p.email.toLowerCase(), name: parsedName.success ? parsedName.data : "" };
 }
 
 /**
- * Cambia el código del popup de Google Identity Services (`redirect_uri=postmessage`) por la identidad
- * verificada. null si Google no está configurado o el código no vale.
+ * Cambia el código del popup de Google Identity Services (`redirect_uri=postmessage`) o del flujo OAuth
+ * móvil PKCE por la identidad verificada. null si Google no está configurado o el código no vale.
  */
-export async function exchangeGoogleCode(env: Env, code: string): Promise<GoogleIdentity | null> {
+export async function exchangeGoogleCode(
+  env: Env,
+  code: string,
+  redirectUri = "postmessage",
+  codeVerifier?: string,
+): Promise<GoogleIdentity | null> {
   if (!env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET) return null;
+  const params = new URLSearchParams({
+    code,
+    client_id: env.GOOGLE_CLIENT_ID,
+    client_secret: env.GOOGLE_CLIENT_SECRET,
+    redirect_uri: redirectUri,
+    grant_type: "authorization_code",
+    ...(codeVerifier ? { code_verifier: codeVerifier } : {}),
+  });
   const res = await fetch(env.GOOGLE_TOKEN_URL, {
     method: "POST",
     headers: { "content-type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      code,
-      client_id: env.GOOGLE_CLIENT_ID,
-      client_secret: env.GOOGLE_CLIENT_SECRET,
-      redirect_uri: "postmessage",
-      grant_type: "authorization_code",
-    }),
+    body: params,
     signal: AbortSignal.timeout(15_000),
   }).catch(() => undefined);
   if (!res?.ok) return null;
@@ -51,7 +61,24 @@ export async function exchangeGoogleCode(env: Env, code: string): Promise<Google
   return identityOf(data?.id_token, env.GOOGLE_CLIENT_ID, Boolean(env.TEST_MODE));
 }
 
-/** Sesión del cliente final para esa identidad (crea la cuenta, ya verificada, si no existe). */
+/**
+ * Resuelve la identidad de Google a partir de un `idToken` nativo o de un `code` OAuth (web o móvil PKCE).
+ */
+export async function resolveGoogleMobileIdentity(
+  env: Env,
+  input: { code?: string; redirectUri?: string; codeVerifier?: string; idToken?: string },
+): Promise<GoogleIdentity | null> {
+  if (!env.GOOGLE_CLIENT_ID) return null;
+  if (input.idToken) {
+    return identityOf(input.idToken, env.GOOGLE_CLIENT_ID, Boolean(env.TEST_MODE));
+  }
+  if (input.code) {
+    return exchangeGoogleCode(env, input.code, input.redirectUri ?? "postmessage", input.codeVerifier);
+  }
+  return null;
+}
+
+/** Sesión Bearer para esa identidad (crea la cuenta, ya verificada, si no existe). */
 export async function customerSessionFor(auth: Auth, id: GoogleIdentity, lang: Lang) {
   const ctx = await auth.$context;
   const found = await ctx.internalAdapter.findUserByEmail(id.email);
@@ -65,5 +92,16 @@ export async function customerSessionFor(auth: Auth, id: GoogleIdentity, lang: L
     user = (await ctx.internalAdapter.updateUser(user.id, { emailVerified: true })) ?? user;
   }
   const session = await ctx.internalAdapter.createSession(user.id);
-  return { token: session.token, user: { id: user.id, email: user.email, name: user.name } };
+  const u = user as typeof user & { locale?: string; timezone?: string };
+  return {
+    token: session.token,
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      locale: u.locale === "en" ? "en" : lang,
+      timezone: u.timezone ?? "UTC",
+      emailVerified: true,
+    },
+  };
 }

@@ -1,4 +1,5 @@
 # language: es
+@backend
 @tableros
 Característica: Tableros, horarios, feriados y servicios
   Un negocio crea su tablero con horario laboral, descansos y feriados de su país (RF-04, RF-05, RF-06).

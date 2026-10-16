@@ -7,7 +7,7 @@ import { formatDateTime } from "~/lib/time";
 import { instantToWall, wallToInstant, weekdayOf } from "~/lib/wall";
 import { Dialog } from "./dialog";
 import { Select } from "./select";
-import { Alert, Button, Checkbox, Field, TextArea } from "./ui";
+import { Alert, Button, Checkbox, Field, PhoneField, TextArea } from "./ui";
 
 export interface EditorTarget {
   mode: "create" | "edit";
@@ -270,10 +270,8 @@ export function EventEditor({
                 onChange={(x) => setAttendee({ ...attendee, email: x.target.value })}
                 optional
               />
-              <Field
+              <PhoneField
                 label={e.attendeePhone}
-                type="tel"
-                pattern="\+[1-9][0-9]{6,14}"
                 value={attendee.phone}
                 onChange={(x) => setAttendee({ ...attendee, phone: x.target.value })}
                 optional

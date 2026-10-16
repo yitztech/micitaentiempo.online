@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { TimeZone } from "./common.ts";
+import { FullName, freeText, singleLine } from "./text.ts";
 
 const Instant = z.iso.datetime({ offset: true });
 const Uuid = z.uuid();
@@ -7,7 +8,7 @@ const Uuid = z.uuid();
 /** Datos del asistente que se guardan con la cita. */
 export const Attendee = z
   .object({
-    name: z.string().trim().min(1).max(120),
+    name: FullName,
     email: z.string().trim().max(254).optional(),
     phone: z
       .string()
@@ -34,10 +35,10 @@ export const CreateEvent = z
     start: Instant,
     end: Instant.optional(),
     serviceId: Uuid.optional(),
-    title: z.string().trim().max(200).optional(),
+    title: singleLine(200).optional(),
     customerUserId: z.string().min(1).max(64).optional(),
     attendee: Attendee.optional(),
-    internalNotes: z.string().max(2000).optional(),
+    internalNotes: freeText(2000).optional(),
     rrule: z.string().max(300).optional(),
     onConflict: z.enum(["abort", "skip"]).default("abort"),
     cancelOverlapping: z.boolean().default(false),
@@ -58,8 +59,8 @@ export const UpdateEvent = z
     scope: EventScope.default("this"),
     start: Instant.optional(),
     end: Instant.optional(),
-    title: z.string().trim().max(200).optional(),
-    internalNotes: z.string().max(2000).optional(),
+    title: singleLine(200).optional(),
+    internalNotes: freeText(2000).optional(),
     attendee: Attendee.optional(),
     rrule: z.string().max(300).optional(),
   })
@@ -69,7 +70,7 @@ export type UpdateEvent = z.infer<typeof UpdateEvent>;
 export const CancelEvent = z
   .object({
     scope: EventScope.default("this"),
-    reason: z.string().trim().max(500).default(""),
+    reason: freeText(500).trim().default(""),
     expectedVersion: z.number().int().min(0).default(0),
   })
   .strict();
@@ -87,7 +88,7 @@ export const PublicHold = z
     serviceId: Uuid,
     start: Instant,
     attendee: Attendee.extend({ email: z.string().trim().min(3).max(254) }),
-    notes: z.string().max(1000).optional(),
+    notes: freeText(1000).optional(),
     channel: z.enum(["embed", "public"]).default("public"),
   })
   .strict();
@@ -109,13 +110,13 @@ export const HoldToken = z
 export const ConfirmHold = z
   .object({
     holdToken: HoldToken,
-    name: z.string().trim().min(1).max(120).optional(),
+    name: FullName.optional(),
     phone: z
       .string()
       .regex(/^\+[1-9]\d{6,14}$/)
       .optional(),
     timezone: TimeZone.optional(),
-    notes: z.string().max(1000).optional(),
+    notes: freeText(1000).optional(),
   })
   .strict();
 export type ConfirmHold = z.infer<typeof ConfirmHold>;
@@ -129,7 +130,7 @@ export const OtpVerify = z
   .object({
     email: z.string().trim().min(3).max(254),
     code: z.string().regex(/^\d{6}$/),
-    name: z.string().trim().min(1).max(120).optional(),
+    name: FullName.optional(),
   })
   .strict();
 export type OtpVerify = z.infer<typeof OtpVerify>;
@@ -141,4 +142,4 @@ export const Reschedule = z
   .strict();
 export type Reschedule = z.infer<typeof Reschedule>;
 
-export const CancelBooking = z.object({ reason: z.string().trim().max(500).default("") }).strict();
+export const CancelBooking = z.object({ reason: freeText(500).trim().default("") }).strict();

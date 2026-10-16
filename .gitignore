@@ -9,7 +9,7 @@ build/
 .react-router/
 coverage/
 playwright-report*/
-test-results/
+test-results*/
 blob-report/
 tests/escenarios/.features-gen/
 *.tsbuildinfo

@@ -1,4 +1,5 @@
 # language: es
+@frontend
 @reservas @ui
 Característica: Flujos alternativos y catálogo multiservicio en reserva y «Mis citas»
   El cliente final puede elegir entre múltiples servicios, recuperarse de errores de verificación,

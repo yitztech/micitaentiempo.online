@@ -86,3 +86,7 @@ docker compose up --watch       # todo el sistema con recarga en caliente
 
 El plan de construcción está en [`docs/plan/`](docs/plan/README.md) y las decisiones de arquitectura en
 [`docs/adr/`](docs/adr/).
+
+## Pruebas y límites de datos
+
+Consulta [las suites independientes y la ejecución conjunta](docs/testing/README.md). Incluyen unitarias, Gherkin/Playwright en JavaScript, SQL directo local y emulación web Android/iOS fuera de GitHub.

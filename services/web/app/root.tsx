@@ -25,7 +25,7 @@ export const middleware: Route.MiddlewareFunction[] = [
     // Una ruta del otro idioma responde 301 a su par en el mismo dominio (07-frontend.md §7.2).
     const url = new URL(request.url);
     const m = matchRoute(url.pathname);
-    if (m && m.lang !== site.lang && ROUTES[m.id].es !== ROUTES[m.id].en) {
+    if (m && m.lang !== site.lang && ROUTES[m.id][m.lang] !== ROUTES[m.id][site.lang]) {
       throw redirect(`${pathFor(m.id, site.lang, m.params)}${url.search}`, 301);
     }
     context.set(siteContext, site);

@@ -1,4 +1,5 @@
 import { request as httpRequest } from "node:http";
+import type { Lang } from "@mcet/i18n";
 
 const BASE = new URL(process.env.API_INTERNAL_URL ?? "http://api:3000");
 
@@ -51,7 +52,7 @@ export interface Features {
   slack: boolean;
   telegram: boolean;
   whatsapp: boolean;
-  newsletter: { es: boolean; en: boolean };
+  newsletter: Record<Lang, boolean>;
 }
 
 const NONE: Features = {
@@ -62,7 +63,7 @@ const NONE: Features = {
   slack: false,
   telegram: false,
   whatsapp: false,
-  newsletter: { es: false, en: false },
+  newsletter: { es: false, en: false, fr: false, pt: false, de: false, it: false },
 };
 
 let cached: { at: number; value: Features } | undefined;
