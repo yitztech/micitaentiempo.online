@@ -68,6 +68,7 @@ export default function SignUp() {
           email,
           password,
           callbackURL,
+          locale: site.lang,
         },
         { "x-altcha": token },
       );

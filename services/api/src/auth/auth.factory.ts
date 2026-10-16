@@ -1,6 +1,6 @@
 import { cimd } from "@better-auth/cimd";
 import { oauthProvider } from "@better-auth/oauth-provider";
-import { type Lang, pathFor } from "@mcet/i18n";
+import { isLang, type Lang, pathFor } from "@mcet/i18n";
 import { FullName, UpdateMe } from "@mcet/schemas";
 import { APIError, betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
@@ -102,7 +102,7 @@ export function inferNativeClient(body: unknown): void {
 }
 
 function userLang(user: { locale?: unknown }, fallback: Lang): Lang {
-  return user.locale === "en" || user.locale === "es" ? user.locale : fallback;
+  return isLang(user?.locale) ? user.locale : fallback;
 }
 
 /**

@@ -1,4 +1,4 @@
-import type { Lang } from "@mcet/i18n";
+import { isLang, type Lang } from "@mcet/i18n";
 import { Inject, Injectable } from "@nestjs/common";
 import type { FastifyRequest } from "fastify";
 import { requestLang, toHeaders } from "../common/request.js";
@@ -22,7 +22,7 @@ export interface SessionUser {
   calendarIds?: readonly string[];
 }
 
-/** Una instancia de Better Auth por dominio; se elige por el Host de la petición. */
+/** Una instancia de Better Auth por dominio real (es y en); se elige por el Host de la petición. */
 @Injectable()
 export class AuthRegistry {
   private readonly instances: Record<Lang, Auth>;
@@ -34,13 +34,15 @@ export class AuthRegistry {
     altcha: AltchaService,
   ) {
     const deps = { env, db, mail, verifyAltcha: (h: string | undefined) => altcha.verify(h) };
+    const esAuth = createAuth("es", deps);
+    const enAuth = createAuth("en", deps);
     this.instances = {
-      es: createAuth("es", deps),
-      en: createAuth("en", deps),
-      fr: createAuth("fr", deps),
-      pt: createAuth("pt", deps),
-      de: createAuth("de", deps),
-      it: createAuth("it", deps),
+      es: esAuth,
+      en: enAuth,
+      fr: enAuth,
+      pt: enAuth,
+      de: enAuth,
+      it: enAuth,
     };
   }
 
@@ -66,7 +68,7 @@ export class AuthRegistry {
         email: u.email,
         name: u.name,
         emailVerified: u.emailVerified,
-        locale: u.locale === "en" ? "en" : "es",
+        locale: isLang(u.locale) ? u.locale : "es",
         timezone: u.timezone ?? "UTC",
       },
     };
