@@ -18,7 +18,7 @@ func validText(value string, maxUnits int, multiline bool) bool {
 		if ch > 65535 {
 			units++
 		}
-		if units > maxUnits || (ch < 32 && !(multiline && (ch == '\t' || ch == '\n' || ch == '\r'))) ||
+		if units > maxUnits || (ch < 32 && (!multiline || (ch != '\t' && ch != '\n' && ch != '\r'))) ||
 			(ch >= 127 && ch <= 159) || (ch >= 8234 && ch <= 8238) || (ch >= 8294 && ch <= 8297) ||
 			(!multiline && (ch == '<' || ch == '>')) {
 			return false

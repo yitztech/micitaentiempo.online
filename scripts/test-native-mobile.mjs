@@ -92,11 +92,6 @@ export function locatorFor(target, testId) {
 
 /** Verifica prerrequisitos reales (artefacto compilado y servidor Appium/W3C activo); nunca simula éxito. */
 export async function verifyNativePrerequisites({ target, appiumUrl, appPath }) {
-  if (process.env.CI) {
-    throw new Error(
-      "Las pruebas nativas móviles están excluidas de CI y requieren simulador/emulador local.",
-    );
-  }
   if (!appPath || !existsSync(appPath)) {
     throw new Error(
       `No existe el artefacto nativo para ${target} (define NATIVE_APP_PATH, ANDROID_APP_PATH o IOS_APP_PATH apuntando al .apk o .app de desarrollo).`,
@@ -287,6 +282,10 @@ export async function runNativeFlowWithDriver({ target, appiumUrl, appPath, acco
 
 const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 if (isMain) {
+  if (process.env.CI) {
+    console.log("Las pruebas nativas móviles están excluidas de CI y requieren simulador/emulador local.");
+    process.exit(0);
+  }
   const targets = process.argv.slice(2).filter((arg) => VALID_TARGETS.includes(arg));
   if (!targets.length) {
     console.error(`Indica uno o más destinos: ${VALID_TARGETS.join(", ")}`);
