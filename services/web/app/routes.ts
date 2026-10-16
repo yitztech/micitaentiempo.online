@@ -20,6 +20,10 @@ export default [
   route("robots.txt", "routes/robots.ts"),
   layout("routes/_public.tsx", [
     index("routes/home.tsx"),
+    route("fr", "routes/home.tsx", { id: "home-fr" }),
+    route("pt", "routes/home.tsx", { id: "home-pt" }),
+    route("de", "routes/home.tsx", { id: "home-de" }),
+    route("it", "routes/home.tsx", { id: "home-it" }),
     ...page("features", "routes/features.tsx"),
     ...page("pricing", "routes/pricing.tsx"),
     ...page("faq", "routes/faq.tsx"),

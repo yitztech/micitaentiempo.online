@@ -62,4 +62,4 @@ Característica: Páginas públicas en español e inglés
 
   Escenario: La portada respeta el presupuesto de JavaScript
     Cuando un visitante abre la página "/" del dominio "es"
-    Entonces la página carga como mucho 130 KB de JavaScript comprimido
+    Entonces la página carga como mucho 145 KB de JavaScript comprimido

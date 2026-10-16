@@ -51,17 +51,19 @@ export function LanguageSelector({ className }: { className?: string }) {
 
   function getTargetUrl(targetLang: Lang): string {
     const targetPath = translatePath(pathname, targetLang) ?? pathFor("home", targetLang);
-    // Si se cambia a inglés y hay URL específica configurada para inglés, usar la URL en inglés
-    if (targetLang === "en" && site.siteUrls?.en) {
-      return `${site.siteUrls.en}${targetPath}`;
+    const esBase = site.siteUrls?.es;
+    const enBase = site.siteUrls?.en;
+
+    if (targetLang === "es") {
+      if (esBase && site.lang !== "es") {
+        return `${esBase}${targetPath}`;
+      }
+      return targetPath;
     }
-    // Si estamos en inglés y cambiamos a español u otro idioma
-    if (targetLang === "es" && site.siteUrls?.es && site.lang === "en") {
-      return `${site.siteUrls.es}${targetPath}`;
-    }
-    // Si el idioma destino tiene una URL específica configurada y difiere de la actual
-    if (site.siteUrls?.[targetLang] && site.siteUrls[targetLang] !== site.siteUrl) {
-      return `${site.siteUrls[targetLang]}${targetPath}`;
+
+    // Para inglés y para cualquier otro idioma (fr, pt, de, it), el host es el de inglés
+    if (enBase && site.lang === "es") {
+      return `${enBase}${targetPath}`;
     }
     return targetPath;
   }

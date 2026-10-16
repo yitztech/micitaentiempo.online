@@ -46,17 +46,28 @@ describe("rutas traducidas", () => {
   it("exige los parámetros", () => {
     expect(() => pathFor("booking", "es")).toThrow();
     expect(pathFor("booking", "en", { slug: "a b" })).toBe("/book/a%20b");
-    expect(pathFor("booking", "fr", { slug: "clinique" })).toBe("/reserver/clinique");
-    expect(pathFor("booking", "pt", { slug: "clinica" })).toBe("/agendar/clinica");
-    expect(pathFor("booking", "de", { slug: "klinik" })).toBe("/buchen/klinik");
-    expect(pathFor("booking", "it", { slug: "clinica" })).toBe("/prenota/clinica");
+    expect(pathFor("booking", "fr", { slug: "clinique" })).toBe("/fr/reserver/clinique");
+    expect(pathFor("booking", "pt", { slug: "clinica" })).toBe("/pt/agendar/clinica");
+    expect(pathFor("booking", "de", { slug: "klinik" })).toBe("/de/buchen/klinik");
+    expect(pathFor("booking", "it", { slug: "clinica" })).toBe("/it/prenota/clinica");
   });
   it("traduce rutas entre todos los idiomas soportados", () => {
-    expect(translatePath("/citas", "fr")).toBe("/rendez-vous");
-    expect(translatePath("/citas", "pt")).toBe("/agendamentos");
-    expect(translatePath("/citas", "de")).toBe("/termine");
-    expect(translatePath("/citas", "it")).toBe("/appuntamenti");
+    expect(translatePath("/citas", "fr")).toBe("/fr/rendez-vous");
+    expect(translatePath("/citas", "pt")).toBe("/pt/agendamentos");
+    expect(translatePath("/citas", "de")).toBe("/de/termine");
+    expect(translatePath("/citas", "it")).toBe("/it/appuntamenti");
     expect(translatePath("/tarifs", "es")).toBe("/precios");
-    expect(translatePath("/preise", "it")).toBe("/prezzi");
+    expect(translatePath("/fr/tarifs", "es")).toBe("/precios");
+    expect(translatePath("/preise", "it")).toBe("/it/prezzi");
+    expect(translatePath("/de/preise", "it")).toBe("/it/prezzi");
+  });
+  it("solo hay dos dominios reales configurados y los demás idiomas usan el dominio en inglés", () => {
+    expect(config.siteUrl.es).toBe("https://micitaentiempo.online");
+    expect(config.siteUrl.en).toBe("https://myappointmentontime.online");
+    expect(config.siteUrl.fr).toBe("https://myappointmentontime.online");
+    expect(config.siteUrl.pt).toBe("https://myappointmentontime.online");
+    expect(config.siteUrl.de).toBe("https://myappointmentontime.online");
+    expect(config.siteUrl.it).toBe("https://myappointmentontime.online");
+    expect(config.hosts.size).toBe(2);
   });
 });

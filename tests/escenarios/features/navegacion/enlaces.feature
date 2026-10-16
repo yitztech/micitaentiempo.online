@@ -74,6 +74,13 @@ Característica: Validación y funcionamiento de todos los enlaces de la platafo
     Y la página actual tiene la ruta "/precios"
 
   @critico @movil @tableta
+  Escenario: Cambiar a un idioma distinto añade el prefijo en el dominio en inglés
+    Cuando un visitante abre la página "/precios" del dominio "es"
+    Y cambia al idioma "fr" usando el selector de idioma
+    Entonces la página actual está en el dominio "en"
+    Y la página actual tiene la ruta "/fr/tarifs"
+
+  @critico @movil @tableta
   Escenario: Los documentos legales en inglés funcionan al navegar desde el pie
     Cuando un visitante abre la página "/" del dominio "en"
     Y hace clic en el enlace "Privacy" del pie de página

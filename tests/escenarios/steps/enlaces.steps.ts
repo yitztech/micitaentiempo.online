@@ -83,12 +83,51 @@ When("hace clic en el logo de la cabecera", async ({ page }) => {
 
 When("cambia de idioma usando el enlace de idioma de la cabecera", async ({ page }) => {
   await abrirMenuSiHaceFalta(page);
+  const selectorBtn = page.locator("header button[aria-haspopup='true']");
+  if (await selectorBtn.isVisible()) {
+    await selectorBtn.click();
+    const otroIdioma = page.url().includes("myappointmentontime") || page.url().includes("/en") ? "es" : "en";
+    const opcion = page.locator(`header a[hreflang='${otroIdioma}']`);
+    await expect(opcion).toBeVisible({ timeout: 10_000 });
+    const destino = await opcion.getAttribute("href");
+    expect(destino).toBeTruthy();
+    await opcion.click();
+    if (destino) {
+      if (destino.startsWith("http://") || destino.startsWith("https://")) {
+        await expect(page).toHaveURL(destino);
+      } else {
+        await expect(page).toHaveURL((url) => url.pathname === destino);
+      }
+    }
+    await page.waitForLoadState("load");
+    return;
+  }
   const enlace = page.locator("header a[hreflang]:visible");
   await expect(enlace).toBeVisible({ timeout: 10_000 });
   const destino = await enlace.getAttribute("href");
   expect(destino).toBeTruthy();
   await enlace.click();
   await expect(page).toHaveURL(destino as string);
+  await page.waitForLoadState("load");
+});
+
+When("cambia al idioma {string} usando el selector de idioma", async ({ page }, targetLang: string) => {
+  await abrirMenuSiHaceFalta(page);
+  const selectorBtn = page.locator("header button[aria-haspopup='true']");
+  await expect(selectorBtn).toBeVisible({ timeout: 10_000 });
+  await selectorBtn.click();
+  const opcion = page.locator(`header a[hreflang='${targetLang}']`);
+  await expect(opcion).toBeVisible({ timeout: 10_000 });
+  const destino = await opcion.getAttribute("href");
+  expect(destino).toBeTruthy();
+  await opcion.click();
+  if (destino) {
+    if (destino.startsWith("http://") || destino.startsWith("https://")) {
+      await expect(page).toHaveURL(destino);
+    } else {
+      await expect(page).toHaveURL((url) => url.pathname === destino);
+    }
+  }
   await page.waitForLoadState("load");
 });
 

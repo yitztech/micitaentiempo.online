@@ -26,22 +26,18 @@ export function siteForRequest(request: Request): SiteContext {
   const enHost = config.siteUrl.en ? new URL(config.siteUrl.en).hostname.toLowerCase() : "";
   const reqHost = host ? host.split(":")[0]?.toLowerCase() : "";
 
-  // Si el host es específicamente el de la URL en inglés, siempre es inglés.
-  if (enHost && reqHost === enHost) {
-    lang = "en";
-  } else {
-    // Si no es el host exclusivo de inglés, revisar si hay cookie o query param de idioma
-    const url = new URL(request.url);
-    const queryLang = url.searchParams.get("lang");
-    const cookie = request.headers.get("cookie") ?? "";
-    const cookieMatch = cookie.match(/(?:^|;\s*)mcet_lang=([a-z]{2})/);
-    const cookieLang = cookieMatch?.[1];
+  const url = new URL(request.url);
 
-    if (queryLang && isLang(queryLang)) {
-      lang = queryLang;
-    } else if (cookieLang && isLang(cookieLang)) {
-      lang = cookieLang;
+  // Si el host es el de la URL en inglés (que aloja inglés y los idiomas prefijados: fr, pt, de, it)
+  if (enHost && reqHost === enHost) {
+    const prefixMatch = url.pathname.match(/^\/(fr|pt|de|it)(?:\/|$)/);
+    if (prefixMatch && isLang(prefixMatch[1])) {
+      lang = prefixMatch[1];
+    } else {
+      lang = "en";
     }
+  } else {
+    lang = "es";
   }
 
   const other = otherLang(lang);
