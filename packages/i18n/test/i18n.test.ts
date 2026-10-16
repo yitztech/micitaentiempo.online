@@ -46,5 +46,17 @@ describe("rutas traducidas", () => {
   it("exige los parámetros", () => {
     expect(() => pathFor("booking", "es")).toThrow();
     expect(pathFor("booking", "en", { slug: "a b" })).toBe("/book/a%20b");
+    expect(pathFor("booking", "fr", { slug: "clinique" })).toBe("/reserver/clinique");
+    expect(pathFor("booking", "pt", { slug: "clinica" })).toBe("/agendar/clinica");
+    expect(pathFor("booking", "de", { slug: "klinik" })).toBe("/buchen/klinik");
+    expect(pathFor("booking", "it", { slug: "clinica" })).toBe("/prenota/clinica");
+  });
+  it("traduce rutas entre todos los idiomas soportados", () => {
+    expect(translatePath("/citas", "fr")).toBe("/rendez-vous");
+    expect(translatePath("/citas", "pt")).toBe("/agendamentos");
+    expect(translatePath("/citas", "de")).toBe("/termine");
+    expect(translatePath("/citas", "it")).toBe("/appuntamenti");
+    expect(translatePath("/tarifs", "es")).toBe("/precios");
+    expect(translatePath("/preise", "it")).toBe("/prezzi");
   });
 });

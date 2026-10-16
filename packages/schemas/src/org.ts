@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { Country } from "./common.ts";
+import { Label } from "./text.ts";
 
 export const Plan = z.enum(["personal", "branches"]);
 export type Plan = z.infer<typeof Plan>;
@@ -20,7 +21,7 @@ export const TRIAL_DAYS = 30;
 
 export const CreateOrg = z
   .object({
-    name: z.string().trim().min(1).max(120),
+    name: Label,
     plan: Plan,
     country: Country.optional(),
   })

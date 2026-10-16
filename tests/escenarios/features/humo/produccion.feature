@@ -1,4 +1,5 @@
 # language: es
+@backend
 @humo-produccion
 Característica: Humo en producción
   Comprobaciones de solo lectura tras cada despliegue (ES_URL, EN_URL y, si se da, EXPECTED_SHA). No crean

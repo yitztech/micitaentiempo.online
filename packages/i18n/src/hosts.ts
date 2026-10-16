@@ -24,7 +24,7 @@ function hostOf(url: string): string {
  * IDIOMAS, SITE_URL (idioma principal), SITE_URL_ES, SITE_URL_EN y, solo en local, HOST_LANG_MAP.
  */
 export function siteConfigFromEnv(env: Env): SiteConfig {
-  const idiomas = (env.IDIOMAS ?? "es,en")
+  const idiomas = (env.IDIOMAS ?? "es,en,fr,pt,de,it")
     .split(",")
     .map((s) => s.trim().toLowerCase())
     .filter(isLang);
@@ -34,11 +34,22 @@ export function siteConfigFromEnv(env: Env): SiteConfig {
   if (!esUrl || !enUrl) {
     throw new Error("Faltan SITE_URL/SITE_URL_ES y SITE_URL_EN");
   }
-  const siteUrl: Record<Lang, string> = { es: stripSlash(esUrl), en: stripSlash(enUrl) };
+  const siteUrl: Record<Lang, string> = {
+    es: stripSlash(esUrl),
+    en: stripSlash(enUrl),
+    fr: stripSlash(env.SITE_URL_FR || esUrl),
+    pt: stripSlash(env.SITE_URL_PT || esUrl),
+    de: stripSlash(env.SITE_URL_DE || esUrl),
+    it: stripSlash(env.SITE_URL_IT || esUrl),
+  };
   const hosts = new Map<string, Lang>([
     [hostOf(siteUrl.es), "es"],
     [hostOf(siteUrl.en), "en"],
   ]);
+  if (env.SITE_URL_FR) hosts.set(hostOf(siteUrl.fr), "fr");
+  if (env.SITE_URL_PT) hosts.set(hostOf(siteUrl.pt), "pt");
+  if (env.SITE_URL_DE) hosts.set(hostOf(siteUrl.de), "de");
+  if (env.SITE_URL_IT) hosts.set(hostOf(siteUrl.it), "it");
   for (const pair of (env.HOST_LANG_MAP ?? "").split(",")) {
     const [host, lang] = pair.split(":").map((s) => s.trim().toLowerCase());
     if (host && isLang(lang)) hosts.set(host, lang);

@@ -1,4 +1,5 @@
 # language: es
+@backend
 @sincronizacion
 Característica: Sincronización con Google, Outlook y Apple
   Nuestro sistema es la fuente de verdad: el ocupado externo bloquea la agenda, nuestras citas aparecen en

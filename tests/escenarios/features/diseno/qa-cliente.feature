@@ -1,4 +1,5 @@
 # language: es
+@frontend
 @qa-diseno
 Característica: Evidencia de diseño y accesibilidad del cliente
   La interfaz conserva sus acciones en pantallas estrechas, con texto largo y en modo oscuro.

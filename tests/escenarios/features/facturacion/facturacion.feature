@@ -1,4 +1,5 @@
 # language: es
+@backend
 @facturacion
 Característica: Planes, prueba gratuita y facturación
   Solo suscripción. Stripe está implementado y apagado (decisión del 2026-10-06): sin claves, «Disponible

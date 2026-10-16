@@ -1,4 +1,4 @@
-import { en, es, type Lang, pathFor } from "@mcet/i18n";
+import { de, en, es, fr, it, type Lang, pathFor, pt } from "@mcet/i18n";
 import type { AuthInfo } from "@modelcontextprotocol/server";
 import {
   BadRequestException,
@@ -31,7 +31,14 @@ import type { McpCaller } from "./tools.js";
 /** URL de retorno de Gemini Enterprise para clientes registrados a mano (06-mcp.md §6.1). */
 export const GEMINI_ENTERPRISE_REDIRECT = "https://vertexaisearch.cloud.google.com/oauth-redirect";
 
-const SCOPE_TEXT = { es: es.aiScopes, en: en.aiScopes } as const;
+const SCOPE_TEXT: Record<Lang, typeof es.aiScopes> = {
+  es: es.aiScopes,
+  en: en.aiScopes,
+  fr: fr.aiScopes,
+  pt: pt.aiScopes,
+  de: de.aiScopes,
+  it: it.aiScopes,
+};
 
 type ClientRow = typeof oauthClient.$inferSelect;
 

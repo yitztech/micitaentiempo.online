@@ -53,7 +53,7 @@ func (s CalendarServer) CreateCalendar(ctx context.Context, req *calendarv1.Crea
 	if !statuses[req.GetOrgStatus()] {
 		return nil, fail(connect.CodeInvalidArgument, "invalid_status", "%q", req.GetOrgStatus())
 	}
-	if l := len([]rune(req.GetName())); l < 1 || l > 120 {
+	if !validName(req.GetName()) || !validText(req.GetAddress(), 240, false) {
 		return nil, fail(connect.CodeInvalidArgument, "invalid_name", "nombre de 1 a 120 caracteres")
 	}
 	if _, err := location(req.GetTimezone()); err != nil {
@@ -129,6 +129,9 @@ func (s CalendarServer) UpdateCalendar(ctx context.Context, req *calendarv1.Upda
 	cur, _, err := s.calendar(ctx, req.GetId(), true)
 	if err != nil {
 		return nil, err
+	}
+	if (req.Name != nil && !validName(req.GetName())) || !validText(req.GetAddress(), 240, false) {
+		return nil, fail(connect.CodeInvalidArgument, "validation_failed", "texto no válido")
 	}
 	p := store.CalendarPatch{Name: req.Name, Slug: req.Slug, Timezone: req.Timezone, Country: req.Country, Subdivision: req.Subdivision, Address: req.Address}
 	if req.Timezone != nil {

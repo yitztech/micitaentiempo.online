@@ -1,4 +1,5 @@
 # language: es
+@backend
 @cuentas
 Característica: Registro de negocios con correo verificado
   Un negocio se registra con su nombre completo, su correo (que es su usuario) y una contraseña;

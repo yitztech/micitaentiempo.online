@@ -1,4 +1,5 @@
 # language: es
+@backend
 @mcp
 Característica: Conecta tu IA (MCP)
   Una aplicación de IA se conecta por OAuth (CIMD o registro dinámico), actúa con los permisos de quien la

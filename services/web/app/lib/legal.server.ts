@@ -15,6 +15,10 @@ export const LEGAL_UPDATED = "2026-10-07";
 const SOURCES: Record<Lang, Record<LegalDoc, string>> = {
   es: { privacy: privacyEs, terms: termsEs, credits: creditsEs },
   en: { privacy: privacyEn, terms: termsEn, credits: creditsEn },
+  fr: { privacy: privacyEn, terms: termsEn, credits: creditsEn },
+  pt: { privacy: privacyEn, terms: termsEn, credits: creditsEn },
+  de: { privacy: privacyEn, terms: termsEn, credits: creditsEn },
+  it: { privacy: privacyEn, terms: termsEn, credits: creditsEn },
 };
 
 const cache = new Map<string, string>();

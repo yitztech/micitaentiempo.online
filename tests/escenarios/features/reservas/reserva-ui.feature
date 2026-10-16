@@ -1,4 +1,5 @@
 # language: es
+@frontend
 @reservas @ui
 Característica: Reservar desde la página pública, «Mis citas» y el embed
   El cliente final reserva desde el teléfono en su idioma, confirma con un código y gestiona sus citas

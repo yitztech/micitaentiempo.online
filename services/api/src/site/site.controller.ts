@@ -40,6 +40,10 @@ export function features(env: Env) {
     newsletter: {
       es: Boolean(env.LISTMONK_URL && env.LISTMONK_LIST_UUID),
       en: Boolean(env.LISTMONK_URL_EN && env.LISTMONK_LIST_UUID_EN),
+      fr: Boolean(env.LISTMONK_URL_EN && env.LISTMONK_LIST_UUID_EN),
+      pt: Boolean(env.LISTMONK_URL_EN && env.LISTMONK_LIST_UUID_EN),
+      de: Boolean(env.LISTMONK_URL_EN && env.LISTMONK_LIST_UUID_EN),
+      it: Boolean(env.LISTMONK_URL_EN && env.LISTMONK_LIST_UUID_EN),
     },
   };
 }

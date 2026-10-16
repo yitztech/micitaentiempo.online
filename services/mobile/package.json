@@ -1,0 +1,32 @@
+{
+  "name": "@mcet/mobile",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "index.ts",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.app.json --noEmit",
+    "test": "vitest run ../../tests/unit/mobile-app.test.js",
+    "start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "prebuild:android": "expo prebuild --platform android --clean",
+    "build:android": "expo prebuild --platform android && cd android && ./gradlew assembleDebug",
+    "appium": "APPIUM_HOME=.appium appium --address 127.0.0.1 --port 4723",
+    "appium:setup": "APPIUM_HOME=.appium appium driver install uiautomator2"
+  },
+  "dependencies": {
+    "expo": "~58.0.11",
+    "expo-auth-session": "~58.0.12",
+    "expo-crypto": "~58.0.6",
+    "expo-status-bar": "~58.0.3",
+    "expo-web-browser": "~58.0.6",
+    "react": "19.3.0",
+    "react-native": "0.88.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "appium": "^3.8.0",
+    "typescript": "~5.9"
+  }
+}

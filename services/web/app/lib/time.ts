@@ -1,6 +1,13 @@
 import type { Lang } from "@mcet/i18n";
 
-export const LOCALE: Record<Lang, string> = { es: "es-MX", en: "en-US" };
+export const LOCALE: Record<Lang, string> = {
+  es: "es-ES",
+  en: "en-US",
+  fr: "fr-FR",
+  pt: "pt-BR",
+  de: "de-DE",
+  it: "it-IT",
+};
 
 /** Primera letra en mayúscula (en español no se capitalizan meses ni «de»). */
 export function ucfirst(s: string): string {

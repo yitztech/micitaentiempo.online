@@ -35,12 +35,20 @@ export class MailService {
         secure: env.SMTP_SECURE,
         auth: { user, pass },
       });
+    const defaultTransporter = make(
+      env.SMTP_USER_ES ?? env.SMTP_USER,
+      env.SMTP_PASSWORD_ES ?? env.SMTP_PASSWORD,
+    );
+    const defaultFrom = env.MAIL_FROM_ES ?? env.MAIL_FROM;
+    const enTransporter = make(env.SMTP_USER_EN, env.SMTP_PASSWORD_EN);
+    const enFrom = env.MAIL_FROM_EN;
     this.transports = {
-      es: {
-        transporter: make(env.SMTP_USER_ES ?? env.SMTP_USER, env.SMTP_PASSWORD_ES ?? env.SMTP_PASSWORD),
-        from: env.MAIL_FROM_ES ?? env.MAIL_FROM,
-      },
-      en: { transporter: make(env.SMTP_USER_EN, env.SMTP_PASSWORD_EN), from: env.MAIL_FROM_EN },
+      es: { transporter: defaultTransporter, from: defaultFrom },
+      en: { transporter: enTransporter, from: enFrom },
+      fr: { transporter: defaultTransporter, from: defaultFrom },
+      pt: { transporter: defaultTransporter, from: defaultFrom },
+      de: { transporter: defaultTransporter, from: defaultFrom },
+      it: { transporter: defaultTransporter, from: defaultFrom },
     };
   }
 

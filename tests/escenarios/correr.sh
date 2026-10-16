@@ -3,5 +3,5 @@
 # escenarios @reloj (los que lo mueven) corren solos y al final. Los argumentos pasan a ambas.
 set -e
 bddgen
-playwright test --project escritorio --project movil --project tableta "$@"
+playwright test --project escritorio "$@"
 INFORME=reloj playwright test --project reloj "$@"

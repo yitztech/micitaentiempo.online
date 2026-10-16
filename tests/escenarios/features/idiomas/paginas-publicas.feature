@@ -1,4 +1,5 @@
 # language: es
+@frontend
 @idiomas @publico
 Característica: Páginas públicas en español e inglés
   Cada página existe en los dos dominios con su ruta traducida, sin barreras de accesibilidad graves,

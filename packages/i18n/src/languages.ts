@@ -1,4 +1,4 @@
-export const LANGS = ["es", "en"] as const;
+export const LANGS = ["es", "en", "fr", "pt", "de", "it"] as const;
 export type Lang = (typeof LANGS)[number];
 
 export function isLang(value: unknown): value is Lang {
@@ -6,4 +6,11 @@ export function isLang(value: unknown): value is Lang {
 }
 
 /** Región por defecto para formatear fechas y números en cada idioma. */
-export const DEFAULT_LOCALE: Record<Lang, string> = { es: "es-MX", en: "en-US" };
+export const DEFAULT_LOCALE: Record<Lang, string> = {
+  es: "es-ES",
+  en: "en-US",
+  fr: "fr-FR",
+  pt: "pt-BR",
+  de: "de-DE",
+  it: "it-IT",
+};

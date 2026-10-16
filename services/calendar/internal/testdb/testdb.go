@@ -18,10 +18,12 @@ import (
 const Image = "postgres:18.6-alpine3.24"
 
 // New arranca un contenedor, aplica las migraciones y devuelve el pool.
-// Si no hay Docker disponible, la prueba se salta.
+// -short excluye explícitamente las pruebas SQL; sin Docker, la suite local falla.
 func New(t *testing.T) *pgxpool.Pool {
 	t.Helper()
-	testcontainers.SkipIfProviderIsNotHealthy(t)
+	if testing.Short() {
+		t.Skip("SQL separado: ejecutar pnpm test:db")
+	}
 	ctx := context.Background()
 	ctr, err := tcpostgres.Run(ctx, Image,
 		tcpostgres.WithDatabase("micita"),

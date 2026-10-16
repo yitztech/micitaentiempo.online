@@ -30,7 +30,17 @@ func fromProtoService(p *calendarv1.Service) (store.Service, error) {
 		MinNoticeMin: int(p.GetMinNoticeMin()), MaxAdvanceDays: int(p.GetMaxAdvanceDays()), SlotStepMin: int(p.GetSlotStepMin()),
 		DailyLimit: int(p.GetDailyLimit()), Color: p.GetColor(), Active: p.GetActive(),
 	}
-	if s.Name["es"] == "" && s.Name["en"] == "" {
+	for lang, value := range s.Name {
+		if (lang != "es" && lang != "en") || !validText(value, 120, false) {
+			return s, fail(connect.CodeInvalidArgument, "validation_failed", "nombre no válido")
+		}
+	}
+	for lang, value := range s.Description {
+		if (lang != "es" && lang != "en") || !validText(value, 1000, true) {
+			return s, fail(connect.CodeInvalidArgument, "validation_failed", "descripción no válida")
+		}
+	}
+	if !validName(s.Name["es"]) && !validName(s.Name["en"]) {
 		return s, fail(connect.CodeInvalidArgument, "invalid_name", "el servicio necesita nombre en es o en")
 	}
 	if s.DurationMin < 5 || s.DurationMin > 720 {

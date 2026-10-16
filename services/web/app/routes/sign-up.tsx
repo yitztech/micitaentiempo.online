@@ -28,7 +28,35 @@ export default function SignUp() {
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
+    const name = String(form.get("name") ?? "").trim();
     const email = String(form.get("email") ?? "").trim();
+    const password = String(form.get("password") ?? "");
+
+    // Validaciones de longitud mínima, máxima y caracteres permitidos
+    // biome-ignore lint/suspicious/noControlCharactersInRegex: validación de controles y etiquetas
+    if (!name || name.length < 2 || name.length > 120 || /[<>\u0000-\u001f\u007f-\u009f]/.test(name)) {
+      setError(t.auth.errors.name_required || t.auth.errors.validation_failed);
+      return;
+    }
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!email || email.length < 5 || email.length > 254 || !emailRegex.test(email)) {
+      setError(t.auth.errors.invalid_format);
+      return;
+    }
+    if (!password || password.length < 12) {
+      setError(t.auth.errors.password_too_short);
+      return;
+    }
+    if (password.length > 128) {
+      setError(t.auth.errors.password_too_long);
+      return;
+    }
+    // biome-ignore lint/suspicious/noControlCharactersInRegex: validación de caracteres de control
+    if (/[\u0000-\u001f\u007f-\u009f]/.test(password)) {
+      setError(t.auth.errors.validation_failed);
+      return;
+    }
+
     setBusy(true);
     setError(null);
     try {
@@ -36,9 +64,9 @@ export default function SignUp() {
       await postJson(
         "/api/auth/sign-up/email",
         {
-          name: String(form.get("name") ?? "").trim(),
+          name,
           email,
-          password: String(form.get("password") ?? ""),
+          password,
           callbackURL,
         },
         { "x-altcha": token },
@@ -93,14 +121,24 @@ export default function SignUp() {
         onFocus={() => void altcha.start().catch(() => undefined)}
         className="space-y-5"
       >
-        <Field label={f.name} name="name" autoComplete="name" required maxLength={120} />
+        <Field
+          label={f.name}
+          name="name"
+          autoComplete="name"
+          required
+          minLength={2}
+          maxLength={120}
+          pattern="[^<>\u0000-\u001f\u007f-\u009f]+"
+        />
         <Field
           label={f.email}
           name="email"
           type="email"
           autoComplete="email"
           required
+          minLength={5}
           maxLength={254}
+          pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}"
           hint={f.emailHint}
         />
         <Field

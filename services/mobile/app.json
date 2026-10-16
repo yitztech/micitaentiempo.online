@@ -1,0 +1,53 @@
+{
+  "expo": {
+    "name": "Mi Cita en Tiempo",
+    "slug": "micitaentiempo",
+    "version": "1.0.0",
+    "orientation": "default",
+    "scheme": ["micitaentiempo", "myappointmentontime"],
+    "userInterfaceStyle": "automatic",
+    "platforms": ["ios", "android", "web"],
+    "ios": {
+      "bundleIdentifier": "online.micitaentiempo.app",
+      "supportsTablet": true,
+      "infoPlist": {
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": ["micitaentiempo", "myappointmentontime"]
+          }
+        ]
+      }
+    },
+    "android": {
+      "package": "online.micitaentiempo.app",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "micitaentiempo",
+              "host": "oauth",
+              "pathPrefix": "/google"
+            },
+            {
+              "scheme": "myappointmentontime",
+              "host": "oauth",
+              "pathPrefix": "/google"
+            },
+            {
+              "scheme": "https",
+              "host": "micitaentiempo.online"
+            },
+            {
+              "scheme": "https",
+              "host": "myappointmentontime.online"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
+    },
+    "plugins": ["expo-status-bar", "expo-web-browser"]
+  }
+}

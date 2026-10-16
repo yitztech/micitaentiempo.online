@@ -1,3 +1,4 @@
+import { MULTI_LINE, SINGLE_LINE } from "@mcet/schemas/text-policy";
 import { AlertCircle, CheckCircle2, Eye, EyeOff, Info, Loader2, TriangleAlert } from "lucide-react";
 import { type ComponentProps, type ReactNode, useId, useState, useSyncExternalStore } from "react";
 import { Link, type LinkProps } from "react-router";
@@ -167,6 +168,16 @@ export function Field({ label, hint, error, optional, className, type, ...props 
       <div className="relative mt-1.5">
         <input
           {...props}
+          onInput={(event) => {
+            props.onInput?.(event);
+            if (type && type !== "text") return;
+            const value = event.currentTarget.value;
+            const valid =
+              SINGLE_LINE.test(value) &&
+              value.length <= (props.maxLength ?? 200) &&
+              (!props.required || value.trim().length > 0);
+            event.currentTarget.setCustomValidity(valid ? "" : t.common.ui.invalidText);
+          }}
           id={id}
           type={isPassword && visible ? "text" : type}
           aria-invalid={error ? true : undefined}
@@ -208,6 +219,7 @@ export function TextArea({
   ...props
 }: Omit<ComponentProps<"textarea">, "id"> & { label: string; hint?: string; error?: string }) {
   const id = useId();
+  const t = useT();
   return (
     <div className={className}>
       <label htmlFor={id} className="block text-[15px] font-medium">
@@ -215,6 +227,12 @@ export function TextArea({
       </label>
       <textarea
         {...props}
+        onInput={(event) => {
+          props.onInput?.(event);
+          const value = event.currentTarget.value;
+          const valid = MULTI_LINE.test(value) && value.length <= (props.maxLength ?? 4000);
+          event.currentTarget.setCustomValidity(valid ? "" : t.common.ui.invalidText);
+        }}
         id={id}
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? `${id}-error` : hint ? `${id}-hint` : undefined}
@@ -261,3 +279,5 @@ export function OrDivider() {
     </div>
   );
 }
+
+export * from "./phone-field";

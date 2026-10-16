@@ -1,0 +1,79 @@
+{
+  "site": {
+    "name": "Il Mio Appuntamento In Tempo",
+    "tagline": "La tua agenda di appuntamenti, sempre puntuale.",
+    "description": "Calendario di prenotazione per le aziende: condividi le tue disponibilità, ricevi appuntamenti e sincronizza con Google, Outlook e Apple."
+  },
+  "home": {
+    "title": "Prenotazioni senza chiamate né messaggi",
+    "lead": "Condividi la tua agenda o inseriscila nel tuo sito web. I tuoi clienti prenotano in autonomia e ricevi ogni appuntamento all'istante.",
+    "comingSoon": "Prossimamente"
+  },
+  "language": {
+    "switchTo": "Italiano",
+    "switchToLabel": "Visualizza questo sito in italiano",
+    "sessionNote": "Questo sito ha una propria sessione: se hai effettuato l'accesso altrove, dovrai accedere di nuovo qui."
+  },
+  "nav": {
+    "main": "Principale",
+    "features": "Funzionalità",
+    "pricing": "Prezzi",
+    "faq": "FAQ",
+    "help": "Aiuto",
+    "connectAi": "Connetti la tua IA",
+    "contact": "Contatto",
+    "signIn": "Accedi",
+    "signUp": "Inizia gratis",
+    "myAppointments": "I miei appuntamenti",
+    "businessSignIn": "Accesso aziendale",
+    "createAgenda": "Crea la mia agenda",
+    "dashboard": "Pannello",
+    "openMenu": "Apri menu",
+    "closeMenu": "Chiudi menu",
+    "skipToContent": "Salta al contenuto"
+  },
+  "footer": {
+    "product": "Prodotto",
+    "legal": "Legale",
+    "privacy": "Privacy",
+    "terms": "Termini",
+    "credits": "Crediti",
+    "rights": "© {{year}} Il Mio Appuntamento In Tempo",
+    "madeFor": "Agenda online per aziende di servizi."
+  },
+  "ui": {
+    "loading": "Caricamento…",
+    "required": "Obbligatorio",
+    "optional": "Opzionale",
+    "showPassword": "Mostra password",
+    "hidePassword": "Nascondi password",
+    "close": "Chiudi",
+    "back": "Indietro",
+    "continue": "Continua",
+    "or": "o",
+    "sending": "Invio in corso…",
+    "comingSoon": "Disponibile a breve",
+    "invalidText": "Verifica la lunghezza ed elimina i caratteri di controllo o i tag."
+  },
+  "errors": {
+    "notFoundTitle": "Pagina non trovata",
+    "notFoundBody": "L'indirizzo non esiste o è stato modificato.",
+    "serverTitle": "Si è verificato un errore",
+    "serverBody": "Riprova tra qualche istante.",
+    "backHome": "Torna alla home",
+    "errorCode": "Codice {{code}}"
+  },
+  "aiScopes": {
+    "openid": "Saber que eres tú",
+    "profile": "Ver quién eres, tu organización, plan y roles",
+    "email": "Ver tu correo",
+    "offline_access": "Mantener la conexión sin volver a iniciar sesión",
+    "calendar:read": "Ver tableros, ajustes, eventos, huecos libres y feriados",
+    "calendar:write": "Crear, cambiar y cancelar eventos y bloqueos",
+    "customers:read": "Ver los datos de contacto de tus clientes (sin esto se ocultan)",
+    "stats:read": "Ver estadísticas",
+    "settings:write": "Cambiar horario, descansos y excepciones (solo propietario)",
+    "billing:read": "Ver plan, prueba y facturas (solo propietario)",
+    "notifications:read": "Ver avisos recientes"
+  }
+}

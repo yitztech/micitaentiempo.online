@@ -1,12 +1,54 @@
-import { emailsEn, emailsEs, en, es, interpolate, type Lang, noticesEn, noticesEs } from "@mcet/i18n";
+import {
+  de,
+  emailsDe,
+  emailsEn,
+  emailsEs,
+  emailsFr,
+  emailsIt,
+  emailsPt,
+  en,
+  es,
+  fr,
+  interpolate,
+  it,
+  type Lang,
+  noticesDe,
+  noticesEn,
+  noticesEs,
+  noticesFr,
+  noticesIt,
+  noticesPt,
+  pt,
+} from "@mcet/i18n";
 import { Button, Text } from "@react-email/components";
 import { render } from "@react-email/render";
 import { Layout, styles } from "./layout.js";
 
 type Catalog = typeof emailsEs;
-const CATALOG: Record<Lang, Catalog> = { es: emailsEs, en: emailsEn };
-const BRAND: Record<Lang, string> = { es: es.site.name, en: en.site.name };
-const NOTICES_EMAIL: Record<Lang, typeof noticesEs> = { es: noticesEs, en: noticesEn };
+const CATALOG: Record<Lang, Catalog> = {
+  es: emailsEs,
+  en: emailsEn,
+  fr: emailsFr,
+  pt: emailsPt,
+  de: emailsDe,
+  it: emailsIt,
+};
+const BRAND: Record<Lang, string> = {
+  es: es.site.name,
+  en: en.site.name,
+  fr: fr.site.name,
+  pt: pt.site.name,
+  de: de.site.name,
+  it: it.site.name,
+};
+const NOTICES_EMAIL: Record<Lang, typeof noticesEs> = {
+  es: noticesEs,
+  en: noticesEn,
+  fr: noticesFr,
+  pt: noticesPt,
+  de: noticesDe,
+  it: noticesIt,
+};
 
 export interface RenderedEmail {
   subject: string;

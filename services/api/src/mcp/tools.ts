@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { interpolate, type Lang, mcpEn, mcpEs, pathFor } from "@mcet/i18n";
+import { interpolate, type Lang, mcpDe, mcpEn, mcpEs, mcpFr, mcpIt, mcpPt, pathFor } from "@mcet/i18n";
 import { CancelEvent, CreateEvent, DateOverride, UpdateEvent, WeeklyHours } from "@mcet/schemas";
 import type { CallToolResult } from "@modelcontextprotocol/server";
 import { HttpException } from "@nestjs/common";
@@ -18,7 +18,14 @@ import type { NotificationsController } from "../notifications/notifications.con
 import type { OrgsService } from "../orgs/orgs.service.js";
 import { mcpResourceMetadataUrl } from "./mcp.config.js";
 
-export const MCP_TEXT: Record<Lang, typeof mcpEs> = { es: mcpEs, en: mcpEn };
+export const MCP_TEXT: Record<Lang, typeof mcpEs> = {
+  es: mcpEs,
+  en: mcpEn,
+  fr: mcpFr,
+  pt: mcpPt,
+  de: mcpDe,
+  it: mcpIt,
+};
 
 /** Quién llama: el usuario que conectó la aplicación, con sus permisos OAuth y tableros elegidos. */
 export interface McpCaller {
@@ -219,7 +226,7 @@ export class BulkActions {
 
 interface ToolSpec<I extends z.ZodType, O extends z.ZodType> {
   name: string;
-  title: Record<Lang, string>;
+  title: Partial<Record<Lang, string>> & { es: string; en: string };
   description: string;
   /** Permiso OAuth que exige (además del rol del usuario en el tablero). */
   scope?: string;

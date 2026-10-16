@@ -11,6 +11,7 @@ import { HealthController } from "./health/health.controller.js";
 import { IntegrationsModule } from "./integrations/integrations.module.js";
 import { InternalRpcModule } from "./internal-rpc/internal-rpc.module.js";
 import { McpModule } from "./mcp/mcp.module.js";
+import { MobileModule } from "./mobile/mobile.module.js";
 import { NotificationsModule } from "./notifications/notifications.module.js";
 import { SiteController } from "./site/site.controller.js";
 import { TestSupportController } from "./test-support/test-support.controller.js";
@@ -40,6 +41,7 @@ const testControllers = process.env.TEST_MODE ? [TestSupportController] : [];
     BillingModule,
     IntegrationsModule,
     McpModule,
+    MobileModule,
   ],
   controllers: [HealthController, SiteController, ...testControllers],
 })

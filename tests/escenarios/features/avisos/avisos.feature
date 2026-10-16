@@ -1,4 +1,5 @@
 # language: es
+@backend
 @avisos
 Característica: Avisos multicanal y recordatorios
   Cada persona recibe los avisos en su idioma y por los canales que eligió; nunca el autor del cambio

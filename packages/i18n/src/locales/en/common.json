@@ -52,7 +52,8 @@
     "continue": "Continue",
     "or": "or",
     "sending": "Sending…",
-    "comingSoon": "Coming soon"
+    "comingSoon": "Coming soon",
+    "invalidText": "Check the length and remove control characters or tags."
   },
   "errors": {
     "notFoundTitle": "Page not found",

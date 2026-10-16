@@ -22,12 +22,26 @@ export default function ResetPassword() {
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const newPassword = String(new FormData(e.currentTarget).get("password") ?? "");
+    if (!newPassword || newPassword.length < 12) {
+      setError(t.auth.errors.password_too_short);
+      return;
+    }
+    if (newPassword.length > 128) {
+      setError(t.auth.errors.password_too_long);
+      return;
+    }
+    // biome-ignore lint/suspicious/noControlCharactersInRegex: validación de caracteres de control
+    if (/[\u0000-\u001f\u007f-\u009f]/.test(newPassword)) {
+      setError(t.auth.errors.validation_failed);
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
       await postJson("/api/auth/reset-password", {
         token,
-        newPassword: String(new FormData(e.currentTarget).get("password") ?? ""),
+        newPassword,
       });
       setDone(true);
     } catch (err) {

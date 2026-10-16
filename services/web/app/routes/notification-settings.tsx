@@ -1,6 +1,6 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { useRevalidator, useSearchParams } from "react-router";
-import { Alert, Button, Card, Checkbox, Field } from "~/components/ui";
+import { Alert, Button, Card, Checkbox, Field, PhoneField } from "~/components/ui";
 import { apiRequest, errorText } from "~/lib/api-client";
 import { fmt, useRoot } from "~/lib/i18n";
 import { panelGet } from "~/lib/panel.server";
@@ -229,13 +229,7 @@ export default function NotificationSettings({ loaderData }: Route.ComponentProp
                         required
                       />
                     ) : (
-                      <Field
-                        label={p.phone}
-                        name="phone"
-                        type="tel"
-                        placeholder="+52 55 1234 5678"
-                        required
-                      />
+                      <PhoneField label={p.phone} name="phone" required />
                     )}
                     <Button type="submit" variant="secondary">
                       {waSent ? p.verify : p.sendCode}

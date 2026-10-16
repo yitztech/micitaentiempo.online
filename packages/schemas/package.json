@@ -7,6 +7,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./text-policy": {
+      "types": "./dist/text-policy.d.ts",
+      "default": "./dist/text-policy.js"
     }
   },
   "files": [

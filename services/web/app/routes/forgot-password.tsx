@@ -24,6 +24,11 @@ export default function ForgotPassword() {
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const email = String(new FormData(e.currentTarget).get("email") ?? "").trim();
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!email || email.length < 5 || email.length > 254 || !emailRegex.test(email)) {
+      setError(t.auth.errors.invalid_format);
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
@@ -63,7 +68,16 @@ export default function ForgotPassword() {
           onFocus={() => void altcha.start().catch(() => undefined)}
           className="space-y-5"
         >
-          <Field label={t.auth.fields.email} name="email" type="email" autoComplete="email" required />
+          <Field
+            label={t.auth.fields.email}
+            name="email"
+            type="email"
+            autoComplete="email"
+            required
+            minLength={5}
+            maxLength={254}
+            pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}"
+          />
           <AltchaStatus state={altcha.state} onRetry={() => void altcha.start().catch(() => undefined)} />
           {error ? <Alert tone="danger">{error}</Alert> : null}
           <Button type="submit" size="lg" className="w-full" loading={busy}>

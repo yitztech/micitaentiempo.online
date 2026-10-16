@@ -1,4 +1,4 @@
-import { type Lang, langForHost, otherLang, type SiteConfig, siteConfigFromEnv } from "@mcet/i18n";
+import { isLang, type Lang, langForHost, otherLang, type SiteConfig, siteConfigFromEnv } from "@mcet/i18n";
 
 let cached: SiteConfig | undefined;
 
@@ -13,19 +13,44 @@ export interface SiteContext {
   siteUrl: string;
   otherSiteUrl: string;
   primaryUrl: string;
+  siteUrls: Record<Lang, string>;
 }
 
-/** Idioma y URLs para una petición; el idioma lo decide el Host. */
+/** Idioma y URLs para una petición; el idioma lo decide el Host o la preferencia guardada. */
 export function siteForRequest(request: Request): SiteContext {
   const config = siteConfig();
   const host = request.headers.get("host");
-  const lang = langForHost(host, config);
+  const hostLang = langForHost(host, config);
+
+  let lang = hostLang;
+  const enHost = config.siteUrl.en ? new URL(config.siteUrl.en).hostname.toLowerCase() : "";
+  const reqHost = host ? host.split(":")[0]?.toLowerCase() : "";
+
+  // Si el host es específicamente el de la URL en inglés, siempre es inglés.
+  if (enHost && reqHost === enHost) {
+    lang = "en";
+  } else {
+    // Si no es el host exclusivo de inglés, revisar si hay cookie o query param de idioma
+    const url = new URL(request.url);
+    const queryLang = url.searchParams.get("lang");
+    const cookie = request.headers.get("cookie") ?? "";
+    const cookieMatch = cookie.match(/(?:^|;\s*)mcet_lang=([a-z]{2})/);
+    const cookieLang = cookieMatch?.[1];
+
+    if (queryLang && isLang(queryLang)) {
+      lang = queryLang;
+    } else if (cookieLang && isLang(cookieLang)) {
+      lang = cookieLang;
+    }
+  }
+
   const other = otherLang(lang);
   return {
     lang,
     other,
-    siteUrl: config.siteUrl[lang],
-    otherSiteUrl: config.siteUrl[other],
+    siteUrl: config.siteUrl[lang] || config.siteUrl[config.primary],
+    otherSiteUrl: config.siteUrl[other] || config.siteUrl.en,
     primaryUrl: config.siteUrl[config.primary],
+    siteUrls: config.siteUrl,
   };
 }

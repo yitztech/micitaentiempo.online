@@ -1,6 +1,7 @@
 import { cimd } from "@better-auth/cimd";
 import { oauthProvider } from "@better-auth/oauth-provider";
 import { type Lang, pathFor } from "@mcet/i18n";
+import { FullName, UpdateMe } from "@mcet/schemas";
 import { APIError, betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { createAuthMiddleware } from "better-auth/api";
@@ -34,16 +35,44 @@ const EMAIL_ERRORS: Record<Lang, Record<EmailProblem, string>> = {
     no_mail_server: "That domain doesn't receive email. Check the spelling.",
     disposable: "Temporary email addresses aren't allowed. Please use your regular email.",
   },
+  fr: {
+    invalid_format: "Cette adresse e-mail n'est pas valide.",
+    no_mail_server: "Ce domaine ne reçoit pas d'e-mails. Vérifiez l'orthographe.",
+    disposable: "Les adresses e-mail temporaires ne sont pas autorisées. Utilisez votre e-mail habituel.",
+  },
+  pt: {
+    invalid_format: "Esse endereço de e-mail não é válido.",
+    no_mail_server: "Esse domínio não recebe e-mails. Verifique a digitação.",
+    disposable: "Endereços de e-mail temporários não são permitidos. Use seu e-mail habitual.",
+  },
+  de: {
+    invalid_format: "Diese E-Mail-Adresse ist ungültig.",
+    no_mail_server: "Diese Domain empfängt keine E-Mails. Bitte Schreibweise prüfen.",
+    disposable: "Temporäre E-Mail-Adressen sind nicht erlaubt. Bitte reguläre E-Mail verwenden.",
+  },
+  it: {
+    invalid_format: "Questo indirizzo e-mail non è valido.",
+    no_mail_server: "Questo dominio non riceve e-mail. Controlla la digitazione.",
+    disposable: "Gli indirizzi e-mail temporanei non sono consentiti. Usa la tua e-mail abituale.",
+  },
 };
 
 const ALTCHA_MESSAGE: Record<Lang, string> = {
   es: "No pudimos comprobar que no eres un robot. Recarga la página e inténtalo de nuevo.",
   en: "We couldn't verify you're not a robot. Reload the page and try again.",
+  fr: "Impossible de vérifier que vous n'êtes pas un robot. Rechargez la page et réessayez.",
+  pt: "Não foi possível verificar que você não é um robô. Recarregue a página e tente novamente.",
+  de: "Wir konnten nicht überprüfen, dass Sie kein Roboter sind. Laden Sie die Seite neu.",
+  it: "Impossibile verificare che non sei un robot. Ricarica la pagina e riprova.",
 };
 
 const PWNED_MESSAGE: Record<Lang, string> = {
   es: "Esa contraseña apareció en una filtración conocida. Elige otra.",
   en: "That password appeared in a known data breach. Choose another one.",
+  fr: "Ce mot de passe est apparu dans une fuite de données connue. Choisissez-en un autre.",
+  pt: "Essa senha apareceu em um vazamento conhecido. Escolha outra.",
+  de: "Dieses Passwort ist in einem bekannten Datenleck aufgetaucht. Bitte wählen Sie ein anderes.",
+  it: "Questa password è comparsa in una violazione nota. Scegline un'altra.",
 };
 
 /** Rutas que envían correos a direcciones nuevas: exigen ALTCHA. */
@@ -100,7 +129,7 @@ export function createAuth(lang: Lang, { env, db, mail, verifyAltcha }: AuthDeps
     baseURL,
     basePath: "/api/auth",
     secret: env.BETTER_AUTH_SECRET,
-    trustedOrigins: [baseURL],
+    trustedOrigins: [baseURL, "micitaentiempo://*", "myappointmentontime://*", "exp://*"],
     database: drizzleAdapter(db, { provider: "pg", schema, usePlural: false }),
     advanced: {
       useSecureCookies: secure,
@@ -177,10 +206,45 @@ export function createAuth(lang: Lang, { env, db, mail, verifyAltcha }: AuthDeps
         "/oauth2/register": { window: 60 * 60, max: 10 },
       },
     },
+    databaseHooks: {
+      user: {
+        create: {
+          before: async (user) => {
+            // OTP crea usuarios sin nombre; ese estado vacío es deliberado.
+            if (user.name === "") return { data: user };
+            const result = FullName.safeParse(user.name);
+            if (!result.success)
+              throw new APIError("BAD_REQUEST", { code: "VALIDATION_FAILED", message: "Invalid name" });
+            return { data: { ...user, name: result.data } };
+          },
+        },
+        update: {
+          before: async (user) => {
+            if (user.name === undefined) return { data: user };
+            const result = FullName.safeParse(user.name);
+            if (!result.success)
+              throw new APIError("BAD_REQUEST", { code: "VALIDATION_FAILED", message: "Invalid name" });
+            return { data: { ...user, name: result.data } };
+          },
+        },
+      },
+    },
     hooks: {
       before: createAuthMiddleware(async (ctx) => {
         if (ALTCHA_PATHS.has(ctx.path) && !(await verifyAltcha(ctx.headers?.get("x-altcha") ?? undefined))) {
           throw new APIError("FORBIDDEN", { code: "ALTCHA_REQUIRED", message: ALTCHA_MESSAGE[lang] });
+        }
+        if (ctx.path === "/sign-up/email" || ctx.path === "/update-user") {
+          const body = ctx.body as Record<string, unknown> | undefined;
+          const fields = ["name", "locale", "timezone", "timeFormat", "weekStart", "country"];
+          const profile = Object.fromEntries(
+            fields.filter((key) => body && key in body).map((key) => [key, body?.[key]]),
+          );
+          const parsed = UpdateMe.safeParse(profile);
+          if (!parsed.success || (ctx.path === "/sign-up/email" && !profile.name)) {
+            throw new APIError("BAD_REQUEST", { code: "VALIDATION_FAILED", message: "Invalid profile" });
+          }
+          Object.assign(body ?? {}, parsed.data);
         }
         if (ctx.path === "/oauth2/register") inferNativeClient(ctx.body);
         if (!EMAIL_PATHS.has(ctx.path)) return;

@@ -4,3 +4,15 @@
 63282dc94035939afda7e9f01c427331424eaeed:services/calendar/internal/auth/auth_test.go:generic-api-key:11
 63282dc94035939afda7e9f01c427331424eaeed:services/calendar/internal/config/config_test.go:generic-api-key:7
 63282dc94035939afda7e9f01c427331424eaeed:services/calendar/internal/config/config_test.go:generic-api-key:8
+31cf5b9711cadea9b4783aaa3d2c8d699310ac67:scripts/test-native-mobile.mjs:generic-api-key:124
+31cf5b9711cadea9b4783aaa3d2c8d699310ac67:tests/escenarios/steps/validacion.steps.js:generic-api-key:28
+31cf5b9711cadea9b4783aaa3d2c8d699310ac67:tests/unit/native-driver.test.js:generic-api-key:105
+31cf5b9711cadea9b4783aaa3d2c8d699310ac67:tests/unit/mobile.test.js:generic-api-key:11
+31cf5b9711cadea9b4783aaa3d2c8d699310ac67:tests/unit/mobile.test.js:generic-api-key:16
+31cf5b9711cadea9b4783aaa3d2c8d699310ac67:tests/unit/mobile.test.js:generic-api-key:24
+31cf5b9711cadea9b4783aaa3d2c8d699310ac67:tests/unit/mobile.test.js:generic-api-key:42
+31cf5b9711cadea9b4783aaa3d2c8d699310ac67:tests/unit/mobile.test.js:generic-api-key:59
+31cf5b9711cadea9b4783aaa3d2c8d699310ac67:tests/unit/mobile.test.js:generic-api-key:79
+31cf5b9711cadea9b4783aaa3d2c8d699310ac67:tests/unit/validation.test.js:generic-api-key:115
+31cf5b9711cadea9b4783aaa3d2c8d699310ac67:tests/unit/validation.test.js:generic-api-key:122
+

@@ -1,4 +1,5 @@
 # language: es
+@backend
 @reservas
 Característica: Reservas, holds, bloqueos y series
   Un cliente final reserva sin ver a otros clientes; el negocio gestiona citas, bloqueos y series

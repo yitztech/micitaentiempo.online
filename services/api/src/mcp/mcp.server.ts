@@ -1,9 +1,16 @@
-import { interpolate } from "@mcet/i18n";
+import { interpolate, type Lang } from "@mcet/i18n";
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/server";
 import { z } from "zod";
 import { MCP_TEXT, type McpCaller, type McpDeps, runTool, TOOLS } from "./tools.js";
 
-const SERVER_NAME = { es: "Mi Cita en Tiempo", en: "My Appointment On Time" } as const;
+const SERVER_NAME: Record<Lang, string> = {
+  es: "Mi Cita en Tiempo",
+  en: "My Appointment On Time",
+  fr: "Mon Rendez-vous À L'heure",
+  pt: "Meu Agendamento No Horário",
+  de: "Mein Termin Pünktlich",
+  it: "Il Mio Appuntamento In Tempo",
+};
 
 /**
  * Servidor MCP de una petición (sin estado): herramientas, recursos y prompts en el idioma del
@@ -26,7 +33,7 @@ export function buildMcpServer(c: McpCaller, d: McpDeps): McpServer {
     server.registerTool(
       spec.name,
       {
-        title: spec.title[c.lang],
+        title: spec.title[c.lang] || spec.title.en || spec.title.es,
         description: spec.description,
         inputSchema: spec.input,
         outputSchema: spec.output,

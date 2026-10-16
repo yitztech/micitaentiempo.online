@@ -34,7 +34,14 @@ export class AuthRegistry {
     altcha: AltchaService,
   ) {
     const deps = { env, db, mail, verifyAltcha: (h: string | undefined) => altcha.verify(h) };
-    this.instances = { es: createAuth("es", deps), en: createAuth("en", deps) };
+    this.instances = {
+      es: createAuth("es", deps),
+      en: createAuth("en", deps),
+      fr: createAuth("fr", deps),
+      pt: createAuth("pt", deps),
+      de: createAuth("de", deps),
+      it: createAuth("it", deps),
+    };
   }
 
   forLang(lang: Lang): Auth {

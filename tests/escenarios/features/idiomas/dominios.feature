@@ -1,4 +1,5 @@
 # language: es
+@backend
 @idiomas @humo
 Característica: El idioma lo decide el dominio
   La misma app responde en los dos dominios; el idioma nunca depende de Accept-Language ni de la IP.

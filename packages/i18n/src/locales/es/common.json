@@ -52,7 +52,8 @@
     "continue": "Continuar",
     "or": "o",
     "sending": "Enviando…",
-    "comingSoon": "Disponible pronto"
+    "comingSoon": "Disponible pronto",
+    "invalidText": "Revisa la longitud y elimina caracteres de control o etiquetas."
   },
   "errors": {
     "notFoundTitle": "Página no encontrada",

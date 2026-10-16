@@ -1,4 +1,5 @@
 # language: es
+@frontend
 @panel
 Característica: Panel del negocio
   El propietario configura su agenda con el asistente y gestiona citas, series y bloqueos desde el

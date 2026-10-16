@@ -1,0 +1,79 @@
+{
+  "site": {
+    "name": "Meu Agendamento No Horário",
+    "tagline": "Sua agenda de consultas, sempre pontual.",
+    "description": "Calendário de reservas para empresas: compartilhe sua agenda, receba agendamentos e sincronize com Google, Outlook e Apple."
+  },
+  "home": {
+    "title": "Agendamentos sem ligações nem mensagens",
+    "lead": "Compartilhe sua agenda ou insira-a no seu site. Seus clientes agendam sozinhos e você recebe cada agendamento instantaneamente.",
+    "comingSoon": "Em breve"
+  },
+  "language": {
+    "switchTo": "Português",
+    "switchToLabel": "Ver este site em português",
+    "sessionNote": "Este site tem sua própria sessão: se você entrou em outro idioma, precisará entrar novamente aqui."
+  },
+  "nav": {
+    "main": "Principal",
+    "features": "Recursos",
+    "pricing": "Preços",
+    "faq": "Perguntas Frequentes",
+    "help": "Ajuda",
+    "connectAi": "Conecte sua IA",
+    "contact": "Contato",
+    "signIn": "Entrar",
+    "signUp": "Comece grátis",
+    "myAppointments": "Meus agendamentos",
+    "businessSignIn": "Acesso para empresas",
+    "createAgenda": "Criar minha agenda",
+    "dashboard": "Painel",
+    "openMenu": "Abrir menu",
+    "closeMenu": "Fechar menu",
+    "skipToContent": "Pular para o conteúdo"
+  },
+  "footer": {
+    "product": "Produto",
+    "legal": "Legal",
+    "privacy": "Privacidade",
+    "terms": "Termos",
+    "credits": "Créditos",
+    "rights": "© {{year}} Meu Agendamento No Horário",
+    "madeFor": "Agenda online para empresas de serviços."
+  },
+  "ui": {
+    "loading": "Carregando…",
+    "required": "Obrigatório",
+    "optional": "Opcional",
+    "showPassword": "Ver senha",
+    "hidePassword": "Ocultar senha",
+    "close": "Fechar",
+    "back": "Voltar",
+    "continue": "Continuar",
+    "or": "ou",
+    "sending": "Enviando…",
+    "comingSoon": "Disponível em breve",
+    "invalidText": "Verifique o tamanho e remova caracteres de controle ou tags."
+  },
+  "errors": {
+    "notFoundTitle": "Página não encontrada",
+    "notFoundBody": "O endereço não existe ou foi alterado.",
+    "serverTitle": "Algo deu errado",
+    "serverBody": "Tente novamente em alguns instantes.",
+    "backHome": "Voltar ao início",
+    "errorCode": "Código {{code}}"
+  },
+  "aiScopes": {
+    "openid": "Saber que eres tú",
+    "profile": "Ver quién eres, tu organización, plan y roles",
+    "email": "Ver tu correo",
+    "offline_access": "Mantener la conexión sin volver a iniciar sesión",
+    "calendar:read": "Ver tableros, ajustes, eventos, huecos libres y feriados",
+    "calendar:write": "Crear, cambiar y cancelar eventos y bloqueos",
+    "customers:read": "Ver los datos de contacto de tus clientes (sin esto se ocultan)",
+    "stats:read": "Ver estadísticas",
+    "settings:write": "Cambiar horario, descansos y excepciones (solo propietario)",
+    "billing:read": "Ver plan, prueba y facturas (solo propietario)",
+    "notifications:read": "Ver avisos recientes"
+  }
+}
