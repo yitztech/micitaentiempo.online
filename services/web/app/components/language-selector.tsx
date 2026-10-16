@@ -1,5 +1,5 @@
 import { type Lang, pathFor, translatePath } from "@mcet/i18n";
-import { Check, ChevronDown, Globe } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router";
 import { cx, useRoot } from "~/lib/i18n";
@@ -68,6 +68,7 @@ export function LanguageSelector({ className }: { className?: string }) {
 
   function handleSelect(targetLang: Lang, targetUrl: string) {
     // Guardar cookie de idioma para recordar preferencia
+    // biome-ignore lint/suspicious/noDocumentCookie: asignación directa de cookie necesaria en cliente
     document.cookie = `mcet_lang=${targetLang}; path=/; max-age=31536000; SameSite=Lax`;
     setOpen(false);
 

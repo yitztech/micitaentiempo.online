@@ -15,14 +15,7 @@
     "previewService": "Consulta general · 30 min",
     "previewDay": "martes 15",
     "previewTimezone": "Zona horaria: America/Mexico_City",
-    "previewTimes": [
-      "9:00",
-      "9:30",
-      "10:30",
-      "11:00",
-      "12:30",
-      "16:00"
-    ],
+    "previewTimes": ["9:00", "9:30", "10:30", "11:00", "12:30", "16:00"],
     "previewConfirm": "Cita confirmada",
     "previewSecurity": "Código de seguridad enviado al correo. Archivo de calendario adjunto.",
     "previewSync": "Sincronización automática:",

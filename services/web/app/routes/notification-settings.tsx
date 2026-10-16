@@ -229,11 +229,7 @@ export default function NotificationSettings({ loaderData }: Route.ComponentProp
                         required
                       />
                     ) : (
-                      <PhoneField
-                        label={p.phone}
-                        name="phone"
-                        required
-                      />
+                      <PhoneField label={p.phone} name="phone" required />
                     )}
                     <Button type="submit" variant="secondary">
                       {waSent ? p.verify : p.sendCode}

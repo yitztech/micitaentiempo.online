@@ -45,14 +45,7 @@
     "seoTitle": "Bienvenida",
     "title": "Configura tu agenda",
     "stepOf": "Paso {{n}} de {{total}}",
-    "steps": [
-      "Plan",
-      "Tablero",
-      "Horario",
-      "Feriados",
-      "Servicio",
-      "Compartir"
-    ],
+    "steps": ["Plan", "Tablero", "Horario", "Feriados", "Servicio", "Compartir"],
     "next": "Siguiente",
     "back": "Atrás",
     "skip": "Omitir por ahora",
@@ -105,15 +98,7 @@
     "optional": "Opcionales",
     "observance": "Conmemorativos"
   },
-  "weekdays": [
-    "lunes",
-    "martes",
-    "miércoles",
-    "jueves",
-    "viernes",
-    "sábado",
-    "domingo"
-  ],
+  "weekdays": ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"],
   "calendar": {
     "seoTitle": "Calendario",
     "threeDays": "3 días",

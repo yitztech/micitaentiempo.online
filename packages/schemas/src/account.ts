@@ -48,6 +48,7 @@ export const PasswordField = z
   .string()
   .min(8, "Mínimo 8 caracteres")
   .max(128, "Máximo 128 caracteres")
+  // biome-ignore lint/suspicious/noControlCharactersInRegex: validación explícita de caracteres de control
   .regex(/^[^\u0000-\u001f\u007f-\u009f]+$/, "Contraseña con caracteres no permitidos");
 
 /** Validación de nueva contraseña (registro y restablecimiento): mín 12, máx 128 */
@@ -55,6 +56,7 @@ export const NewPasswordField = z
   .string()
   .min(12, "Mínimo 12 caracteres")
   .max(128, "Máximo 128 caracteres")
+  // biome-ignore lint/suspicious/noControlCharactersInRegex: validación explícita de caracteres de control
   .regex(/^[^\u0000-\u001f\u007f-\u009f]+$/, "Contraseña con caracteres no permitidos");
 
 export const SignInInput = z

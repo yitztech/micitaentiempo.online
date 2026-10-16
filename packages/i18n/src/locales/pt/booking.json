@@ -1,11 +1,6 @@
 {
   "seoTitle": "Reservar en {{name}}",
-  "steps": [
-    "Servicio",
-    "Fecha y hora",
-    "Tus datos",
-    "Confirmación"
-  ],
+  "steps": ["Servicio", "Fecha y hora", "Tus datos", "Confirmación"],
   "service": {
     "title": "Elige un servicio",
     "minutes": "{{n}} min"

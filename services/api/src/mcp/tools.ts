@@ -1,15 +1,5 @@
 import { randomBytes } from "node:crypto";
-import {
-  interpolate,
-  type Lang,
-  mcpDe,
-  mcpEn,
-  mcpEs,
-  mcpFr,
-  mcpIt,
-  mcpPt,
-  pathFor,
-} from "@mcet/i18n";
+import { interpolate, type Lang, mcpDe, mcpEn, mcpEs, mcpFr, mcpIt, mcpPt, pathFor } from "@mcet/i18n";
 import { CancelEvent, CreateEvent, DateOverride, UpdateEvent, WeeklyHours } from "@mcet/schemas";
 import type { CallToolResult } from "@modelcontextprotocol/server";
 import { HttpException } from "@nestjs/common";

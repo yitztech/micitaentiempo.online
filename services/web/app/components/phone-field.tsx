@@ -1,5 +1,5 @@
 import { type ChangeEvent, type ComponentProps, useId, useState } from "react";
-import { cx, useRoot, useT } from "~/lib/i18n";
+import { useRoot, useT } from "~/lib/i18n";
 
 export interface CountryCallingCode {
   code: string; // ISO 3166-1 alpha-2
@@ -71,7 +71,17 @@ export function PhoneField({
 
   // Elegir país por defecto según el idioma del sitio
   const defaultCountry =
-    site.lang === "en" ? "US" : site.lang === "pt" ? "BR" : site.lang === "fr" ? "FR" : site.lang === "de" ? "DE" : site.lang === "it" ? "IT" : "ES";
+    site.lang === "en"
+      ? "US"
+      : site.lang === "pt"
+        ? "BR"
+        : site.lang === "fr"
+          ? "FR"
+          : site.lang === "de"
+            ? "DE"
+            : site.lang === "it"
+              ? "IT"
+              : "ES";
 
   const parsed = parsePhoneNumber(value);
   const [selectedCountryCode, setSelectedCountryCode] = useState(
@@ -79,12 +89,8 @@ export function PhoneField({
   );
   const [localNumber, setLocalNumber] = useState(parsed.localNumber);
 
-  const country =
-    COUNTRIES.find((c) => c.code === selectedCountryCode) ?? (COUNTRIES[0] as CountryCallingCode);
-
   function emitChange(cCode: string, num: string) {
-    const currentCountry =
-      COUNTRIES.find((c) => c.code === cCode) ?? (COUNTRIES[0] as CountryCallingCode);
+    const currentCountry = COUNTRIES.find((c) => c.code === cCode) ?? (COUNTRIES[0] as CountryCallingCode);
     const cleanNum = num.replace(/\D/g, "");
     const fullValue = cleanNum ? `${currentCountry.dialCode}${cleanNum}` : "";
     onChange?.({ target: { name, value: fullValue } });
