@@ -10,6 +10,7 @@ import {
   Globe2,
   Scissors,
   ShieldCheck,
+  Smartphone,
   Sparkles,
   Star,
   Stethoscope,
@@ -242,6 +243,10 @@ export default function Home() {
               </LinkButton>
               <LinkButton to={pathFor("pricing", site.lang)} size="lg" variant="secondary">
                 {h.ctaSecondary}
+              </LinkButton>
+              <LinkButton to={pathFor("downloadApp", site.lang)} size="lg" variant="ghost" className="gap-2">
+                <Smartphone className="size-4" />
+                {t.common.nav.downloadApp}
               </LinkButton>
             </div>
             <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted">

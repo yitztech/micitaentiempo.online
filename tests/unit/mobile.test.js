@@ -82,4 +82,51 @@ describe("contratos de autenticación y endpoints móviles", () => {
 
     expect(() => validateRequest("POST", "/api/public/v1/mobile/auth/google", {})).toThrow();
   });
+
+  it("valida el teléfono opcional en el registro móvil y el esquema de recuperación de contraseña", () => {
+    const { MobileForgotPassword } = require("../../packages/schemas/dist/index.js");
+    expect(
+      MobileSignUp.parse({
+        name: "Carlos Ruiz",
+        email: "carlos@example.com",
+        password: "una-clave-segura-2026",
+        phone: "+34 612 345 678",
+      }),
+    ).toMatchObject({
+      phone: "+34 612 345 678",
+    });
+
+    // Rechaza teléfono con letras o caracteres no telefónicos
+    expect(
+      MobileSignUp.safeParse({
+        name: "Carlos Ruiz",
+        email: "carlos@example.com",
+        password: "una-clave-segura-2026",
+        phone: "telefono-con-letras",
+      }).success,
+    ).toBe(false);
+
+    expect(MobileForgotPassword.safeParse({ email: "carlos@example.com" }).success).toBe(true);
+    expect(MobileForgotPassword.safeParse({ email: "invalido" }).success).toBe(false);
+  });
+
+  it("sirve el APK de la app móvil con las cabeceras de descarga correctas", async () => {
+    const { loader } = await import("../../services/web/app/routes/app-apk.ts");
+    const res = await loader({ request: new Request("https://micitaentiempo.online/app.apk") });
+    expect(res.status).toBe(200);
+    expect(res.headers.get("Content-Type")).toBe("application/vnd.android.package-archive");
+    expect(res.headers.get("Content-Disposition")).toContain("micitaentiempo.apk");
+  });
+
+  it("ofrece la ruta de descarga de la app en los 6 idiomas", async () => {
+    const { ROUTES } = await import("../../packages/i18n/dist/index.js");
+    expect(ROUTES.downloadApp).toMatchObject({
+      es: "/descargar",
+      en: "/download",
+      fr: "/fr/telecharger",
+      pt: "/pt/baixar",
+      de: "/de/herunterladen",
+      it: "/it/scarica",
+    });
+  });
 });

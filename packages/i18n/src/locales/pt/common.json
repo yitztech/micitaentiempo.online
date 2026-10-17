@@ -30,7 +30,8 @@
     "dashboard": "Painel",
     "openMenu": "Abrir menu",
     "closeMenu": "Fechar menu",
-    "skipToContent": "Pular para o conteúdo"
+    "skipToContent": "Pular para o conteúdo",
+    "downloadApp": "Baixar app"
   },
   "footer": {
     "product": "Produto",

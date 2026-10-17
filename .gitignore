@@ -18,3 +18,6 @@ tests/escenarios/.features-gen/
 cucumber-report*/
 .cc-writes/
 tests/carga/resultados/
+*.apk
+.gradle/
+android/app/build/

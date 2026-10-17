@@ -59,6 +59,15 @@ export const NewPasswordField = z
   // biome-ignore lint/suspicious/noControlCharactersInRegex: validación explícita de caracteres de control
   .regex(/^[^\u0000-\u001f\u007f-\u009f]+$/, "Contraseña con caracteres no permitidos");
 
+/** Validación de teléfono: solo dígitos y caracteres numéricos/separadores, longitud válida */
+export const PhoneField = z
+  .string()
+  .trim()
+  .min(7, "Mínimo 7 caracteres")
+  .max(20, "Máximo 20 caracteres")
+  .regex(/^\+?[0-9\s\-()]{7,20}$/, "Solo se permiten números y caracteres telefónicos");
+export type PhoneField = z.infer<typeof PhoneField>;
+
 export const SignInInput = z
   .object({
     email: EmailField,

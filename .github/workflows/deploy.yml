@@ -49,6 +49,39 @@ jobs:
         env:
           REPOSITORY: ${{ github.repository }}
         run: echo "name=ghcr.io/${REPOSITORY,,}-${{ matrix.name }}" >> "$GITHUB_OUTPUT"
+      - name: Instalar Node y pnpm
+        if: matrix.name == 'web'
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12.9.1
+      - name: Configurar Node
+        if: matrix.name == 'web'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      - name: Configurar Java
+        if: matrix.name == 'web'
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - name: Compilar APK Android
+        if: matrix.name == 'web'
+        continue-on-error: true
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --filter @mcet/schemas build
+          pnpm --filter @mcet/i18n build
+          cd services/mobile/android
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon || true
+          if [ -f app/build/outputs/apk/release/app-release.apk ]; then
+            mkdir -p ../../web/public
+            cp app/build/outputs/apk/release/app-release.apk ../../web/public/app.apk
+            echo "APK copiado a services/web/public/app.apk"
+          fi
+          cd ../../..
       - uses: docker/build-push-action@v7
         with:
           context: .

@@ -30,7 +30,8 @@
     "dashboard": "Go to dashboard",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
-    "skipToContent": "Skip to content"
+    "skipToContent": "Skip to content",
+    "downloadApp": "Download app"
   },
   "footer": {
     "product": "Product",

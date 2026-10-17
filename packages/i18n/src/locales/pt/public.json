@@ -435,6 +435,36 @@
     "serverUrl": "URL del servidor MCP",
     "geminiApp": "La app de Gemini para consumidores aún no admite servidores MCP propios."
   },
+  "downloadApp": {
+    "seoTitle": "Baixar app móvel para Android",
+    "seoDescription": "Baixe o aplicativo móvel oficial para Android via APK direto.",
+    "title": "Leve sua agenda no bolso",
+    "lead": "Gerencie seus agendamentos, clientes e disponibilidade em tempo real no seu dispositivo Android.",
+    "downloadApk": "Baixar APK para Android",
+    "version": "Versão 1.0.0 (APK direto)",
+    "requirements": "Requer Android 8.0 (Oreo) ou superior",
+    "featuresTitle": "Por que usar o app móvel?",
+    "features": [
+      {
+        "title": "Notificações instantâneas",
+        "body": "Receba alertas imediatos quando um cliente agendar ou cancelar um compromisso."
+      },
+      {
+        "title": "Multilíngue e seletor de países",
+        "body": "Disponível em 6 idiomas com seleção de códigos telefônicos internacionais."
+      },
+      {
+        "title": "Rápido e seguro",
+        "body": "Acesso seguro com e-mail e senha com validações rigorosas."
+      }
+    ],
+    "stepsTitle": "Como instalar o APK no Android",
+    "steps": [
+      "Baixe o arquivo APK tocando no botão acima.",
+      "Abra o arquivo baixado nas transferências ou barra de notificações do seu celular.",
+      "Se solicitado, permita 'Instalação de apps de fontes desconhecidas' e toque em Instalar."
+    ]
+  },
   "contact": {
     "seoTitle": "Contacto",
     "seoDescription": "Escríbenos con tus dudas sobre Mi Cita en Tiempo.",

@@ -28,6 +28,7 @@ export default [
     ...page("pricing", "routes/pricing.tsx"),
     ...page("faq", "routes/faq.tsx"),
     ...page("connectAi", "routes/connect-ai.tsx"),
+    ...page("downloadApp", "routes/download.tsx"),
     ...page("contact", "routes/contact.tsx"),
     ...page("privacy", "routes/legal.tsx"),
     ...page("terms", "routes/legal.tsx"),
@@ -59,5 +60,7 @@ export default [
   ...page("myAppointments", "routes/my-appointments.tsx"),
   route("embed/:slug", "routes/embed.tsx"),
   route("embed.js", "routes/embed-js.ts"),
+  route("app.apk", "routes/app-apk.ts"),
+  route("micitaentiempo.apk", "routes/app-apk.ts", { id: "micitaentiempo-apk" }),
   route("*", "routes/not-found.tsx"),
 ] satisfies RouteConfig;

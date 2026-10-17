@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { EmailField, NewPasswordField, PasswordField, PhoneField } from "./account.ts";
 import { FullName } from "./text.ts";
 
 const MOBILE_REDIRECT_RE =
@@ -7,19 +8,27 @@ const MOBILE_REDIRECT_RE =
 export const MobileSignUp = z
   .object({
     name: FullName,
-    email: z.email().max(254),
-    password: z.string().min(12).max(128),
+    email: EmailField,
+    password: NewPasswordField,
+    phone: PhoneField.optional(),
   })
   .strict();
 export type MobileSignUp = z.infer<typeof MobileSignUp>;
 
 export const MobileSignIn = z
   .object({
-    email: z.email().max(254),
-    password: z.string().min(12).max(128),
+    email: EmailField,
+    password: PasswordField,
   })
   .strict();
 export type MobileSignIn = z.infer<typeof MobileSignIn>;
+
+export const MobileForgotPassword = z
+  .object({
+    email: EmailField,
+  })
+  .strict();
+export type MobileForgotPassword = z.infer<typeof MobileForgotPassword>;
 
 export const MobileGoogleAuth = z
   .object({

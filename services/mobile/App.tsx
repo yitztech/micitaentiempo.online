@@ -15,8 +15,10 @@ import {
   View,
 } from "react-native";
 import {
+  COUNTRIES,
   createMobileClient,
   getCatalog,
+  MOBILE_LANGUAGES,
   MOBILE_SELECTORS,
   MOBILE_STRINGS,
   type MobileBootstrapResponse,
@@ -42,6 +44,7 @@ function defaultBaseUrl(platform: MobilePlatform): string {
 
 type Booking = { id: string; status: string; start: string; end: string };
 type ConnState = "connecting" | "connected" | "offline";
+type AuthMode = "signIn" | "signUp" | "forgot";
 
 /**
  * App Expo (Android e iOS, teléfonos y tablets). Reutiliza los catálogos @mcet/i18n, la validación
@@ -56,16 +59,32 @@ export default function App() {
 
   const [conn, setConn] = useState<ConnState>("connecting");
   const [boot, setBoot] = useState<MobileBootstrapResponse | null>(null);
+
+  // Idioma activo con soporte para los 6 idiomas y banderas
+  const [userLang, setUserLang] = useState<MobileLang | null>(null);
+  const [showLangMenu, setShowLangMenu] = useState(false);
+
+  // Modo de autenticación: entrada, registro o recuperación
+  const [authMode, setAuthMode] = useState<AuthMode>("signIn");
+
+  // Campos de formulario
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState<(typeof COUNTRIES)[number]>(() => COUNTRIES[0]);
+  const [showCountryMenu, setShowCountryMenu] = useState(false);
+
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [infoMessage, setInfoMessage] = useState<string | null>(null);
+
   const [summary, setSummary] = useState<MobilePanelSummary | null>(null);
   const [bookings, setBookings] = useState<Booking[] | null>(null);
 
-  const lang: MobileLang = boot?.lang ?? "es";
+  const lang: MobileLang = userLang ?? boot?.lang ?? "es";
   const t = getCatalog(lang);
-  const s = MOBILE_STRINGS[lang];
+  const s = MOBILE_STRINGS[lang] ?? MOBILE_STRINGS.es;
 
   useEffect(() => {
     let alive = true;
@@ -102,7 +121,69 @@ export default function App() {
     setBookings(list);
   }, [client]);
 
+  // Validaciones del lado del cliente antes de enviar
+  const validateForm = useCallback((): boolean => {
+    setError(null);
+    setInfoMessage(null);
+
+    // Validación de Correo: longitud 5-254 y formato RFC
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const cleanEmail = email.trim();
+    if (!cleanEmail || cleanEmail.length < 5 || cleanEmail.length > 254 || !emailRegex.test(cleanEmail)) {
+      setError(s.emailError);
+      return false;
+    }
+
+    if (authMode === "forgot") return true;
+
+    // Validación de Contraseña
+    // biome-ignore lint/suspicious/noControlCharactersInRegex: validación de controles
+    if (/[\u0000-\u001f\u007f-\u009f]/.test(password)) {
+      setError(s.passwordError);
+      return false;
+    }
+
+    if (authMode === "signIn") {
+      if (!password || password.length < 8 || password.length > 128) {
+        setError(s.passwordError);
+        return false;
+      }
+    } else if (authMode === "signUp") {
+      // Registro exige mín 12, máx 128
+      if (!password || password.length < 12 || password.length > 128) {
+        setError(s.passwordError);
+        return false;
+      }
+
+      // Nombre en registro: mín 2, máx 120, sin etiquetas ni controles
+      const cleanName = name.trim();
+      if (
+        !cleanName ||
+        cleanName.length < 2 ||
+        cleanName.length > 120 ||
+        // biome-ignore lint/suspicious/noControlCharactersInRegex: validación de etiquetas y caracteres de control
+        /[<>\u0000-\u001f\u007f-\u009f]/.test(cleanName)
+      ) {
+        setError(s.nameError);
+        return false;
+      }
+
+      // Teléfono en registro: opcional, pero si existe solo numéricos y longitud válida
+      const cleanPhone = phone.trim();
+      if (cleanPhone) {
+        const fullPhone = `${selectedCountry.dialCode} ${cleanPhone}`;
+        if (!/^\+?[0-9\s\-()]{7,20}$/.test(fullPhone)) {
+          setError(s.phoneError);
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }, [authMode, email, password, name, phone, selectedCountry, s]);
+
   const onSignIn = useCallback(async () => {
+    if (!validateForm()) return;
     setBusy(true);
     setError(null);
     try {
@@ -114,7 +195,42 @@ export default function App() {
     } finally {
       setBusy(false);
     }
-  }, [client, email, password, loadSession, s.signInError]);
+  }, [client, email, password, validateForm, loadSession, s.signInError]);
+
+  const onSignUp = useCallback(async () => {
+    if (!validateForm()) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const fullPhone = phone.trim() ? `${selectedCountry.dialCode} ${phone.trim()}` : undefined;
+      await client.signUp({
+        name: name.trim(),
+        email: email.trim(),
+        password,
+        phone: fullPhone,
+      });
+      setInfoMessage(s.signUpSuccess);
+      setPassword("");
+    } catch {
+      setError(s.signInError);
+    } finally {
+      setBusy(false);
+    }
+  }, [client, name, email, password, phone, selectedCountry, validateForm, s.signUpSuccess, s.signInError]);
+
+  const onForgot = useCallback(async () => {
+    if (!validateForm()) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await client.forgotPassword({ email: email.trim() });
+      setInfoMessage(s.forgotSuccess);
+    } catch {
+      setError(s.signInError);
+    } finally {
+      setBusy(false);
+    }
+  }, [client, email, validateForm, s.forgotSuccess, s.signInError]);
 
   const onGoogle = useCallback(async () => {
     setError(null);
@@ -156,21 +272,76 @@ export default function App() {
 
   const signedIn = summary !== null;
   const bannerText = conn === "connected" ? s.connected : conn === "offline" ? s.offline : s.connecting;
+  const currentLangObj = MOBILE_LANGUAGES.find((l) => l.lang === lang) ?? MOBILE_LANGUAGES[0];
+
+  const authTabs = (
+    <View style={styles.tabRow}>
+      <Pressable
+        testID={MOBILE_SELECTORS.tabSignIn}
+        onPress={() => {
+          setAuthMode("signIn");
+          setError(null);
+          setInfoMessage(null);
+        }}
+        style={[styles.tabButton, authMode === "signIn" && styles.tabButtonActive]}
+      >
+        <Text style={[styles.tabText, authMode === "signIn" && styles.tabTextActive]}>
+          {t.common.nav.signIn}
+        </Text>
+      </Pressable>
+      <Pressable
+        testID={MOBILE_SELECTORS.tabSignUp}
+        onPress={() => {
+          setAuthMode("signUp");
+          setError(null);
+          setInfoMessage(null);
+        }}
+        style={[styles.tabButton, authMode === "signUp" && styles.tabButtonActive]}
+      >
+        <Text style={[styles.tabText, authMode === "signUp" && styles.tabTextActive]}>
+          {t.common.nav.signUp}
+        </Text>
+      </Pressable>
+    </View>
+  );
 
   const authCard = (
     <View style={styles.card}>
+      {authTabs}
       <Text style={styles.h2} accessibilityRole="header">
-        {t.auth.signIn.title}
+        {authMode === "signIn"
+          ? t.auth.signIn.title
+          : authMode === "signUp"
+            ? t.auth.signUp.title
+            : t.auth.forgot.title}
       </Text>
-      <Pressable
-        testID={MOBILE_SELECTORS.googleButton}
-        accessibilityRole="button"
-        accessibilityLabel={t.auth.google}
-        onPress={onGoogle}
-        style={({ pressed }) => [styles.button, styles.googleButton, pressed && styles.pressed]}
-      >
-        <Text style={styles.googleText}>{t.auth.google}</Text>
-      </Pressable>
+
+      {authMode === "signIn" ? (
+        <Pressable
+          testID={MOBILE_SELECTORS.googleButton}
+          accessibilityRole="button"
+          accessibilityLabel={t.auth.google}
+          onPress={onGoogle}
+          style={({ pressed }) => [styles.button, styles.googleButton, pressed && styles.pressed]}
+        >
+          <Text style={styles.googleText}>{t.auth.google}</Text>
+        </Pressable>
+      ) : null}
+
+      {authMode === "signUp" ? (
+        <>
+          <Text style={styles.label}>{t.auth.fields.name}</Text>
+          <TextInput
+            testID={MOBILE_SELECTORS.nameInput}
+            accessibilityLabel={t.auth.fields.name}
+            value={name}
+            onChangeText={setName}
+            maxLength={120}
+            style={styles.input}
+          />
+        </>
+      ) : null}
+
       <Text style={styles.label}>{t.auth.fields.email}</Text>
       <TextInput
         testID={MOBILE_SELECTORS.emailInput}
@@ -183,28 +354,92 @@ export default function App() {
         maxLength={254}
         style={styles.input}
       />
-      <Text style={styles.label}>{t.auth.fields.password}</Text>
-      <TextInput
-        testID={MOBILE_SELECTORS.passwordInput}
-        accessibilityLabel={t.auth.fields.password}
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        autoComplete="current-password"
-        maxLength={128}
-        style={styles.input}
-      />
+
+      {authMode !== "forgot" ? (
+        <>
+          <Text style={styles.label}>{t.auth.fields.password}</Text>
+          <TextInput
+            testID={MOBILE_SELECTORS.passwordInput}
+            accessibilityLabel={t.auth.fields.password}
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            autoComplete={authMode === "signIn" ? "current-password" : "new-password"}
+            maxLength={128}
+            style={styles.input}
+          />
+        </>
+      ) : null}
+
+      {authMode === "signUp" ? (
+        <>
+          <Text style={styles.label}>{s.phoneLabel}</Text>
+          <View style={styles.phoneContainer}>
+            <Pressable
+              testID={MOBILE_SELECTORS.countrySelector}
+              onPress={() => setShowCountryMenu((v) => !v)}
+              style={styles.countryPickerButton}
+              accessibilityLabel={`${s.countryLabel}: ${selectedCountry.name}`}
+            >
+              <Text style={styles.countryPickerText}>
+                {selectedCountry.flag} {selectedCountry.dialCode}
+              </Text>
+            </Pressable>
+            <TextInput
+              testID={MOBILE_SELECTORS.phoneInput}
+              accessibilityLabel={s.phoneLabel}
+              value={phone}
+              onChangeText={(val) => setPhone(val.replace(/[^0-9\s\-()]/g, ""))}
+              keyboardType="phone-pad"
+              maxLength={20}
+              placeholder="123 456 789"
+              style={[styles.input, styles.phoneInput]}
+            />
+          </View>
+          {showCountryMenu ? (
+            <View style={styles.countryDropdown}>
+              {COUNTRIES.slice(0, 8).map((c) => (
+                <Pressable
+                  key={c.code}
+                  onPress={() => {
+                    setSelectedCountry(c);
+                    setShowCountryMenu(false);
+                  }}
+                  style={styles.countryItem}
+                >
+                  <Text style={styles.countryItemText}>
+                    {c.flag} {c.name} ({c.dialCode})
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          ) : null}
+        </>
+      ) : null}
+
       {error ? (
         <Text style={styles.error} accessibilityLiveRegion="polite">
           {error}
         </Text>
       ) : null}
+      {infoMessage ? (
+        <Text style={styles.successMessage} accessibilityLiveRegion="polite">
+          {infoMessage}
+        </Text>
+      ) : null}
+
       <Pressable
         testID={MOBILE_SELECTORS.submitButton}
         accessibilityRole="button"
-        accessibilityLabel={t.auth.signIn.submit}
+        accessibilityLabel={
+          authMode === "signIn"
+            ? t.auth.signIn.submit
+            : authMode === "signUp"
+              ? t.auth.signUp.submit
+              : t.auth.forgot.submit
+        }
         disabled={busy || conn !== "connected"}
-        onPress={onSignIn}
+        onPress={authMode === "signIn" ? onSignIn : authMode === "signUp" ? onSignUp : onForgot}
         style={({ pressed }) => [
           styles.button,
           styles.primary,
@@ -215,9 +450,40 @@ export default function App() {
         {busy ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={styles.primaryText}>{t.auth.signIn.submit}</Text>
+          <Text style={styles.primaryText}>
+            {authMode === "signIn"
+              ? t.auth.signIn.submit
+              : authMode === "signUp"
+                ? t.auth.signUp.submit
+                : t.auth.forgot.submit}
+          </Text>
         )}
       </Pressable>
+
+      <View style={styles.authLinks}>
+        {authMode === "signIn" ? (
+          <Pressable
+            testID={MOBILE_SELECTORS.tabForgot}
+            onPress={() => {
+              setAuthMode("forgot");
+              setError(null);
+              setInfoMessage(null);
+            }}
+          >
+            <Text style={styles.linkText}>{t.auth.signIn.forgotPassword}</Text>
+          </Pressable>
+        ) : (
+          <Pressable
+            onPress={() => {
+              setAuthMode("signIn");
+              setError(null);
+              setInfoMessage(null);
+            }}
+          >
+            <Text style={styles.linkText}>← {t.common.nav.signIn}</Text>
+          </Pressable>
+        )}
+      </View>
     </View>
   );
 
@@ -260,9 +526,44 @@ export default function App() {
     <SafeAreaView style={styles.root}>
       <StatusBar style="dark" />
       <ScrollView contentContainerStyle={[styles.scroll, layout.isTablet && styles.scrollTablet]}>
-        <Text style={styles.h1} accessibilityRole="header">
-          {t.common.site.name}
-        </Text>
+        <View style={styles.topHeader}>
+          <Text style={styles.h1} accessibilityRole="header">
+            {t.common.site.name}
+          </Text>
+
+          {/* Selector de idioma con banderas (USA para EN, Brasil para PT) */}
+          <View style={styles.langSelectorWrapper}>
+            <Pressable
+              testID={MOBILE_SELECTORS.languageSelector}
+              onPress={() => setShowLangMenu((v) => !v)}
+              style={styles.langSelectorButton}
+              accessibilityLabel={`Idioma: ${currentLangObj.label}`}
+            >
+              <Text style={styles.langButtonText}>
+                {currentLangObj.flag} {currentLangObj.label} ▾
+              </Text>
+            </Pressable>
+            {showLangMenu && (
+              <View style={styles.langDropdown}>
+                {MOBILE_LANGUAGES.map((item) => (
+                  <Pressable
+                    key={item.lang}
+                    onPress={() => {
+                      setUserLang(item.lang);
+                      setShowLangMenu(false);
+                    }}
+                    style={[styles.langItem, item.lang === lang && styles.langItemActive]}
+                  >
+                    <Text style={styles.langItemText}>
+                      {item.flag} {item.label}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+            )}
+          </View>
+        </View>
+
         <View
           accessibilityLiveRegion="polite"
           style={[
@@ -277,6 +578,7 @@ export default function App() {
             {apiUrl} · {layout.formFactor} · {lang}
           </Text>
         </View>
+
         <View style={layout.columns === 2 ? styles.row : undefined}>
           <View style={layout.columns === 2 ? styles.col : undefined}>{signedIn ? panelCard : authCard}</View>
           {appointmentsCard ? (
@@ -292,8 +594,55 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: "#f6f7f9" },
   scroll: { padding: 20, paddingTop: 48, gap: 16 },
   scrollTablet: { paddingHorizontal: 48 },
-  h1: { fontSize: 28, fontWeight: "700", color: "#111827" },
+  topHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+    zIndex: 10,
+  },
+  h1: { fontSize: 24, fontWeight: "700", color: "#111827", flex: 1 },
+  langSelectorWrapper: { position: "relative" },
+  langSelectorButton: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+    backgroundColor: "#fff",
+  },
+  langButtonText: { fontSize: 14, fontWeight: "600", color: "#374151" },
+  langDropdown: {
+    position: "absolute",
+    right: 0,
+    top: 36,
+    width: 140,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
+    zIndex: 50,
+  },
+  langItem: { paddingVertical: 8, paddingHorizontal: 12 },
+  langItemActive: { backgroundColor: "#eff6ff" },
+  langItemText: { fontSize: 13, color: "#1f2937" },
   h2: { fontSize: 20, fontWeight: "600", color: "#111827", marginBottom: 8 },
+  tabRow: { flexDirection: "row", gap: 8, marginBottom: 12 },
+  tabButton: {
+    flex: 1,
+    paddingVertical: 8,
+    alignItems: "center",
+    borderBottomWidth: 2,
+    borderBottomColor: "transparent",
+  },
+  tabButtonActive: { borderBottomColor: "#1d4ed8" },
+  tabText: { fontSize: 15, fontWeight: "500", color: "#6b7280" },
+  tabTextActive: { color: "#1d4ed8", fontWeight: "700" },
   banner: { borderRadius: 10, padding: 12, backgroundColor: "#e5e7eb" },
   bannerOn: { backgroundColor: "#d1fae5" },
   bannerOff: { backgroundColor: "#fee2e2" },
@@ -313,6 +662,28 @@ const styles = StyleSheet.create({
     color: "#111827",
     minHeight: 48,
   },
+  phoneContainer: { flexDirection: "row", gap: 8, alignItems: "center" },
+  countryPickerButton: {
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    minHeight: 48,
+    justifyContent: "center",
+    backgroundColor: "#f9fafb",
+  },
+  countryPickerText: { fontSize: 15, color: "#111827" },
+  phoneInput: { flex: 1 },
+  countryDropdown: {
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    borderRadius: 8,
+    backgroundColor: "#fff",
+    marginTop: 4,
+    paddingVertical: 4,
+  },
+  countryItem: { paddingVertical: 8, paddingHorizontal: 12 },
+  countryItemText: { fontSize: 13, color: "#374151" },
   button: { minHeight: 48, borderRadius: 8, alignItems: "center", justifyContent: "center", marginTop: 8 },
   googleButton: { borderWidth: 1, borderColor: "#d1d5db", backgroundColor: "#fff" },
   googleText: { fontSize: 16, fontWeight: "600", color: "#111827" },
@@ -322,7 +693,10 @@ const styles = StyleSheet.create({
   secondaryText: { fontSize: 16, fontWeight: "600", color: "#1d4ed8" },
   disabled: { opacity: 0.5 },
   pressed: { opacity: 0.8 },
-  error: { color: "#b91c1c", fontSize: 14 },
+  error: { color: "#b91c1c", fontSize: 14, marginTop: 4 },
+  successMessage: { color: "#15803d", fontSize: 14, marginTop: 4 },
+  authLinks: { marginTop: 12, alignItems: "center" },
+  linkText: { color: "#1d4ed8", fontSize: 14, fontWeight: "500" },
   muted: { color: "#4b5563", fontSize: 14 },
   item: { fontSize: 15, color: "#111827", paddingVertical: 4 },
 });

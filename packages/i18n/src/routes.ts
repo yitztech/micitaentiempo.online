@@ -78,6 +78,15 @@ export const ROUTES = {
     it: "/it/crediti",
     indexable: true,
   },
+  downloadApp: {
+    es: "/descargar",
+    en: "/download",
+    fr: "/fr/telecharger",
+    pt: "/pt/baixar",
+    de: "/de/herunterladen",
+    it: "/it/scarica",
+    indexable: true,
+  },
   signUp: {
     es: "/registro",
     en: "/sign-up",

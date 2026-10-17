@@ -30,7 +30,8 @@
     "dashboard": "Pannello",
     "openMenu": "Apri menu",
     "closeMenu": "Chiudi menu",
-    "skipToContent": "Salta al contenuto"
+    "skipToContent": "Salta al contenuto",
+    "downloadApp": "Scarica app"
   },
   "footer": {
     "product": "Prodotto",

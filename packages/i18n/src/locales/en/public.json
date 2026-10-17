@@ -435,6 +435,36 @@
     "serverUrl": "MCP server URL",
     "geminiApp": "The consumer Gemini app doesn't support custom MCP servers yet."
   },
+  "downloadApp": {
+    "seoTitle": "Download mobile app for Android",
+    "seoDescription": "Download the official Mi Cita en Tiempo mobile app for Android via direct APK.",
+    "title": "Carry your schedule in your pocket",
+    "lead": "Manage your appointments, clients, and availability in real time from your Android device.",
+    "downloadApk": "Download APK for Android",
+    "version": "Version 1.0.0 (Direct APK)",
+    "requirements": "Requires Android 8.0 (Oreo) or higher",
+    "featuresTitle": "Why use the mobile app?",
+    "features": [
+      {
+        "title": "Instant notifications",
+        "body": "Get notified immediately when a client books or cancels an appointment."
+      },
+      {
+        "title": "Multilingual and country selector",
+        "body": "Available in 6 languages with international phone dial code selection."
+      },
+      {
+        "title": "Fast and secure",
+        "body": "Secure login with email and password with strict field validations."
+      }
+    ],
+    "stepsTitle": "How to install the APK on Android",
+    "steps": [
+      "Download the APK file by tapping the button above.",
+      "Open the downloaded file from your browser downloads or notification bar.",
+      "If prompted, allow 'Install apps from unknown sources' for your browser or file manager, then tap Install."
+    ]
+  },
   "contact": {
     "seoTitle": "Contact",
     "seoDescription": "Write to us with your questions about My Appointment On Time.",

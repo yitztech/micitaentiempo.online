@@ -39,6 +39,7 @@ export function SiteFooter() {
     ["features", n.features],
     ["pricing", n.pricing],
     ["connectAi", n.connectAi],
+    ["downloadApp", n.downloadApp],
     ["faq", n.faq],
     ["contact", n.contact],
     ...(isLoggedIn ? ([["myAppointments", n.myAppointments]] as Array<[RouteId, string]>) : []),

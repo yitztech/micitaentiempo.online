@@ -10,6 +10,7 @@ import {
   DateOverride,
   EmailField,
   FullName,
+  MobileForgotPassword,
   MobileGoogleAuth,
   MobileSignIn,
   MobileSignUp,
@@ -58,6 +59,8 @@ export function validateRequest(method: string, path: string, body: unknown): un
   }
   if (route === "/api/public/v1/mobile/auth/sign-up" && method === "POST") schema = MobileSignUp;
   if (route === "/api/public/v1/mobile/auth/sign-in" && method === "POST") schema = MobileSignIn;
+  if (route === "/api/public/v1/mobile/auth/forgot-password" && method === "POST")
+    schema = MobileForgotPassword;
   if (
     (route === "/api/public/v1/mobile/auth/google" || route === "/api/public/v1/google/verify") &&
     method === "POST"

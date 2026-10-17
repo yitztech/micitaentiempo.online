@@ -1,3 +1,7 @@
+import authDe from "../../../packages/i18n/src/locales/de/auth.json" with { type: "json" };
+import bookingDe from "../../../packages/i18n/src/locales/de/booking.json" with { type: "json" };
+import commonDe from "../../../packages/i18n/src/locales/de/common.json" with { type: "json" };
+import panelDe from "../../../packages/i18n/src/locales/de/panel.json" with { type: "json" };
 import authEn from "../../../packages/i18n/src/locales/en/auth.json" with { type: "json" };
 import bookingEn from "../../../packages/i18n/src/locales/en/booking.json" with { type: "json" };
 import commonEn from "../../../packages/i18n/src/locales/en/common.json" with { type: "json" };
@@ -6,8 +10,21 @@ import authEs from "../../../packages/i18n/src/locales/es/auth.json" with { type
 import bookingEs from "../../../packages/i18n/src/locales/es/booking.json" with { type: "json" };
 import commonEs from "../../../packages/i18n/src/locales/es/common.json" with { type: "json" };
 import panelEs from "../../../packages/i18n/src/locales/es/panel.json" with { type: "json" };
+import authFr from "../../../packages/i18n/src/locales/fr/auth.json" with { type: "json" };
+import bookingFr from "../../../packages/i18n/src/locales/fr/booking.json" with { type: "json" };
+import commonFr from "../../../packages/i18n/src/locales/fr/common.json" with { type: "json" };
+import panelFr from "../../../packages/i18n/src/locales/fr/panel.json" with { type: "json" };
+import authIt from "../../../packages/i18n/src/locales/it/auth.json" with { type: "json" };
+import bookingIt from "../../../packages/i18n/src/locales/it/booking.json" with { type: "json" };
+import commonIt from "../../../packages/i18n/src/locales/it/common.json" with { type: "json" };
+import panelIt from "../../../packages/i18n/src/locales/it/panel.json" with { type: "json" };
+import authPt from "../../../packages/i18n/src/locales/pt/auth.json" with { type: "json" };
+import bookingPt from "../../../packages/i18n/src/locales/pt/booking.json" with { type: "json" };
+import commonPt from "../../../packages/i18n/src/locales/pt/common.json" with { type: "json" };
+import panelPt from "../../../packages/i18n/src/locales/pt/panel.json" with { type: "json" };
 import type {
   ConfirmHold,
+  MobileForgotPassword,
   MobileGoogleAuth,
   MobileSignIn,
   MobileSignUp,
@@ -17,7 +34,45 @@ import { validateRequest } from "../../web/app/lib/validation.ts";
 import appJson from "../app.json" with { type: "json" };
 
 export type MobilePlatform = "android" | "ios";
-export type MobileLang = "es" | "en";
+export type MobileLang = "es" | "en" | "fr" | "pt" | "de" | "it";
+
+export const MOBILE_LANGUAGES: Array<{ lang: MobileLang; label: string; flag: string }> = [
+  { lang: "es", label: "Español", flag: "🇪🇸" },
+  { lang: "en", label: "English", flag: "🇺🇸" },
+  { lang: "fr", label: "Français", flag: "🇫🇷" },
+  { lang: "pt", label: "Português", flag: "🇧🇷" },
+  { lang: "de", label: "Deutsch", flag: "🇩🇪" },
+  { lang: "it", label: "Italiano", flag: "🇮🇹" },
+];
+
+export interface CountryCallingCode {
+  code: string;
+  name: string;
+  flag: string;
+  dialCode: string;
+}
+
+export const COUNTRIES: CountryCallingCode[] = [
+  { code: "ES", name: "España", flag: "🇪🇸", dialCode: "+34" },
+  { code: "US", name: "Estados Unidos", flag: "🇺🇸", dialCode: "+1" },
+  { code: "BR", name: "Brasil", flag: "🇧🇷", dialCode: "+55" },
+  { code: "FR", name: "Francia", flag: "🇫🇷", dialCode: "+33" },
+  { code: "DE", name: "Alemania", flag: "🇩🇪", dialCode: "+49" },
+  { code: "IT", name: "Italia", flag: "🇮🇹", dialCode: "+39" },
+  { code: "MX", name: "México", flag: "🇲🇽", dialCode: "+52" },
+  { code: "CO", name: "Colombia", flag: "🇨🇴", dialCode: "+57" },
+  { code: "AR", name: "Argentina", flag: "🇦🇷", dialCode: "+54" },
+  { code: "CL", name: "Chile", flag: "🇨🇱", dialCode: "+56" },
+  { code: "PE", name: "Perú", flag: "🇵🇪", dialCode: "+51" },
+  { code: "GB", name: "Reino Unido", flag: "🇬🇧", dialCode: "+44" },
+  { code: "PT", name: "Portugal", flag: "🇵🇹", dialCode: "+351" },
+  { code: "CA", name: "Canadá", flag: "🇨🇦", dialCode: "+1" },
+  { code: "EC", name: "Ecuador", flag: "🇪🇨", dialCode: "+593" },
+  { code: "GT", name: "Guatemala", flag: "🇬🇹", dialCode: "+502" },
+  { code: "CR", name: "Costa Rica", flag: "🇨🇷", dialCode: "+506" },
+  { code: "PA", name: "Panamá", flag: "🇵🇦", dialCode: "+507" },
+  { code: "UY", name: "Uruguay", flag: "UY", dialCode: "+598" },
+];
 
 export interface DeviceLayout {
   platform: MobilePlatform;
@@ -33,6 +88,9 @@ export const MOBILE_SELECTORS = {
   googleButton: "auth-google-button",
   emailInput: "auth-email-input",
   passwordInput: "auth-password-input",
+  nameInput: "auth-name-input",
+  phoneInput: "auth-phone-input",
+  countrySelector: "auth-country-selector",
   submitButton: "auth-submit-button",
   firstSlotButton: "booking-slot-first",
   confirmBookingButton: "booking-confirm-button",
@@ -41,10 +99,33 @@ export const MOBILE_SELECTORS = {
   panelSummaryCard: "panel-summary-card",
   myAppointmentsList: "my-appointments-list",
   signOutButton: "auth-sign-out-button",
+  tabSignIn: "auth-tab-sign-in",
+  tabSignUp: "auth-tab-sign-up",
+  tabForgot: "auth-tab-forgot",
+  languageSelector: "mobile-language-selector",
 } as const;
 
-/** Textos propios de la app nativa (estado de conexión) que no existen en la web. */
-export const MOBILE_STRINGS = {
+/** Textos propios de la app nativa (estado de conexión, validación y flujos) en los 6 idiomas. */
+export const MOBILE_STRINGS: Record<
+  MobileLang,
+  {
+    connecting: string;
+    connected: string;
+    offline: string;
+    signInError: string;
+    googleUnavailable: string;
+    noOrg: string;
+    signUpSuccess: string;
+    forgotSuccess: string;
+    phoneLabel: string;
+    countryLabel: string;
+    selectCountry: string;
+    nameError: string;
+    emailError: string;
+    passwordError: string;
+    phoneError: string;
+  }
+> = {
   es: {
     connecting: "Conectando con el servidor…",
     connected: "Conectado al servidor",
@@ -52,6 +133,15 @@ export const MOBILE_STRINGS = {
     signInError: "No pudimos iniciar sesión. Revisa tu correo y contraseña.",
     googleUnavailable: "El acceso con Google no está configurado en este servidor.",
     noOrg: "Sin negocio",
+    signUpSuccess: "Cuenta creada. Revisa tu correo para confirmarla.",
+    forgotSuccess: "Si la cuenta existe, te enviamos un enlace de recuperación a tu correo.",
+    phoneLabel: "Teléfono",
+    countryLabel: "País",
+    selectCountry: "Elige país",
+    nameError: "El nombre debe tener entre 2 y 120 caracteres y sin etiquetas.",
+    emailError: "El correo no tiene un formato válido (5-254 caracteres).",
+    passwordError: "La contraseña debe tener entre 12 y 128 caracteres (mínimo 8 al entrar).",
+    phoneError: "El teléfono solo debe contener números (entre 7 y 20 caracteres).",
   },
   en: {
     connecting: "Connecting to server…",
@@ -60,16 +150,105 @@ export const MOBILE_STRINGS = {
     signInError: "We couldn't sign you in. Check your email and password.",
     googleUnavailable: "Google sign-in is not configured on this server.",
     noOrg: "No business",
+    signUpSuccess: "Account created. Check your email to confirm it.",
+    forgotSuccess: "If the account exists, we sent a recovery link to your email.",
+    phoneLabel: "Phone",
+    countryLabel: "Country",
+    selectCountry: "Select country",
+    nameError: "Name must be between 2 and 120 characters without tags.",
+    emailError: "Email format is not valid (5-254 characters).",
+    passwordError: "Password must be between 12 and 128 characters (min 8 to sign in).",
+    phoneError: "Phone must only contain numbers (between 7 and 20 characters).",
   },
-} as const;
+  fr: {
+    connecting: "Connexion au serveur…",
+    connected: "Connecté au serveur",
+    offline: "Pas de connexion avec le serveur",
+    signInError: "Impossible de vous connecter. Vérifiez votre e-mail et votre mot de passe.",
+    googleUnavailable: "La connexion avec Google n'est pas configurée sur ce serveur.",
+    noOrg: "Aucune entreprise",
+    signUpSuccess: "Compte créé. Vérifiez votre boîte mail pour confirmer.",
+    forgotSuccess: "Si le compte existe, un lien de récupération a été envoyé.",
+    phoneLabel: "Téléphone",
+    countryLabel: "Pays",
+    selectCountry: "Choisir un pays",
+    nameError: "Le nom doit comporter entre 2 et 120 caractères sans balises.",
+    emailError: "Le format de l'e-mail n'est pas valide (5-254 caractères).",
+    passwordError: "Le mot de passe doit comporter entre 12 et 128 caractères.",
+    phoneError: "Le téléphone ne doit contenir que des chiffres (7 à 20 caractères).",
+  },
+  pt: {
+    connecting: "Conectando ao servidor…",
+    connected: "Conectado ao servidor",
+    offline: "Sem conexão com o servidor",
+    signInError: "Não foi possível entrar. Verifique seu e-mail e senha.",
+    googleUnavailable: "O login com o Google não está configurado neste servidor.",
+    noOrg: "Sem negócio",
+    signUpSuccess: "Conta criada. Verifique seu e-mail para confirmar.",
+    forgotSuccess: "Se a conta existir, enviamos um link de recuperação para o seu e-mail.",
+    phoneLabel: "Telefone",
+    countryLabel: "País",
+    selectCountry: "Selecione o país",
+    nameError: "O nome deve ter entre 2 e 120 caracteres sem tags.",
+    emailError: "O formato do e-mail não é válido (5-254 caracteres).",
+    passwordError: "A senha deve ter entre 12 e 128 caracteres.",
+    phoneError: "O telefone deve conter apenas números (entre 7 e 20 caracteres).",
+  },
+  de: {
+    connecting: "Verbindung zum Server wird hergestellt…",
+    connected: "Mit Server verbunden",
+    offline: "Keine Verbindung zum Server",
+    signInError: "Anmeldung fehlgeschlagen. Überprüfen Sie Ihre E-Mail-Adresse und Ihr Passwort.",
+    googleUnavailable: "Google-Anmeldung ist auf diesem Server nicht konfiguriert.",
+    noOrg: "Kein Unternehmen",
+    signUpSuccess: "Konto erstellt. Überprüfen Sie Ihre E-Mails zur Bestätigung.",
+    forgotSuccess: "Falls das Konto existiert, wurde ein Link zur Wiederherstellung gesendet.",
+    phoneLabel: "Telefon",
+    countryLabel: "Land",
+    selectCountry: "Land auswählen",
+    nameError: "Der Name muss zwischen 2 und 120 Zeichen ohne Tags lang sein.",
+    emailError: "E-Mail-Format ist ungültig (5-254 Zeichen).",
+    passwordError: "Das Passwort muss zwischen 12 und 128 Zeichen lang sein.",
+    phoneError: "Das Telefon darf nur Ziffern enthalten (7 bis 20 Zeichen).",
+  },
+  it: {
+    connecting: "Connessione al server in corso…",
+    connected: "Connesso al server",
+    offline: "Nessuna connessione con il server",
+    signInError: "Accesso non riuscito. Controlla la tua email e password.",
+    googleUnavailable: "L'accesso con Google non è configurato su questo server.",
+    noOrg: "Nessuna attività",
+    signUpSuccess: "Account creato. Controlla la tua email per confermare.",
+    forgotSuccess: "Se l'account esiste, abbiamo inviato un link di recupero.",
+    phoneLabel: "Telefono",
+    countryLabel: "Paese",
+    selectCountry: "Scegli il paese",
+    nameError: "Il nome deve avere tra 2 e 120 caratteri senza tag.",
+    emailError: "Il formato dell'email non è valido (5-254 caratteri).",
+    passwordError: "La password deve avere tra 12 e 128 caratteri.",
+    phoneError: "Il telefono deve contenere solo numeri (da 7 a 20 caratteri).",
+  },
+};
 
-const CATALOGS = {
+const CATALOGS: Record<
+  MobileLang,
+  {
+    common: typeof commonEs;
+    auth: typeof authEs;
+    booking: typeof bookingEs;
+    panel: typeof panelEs;
+  }
+> = {
   es: { common: commonEs, auth: authEs, booking: bookingEs, panel: panelEs },
   en: { common: commonEn, auth: authEn, booking: bookingEn, panel: panelEn },
-} as const;
+  fr: { common: commonFr, auth: authFr, booking: bookingFr, panel: panelFr },
+  pt: { common: commonPt, auth: authPt, booking: bookingPt, panel: panelPt },
+  de: { common: commonDe, auth: authDe, booking: bookingDe, panel: panelDe },
+  it: { common: commonIt, auth: authIt, booking: bookingIt, panel: panelIt },
+};
 
 export function getCatalog(lang: MobileLang) {
-  return CATALOGS[lang];
+  return CATALOGS[lang] ?? CATALOGS.es;
 }
 
 export function getExpoConfig() {
@@ -198,6 +377,8 @@ export function createMobileClient({
       if (res.token) token = res.token;
       return res;
     },
+    forgotPassword: (input: MobileForgotPassword) =>
+      request<{ ok: boolean }>("POST", "/api/public/v1/mobile/auth/forgot-password", input),
     signInWithGoogle: async (input: MobileGoogleAuth) => {
       const res = await request<MobileAuthSession>("POST", "/api/public/v1/mobile/auth/google", input);
       if (res.token) token = res.token;
@@ -245,7 +426,7 @@ export function renderMobileInterfaceSnapshot({
   googleEnabled?: boolean;
 }) {
   const layout = resolveDeviceLayout({ width, height, platform });
-  const t = CATALOGS[lang];
+  const t = getCatalog(lang);
   const googleButtonHtml = googleEnabled
     ? `<button type="button" data-testid="${MOBILE_SELECTORS.googleButton}" aria-label="${t.auth.google}">${t.auth.google}</button>`
     : "";

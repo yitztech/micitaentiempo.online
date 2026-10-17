@@ -189,4 +189,19 @@ describe("apps móviles Expo (Android e iOS, teléfonos y tablets)", () => {
     expect(tabletEn.html).toContain("My appointments");
     expect(tabletEn.html).toContain('data-layout="tablet"');
   });
+
+  it("soporta los 6 idiomas con banderas (USA para inglés, Brasil para portugués) y selector de países para teléfono", async () => {
+    const { MOBILE_LANGUAGES, COUNTRIES } = await import("../../services/mobile/src/index.ts");
+    expect(MOBILE_LANGUAGES.map((l) => l.lang)).toEqual(["es", "en", "fr", "pt", "de", "it"]);
+    const enLang = MOBILE_LANGUAGES.find((l) => l.lang === "en");
+    expect(enLang?.flag).toBe("🇺🇸");
+    const ptLang = MOBILE_LANGUAGES.find((l) => l.lang === "pt");
+    expect(ptLang?.flag).toBe("🇧🇷");
+
+    expect(COUNTRIES.length).toBeGreaterThan(10);
+    const mx = COUNTRIES.find((c) => c.code === "MX");
+    expect(mx?.dialCode).toBe("+52");
+    const es = COUNTRIES.find((c) => c.code === "ES");
+    expect(es?.dialCode).toBe("+34");
+  });
 });

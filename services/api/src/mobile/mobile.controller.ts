@@ -1,4 +1,4 @@
-import { MobileGoogleAuth, MobileSignIn, MobileSignUp } from "@mcet/schemas";
+import { MobileForgotPassword, MobileGoogleAuth, MobileSignIn, MobileSignUp } from "@mcet/schemas";
 import { Body, Controller, Get, HttpCode, HttpException, Inject, Post, Req } from "@nestjs/common";
 import { APIError } from "better-auth/api";
 import { eq, or } from "drizzle-orm";
@@ -95,6 +95,26 @@ export class PublicMobileController {
       user: raw.user ?? null,
       twoFactorRedirect: Boolean(raw.twoFactorRedirect),
     };
+  }
+
+  /** Recuperación de contraseña desde la app móvil. */
+  @Post("auth/forgot-password")
+  async forgotPassword(
+    @Req() req: FastifyRequest,
+    @Body(new ZodPipe(MobileForgotPassword)) body: MobileForgotPassword,
+  ) {
+    const lang = requestLang(req, this.env);
+    await this.registry
+      .forRequest(req)
+      .api.requestPasswordReset({
+        body: {
+          email: body.email,
+          redirectTo: `${this.env.site.siteUrl[lang]}/reset-password`,
+        },
+        headers: this.mobileHeaders(req),
+      })
+      .catch((e: unknown) => this.authError(e));
+    return { ok: true };
   }
 
   /**
