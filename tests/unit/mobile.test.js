@@ -89,7 +89,7 @@ describe("contratos de autenticación y endpoints móviles", () => {
       MobileSignUp.parse({
         name: "Carlos Ruiz",
         email: "carlos@example.com",
-        password: "una-clave-segura-2026",
+        password: "ClaveValida1234",
         phone: "+34 612 345 678",
       }),
     ).toMatchObject({
@@ -101,7 +101,7 @@ describe("contratos de autenticación y endpoints móviles", () => {
       MobileSignUp.safeParse({
         name: "Carlos Ruiz",
         email: "carlos@example.com",
-        password: "una-clave-segura-2026",
+        password: "ClaveValida1234",
         phone: "telefono-con-letras",
       }).success,
     ).toBe(false);
