@@ -25,33 +25,8 @@ limit_req_zone $binary_remote_addr zone=mcp:10m    rate=${RATE_MCP};
 limit_req_zone $binary_remote_addr zone=ics:10m    rate=${RATE_ICS};
 limit_req_status 429;
 
-# ── admin (Panel de Administración AngularJS) ──
 server {
-    listen 80;
-    server_name ~^admin(\..+)?$;
-    client_max_body_size 2m;
-
-    location = /healthz {
-        access_log off;
-        default_type text/plain;
-        return 200 'ok';
-    }
-
-    location = /version.json {
-        default_type application/json;
-        add_header Cache-Control "no-store" always;
-        return 200 '{"revision":"${RELEASE_SHA}"}';
-    }
-
-    location / {
-        include /etc/nginx/snippets/proxy-headers.conf;
-        include /etc/nginx/snippets/security-headers.conf;
-        proxy_pass http://admin_upstream;
-    }
-}
-
-server {
-    listen 80;
+    listen 80 default_server;
     server_name _;
     client_max_body_size 256k;
 
@@ -143,5 +118,30 @@ server {
         include /etc/nginx/snippets/proxy-headers.conf;
         include /etc/nginx/snippets/security-headers.conf;
         proxy_pass http://web_upstream;
+    }
+}
+
+# ── admin (Panel de Administración AngularJS) ──
+server {
+    listen 80;
+    server_name ~^admin(\..+)?$;
+    client_max_body_size 2m;
+
+    location = /healthz {
+        access_log off;
+        default_type text/plain;
+        return 200 'ok';
+    }
+
+    location = /version.json {
+        default_type application/json;
+        add_header Cache-Control "no-store" always;
+        return 200 '{"revision":"${RELEASE_SHA}"}';
+    }
+
+    location / {
+        include /etc/nginx/snippets/proxy-headers.conf;
+        include /etc/nginx/snippets/security-headers.conf;
+        proxy_pass http://admin_upstream;
     }
 }
