@@ -19,7 +19,7 @@ services:
       TRUSTED_PROXY_CIDR: 0.0.0.0/0
       RATE_AUTH: 120r/m
       RATE_PUBLIC: 1200r/m
-    depends_on: [web, api, calendar]
+    depends_on: [web, api, calendar, admin]
     develop:
       watch:
         - { path: services/gateway, action: rebuild }
@@ -107,6 +107,23 @@ services:
       timeout: 5s
       retries: 20
 
+  admin:
+    build: { context: ., dockerfile: services/admin/Dockerfile, target: dev }
+    environment:
+      DB_HOST: postgres
+      DB_PASSWORD: ${API_DB_PASSWORD:-dev-api}
+      ADMIN_DATA_DIR: /data
+    volumes:
+      - admin-dev:/data
+    depends_on:
+      postgres: { condition: service_healthy }
+    develop:
+      watch:
+        - { path: services/admin/src, target: /repo/services/admin/src, action: sync }
+        - { path: services/admin/public, target: /repo/services/admin/public, action: sync }
+        - { path: services/admin/package.json, action: rebuild }
+        - { path: pnpm-lock.yaml, action: rebuild }
+
   mailpit:
     image: axllent/mailpit:v1.31.4
     ports: ["8025:8025"]
@@ -116,3 +133,4 @@ services:
 
 volumes:
   postgres-dev:
+  admin-dev:

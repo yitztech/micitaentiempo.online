@@ -1,6 +1,7 @@
 packages:
   - services/web
   - services/api
+  - services/admin
   - packages/*
   - tools/*
   - tests/escenarios

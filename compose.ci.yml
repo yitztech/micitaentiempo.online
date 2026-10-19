@@ -64,6 +64,8 @@ services:
     depends_on:
       captura: { condition: service_healthy }
       radicale: { condition: service_healthy }
+  admin:
+    build: { context: ., dockerfile: services/admin/Dockerfile, args: { RELEASE_SHA: "${RELEASE_SHA:-ci}" } }
   postgres:
     build: { context: ., dockerfile: services/postgres/Dockerfile }
   mailpit:

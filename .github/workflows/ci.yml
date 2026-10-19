@@ -100,7 +100,7 @@ jobs:
       - run: docker build -f services/gateway/Dockerfile -t gateway-test .
       - name: nginx -t con la plantilla resuelta
         run: |
-          docker run --rm --add-host web:127.0.0.1 --add-host api:127.0.0.1 --add-host calendar:127.0.0.1 \
+          docker run --rm --add-host web:127.0.0.1 --add-host api:127.0.0.1 --add-host calendar:127.0.0.1 --add-host admin:127.0.0.1 \
             -e TRUSTED_PROXY_CIDR=10.0.0.0/8 gateway-test \
             sh -c '/docker-entrypoint.sh nginx -t'
 
@@ -118,7 +118,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: Dominios locales
-        run: echo "127.0.0.1 micitaentiempo.localhost myappointmentontime.localhost" | sudo tee -a /etc/hosts
+        run: echo "127.0.0.1 micitaentiempo.localhost myappointmentontime.localhost admin.micitaentiempo.localhost admin.myappointmentontime.localhost" | sudo tee -a /etc/hosts
       - name: Construir y levantar la topología de producción
         run: docker compose -f compose.prod.yml -f compose.ci.yml --env-file .env.ci -p ci up -d --build --wait
       - name: Escanear imágenes (vulnerabilidades críticas con arreglo)

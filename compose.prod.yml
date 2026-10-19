@@ -33,6 +33,7 @@ services:
       web: { condition: service_healthy }
       api: { condition: service_healthy }
       calendar: { condition: service_healthy }
+      admin: { condition: service_healthy }
     healthcheck:
       test: [CMD, wget, -q, -O, /dev/null, "http://127.0.0.1/healthz"]
       interval: 15s
@@ -154,6 +155,29 @@ services:
       retries: 10
     networks: [frontend, backend]
 
+  admin:
+    <<: *hardening
+    image: ${IMAGE_PREFIX:?Define IMAGE_PREFIX}-admin:${IMAGE_TAG:-main}
+    mem_limit: 192m
+    cpus: 0.5
+    environment:
+      NODE_OPTIONS: --max-old-space-size=128
+      DB_HOST: postgres
+      DB_NAME: micita
+      DB_USER: api
+      DB_PASSWORD: ${API_DB_PASSWORD:?Define API_DB_PASSWORD}
+      ADMIN_DATA_DIR: /data
+    volumes:
+      - admin-data:/data
+    depends_on:
+      postgres: { condition: service_healthy }
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, "http://127.0.0.1:3000/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    networks: [frontend, backend]
+
   # El backup de la plataforma vuelca cada contenedor PostgreSQL en marcha.
   postgres:
     image: ${IMAGE_PREFIX:?Define IMAGE_PREFIX}-postgres:${IMAGE_TAG:-main}
@@ -178,6 +202,7 @@ services:
 
 volumes:
   postgres-data:
+  admin-data:
 
 networks:
   frontend:

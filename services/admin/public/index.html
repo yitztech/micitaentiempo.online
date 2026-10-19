@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="es" ng-app="adminApp">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mi Cita en Tiempo — Panel de Administración</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/vendor/angular.min.js"></script>
+  <script src="/app.js"></script>
+</head>
+<body ng-controller="MainController as vm" ng-cloak>
+
+  <!-- ── VISTA DE INICIO DE SESIÓN ── -->
+  <div class="login-wrapper" ng-if="!vm.isLoggedIn">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="logo-badge">🛡️</div>
+        <h1>Panel de Administración</h1>
+        <p>Mi Cita en Tiempo — Control Interno</p>
+      </div>
+
+      <div class="alert alert-danger" ng-if="vm.loginError" role="alert">
+        {{ vm.loginError }}
+      </div>
+
+      <form ng-submit="vm.login()" class="login-form">
+        <div class="form-group">
+          <label for="username">Usuario Administrador</label>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            ng-model="vm.loginForm.username"
+            placeholder="yunerkis"
+            required
+            autocomplete="username"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="password">Contraseña</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            ng-model="vm.loginForm.password"
+            placeholder="••••••••••••"
+            required
+            autocomplete="current-password"
+          >
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" ng-disabled="vm.loading">
+          <span ng-if="!vm.loading">Iniciar Sesión</span>
+          <span ng-if="vm.loading">Verificando...</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ── VISTA DEL PANEL PRINCIPAL ── -->
+  <div class="admin-layout" ng-if="vm.isLoggedIn">
+    
+    <!-- Barra Lateral de Navegación -->
+    <aside class="sidebar" aria-label="Navegación del panel">
+      <div class="sidebar-brand">
+        <span class="brand-icon">🛡️</span>
+        <div>
+          <div class="brand-title">MCET Admin</div>
+          <div class="brand-sub">Subdominio admin</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button
+          type="button"
+          class="nav-item"
+          ng-class="{'active': vm.currentTab === 'stats'}"
+          ng-click="vm.setTab('stats')"
+        >
+          <span class="nav-icon">📊</span>
+          <span>Estadísticas</span>
+        </button>
+
+        <button
+          type="button"
+          class="nav-item"
+          ng-class="{'active': vm.currentTab === 'users'}"
+          ng-click="vm.setTab('users')"
+        >
+          <span class="nav-icon">👥</span>
+          <span>Usuarios</span>
+          <span class="badge badge-subtle" ng-if="vm.users.length">{{ vm.users.length }}</span>
+        </button>
+
+        <button
+          type="button"
+          class="nav-item"
+          ng-class="{'active': vm.currentTab === 'subscriptions'}"
+          ng-click="vm.setTab('subscriptions')"
+        >
+          <span class="nav-icon">💳</span>
+          <span>Suscripciones</span>
+          <span class="badge badge-warning" ng-if="vm.subscriptionSummary.totalCanceled > 0">
+            {{ vm.subscriptionSummary.totalCanceled }} canceladas
+          </span>
+        </button>
+
+        <button
+          type="button"
+          class="nav-item"
+          ng-class="{'active': vm.currentTab === 'blocked'}"
+          ng-click="vm.setTab('blocked')"
+        >
+          <span class="nav-icon">🚫</span>
+          <span>Bloqueados</span>
+          <span class="badge badge-danger" ng-if="vm.blockedUsers.length">{{ vm.blockedUsers.length }}</span>
+        </button>
+
+        <button
+          type="button"
+          class="nav-item"
+          ng-class="{'active': vm.currentTab === 'audit'}"
+          ng-click="vm.setTab('audit')"
+        >
+          <span class="nav-icon">📋</span>
+          <span>Auditoría</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="admin-badge">
+          <div class="avatar-circle">Y</div>
+          <div class="admin-info">
+            <span class="admin-name">{{ vm.adminUser.username }}</span>
+            <span class="admin-role">Superadministrador</span>
+          </div>
+        </div>
+        <button type="button" class="btn btn-outline-danger btn-sm btn-block" ng-click="vm.logout()">
+          Cerrar sesión
+        </button>
+      </div>
+    </aside>
+
+    <!-- Contenido Principal -->
+    <main class="main-content">
+      <!-- Encabezado Superior -->
+      <header class="topbar">
+        <div class="topbar-title">
+          <h2 ng-if="vm.currentTab === 'stats'">Estadísticas Generales del Sitio</h2>
+          <h2 ng-if="vm.currentTab === 'users'">Gestión y Moderación de Usuarios</h2>
+          <h2 ng-if="vm.currentTab === 'subscriptions'">Monitoreo de Suscripciones y Cancelaciones</h2>
+          <h2 ng-if="vm.currentTab === 'blocked'">Usuarios Suspendidos y Bloqueados</h2>
+          <h2 ng-if="vm.currentTab === 'audit'">Registro Histórico de Auditoría</h2>
+        </div>
+
+        <div class="topbar-actions">
+          <button type="button" class="btn btn-secondary btn-sm" ng-click="vm.refreshCurrentTab()" ng-disabled="vm.loading">
+            🔄 Actualizar
+          </button>
+        </div>
+      </header>
+
+      <!-- Alerta global de acción -->
+      <div class="alert alert-success" ng-if="vm.successMessage" role="alert">
+        {{ vm.successMessage }}
+      </div>
+      <div class="alert alert-danger" ng-if="vm.errorMessage" role="alert">
+        {{ vm.errorMessage }}
+      </div>
+
+      <!-- ── PESTAÑA 1: ESTADÍSTICAS ── -->
+      <section class="tab-pane" ng-if="vm.currentTab === 'stats'">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon icon-users">👥</div>
+            <div class="stat-details">
+              <span class="stat-label">Usuarios Totales</span>
+              <span class="stat-value">{{ vm.stats.totalUsers | number }}</span>
+              <span class="stat-meta">
+                {{ vm.stats.verifiedUsers | number }} verificados ({{ ((vm.stats.verifiedUsers / vm.stats.totalUsers) * 100) | number:0 }}%)
+              </span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon icon-subs">💳</div>
+            <div class="stat-details">
+              <span class="stat-label">Suscripciones Activas</span>
+              <span class="stat-value">{{ vm.stats.activeSubscriptions | number }}</span>
+              <span class="stat-meta">
+                {{ vm.stats.trialSubscriptions | number }} en periodo de prueba
+              </span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon icon-cancel">⚠️</div>
+            <div class="stat-details">
+              <span class="stat-label">Cancelaciones / Churn</span>
+              <span class="stat-value text-danger">{{ vm.stats.canceledSubscriptions | number }}</span>
+              <span class="stat-meta">
+                {{ vm.stats.pastDueSubscriptions | number }} pagos atrasados (past due)
+              </span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon icon-events">📅</div>
+            <div class="stat-details">
+              <span class="stat-label">Citas Reservadas</span>
+              <span class="stat-value">{{ vm.stats.totalAppointments | number }}</span>
+              <span class="stat-meta">Sin dobles reservas</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon icon-revenue">💰</div>
+            <div class="stat-details">
+              <span class="stat-label">MRR Estimado</span>
+              <span class="stat-value">US$ {{ vm.stats.mrrEstimate | number }}</span>
+              <span class="stat-meta">Facturación mensual activa</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon icon-blocked">🚫</div>
+            <div class="stat-details">
+              <span class="stat-label">Usuarios Bloqueados</span>
+              <span class="stat-value text-danger">{{ vm.stats.blockedUsers | number }}</span>
+              <span class="stat-meta">Acceso revocado</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tablas comparativas de estadísticas -->
+        <div class="grid-2col mt-6">
+          <div class="card">
+            <div class="card-header">
+              <h3>Distribución por Planes de Negocio</h3>
+            </div>
+            <div class="card-body">
+              <div class="progress-item">
+                <div class="progress-labels">
+                  <span>Plan Personal (US$5/mes)</span>
+                  <strong>{{ vm.stats.personalPlans }} negocios</strong>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill fill-primary" style="width: 75%;"></div>
+                </div>
+              </div>
+
+              <div class="progress-item mt-4">
+                <div class="progress-labels">
+                  <span>Plan Sedes / Branches (US$20/mes)</span>
+                  <strong>{{ vm.stats.branchesPlans }} negocios</strong>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill fill-secondary" style="width: 25%;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>Salud de la Plataforma</h3>
+            </div>
+            <div class="card-body">
+              <ul class="health-list">
+                <li>
+                  <span>Base de datos aislada del panel:</span>
+                  <span class="badge badge-success">Activa (SQLite /data)</span>
+                </li>
+                <li>
+                  <span>Conexión a base de datos de plataforma:</span>
+                  <span class="badge badge-success">Conectada</span>
+                </li>
+                <li>
+                  <span>Registro de auditoría interna:</span>
+                  <span class="badge badge-success">Habilitado</span>
+                </li>
+                <li>
+                  <span>Nuevos usuarios (últimos 7 días):</span>
+                  <strong>+{{ vm.stats.newUsers7d }} registros</strong>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── PESTAÑA 2: USUARIOS ── -->
+      <section class="tab-pane" ng-if="vm.currentTab === 'users'">
+        <div class="filter-bar">
+          <div class="search-box">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Buscar por nombre o correo electrónico..."
+              ng-model="vm.userSearch"
+              ng-change="vm.filterUsers()"
+            >
+          </div>
+
+          <div class="btn-group">
+            <button
+              type="button"
+              class="btn btn-sm"
+              ng-class="vm.userFilter === 'all' ? 'btn-primary' : 'btn-outline'"
+              ng-click="vm.setUserFilter('all')"
+            >
+              Todos ({{ vm.users.length }})
+            </button>
+            <button
+              type="button"
+              class="btn btn-sm"
+              ng-class="vm.userFilter === 'verified' ? 'btn-primary' : 'btn-outline'"
+              ng-click="vm.setUserFilter('verified')"
+            >
+              Verificados
+            </button>
+            <button
+              type="button"
+              class="btn btn-sm"
+              ng-class="vm.userFilter === 'blocked' ? 'btn-primary' : 'btn-outline'"
+              ng-click="vm.setUserFilter('blocked')"
+            >
+              Bloqueados ({{ vm.blockedUsers.length }})
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive mt-4">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th>Estado Verificación</th>
+                <th>Negocio / Plan</th>
+                <th>Estado Suscripción</th>
+                <th>Estado Acceso</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr ng-repeat="user in vm.filteredUsers">
+                <td>
+                  <div class="user-cell">
+                    <strong>{{ user.name }}</strong>
+                    <span class="text-muted text-sm">{{ user.email }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="badge" ng-class="user.email_verified ? 'badge-success' : 'badge-warning'">
+                    {{ user.email_verified ? 'Verificado' : 'Pendiente' }}
+                  </span>
+                </td>
+                <td>
+                  <div ng-if="user.org_name">
+                    <span>{{ user.org_name }}</span>
+                    <span class="badge badge-subtle ml-1">{{ user.org_plan }}</span>
+                  </div>
+                  <span class="text-muted text-sm" ng-if="!user.org_name">Sin organización</span>
+                </td>
+                <td>
+                  <span class="badge" ng-class="{
+                    'badge-success': user.org_status === 'active',
+                    'badge-info': user.org_status === 'trialing',
+                    'badge-warning': user.org_status === 'past_due',
+                    'badge-danger': user.org_status === 'suspended' || user.org_cancel_at_period_end
+                  }">
+                    {{ user.org_status || 'N/A' }}
+                    <span ng-if="user.org_cancel_at_period_end">(cancela)</span>
+                  </span>
+                </td>
+                <td>
+                  <span class="badge" ng-class="user.is_blocked ? 'badge-danger' : 'badge-success'">
+                    {{ user.is_blocked ? '🚫 Bloqueado' : '✓ Activo' }}
+                  </span>
+                </td>
+                <td>
+                  <div class="action-buttons">
+                    <button
+                      type="button"
+                      class="btn btn-danger btn-xs"
+                      ng-if="!user.is_blocked"
+                      ng-click="vm.openBlockModal(user)"
+                    >
+                      Bloquear
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-success btn-xs"
+                      ng-if="user.is_blocked"
+                      ng-click="vm.unblockUser(user)"
+                    >
+                      Desbloquear
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr ng-if="vm.filteredUsers.length === 0">
+                <td colspan="6" class="text-center text-muted py-6">
+                  No se encontraron usuarios coincidentes.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ── PESTAÑA 3: SUSCRIPCIONES Y CANCELACIONES ── -->
+      <section class="tab-pane" ng-if="vm.currentTab === 'subscriptions'">
+        <div class="stats-grid mb-6">
+          <div class="stat-card">
+            <div class="stat-details">
+              <span class="stat-label">Suscripciones Totales</span>
+              <span class="stat-value">{{ vm.subscriptionSummary.totalSubscriptions }}</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-details">
+              <span class="stat-label">Total Canceladas</span>
+              <span class="stat-value text-danger">{{ vm.subscriptionSummary.totalCanceled }}</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-details">
+              <span class="stat-label">Tasa de Cancelación (Churn)</span>
+              <span class="stat-value">{{ vm.subscriptionSummary.churnRatePercent }}%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>Negocios con Cancelaciones o en Riesgo de Baja</h3>
+          </div>
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Negocio</th>
+                  <th>Propietario</th>
+                  <th>Plan</th>
+                  <th>Estado</th>
+                  <th>Fin de Periodo</th>
+                  <th>Impacto Mensual</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="sub in vm.cancellations">
+                  <td>
+                    <strong>{{ sub.org_name }}</strong>
+                  </td>
+                  <td>
+                    <div>{{ sub.owner_name }}</div>
+                    <span class="text-muted text-sm">{{ sub.owner_email }}</span>
+                  </td>
+                  <td>
+                    <span class="badge badge-subtle">{{ sub.plan }}</span>
+                  </td>
+                  <td>
+                    <span class="badge badge-danger">
+                      {{ sub.cancel_at_period_end ? 'Cancela al fin de periodo' : sub.status }}
+                    </span>
+                  </td>
+                  <td>
+                    <span ng-if="sub.current_period_end">{{ sub.current_period_end | date:'mediumDate' }}</span>
+                    <span ng-if="!sub.current_period_end" class="text-muted">Inmediato</span>
+                  </td>
+                  <td>
+                    <span class="text-danger font-semibold">
+                      - US$ {{ sub.plan === 'branches' ? 20 : 5 }}/mes
+                    </span>
+                  </td>
+                </tr>
+                <tr ng-if="vm.cancellations.length === 0">
+                  <td colspan="6" class="text-center text-muted py-6">
+                    No hay suscripciones canceladas en este momento.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── PESTAÑA 4: USUARIOS BLOQUEADOS ── -->
+      <section class="tab-pane" ng-if="vm.currentTab === 'blocked'">
+        <div class="card">
+          <div class="card-header">
+            <h3>Registro de Usuarios Bloqueados (Almacén Aislado de Administración)</h3>
+          </div>
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>ID de Usuario</th>
+                  <th>Correo</th>
+                  <th>Motivo del Bloqueo</th>
+                  <th>Fecha de Bloqueo</th>
+                  <th>Bloqueado Por</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="b in vm.blockedUsers">
+                  <td><code>{{ b.user_id }}</code></td>
+                  <td><strong>{{ b.email }}</strong></td>
+                  <td>{{ b.reason }}</td>
+                  <td>{{ b.blocked_at | date:'medium' }}</td>
+                  <td><span class="badge badge-subtle">{{ b.blocked_by }}</span></td>
+                  <td>
+                    <button
+                      type="button"
+                      class="btn btn-success btn-xs"
+                      ng-click="vm.unblockDirect(b.user_id)"
+                    >
+                      Desbloquear
+                    </button>
+                  </td>
+                </tr>
+                <tr ng-if="vm.blockedUsers.length === 0">
+                  <td colspan="6" class="text-center text-muted py-6">
+                    No hay usuarios bloqueados actualmente.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── PESTAÑA 5: REGISTRO DE AUDITORÍA ── -->
+      <section class="tab-pane" ng-if="vm.currentTab === 'audit'">
+        <div class="card">
+          <div class="card-header">
+            <h3>Historial de Acciones Administrativas</h3>
+          </div>
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Fecha / Hora</th>
+                  <th>Acción</th>
+                  <th>Administrador</th>
+                  <th>Objetivo</th>
+                  <th>Detalles</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="log in vm.auditLogs">
+                  <td class="text-muted text-sm">{{ log.created_at | date:'medium' }}</td>
+                  <td>
+                    <span class="badge" ng-class="{
+                      'badge-danger': log.action === 'USER_BLOCKED' || log.action === 'LOGIN_FAILED',
+                      'badge-success': log.action === 'USER_UNBLOCKED' || log.action === 'LOGIN_SUCCESS',
+                      'badge-info': log.action.indexOf('ADMIN') !== -1
+                    }">
+                      {{ log.action }}
+                    </span>
+                  </td>
+                  <td><strong>{{ log.admin_user }}</strong></td>
+                  <td><code>{{ log.target_id }}</code></td>
+                  <td>{{ log.details }}</td>
+                </tr>
+                <tr ng-if="vm.auditLogs.length === 0">
+                  <td colspan="5" class="text-center text-muted py-6">
+                    No hay registros de auditoría aún.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ── MODAL PARA BLOQUEAR USUARIO ── -->
+  <div class="modal-backdrop" ng-if="vm.modalOpen">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>Bloquear Usuario</h3>
+        <button type="button" class="close-btn" ng-click="vm.closeBlockModal()">×</button>
+      </div>
+
+      <div class="modal-body">
+        <p>
+          ¿Deseas bloquear el acceso al usuario <strong>{{ vm.selectedUser.email }}</strong>?
+        </p>
+        <p class="text-muted text-sm">
+          Al bloquear a este usuario se revocarán todas sus sesiones activas inmediatamente y su organización pasará a estado suspendido.
+        </p>
+
+        <div class="form-group mt-4">
+          <label for="blockReason">Motivo del Bloqueo</label>
+          <select id="blockReasonSelect" class="form-control mb-2" ng-model="vm.selectedReasonPreset" ng-change="vm.applyPresetReason()">
+            <option value="Uso abusivo de reservas y spam">Uso abusivo de reservas y spam</option>
+            <option value="Violación de términos y condiciones de servicio">Violación de términos y condiciones de servicio</option>
+            <option value="Fallo reiterado de cobro de suscripción">Fallo reiterado de cobro de suscripción</option>
+            <option value="Actividad sospechosa o vulneración de seguridad">Actividad sospechosa o vulneración de seguridad</option>
+            <option value="Otro motivo especificado manualmente">Otro motivo especificado manualmente</option>
+          </select>
+          <input
+            type="text"
+            id="blockReason"
+            class="form-control"
+            ng-model="vm.blockReason"
+            placeholder="Describe el motivo del bloqueo..."
+            required
+          >
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" ng-click="vm.closeBlockModal()">
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="btn btn-danger"
+          ng-disabled="!vm.blockReason || vm.loading"
+          ng-click="vm.confirmBlockUser()"
+        >
+          Confirmar Bloqueo
+        </button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
