@@ -8,6 +8,7 @@ export interface PublicCalendar {
   bookable: boolean;
   embedPolicy: { mode: "any" | "allowlist"; origins: string[] };
   cancelMinNoticeMinutes: number;
+  bookingContactMode?: "email" | "phone" | "name_only";
   services: Array<{
     id: string;
     name: string;

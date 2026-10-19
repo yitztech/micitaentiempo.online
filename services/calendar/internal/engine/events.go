@@ -431,6 +431,20 @@ func (s EventServer) ConfirmHold(ctx context.Context, req *calendarv1.ConfirmHol
 	if err != nil {
 		return nil, err
 	}
+	mode := c.BookingPolicy.ContactMode
+	if mode == "" || mode == "email" {
+		if a.UserID == req.GetHolderId() {
+			return nil, fail(connect.CodePermissionDenied, "email_required", "este tablero requiere verificación por correo")
+		}
+	} else if mode == "phone" {
+		phone := req.GetAttendee().GetPhone()
+		if phone == "" {
+			phone = held.Attendee.Phone
+		}
+		if phone == "" {
+			return nil, fail(connect.CodeInvalidArgument, "phone_required", "número de WhatsApp o teléfono obligatorio")
+		}
+	}
 	s.freshBusy(ctx, c.ID, true)
 	// Lo necesario para revalidar se lee fuera de la transacción (ver slotAvailable).
 	var in *availability.Input
@@ -490,6 +504,21 @@ func (s EventServer) ConfirmHold(ctx context.Context, req *calendarv1.ConfirmHol
 		}
 		if req.GetAttendee() != nil {
 			att := attendeeOf(req.GetAttendee())
+			if att.Name == "" {
+				att.Name = ev.Attendee.Name
+			}
+			if att.Email == "" {
+				att.Email = ev.Attendee.Email
+			}
+			if att.Phone == "" {
+				att.Phone = ev.Attendee.Phone
+			}
+			if att.Timezone == "" {
+				att.Timezone = ev.Attendee.Timezone
+			}
+			if att.Locale == "" {
+				att.Locale = ev.Attendee.Locale
+			}
 			ch.Attendee = &att
 		}
 		if req.GetCustomerNotes() != "" {

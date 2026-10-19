@@ -24,6 +24,7 @@ export function calendarView(c: Calendar, role?: string) {
     address: c.address || null,
     embedPolicy: { mode: c.embedPolicy?.mode ?? "any", origins: c.embedPolicy?.origins ?? [] },
     cancelMinNoticeMinutes: c.bookingPolicy?.cancelMinNoticeMinutes ?? 0,
+    bookingContactMode: (c.bookingPolicy?.contactMode as "email" | "phone" | "name_only") || "email",
     status: c.status,
     orgStatus: c.orgStatus,
     ...(role ? { role } : {}),
@@ -131,9 +132,12 @@ export class CalendarsService {
           address: input.address,
           embedPolicy: input.embedPolicy,
           bookingPolicy:
-            input.cancelMinNoticeMinutes === undefined
+            input.cancelMinNoticeMinutes === undefined && input.bookingContactMode === undefined
               ? undefined
-              : { cancelMinNoticeMinutes: input.cancelMinNoticeMinutes },
+              : {
+                  cancelMinNoticeMinutes: input.cancelMinNoticeMinutes ?? 0,
+                  contactMode: input.bookingContactMode ?? "",
+                },
         },
         asActor({ actor: this.access.actor(user, m) }),
       ),

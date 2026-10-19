@@ -23,7 +23,7 @@ func toProtoCalendar(c store.Calendar) *calendarv1.Calendar {
 		Id: c.ID, OrgId: c.OrgID, Slug: c.Slug, Name: c.Name, Timezone: c.Timezone, Capacity: int32(c.Capacity), //nolint:gosec // 1…50
 		Country: c.Country, Subdivision: c.Subdivision, Address: c.Address,
 		EmbedPolicy:   &calendarv1.EmbedPolicy{Mode: c.EmbedPolicy.Mode, Origins: c.EmbedPolicy.Origins},
-		BookingPolicy: &calendarv1.BookingPolicy{CancelMinNoticeMinutes: int32(c.BookingPolicy.CancelMinNoticeMinutes)}, //nolint:gosec // acotado
+		BookingPolicy: &calendarv1.BookingPolicy{CancelMinNoticeMinutes: int32(c.BookingPolicy.CancelMinNoticeMinutes), ContactMode: c.BookingPolicy.ContactMode}, //nolint:gosec // acotado
 		Status:        c.Status, CreatedAt: timestamppb.New(c.CreatedAt), OrgStatus: c.OrgStatus,
 	}
 }
@@ -166,7 +166,17 @@ func (s CalendarServer) UpdateCalendar(ctx context.Context, req *calendarv1.Upda
 		p.EmbedPolicy = &store.EmbedPolicy{Mode: ep.GetMode(), Origins: ep.GetOrigins()}
 	}
 	if bp := req.GetBookingPolicy(); bp != nil {
-		p.BookingPolicy = &store.BookingPolicy{CancelMinNoticeMinutes: int(bp.GetCancelMinNoticeMinutes())}
+		cm := bp.GetContactMode()
+		if cm != "" && cm != "email" && cm != "phone" && cm != "name_only" {
+			return nil, fail(connect.CodeInvalidArgument, "invalid_contact_mode", "%q", cm)
+		}
+		if cm == "" {
+			cm = "email"
+		}
+		p.BookingPolicy = &store.BookingPolicy{
+			CancelMinNoticeMinutes: int(bp.GetCancelMinNoticeMinutes()),
+			ContactMode:            cm,
+		}
 	}
 	c, err := s.Store.UpdateCalendar(ctx, req.GetId(), p)
 	if err != nil {

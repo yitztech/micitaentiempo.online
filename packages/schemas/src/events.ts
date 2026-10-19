@@ -9,11 +9,12 @@ const Uuid = z.uuid();
 export const Attendee = z
   .object({
     name: FullName,
-    email: z.string().trim().max(254).optional(),
+    email: z.string().trim().min(3).max(254).optional().or(z.literal("")),
     phone: z
       .string()
       .regex(/^\+[1-9]\d{6,14}$/, "teléfono E.164")
-      .optional(),
+      .optional()
+      .or(z.literal("")),
     timezone: TimeZone.optional(),
   })
   .strict();
@@ -87,7 +88,7 @@ export const PublicHold = z
   .object({
     serviceId: Uuid,
     start: Instant,
-    attendee: Attendee.extend({ email: z.string().trim().min(3).max(254) }),
+    attendee: Attendee,
     notes: freeText(1000).optional(),
     channel: z.enum(["embed", "public"]).default("public"),
   })
@@ -114,7 +115,8 @@ export const ConfirmHold = z
     phone: z
       .string()
       .regex(/^\+[1-9]\d{6,14}$/)
-      .optional(),
+      .optional()
+      .or(z.literal("")),
     timezone: TimeZone.optional(),
     notes: freeText(1000).optional(),
   })

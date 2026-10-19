@@ -74,6 +74,7 @@ export default function CalendarSettings({ loaderData }: Route.ComponentProps) {
       .split(/\s+/)
       .map((o) => o.trim())
       .filter(Boolean);
+    const bookingContactMode = String(f.get("bookingContactMode") ?? "email");
     void save("general", () =>
       apiRequest("PATCH", `/api/v1/calendars/${board.id}`, {
         name: String(f.get("name")),
@@ -81,6 +82,7 @@ export default function CalendarSettings({ loaderData }: Route.ComponentProps) {
         capacity: Number(f.get("capacity")),
         address: String(f.get("address") ?? ""),
         cancelMinNoticeMinutes: Math.round(Number(f.get("notice") ?? 0) * 60),
+        bookingContactMode,
         embedPolicy: { mode, origins: mode === "allowlist" ? origins : [] },
       }),
     );
@@ -127,6 +129,49 @@ export default function CalendarSettings({ loaderData }: Route.ComponentProps) {
             defaultValue={board.address ?? ""}
             className="sm:col-span-2"
           />
+          <fieldset className="sm:col-span-2">
+            <legend className="text-[15px] font-medium">{s.contactMode}</legend>
+            <p className="mt-1 text-sm text-[var(--muted)]">{s.contactModeHint}</p>
+            <label className="mt-3 flex min-h-11 items-center gap-3">
+              <input
+                type="radio"
+                name="bookingContactMode"
+                value="email"
+                defaultChecked={(board.bookingContactMode ?? "email") === "email"}
+                className="size-4 accent-[var(--primary)]"
+              />
+              <div>
+                <span className="text-sm font-medium">{s.contactModeEmail}</span>
+                <p className="text-xs text-[var(--muted)]">{s.contactModeEmailDesc}</p>
+              </div>
+            </label>
+            <label className="mt-2 flex min-h-11 items-center gap-3">
+              <input
+                type="radio"
+                name="bookingContactMode"
+                value="phone"
+                defaultChecked={board.bookingContactMode === "phone"}
+                className="size-4 accent-[var(--primary)]"
+              />
+              <div>
+                <span className="text-sm font-medium">{s.contactModePhone}</span>
+                <p className="text-xs text-[var(--muted)]">{s.contactModePhoneDesc}</p>
+              </div>
+            </label>
+            <label className="mt-2 flex min-h-11 items-center gap-3">
+              <input
+                type="radio"
+                name="bookingContactMode"
+                value="name_only"
+                defaultChecked={board.bookingContactMode === "name_only"}
+                className="size-4 accent-[var(--primary)]"
+              />
+              <div>
+                <span className="text-sm font-medium">{s.contactModeNameOnly}</span>
+                <p className="text-xs text-[var(--muted)]">{s.contactModeNameOnlyDesc}</p>
+              </div>
+            </label>
+          </fieldset>
           <fieldset className="sm:col-span-2">
             <legend className="text-[15px] font-medium">{s.embed}</legend>
             <label className="mt-2 flex min-h-11 items-center gap-3">

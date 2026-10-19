@@ -16,6 +16,9 @@ const Slug = z
 
 export const TimeRange = z.object({ start: Hhmm, end: Hhmm }).strict();
 
+export const BookingContactMode = z.enum(["email", "phone", "name_only"]);
+export type BookingContactMode = z.infer<typeof BookingContactMode>;
+
 export const CreateCalendar = z
   .object({
     name: Label,
@@ -25,6 +28,7 @@ export const CreateCalendar = z
     country: Country.optional(),
     subdivision: Subdivision.optional(),
     address: singleLine(240).optional(),
+    bookingContactMode: BookingContactMode.optional(),
   })
   .strict();
 export type CreateCalendar = z.infer<typeof CreateCalendar>;
@@ -47,6 +51,7 @@ export const UpdateCalendar = z
     address: singleLine(240),
     embedPolicy: EmbedPolicy,
     cancelMinNoticeMinutes: z.number().int().min(0).max(43_200),
+    bookingContactMode: BookingContactMode,
   })
   .partial()
   .strict();

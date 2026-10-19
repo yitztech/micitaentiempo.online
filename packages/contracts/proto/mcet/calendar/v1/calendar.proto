@@ -28,6 +28,8 @@ message EmbedPolicy {
 message BookingPolicy {
   // Antelación mínima para que el cliente final cancele o reprograme por su cuenta.
   int32 cancel_min_notice_minutes = 1;
+  // "email" | "phone" | "name_only"
+  string contact_mode = 2;
 }
 
 message Calendar {

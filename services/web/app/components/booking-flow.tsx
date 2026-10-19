@@ -109,7 +109,7 @@ export function BookingFlow({
           start: slot.start,
           attendee: {
             name: person.name,
-            email: person.email,
+            ...(person.email ? { email: person.email } : {}),
             ...(person.phone ? { phone: person.phone } : {}),
             timezone: tz,
           },
@@ -123,11 +123,15 @@ export function BookingFlow({
         token: res.holdToken,
         expiresAt: new Date(Date.now() + HOLD_MS).toISOString(),
       });
-      const session = customerSession();
-      if (session && session.email.toLowerCase() === person.email.toLowerCase()) {
+      if (calendar.bookingContactMode === "phone" || calendar.bookingContactMode === "name_only") {
         await confirm(res.hold.id, res.holdToken);
       } else {
-        setStep("verify");
+        const session = customerSession();
+        if (session && session.email.toLowerCase() === person.email.toLowerCase()) {
+          await confirm(res.hold.id, res.holdToken);
+        } else {
+          setStep("verify");
+        }
       }
     } catch (err) {
       if ((err as ApiError).code === "slot_taken") backToSlots(b.taken);
@@ -318,7 +322,11 @@ export function BookingFlow({
           >
             {b.details.title}
           </h2>
-          <p className="mt-1 text-sm text-muted">{b.details.lead}</p>
+          <p className="mt-1 text-sm text-muted">
+            {calendar.bookingContactMode === "phone" || calendar.bookingContactMode === "name_only"
+              ? b.details.leadDirect
+              : b.details.lead}
+          </p>
           <div className="mt-4">{summary}</div>
           <button
             type="button"
@@ -347,18 +355,34 @@ export function BookingFlow({
               label={b.details.email}
               type="email"
               autoComplete="email"
-              required
+              required={
+                calendar.bookingContactMode !== "phone" && calendar.bookingContactMode !== "name_only"
+              }
+              optional={
+                calendar.bookingContactMode === "phone" || calendar.bookingContactMode === "name_only"
+              }
               maxLength={254}
-              hint={b.details.emailHint}
+              hint={
+                calendar.bookingContactMode === "phone" || calendar.bookingContactMode === "name_only"
+                  ? b.details.emailOptionalHint
+                  : b.details.emailHint
+              }
               value={person.email}
               onChange={(e) => setPerson({ ...person, email: e.target.value })}
             />
             <PhoneField
               name="phone"
-              label={b.details.phone}
+              label={calendar.bookingContactMode === "phone" ? b.details.phoneWhatsapp : b.details.phone}
               autoComplete="tel"
-              optional
-              hint={b.details.phoneHint}
+              required={calendar.bookingContactMode === "phone"}
+              optional={calendar.bookingContactMode !== "phone"}
+              hint={
+                calendar.bookingContactMode === "phone"
+                  ? b.details.phoneWhatsappHint
+                  : calendar.bookingContactMode === "name_only"
+                    ? b.details.phoneOptionalHint
+                    : b.details.phoneHint
+              }
               value={person.phone}
               onChange={(e) => setPerson({ ...person, phone: e.target.value })}
             />
@@ -373,7 +397,9 @@ export function BookingFlow({
             <AltchaStatus state={altcha.state} onRetry={() => void altcha.start().catch(() => undefined)} />
             {error ? <Alert tone="danger">{error}</Alert> : null}
             <Button type="submit" size="lg" className="w-full" loading={busy}>
-              {b.details.submit}
+              {calendar.bookingContactMode === "phone" || calendar.bookingContactMode === "name_only"
+                ? b.details.submitDirect
+                : b.details.submit}
             </Button>
           </form>
         </section>
@@ -425,7 +451,9 @@ export function BookingFlow({
           >
             {b.done.title}
           </h2>
-          <p className="mt-2 text-muted">{fmt(b.done.lead, { email: person.email })}</p>
+          <p className="mt-2 text-muted">
+            {person.email ? fmt(b.done.lead, { email: person.email }) : b.done.leadNoEmail}
+          </p>
 
           <div className="mt-6 rounded-[var(--radius-card)] border border-border bg-surface p-5 text-left shadow-[var(--shadow-soft)]">
             <div className="flex items-center gap-2 font-semibold text-text">

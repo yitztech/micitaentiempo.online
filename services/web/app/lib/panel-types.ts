@@ -27,6 +27,7 @@ export interface BoardView {
   address: string | null;
   embedPolicy: { mode: "any" | "allowlist"; origins: string[] };
   cancelMinNoticeMinutes: number;
+  bookingContactMode?: "email" | "phone" | "name_only";
   status: string;
   orgStatus: string;
   role: Role;

@@ -46,9 +46,15 @@
     "phoneHint": "With country code, for example +1 555 123 4567.",
     "notes": "Note for the business",
     "submit": "Hold this time",
+    "submitDirect": "Confirm booking",
     "held": "We're holding your time. You have {{time}} to confirm it.",
     "expired": "Your hold expired. Please choose again.",
-    "lead": "We'll hold this time while you confirm your email."
+    "lead": "We'll hold this time while you confirm your email.",
+    "leadDirect": "Enter your details to confirm your appointment directly.",
+    "emailOptionalHint": "Optional. If provided, we will send you the confirmation.",
+    "phoneWhatsapp": "WhatsApp / Phone",
+    "phoneWhatsappHint": "WhatsApp or phone number with country code.",
+    "phoneOptionalHint": "Optional. With country code, for example +1 555 123 4567."
   },
   "verify": {
     "title": "Confirm your email",
@@ -63,6 +69,7 @@
   "done": {
     "title": "Appointment confirmed!",
     "lead": "We sent the details to {{email}}.",
+    "leadNoEmail": "Your appointment has been successfully confirmed.",
     "addGoogle": "Add to Google Calendar",
     "addOutlook": "Add to Outlook",
     "downloadIcs": "Download .ics",

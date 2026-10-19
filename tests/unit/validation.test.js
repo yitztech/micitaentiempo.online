@@ -132,4 +132,53 @@ describe("contratos de texto compartidos", () => {
     expect(Attendee.safeParse({ name: "Carlos", phone: "letras-en-telefono" }).success).toBe(false);
     expect(Attendee.safeParse({ name: "Carlos", phone: "+0123" }).success).toBe(false); // < 7 dígitos
   });
+
+  it("soporta modos de contacto para reservas (email, whatsapp/teléfono o solo nombre)", async () => {
+    const { BookingContactMode, UpdateCalendar, PublicHold, ConfirmHold } = await import(
+      "../../packages/schemas/dist/index.js"
+    );
+
+    // Modos válidos
+    expect(BookingContactMode.safeParse("email").success).toBe(true);
+    expect(BookingContactMode.safeParse("phone").success).toBe(true);
+    expect(BookingContactMode.safeParse("name_only").success).toBe(true);
+    expect(BookingContactMode.safeParse("invalid").success).toBe(false);
+
+    // Ajustes de tablero permiten cambiar el modo
+    expect(UpdateCalendar.safeParse({ bookingContactMode: "phone" }).success).toBe(true);
+    expect(UpdateCalendar.safeParse({ bookingContactMode: "name_only" }).success).toBe(true);
+
+    // PublicHold no obliga a que el correo esté presente si se reserva por WhatsApp o solo nombre
+    const baseHold = {
+      serviceId: "018f3a36-3a6a-7d2d-8b01-a1b2c3d4e5f6",
+      start: new Date().toISOString(),
+      channel: "public",
+    };
+    expect(
+      PublicHold.safeParse({
+        ...baseHold,
+        attendee: { name: "Juan Pérez", phone: "+525512345678" },
+      }).success,
+    ).toBe(true);
+    expect(
+      PublicHold.safeParse({
+        ...baseHold,
+        attendee: { name: "Solo Nombre" },
+      }).success,
+    ).toBe(true);
+
+    // ConfirmHold permite confirmar con holdToken válido
+    expect(
+      ConfirmHold.safeParse({
+        holdToken: "abcdefghijklmnopqrstuvwxyz1234567890",
+      }).success,
+    ).toBe(true);
+    expect(
+      ConfirmHold.safeParse({
+        holdToken: "abcdefghijklmnopqrstuvwxyz1234567890",
+        name: "Juan Pérez",
+        phone: "+525512345678",
+      }).success,
+    ).toBe(true);
+  });
 });

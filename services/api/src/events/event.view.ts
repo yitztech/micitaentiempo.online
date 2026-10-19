@@ -18,7 +18,7 @@ export function eventView(e: Event) {
     title: e.title || null,
     customerUserId: e.customerUserId || null,
     attendee:
-      e.attendee?.name || e.attendee?.email
+      e.attendee?.name || e.attendee?.email || e.attendee?.phone
         ? {
             name: e.attendee.name || null,
             email: e.attendee.email || null,

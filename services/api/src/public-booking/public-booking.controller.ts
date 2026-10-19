@@ -127,6 +127,7 @@ export class PublicBookingController {
       bookable: c.orgStatus !== "read_only",
       embedPolicy: { mode: c.embedPolicy?.mode || "any", origins: c.embedPolicy?.origins ?? [] },
       cancelMinNoticeMinutes: c.bookingPolicy?.cancelMinNoticeMinutes ?? 0,
+      bookingContactMode: c.bookingPolicy?.contactMode || "email",
       services: services.services.map((s) => ({
         id: s.id,
         name: pick(s.name, lang),
@@ -171,11 +172,36 @@ export class PublicBookingController {
     if (!(await this.altcha.verify(req.headers["x-altcha"] as string | undefined))) {
       throw new ForbiddenException({ code: "altcha_required", message: "Verificación antibots fallida" });
     }
-    const email = await checkEmail(body.attendee.email, { skipDns: Boolean(this.env.TEST_MODE) });
-    if (!email.ok) throw new BadRequestException({ code: email.problem, message: "Correo no válido" });
     const c = await this.calendar(req, slug);
     if (c.orgStatus === "read_only")
       throw new HttpException({ code: "calendar_unavailable", message: "Reservas pausadas" }, 409);
+
+    const contactMode = c.bookingPolicy?.contactMode || "email";
+    let normalizedEmail = "";
+
+    if (contactMode === "email") {
+      if (!body.attendee.email?.trim()) {
+        throw new BadRequestException({ code: "email_required", message: "Correo obligatorio" });
+      }
+      const email = await checkEmail(body.attendee.email, { skipDns: Boolean(this.env.TEST_MODE) });
+      if (!email.ok) throw new BadRequestException({ code: email.problem, message: "Correo no válido" });
+      normalizedEmail = email.normalized;
+    } else {
+      if (contactMode === "phone") {
+        if (!body.attendee.phone?.trim()) {
+          throw new BadRequestException({
+            code: "phone_required",
+            message: "Número de WhatsApp o teléfono obligatorio",
+          });
+        }
+      }
+      if (body.attendee.email?.trim()) {
+        const email = await checkEmail(body.attendee.email, { skipDns: Boolean(this.env.TEST_MODE) });
+        if (!email.ok) throw new BadRequestException({ code: email.problem, message: "Correo no válido" });
+        normalizedEmail = email.normalized;
+      }
+    }
+
     const lang = requestLang(req, this.env);
     const token = holdToken(this.env.APP_ENC_KEY, c.id, key.data);
     const ev = await rpc(
@@ -184,7 +210,12 @@ export class PublicBookingController {
           calendarId: c.id,
           serviceId: body.serviceId,
           start: at(body.start),
-          attendee: { ...body.attendee, email: email.normalized, locale: lang },
+          attendee: {
+            ...body.attendee,
+            email: normalizedEmail,
+            phone: body.attendee.phone || "",
+            locale: lang,
+          },
           customerNotes: body.notes ?? "",
           idempotencyKey: key.data,
         },
@@ -212,30 +243,37 @@ export class PublicBookingController {
     );
   }
 
-  /** Confirma el hold con el cliente final ya verificado por código. */
+  /** Confirma el hold con el cliente final verificado o directo según el modo de contacto. */
   @Post("holds/:id/confirm")
   async confirm(
     @Req() req: FastifyRequest,
     @Param("id") id: string,
     @Body(new ZodPipe(ConfirmHold)) body: ConfirmHold,
   ) {
-    const u = await this.customer(req);
+    let u: SessionUser | null = null;
+    try {
+      u = await this.customer(req);
+    } catch {
+      // Sin sesión autenticada de cliente
+    }
     const lang = requestLang(req, this.env);
+    const holder = holderId(this.env.APP_ENC_KEY, body.holdToken);
+    const sub = u?.id ?? holder;
     const ev = await rpc(
       this.rpcClients.client(EventService).confirmHold(
         {
           id,
-          holderId: holderId(this.env.APP_ENC_KEY, body.holdToken),
+          holderId: holder,
           attendee: {
-            name: body.name ?? u.name,
-            email: u.email,
+            name: body.name ?? u?.name ?? "",
+            email: u?.email ?? "",
             phone: body.phone ?? "",
             locale: lang,
-            timezone: body.timezone ?? u.timezone,
+            timezone: body.timezone ?? u?.timezone ?? "",
           },
           customerNotes: body.notes ?? "",
         },
-        this.customerActor(req, u),
+        u ? this.customerActor(req, u) : this.actor(req, { sub, tz: body.timezone }),
       ),
     );
     return bookingView(ev);

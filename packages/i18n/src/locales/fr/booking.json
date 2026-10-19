@@ -46,9 +46,15 @@
     "phoneHint": "Con código de país, por ejemplo +52 55 1234 5678.",
     "notes": "Nota para el negocio",
     "submit": "Apartar este horario",
+    "submitDirect": "Confirmer la réservation",
     "held": "Apartamos tu horario. Tienes {{time}} para confirmarlo.",
     "expired": "Tu horario apartado caducó. Elige otra vez.",
-    "lead": "Apartaremos el horario mientras confirmas tu correo."
+    "lead": "Apartaremos el horario mientras confirmas tu correo.",
+    "leadDirect": "Indiquez vos coordonnées pour confirmer directement votre rendez-vous.",
+    "emailOptionalHint": "Facultatif. Si renseigné, nous vous enverrons la confirmation.",
+    "phoneWhatsapp": "WhatsApp / Téléphone",
+    "phoneWhatsappHint": "Numéro WhatsApp ou téléphone avec indicatif pays.",
+    "phoneOptionalHint": "Facultatif. Avec indicatif pays, par exemple +33 6 12 34 56 78."
   },
   "verify": {
     "title": "Vérifiez votre e-mail",
@@ -63,6 +69,7 @@
   "done": {
     "title": "¡Cita confirmada!",
     "lead": "Te enviamos los detalles a {{email}}.",
+    "leadNoEmail": "Votre rendez-vous a été confirmé avec succès.",
     "addGoogle": "Añadir a Google Calendar",
     "addOutlook": "Añadir a Outlook",
     "downloadIcs": "Descargar .ics",

@@ -79,8 +79,10 @@ type BookingPolicy struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Antelación mínima para que el cliente final cancele o reprograme por su cuenta.
 	CancelMinNoticeMinutes int32 `protobuf:"varint,1,opt,name=cancel_min_notice_minutes,json=cancelMinNoticeMinutes,proto3" json:"cancel_min_notice_minutes,omitempty"`
-	unknownFields          protoimpl.UnknownFields
-	sizeCache              protoimpl.SizeCache
+	// "email" | "phone" | "name_only"
+	ContactMode   string `protobuf:"bytes,2,opt,name=contact_mode,json=contactMode,proto3" json:"contact_mode,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *BookingPolicy) Reset() {
@@ -118,6 +120,13 @@ func (x *BookingPolicy) GetCancelMinNoticeMinutes() int32 {
 		return x.CancelMinNoticeMinutes
 	}
 	return 0
+}
+
+func (x *BookingPolicy) GetContactMode() string {
+	if x != nil {
+		return x.ContactMode
+	}
+	return ""
 }
 
 type Calendar struct {
@@ -915,9 +924,10 @@ const file_mcet_calendar_v1_calendar_proto_rawDesc = "" +
 	"\x1fmcet/calendar/v1/calendar.proto\x12\x10mcet.calendar.v1\x1a\x1fgoogle/protobuf/timestamp.proto\";\n" +
 	"\vEmbedPolicy\x12\x12\n" +
 	"\x04mode\x18\x01 \x01(\tR\x04mode\x12\x18\n" +
-	"\aorigins\x18\x02 \x03(\tR\aorigins\"J\n" +
+	"\aorigins\x18\x02 \x03(\tR\aorigins\"m\n" +
 	"\rBookingPolicy\x129\n" +
-	"\x19cancel_min_notice_minutes\x18\x01 \x01(\x05R\x16cancelMinNoticeMinutes\"\xe3\x03\n" +
+	"\x19cancel_min_notice_minutes\x18\x01 \x01(\x05R\x16cancelMinNoticeMinutes\x12!\n" +
+	"\fcontact_mode\x18\x02 \x01(\tR\vcontactMode\"\xe3\x03\n" +
 	"\bCalendar\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x15\n" +
 	"\x06org_id\x18\x02 \x01(\tR\x05orgId\x12\x12\n" +

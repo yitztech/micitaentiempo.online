@@ -19,7 +19,8 @@ type EmbedPolicy struct {
 
 // BookingPolicy son las reglas de autoservicio del cliente final.
 type BookingPolicy struct {
-	CancelMinNoticeMinutes int `json:"cancel_min_notice_minutes,omitempty"`
+	CancelMinNoticeMinutes int    `json:"cancel_min_notice_minutes,omitempty"`
+	ContactMode            string `json:"contact_mode,omitempty"`
 }
 
 // Calendar es un tablero.
@@ -54,6 +55,9 @@ func scanCalendar(row pgx.Row) (Calendar, error) {
 	_ = json.Unmarshal(booking, &c.BookingPolicy)
 	if c.EmbedPolicy.Mode == "" {
 		c.EmbedPolicy.Mode = "any"
+	}
+	if c.BookingPolicy.ContactMode == "" {
+		c.BookingPolicy.ContactMode = "email"
 	}
 	return c, nil
 }
