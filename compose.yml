@@ -120,8 +120,9 @@ services:
     develop:
       watch:
         - { path: services/admin/src, target: /repo/services/admin/src, action: sync }
-        - { path: services/admin/public, target: /repo/services/admin/public, action: sync }
+        - { path: services/admin/ui/src, target: /repo/services/admin/ui/src, action: sync }
         - { path: services/admin/package.json, action: rebuild }
+        - { path: services/admin/ui/package.json, action: rebuild }
         - { path: pnpm-lock.yaml, action: rebuild }
 
   mailpit:

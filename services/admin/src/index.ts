@@ -40,8 +40,8 @@ export async function buildAdminApp(
   // Registrar rutas de la API del panel
   registerApiRoutes(app, auth, adminDb, platformDb);
 
-  // Servidor de estáticos para el frontend en AngularJS 1.8.3
-  const publicDir = resolve(process.cwd(), "public");
+  // Servidor de estáticos para el frontend en Angular (salida de `ng build` en public/)
+  const publicDir = resolve(config.publicDir);
   const fallbackIndex = resolve(publicDir, "index.html");
 
   app.get("/*", async (req, reply) => {

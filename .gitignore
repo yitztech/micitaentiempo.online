@@ -5,6 +5,9 @@
 node_modules/
 .DS_Store
 dist/
+# Salida generada del panel de administración (Angular)
+/services/admin/public/
+/services/admin/ui/.angular/
 build/
 .react-router/
 coverage/

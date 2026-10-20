@@ -20,6 +20,7 @@ otro (p. ej., `@nestjs/swagger` a TypeScript 6), usa la última compatible y an�
 | Distroless | `static-debian13:nonroot` | `gcr.io/distroless/static-debian13:nonroot` | Imagen final de `calendar` |
 | Mailpit | v1.31.4 | `axllent/mailpit:v1.31.4` | Solo desarrollo y pruebas |
 | Stripe CLI | v1.53.0 | `stripe/stripe-cli:v1.53.0` | Solo desarrollo |
+| Angular | 22.2.3 | `@angular/*` en `services/admin/ui` | Panel de administración ([ADR 0019](../adr/0019-panel-admin-angular.md)); exige TypeScript 6.0 |
 
 ## 3.2 Docker, CI y plataforma
 
