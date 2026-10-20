@@ -431,12 +431,12 @@ func (s EventServer) ConfirmHold(ctx context.Context, req *calendarv1.ConfirmHol
 	if err != nil {
 		return nil, err
 	}
-	mode := c.BookingPolicy.ContactMode
-	if mode == "" || mode == "email" {
+	switch c.BookingPolicy.ContactMode {
+	case "", "email":
 		if a.UserID == req.GetHolderId() {
 			return nil, fail(connect.CodePermissionDenied, "email_required", "este tablero requiere verificación por correo")
 		}
-	} else if mode == "phone" {
+	case "phone":
 		phone := req.GetAttendee().GetPhone()
 		if phone == "" {
 			phone = held.Attendee.Phone
