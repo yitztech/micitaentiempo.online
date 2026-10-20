@@ -78,7 +78,7 @@ services:
     networks: [frontend]
   # Imita Telegram, Slack y WhatsApp (tests/fakes/captura.mjs): nada sale a terceros en las pruebas.
   captura:
-    image: node:24.21.0-alpine3.24
+    image: node:24.22.0-alpine3.24
     mem_limit: 64m
     command: ["node", "/app/captura.mjs"]
     volumes: ["./tests/fakes:/app:ro"]
