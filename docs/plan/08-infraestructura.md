@@ -229,8 +229,8 @@ Todas se construyen desde la raíz del repo (`docker build -f services/<servicio
 
 | Imagen | Construcción | Ejecución |
 |---|---|---|
-| `gateway` | Plantilla de yitztech: `nginx:1.30.5-alpine`, plantillas de configuración con `envsubst` para `TRUSTED_PROXY_CIDR` y `RELEASE_SHA` | nginx |
-| `web` | `node:24.21.0-alpine3.24` + pnpm 12.9.1: `pnpm fetch`, instalación filtrada, `react-router build`, `pnpm deploy --prod` | `node` con `@react-router/serve`, usuario `node` |
+| `gateway` | Plantilla de yitztech: `nginx:1.30.6-alpine`, plantillas de configuración con `envsubst` para `TRUSTED_PROXY_CIDR` y `RELEASE_SHA` | nginx |
+| `web` | `node:24.22.0-alpine3.24` + pnpm 12.9.1: `pnpm fetch`, instalación filtrada, `react-router build`, `pnpm deploy --prod` | `node` con `@react-router/serve`, usuario `node` |
 | `api` | Igual que `web`; `nest build` | `node dist/main.js`, usuario `node` |
 | `calendar` | `golang:1.27.1-alpine3.24`, `CGO_ENABLED=0`, `-trimpath`, `-ldflags "-s -w -X main.revision=${RELEASE_SHA}"` | `gcr.io/distroless/static-debian13:nonroot`; zonas del sistema + `time/tzdata` de respaldo |
 | `postgres` | `postgres:18.6-alpine3.24` + `postgresql.conf` + scripts de `docker-entrypoint-initdb.d` | PostgreSQL |

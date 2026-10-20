@@ -14,9 +14,9 @@ otro (p. ej., `@nestjs/swagger` a TypeScript 6), usa la última compatible y an�
 | Componente | Versión | Imagen / fuente | Nota |
 |---|---|---|---|
 | Go | 1.27.1 | `golang:1.27.1-alpine3.24` (compilación) | [go.dev/dl](https://go.dev/dl/) |
-| Node.js | 24.21.0 LTS «Krypton» | `node:24.21.0-alpine3.24` | Node 26 pasa a LTS el **2026-10-28**: cambiar entonces a `node:26-alpine` y `@types/node@26` en un PR propio ([calendario](https://github.com/nodejs/Release)) |
+| Node.js | 24.22.0 LTS «Krypton» | `node:24.22.0-alpine3.24` | Node 26 pasa a LTS el **2026-10-28**: cambiar entonces a `node:26-alpine` y `@types/node@26` en un PR propio ([calendario](https://github.com/nodejs/Release)) |
 | PostgreSQL | 18.6 | `postgres:18.6-alpine3.24` como base de la imagen propia | PostgreSQL 19 aún no está publicado ([versiones](https://www.postgresql.org/support/versioning/)). En 18 el volumen se monta en `/var/lib/postgresql` |
-| nginx | 1.30.5 (rama estable) | `nginx:1.30.5-alpine` | La plantilla usa la rama estable; la *mainline* es 1.31.6 |
+| nginx | 1.30.6 (rama estable) | `nginx:1.30.6-alpine` | La plantilla usa la rama estable; la *mainline* es 1.31.7 |
 | Distroless | `static-debian13:nonroot` | `gcr.io/distroless/static-debian13:nonroot` | Imagen final de `calendar` |
 | Mailpit | v1.31.4 | `axllent/mailpit:v1.31.4` | Solo desarrollo y pruebas |
 | Stripe CLI | v1.53.0 | `stripe/stripe-cli:v1.53.0` | Solo desarrollo |
