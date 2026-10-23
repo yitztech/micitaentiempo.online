@@ -319,7 +319,7 @@ Cambiar contraseñas de roles más adelante es manual (`ALTER ROLE`), documentad
 | `web` | Servidor de desarrollo de React Router con HMR; `develop.watch` sincroniza `services/web` y `packages/*` |
 | `api` | `nest start --watch`; `develop.watch` con `sync` del código y `rebuild` si cambia `package.json` o el lockfile |
 | `calendar` | `develop.watch` con `rebuild` al cambiar código Go |
-| `postgres` | Misma imagen; puerto `5432:5432` para herramientas locales |
+| `postgres` | Misma imagen; puerto `5481:5432` para herramientas locales |
 | `mailpit` | `axllent/mailpit:v1.31.4`; todos los correos de los dos idiomas; interfaz en `:8025` |
 | `stripe-cli` | Perfil `stripe`: `stripe listen --forward-to http://gateway/api/webhooks/stripe` |
 | Dobles de pruebas | Perfil `fakes` (ver `09-pruebas.md` §9.2) |

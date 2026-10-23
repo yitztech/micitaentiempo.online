@@ -81,6 +81,8 @@ docker compose up --watch       # todo el sistema con recarga en caliente
 
 - Español: http://micitaentiempo.localhost:8080 · Inglés: http://myappointmentontime.localhost:8080
 - Correos de desarrollo (Mailpit): http://localhost:8025
+- PostgreSQL para herramientas locales: `localhost:5481`
+- Para probar el acceso con Google en local: en `.env`, `SITE_URL_ES=http://localhost:8080` y `SITE_URL_EN=http://127.0.0.1:8080` (Google no admite subdominios de `localhost`; ver [08-infraestructura](docs/plan/08-infraestructura.md))
 - Calidad: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `cd services/calendar && go test ./...`
 - Pruebas por escenarios: `pnpm escenarios`
 
