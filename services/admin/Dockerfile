@@ -14,7 +14,8 @@ RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
 
 # Desarrollo local (compose.yml): servidor con recarga; Compose Watch sincroniza el código.
 FROM deps AS dev
-RUN pnpm --filter "@mcet/admin^..." build
+# Sus dependencias del monorepo no tienen script build (solo @mcet/tsconfig): --if-present
+RUN pnpm --filter "@mcet/admin^..." run --if-present build
 WORKDIR /repo/services/admin
 CMD ["pnpm", "dev"]
 

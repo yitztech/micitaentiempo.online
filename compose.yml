@@ -2,7 +2,7 @@
 #  DESARROLLO LOCAL: misma topología que producción con recarga en caliente.
 #    cp .env.example .env && docker compose up --watch
 #  Español: http://micitaentiempo.localhost:8080 · Inglés: http://myappointmentontime.localhost:8080
-#  Correos: http://localhost:8025 (Mailpit)
+#  Correos: http://localhost:8025 (Mailpit) · PostgreSQL: localhost:5481
 # ─────────────────────────────────────────────────────────────────────────────
 x-site: &site
   IDIOMAS: ${IDIOMAS:-es,en}
@@ -92,7 +92,7 @@ services:
 
   postgres:
     build: { context: ., dockerfile: services/postgres/Dockerfile }
-    ports: ["5432:5432"]
+    ports: ["5481:5432"]   # 5481 en el Mac: no choca con otros proyectos ni con un PostgreSQL local
     environment:
       POSTGRES_DB: micita
       POSTGRES_USER: micita
