@@ -1,3 +1,6 @@
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import type { FastifyInstance } from "fastify";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { AdminDatabase, verifyPassword } from "../src/db/admin-db.js";
@@ -18,6 +21,7 @@ describe("Panel de Administración — Autenticación y Almacén Aislado", () =>
       port: 3000,
       host: "localhost",
       dataDir: "/tmp",
+      publicDir: "public",
       sqliteFile: ":memory:",
       initialAdminUser: "yunerkis",
       initialAdminPassword: testPassword,
@@ -164,27 +168,35 @@ describe("Panel de Administración — Autenticación y Almacén Aislado", () =>
     expect(version.json()).toEqual({ revision: "test-sha" });
   });
 
-  it("sirve el frontend SPA en AngularJS y sus activos estáticos", async () => {
-    // HTML principal
-    const htmlRes = await app.inject({ method: "GET", url: "/" });
-    expect(htmlRes.statusCode).toBe(200);
-    expect(htmlRes.headers["content-type"]).toContain("text/html");
-    expect(htmlRes.body).toContain('ng-app="adminApp"');
-    expect(htmlRes.body).toContain("/vendor/angular.min.js");
+  it("sirve el panel desde su directorio público y recurre a index.html en las rutas del SPA", async () => {
+    const publicDir = mkdtempSync(join(tmpdir(), "admin-public-"));
+    writeFileSync(join(publicDir, "index.html"), "<!doctype html><app-root></app-root>");
+    writeFileSync(join(publicDir, "styles.css"), ".admin-layout{display:flex}");
 
-    // Librería de AngularJS
-    const angularRes = await app.inject({ method: "GET", url: "/vendor/angular.min.js" });
-    expect(angularRes.statusCode).toBe(200);
-    expect(angularRes.body).toContain("AngularJS v1.8.3");
+    const { app: staticApp } = await buildAdminApp(
+      { releaseSha: "test-sha", publicDir },
+      adminDb,
+      platformDb,
+    );
+    try {
+      const htmlRes = await staticApp.inject({ method: "GET", url: "/" });
+      expect(htmlRes.statusCode).toBe(200);
+      expect(htmlRes.headers["content-type"]).toContain("text/html");
+      expect(htmlRes.body).toContain("<app-root>");
 
-    // JS del controlador
-    const jsRes = await app.inject({ method: "GET", url: "/app.js" });
-    expect(jsRes.statusCode).toBe(200);
-    expect(jsRes.body).toContain('angular.module("adminApp"');
+      const cssRes = await staticApp.inject({ method: "GET", url: "/styles.css" });
+      expect(cssRes.statusCode).toBe(200);
+      expect(cssRes.body).toContain(".admin-layout");
 
-    // CSS del panel
-    const cssRes = await app.inject({ method: "GET", url: "/styles.css" });
-    expect(cssRes.statusCode).toBe(200);
-    expect(cssRes.body).toContain(".admin-layout");
+      const spaRes = await staticApp.inject({ method: "GET", url: "/usuarios" });
+      expect(spaRes.statusCode).toBe(200);
+      expect(spaRes.body).toContain("<app-root>");
+
+      const apiRes = await staticApp.inject({ method: "GET", url: "/api/no-existe" });
+      expect(apiRes.statusCode).toBe(404);
+    } finally {
+      await staticApp.close();
+      rmSync(publicDir, { recursive: true, force: true });
+    }
   });
 });

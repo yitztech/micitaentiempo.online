@@ -1,0 +1,653 @@
+@if (!isLoggedIn()) {
+  <!-- ── VISTA DE INICIO DE SESIÓN ── -->
+  <div class="login-wrapper">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="logo-badge">🛡️</div>
+        <h1>Panel de Administración</h1>
+        <p>Mi Cita en Tiempo — Control Interno</p>
+      </div>
+
+      @if (loginError(); as error) {
+        <div class="alert alert-danger" role="alert">
+          {{ error }}
+        </div>
+      }
+
+      <!-- ngNoForm: la validación nativa de `required` sigue activa, como en la versión anterior -->
+      <form ngNoForm (submit)="onLoginSubmit($event)" class="login-form">
+        <div class="form-group">
+          <label for="username">Usuario Administrador</label>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            [(ngModel)]="loginUsername"
+            placeholder="yunerkis"
+            required
+            autocomplete="username"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="password">Contraseña</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            [(ngModel)]="loginPassword"
+            placeholder="••••••••••••"
+            required
+            autocomplete="current-password"
+          >
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" [disabled]="loading()">
+          @if (!loading()) {
+            <span>Iniciar Sesión</span>
+          } @else {
+            <span>Verificando...</span>
+          }
+        </button>
+      </form>
+    </div>
+  </div>
+} @else {
+  <!-- ── VISTA DEL PANEL PRINCIPAL ── -->
+  <div class="admin-layout">
+    <!-- Barra Lateral de Navegación -->
+    <aside class="sidebar" aria-label="Navegación del panel">
+      <div class="sidebar-brand">
+        <span class="brand-icon">🛡️</span>
+        <div>
+          <div class="brand-title">MCET Admin</div>
+          <div class="brand-sub">Subdominio admin</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button type="button" class="nav-item" [class.active]="currentTab() === 'stats'" (click)="setTab('stats')">
+          <span class="nav-icon">📊</span>
+          <span>Estadísticas</span>
+        </button>
+
+        <button type="button" class="nav-item" [class.active]="currentTab() === 'users'" (click)="setTab('users')">
+          <span class="nav-icon">👥</span>
+          <span>Usuarios</span>
+          @if (users().length) {
+            <span class="badge badge-subtle">{{ users().length }}</span>
+          }
+        </button>
+
+        <button
+          type="button"
+          class="nav-item"
+          [class.active]="currentTab() === 'subscriptions'"
+          (click)="setTab('subscriptions')"
+        >
+          <span class="nav-icon">💳</span>
+          <span>Suscripciones</span>
+          @if (subscriptionSummary().totalCanceled > 0) {
+            <span class="badge badge-warning">{{ subscriptionSummary().totalCanceled }} canceladas</span>
+          }
+        </button>
+
+        <button type="button" class="nav-item" [class.active]="currentTab() === 'blocked'" (click)="setTab('blocked')">
+          <span class="nav-icon">🚫</span>
+          <span>Bloqueados</span>
+          @if (blockedUsers().length) {
+            <span class="badge badge-danger">{{ blockedUsers().length }}</span>
+          }
+        </button>
+
+        <button type="button" class="nav-item" [class.active]="currentTab() === 'audit'" (click)="setTab('audit')">
+          <span class="nav-icon">📋</span>
+          <span>Auditoría</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="admin-badge">
+          <div class="avatar-circle">Y</div>
+          <div class="admin-info">
+            <span class="admin-name">{{ adminUser()?.username }}</span>
+            <span class="admin-role">Superadministrador</span>
+          </div>
+        </div>
+        <button type="button" class="btn btn-outline-danger btn-sm btn-block" (click)="logout()">
+          Cerrar sesión
+        </button>
+      </div>
+    </aside>
+
+    <!-- Contenido Principal -->
+    <main class="main-content">
+      <!-- Encabezado Superior -->
+      <header class="topbar">
+        <div class="topbar-title">
+          @switch (currentTab()) {
+            @case ("stats") {
+              <h2>Estadísticas Generales del Sitio</h2>
+            }
+            @case ("users") {
+              <h2>Gestión y Moderación de Usuarios</h2>
+            }
+            @case ("subscriptions") {
+              <h2>Monitoreo de Suscripciones y Cancelaciones</h2>
+            }
+            @case ("blocked") {
+              <h2>Usuarios Suspendidos y Bloqueados</h2>
+            }
+            @case ("audit") {
+              <h2>Registro Histórico de Auditoría</h2>
+            }
+          }
+        </div>
+
+        <div class="topbar-actions">
+          <button type="button" class="btn btn-secondary btn-sm" (click)="refreshCurrentTab()" [disabled]="loading()">
+            🔄 Actualizar
+          </button>
+        </div>
+      </header>
+
+      <!-- Alerta global de acción -->
+      @if (successMessage(); as message) {
+        <div class="alert alert-success" role="alert">
+          {{ message }}
+        </div>
+      }
+      @if (errorMessage(); as message) {
+        <div class="alert alert-danger" role="alert">
+          {{ message }}
+        </div>
+      }
+
+      <!-- ── PESTAÑA 1: ESTADÍSTICAS ── -->
+      @if (currentTab() === "stats") {
+        <section class="tab-pane">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon icon-users">👥</div>
+              <div class="stat-details">
+                <span class="stat-label">Usuarios Totales</span>
+                <span class="stat-value">{{ stats().totalUsers | number }}</span>
+                <span class="stat-meta">
+                  {{ stats().verifiedUsers | number }} verificados ({{ (stats().verifiedUsers! / stats().totalUsers!) * 100 | number: "1.0-0" }}%)
+                </span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon icon-subs">💳</div>
+              <div class="stat-details">
+                <span class="stat-label">Suscripciones Activas</span>
+                <span class="stat-value">{{ stats().activeSubscriptions | number }}</span>
+                <span class="stat-meta">
+                  {{ stats().trialSubscriptions | number }} en periodo de prueba
+                </span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon icon-cancel">⚠️</div>
+              <div class="stat-details">
+                <span class="stat-label">Cancelaciones / Churn</span>
+                <span class="stat-value text-danger">{{ stats().canceledSubscriptions | number }}</span>
+                <span class="stat-meta">
+                  {{ stats().pastDueSubscriptions | number }} pagos atrasados (past due)
+                </span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon icon-events">📅</div>
+              <div class="stat-details">
+                <span class="stat-label">Citas Reservadas</span>
+                <span class="stat-value">{{ stats().totalAppointments | number }}</span>
+                <span class="stat-meta">Sin dobles reservas</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon icon-revenue">💰</div>
+              <div class="stat-details">
+                <span class="stat-label">MRR Estimado</span>
+                <span class="stat-value">US$ {{ stats().mrrEstimate | number }}</span>
+                <span class="stat-meta">Facturación mensual activa</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon icon-blocked">🚫</div>
+              <div class="stat-details">
+                <span class="stat-label">Usuarios Bloqueados</span>
+                <span class="stat-value text-danger">{{ stats().blockedUsers | number }}</span>
+                <span class="stat-meta">Acceso revocado</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tablas comparativas de estadísticas -->
+          <div class="grid-2col mt-6">
+            <div class="card">
+              <div class="card-header">
+                <h3>Distribución por Planes de Negocio</h3>
+              </div>
+              <div class="card-body">
+                <div class="progress-item">
+                  <div class="progress-labels">
+                    <span>Plan Personal (US$5/mes)</span>
+                    <strong>{{ stats().personalPlans }} negocios</strong>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress-fill fill-primary" style="width: 75%;"></div>
+                  </div>
+                </div>
+
+                <div class="progress-item mt-4">
+                  <div class="progress-labels">
+                    <span>Plan Sedes / Branches (US$20/mes)</span>
+                    <strong>{{ stats().branchesPlans }} negocios</strong>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress-fill fill-secondary" style="width: 25%;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3>Salud de la Plataforma</h3>
+              </div>
+              <div class="card-body">
+                <ul class="health-list">
+                  <li>
+                    <span>Base de datos aislada del panel:</span>
+                    <span class="badge badge-success">Activa (SQLite /data)</span>
+                  </li>
+                  <li>
+                    <span>Conexión a base de datos de plataforma:</span>
+                    <span class="badge badge-success">Conectada</span>
+                  </li>
+                  <li>
+                    <span>Registro de auditoría interna:</span>
+                    <span class="badge badge-success">Habilitado</span>
+                  </li>
+                  <li>
+                    <span>Nuevos usuarios (últimos 7 días):</span>
+                    <strong>+{{ stats().newUsers7d }} registros</strong>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+      }
+
+      <!-- ── PESTAÑA 2: USUARIOS ── -->
+      @if (currentTab() === "users") {
+        <section class="tab-pane">
+          <div class="filter-bar">
+            <div class="search-box">
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Buscar por nombre o correo electrónico..."
+                [(ngModel)]="userSearch"
+              >
+            </div>
+
+            <div class="btn-group">
+              <button
+                type="button"
+                class="btn btn-sm"
+                [class.btn-primary]="userFilter() === 'all'"
+                [class.btn-outline]="userFilter() !== 'all'"
+                (click)="setUserFilter('all')"
+              >
+                Todos ({{ users().length }})
+              </button>
+              <button
+                type="button"
+                class="btn btn-sm"
+                [class.btn-primary]="userFilter() === 'verified'"
+                [class.btn-outline]="userFilter() !== 'verified'"
+                (click)="setUserFilter('verified')"
+              >
+                Verificados
+              </button>
+              <button
+                type="button"
+                class="btn btn-sm"
+                [class.btn-primary]="userFilter() === 'blocked'"
+                [class.btn-outline]="userFilter() !== 'blocked'"
+                (click)="setUserFilter('blocked')"
+              >
+                Bloqueados ({{ blockedUsers().length }})
+              </button>
+            </div>
+          </div>
+
+          <div class="table-responsive mt-4">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Usuario</th>
+                  <th>Estado Verificación</th>
+                  <th>Negocio / Plan</th>
+                  <th>Estado Suscripción</th>
+                  <th>Estado Acceso</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (user of filteredUsers(); track user.id) {
+                  <tr>
+                    <td>
+                      <div class="user-cell">
+                        <strong>{{ user.name }}</strong>
+                        <span class="text-muted text-sm">{{ user.email }}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="badge" [class.badge-success]="user.email_verified" [class.badge-warning]="!user.email_verified">
+                        {{ user.email_verified ? "Verificado" : "Pendiente" }}
+                      </span>
+                    </td>
+                    <td>
+                      @if (user.org_name) {
+                        <div>
+                          <span>{{ user.org_name }}</span>
+                          <span class="badge badge-subtle ml-1">{{ user.org_plan }}</span>
+                        </div>
+                      } @else {
+                        <span class="text-muted text-sm">Sin organización</span>
+                      }
+                    </td>
+                    <td>
+                      <span
+                        class="badge"
+                        [class.badge-success]="user.org_status === 'active'"
+                        [class.badge-info]="user.org_status === 'trialing'"
+                        [class.badge-warning]="user.org_status === 'past_due'"
+                        [class.badge-danger]="user.org_status === 'suspended' || user.org_cancel_at_period_end"
+                      >
+                        {{ user.org_status || "N/A" }}
+                        @if (user.org_cancel_at_period_end) {
+                          <span>(cancela)</span>
+                        }
+                      </span>
+                    </td>
+                    <td>
+                      <span class="badge" [class.badge-danger]="user.is_blocked" [class.badge-success]="!user.is_blocked">
+                        {{ user.is_blocked ? "🚫 Bloqueado" : "✓ Activo" }}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="action-buttons">
+                        @if (!user.is_blocked) {
+                          <button type="button" class="btn btn-danger btn-xs" (click)="openBlockModal(user)">
+                            Bloquear
+                          </button>
+                        } @else {
+                          <button type="button" class="btn btn-success btn-xs" (click)="unblockUser(user)">
+                            Desbloquear
+                          </button>
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="6" class="text-center text-muted py-6">
+                      No se encontraron usuarios coincidentes.
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+      }
+
+      <!-- ── PESTAÑA 3: SUSCRIPCIONES Y CANCELACIONES ── -->
+      @if (currentTab() === "subscriptions") {
+        <section class="tab-pane">
+          <div class="stats-grid mb-6">
+            <div class="stat-card">
+              <div class="stat-details">
+                <span class="stat-label">Suscripciones Totales</span>
+                <span class="stat-value">{{ subscriptionSummary().totalSubscriptions }}</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-details">
+                <span class="stat-label">Total Canceladas</span>
+                <span class="stat-value text-danger">{{ subscriptionSummary().totalCanceled }}</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-details">
+                <span class="stat-label">Tasa de Cancelación (Churn)</span>
+                <span class="stat-value">{{ subscriptionSummary().churnRatePercent }}%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>Negocios con Cancelaciones o en Riesgo de Baja</h3>
+            </div>
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Negocio</th>
+                    <th>Propietario</th>
+                    <th>Plan</th>
+                    <th>Estado</th>
+                    <th>Fin de Periodo</th>
+                    <th>Impacto Mensual</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (sub of cancellations(); track $index) {
+                    <tr>
+                      <td>
+                        <strong>{{ sub.org_name }}</strong>
+                      </td>
+                      <td>
+                        <div>{{ sub.owner_name }}</div>
+                        <span class="text-muted text-sm">{{ sub.owner_email }}</span>
+                      </td>
+                      <td>
+                        <span class="badge badge-subtle">{{ sub.plan }}</span>
+                      </td>
+                      <td>
+                        <span class="badge badge-danger">
+                          {{ sub.cancel_at_period_end ? "Cancela al fin de periodo" : sub.status }}
+                        </span>
+                      </td>
+                      <td>
+                        @if (sub.current_period_end) {
+                          <span>{{ sub.current_period_end | date: "mediumDate" }}</span>
+                        } @else {
+                          <span class="text-muted">Inmediato</span>
+                        }
+                      </td>
+                      <td>
+                        <span class="text-danger font-semibold">
+                          - US$ {{ sub.plan === "branches" ? 20 : 5 }}/mes
+                        </span>
+                      </td>
+                    </tr>
+                  } @empty {
+                    <tr>
+                      <td colspan="6" class="text-center text-muted py-6">
+                        No hay suscripciones canceladas en este momento.
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      }
+
+      <!-- ── PESTAÑA 4: USUARIOS BLOQUEADOS ── -->
+      @if (currentTab() === "blocked") {
+        <section class="tab-pane">
+          <div class="card">
+            <div class="card-header">
+              <h3>Registro de Usuarios Bloqueados (Almacén Aislado de Administración)</h3>
+            </div>
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>ID de Usuario</th>
+                    <th>Correo</th>
+                    <th>Motivo del Bloqueo</th>
+                    <th>Fecha de Bloqueo</th>
+                    <th>Bloqueado Por</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (b of blockedUsers(); track b.user_id) {
+                    <tr>
+                      <td><code>{{ b.user_id }}</code></td>
+                      <td><strong>{{ b.email }}</strong></td>
+                      <td>{{ b.reason }}</td>
+                      <td>{{ b.blocked_at | date: "medium" }}</td>
+                      <td><span class="badge badge-subtle">{{ b.blocked_by }}</span></td>
+                      <td>
+                        <button type="button" class="btn btn-success btn-xs" (click)="unblockDirect(b.user_id)">
+                          Desbloquear
+                        </button>
+                      </td>
+                    </tr>
+                  } @empty {
+                    <tr>
+                      <td colspan="6" class="text-center text-muted py-6">
+                        No hay usuarios bloqueados actualmente.
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      }
+
+      <!-- ── PESTAÑA 5: REGISTRO DE AUDITORÍA ── -->
+      @if (currentTab() === "audit") {
+        <section class="tab-pane">
+          <div class="card">
+            <div class="card-header">
+              <h3>Historial de Acciones Administrativas</h3>
+            </div>
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Fecha / Hora</th>
+                    <th>Acción</th>
+                    <th>Administrador</th>
+                    <th>Objetivo</th>
+                    <th>Detalles</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (log of auditLogs(); track $index) {
+                    <tr>
+                      <td class="text-muted text-sm">{{ log.created_at | date: "medium" }}</td>
+                      <td>
+                        <span
+                          class="badge"
+                          [class.badge-danger]="log.action === 'USER_BLOCKED' || log.action === 'LOGIN_FAILED'"
+                          [class.badge-success]="log.action === 'USER_UNBLOCKED' || log.action === 'LOGIN_SUCCESS'"
+                          [class.badge-info]="log.action.includes('ADMIN')"
+                        >
+                          {{ log.action }}
+                        </span>
+                      </td>
+                      <td><strong>{{ log.admin_user }}</strong></td>
+                      <td><code>{{ log.target_id }}</code></td>
+                      <td>{{ log.details }}</td>
+                    </tr>
+                  } @empty {
+                    <tr>
+                      <td colspan="5" class="text-center text-muted py-6">
+                        No hay registros de auditoría aún.
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      }
+    </main>
+  </div>
+
+  <!-- ── MODAL PARA BLOQUEAR USUARIO ── -->
+  @if (modalOpen()) {
+    <div class="modal-backdrop">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3>Bloquear Usuario</h3>
+          <button type="button" class="close-btn" (click)="closeBlockModal()">×</button>
+        </div>
+
+        <div class="modal-body">
+          <p>
+            ¿Deseas bloquear el acceso al usuario <strong>{{ selectedUser()?.email }}</strong>?
+          </p>
+          <p class="text-muted text-sm">
+            Al bloquear a este usuario se revocarán todas sus sesiones activas inmediatamente y su organización pasará a estado suspendido.
+          </p>
+
+          <div class="form-group mt-4">
+            <label for="blockReason">Motivo del Bloqueo</label>
+            <select
+              id="blockReasonSelect"
+              class="form-control mb-2"
+              [ngModel]="selectedReasonPreset()"
+              (ngModelChange)="selectReasonPreset($event)"
+            >
+              @for (preset of reasonPresets; track preset) {
+                <option [value]="preset">{{ preset }}</option>
+              }
+            </select>
+            <input
+              type="text"
+              id="blockReason"
+              class="form-control"
+              [(ngModel)]="blockReason"
+              placeholder="Describe el motivo del bloqueo..."
+              required
+            >
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeBlockModal()">Cancelar</button>
+          <button
+            type="button"
+            class="btn btn-danger"
+            [disabled]="!blockReason() || loading()"
+            (click)="confirmBlockUser()"
+          >
+            Confirmar Bloqueo
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+}

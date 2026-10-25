@@ -4,6 +4,7 @@ export interface AdminConfig {
   port: number;
   host: string;
   dataDir: string;
+  publicDir: string;
   sqliteFile: string;
   initialAdminUser: string;
   initialAdminPassword: string;
@@ -23,6 +24,7 @@ export function loadConfig(): AdminConfig {
     port: Number(process.env.ADMIN_PORT || process.env.PORT || 3000),
     host: process.env.ADMIN_HOST || "0.0.0.0",
     dataDir,
+    publicDir: process.env.ADMIN_PUBLIC_DIR || resolve(process.cwd(), "public"),
     sqliteFile: process.env.ADMIN_SQLITE_FILE || resolve(dataDir, "admin.sqlite"),
     initialAdminUser: process.env.ADMIN_INITIAL_USER || "yunerkis",
     // Construido dinámicamente para evitar falsos positivos en analizadores de secretos estáticos
