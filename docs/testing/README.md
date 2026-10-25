@@ -18,7 +18,7 @@ pnpm test:env:up
 
 El entorno `mcet-tests` usa exclusivamente datos sintéticos y `.env.ci`. Levanta las imágenes del código actual, PostgreSQL, Mailpit y dobles HTTP de proveedores. Ocupa los puertos 8080, 8025, 4010 y 5232; comprueba que están libres antes de levantarlo. No reutilices bases ni credenciales de producción. Las suites SQL crean otros PostgreSQL efímeros mediante Testcontainers y los eliminan al terminar. No aceptan un DSN de producción.
 
-En macOS, si Testcontainers no descubre Docker, usa las variables de conexión documentadas por tu instalación de Docker/OrbStack; no desactives las pruebas para ocultar el problema. Sin Docker, `test:db` falla. El modo Go `-short` omite explícitamente las pruebas SQL.
+En macOS, si Testcontainers no descubre Docker, usa las variables de conexión documentadas por tu instalación de Docker; no desactives las pruebas para ocultar el problema. Sin Docker, `test:db` falla. El modo Go `-short` omite explícitamente las pruebas SQL.
 
 Los nombres `micitaentiempo.localhost` y `myappointmentontime.localhost` deben resolver a loopback. Para otra dirección local, configura `ES_URL`, `EN_URL` y `MAILPIT_URL` según `tests/escenarios/fixtures/`; las URL públicas del entorno deben coincidir para verificar correos y cookies. No apuntes suites que escriben datos a producción.
 
