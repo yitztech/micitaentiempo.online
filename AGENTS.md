@@ -317,7 +317,7 @@ estos estados, y la respuesta del servidor lo dice sin depender de que se ejecut
 | Estado | Respuesta | En el sitemap |
 |---|---|---|
 | Pública | 200, sin `noindex`, `canonical` igual a su propia URL, carácter por carácter | Sí, con esa misma URL |
-| Privada (app, panel, cuenta, invitaciones, enlaces con token, flujos de acceso, API, descargas) | 200 o la que corresponda, con la cabecera `X-Robots-Tag: noindex` | No |
+| Privada (app, panel, cuenta, invitaciones, enlaces con token, pasos de contraseña, API, descargas) | 200 o la que corresponda, con la cabecera `X-Robots-Tag: noindex` (una página que el servidor renderiza puede llevar en su lugar `<meta name="robots" content="noindex">`; una SPA, siempre la cabecera) | No |
 | Inexistente | 404 (410 si se borró a propósito), con `noindex` y sin `canonical` | No |
 | Movida | 301 en un solo salto a la URL final | No |
 
@@ -327,9 +327,8 @@ estos estados, y la respuesta del servidor lo dice sin depender de que se ejecut
   (`/e/<id>` de un evento borrado): 404, no una página vacía con 200.
 - **`robots.txt` no oculta páginas.** Solo `User-agent: *`, `Allow: /` y `Sitemap:`. Si una URL bloqueada
   tiene enlaces, Google la indexa sin leerla («indexada aunque bloqueada») porque no puede ver su `noindex`. Lo
-  privado se excluye con `X-Robots-Tag: noindex` en la respuesta (también la API y las descargas), nunca con
-  `Disallow`. `robots.txt` y `sitemap.xml` son archivos de verdad: `text/plain` y `application/xml`, nunca el
-  `index.html` de la SPA.
+  privado se excluye con `noindex` (la API y las descargas, con la cabecera), nunca con `Disallow`. `robots.txt`
+  y `sitemap.xml` son archivos de verdad (`text/plain` y XML), nunca el `index.html` de la SPA.
 - **Una sola forma por URL.** Se decide una vez si las rutas llevan barra final y se cumple en todo: la otra
   forma, `/index.html` y las mayúsculas responden 301 a la buena. En nginx, `absolute_redirect off;` para que sus
   redirecciones (las de directorio de `try_files $uri/`) no salgan con `http://`.
