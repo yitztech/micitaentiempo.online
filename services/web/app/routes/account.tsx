@@ -1,4 +1,5 @@
 import { pathFor } from "@mcet/i18n";
+import { AUTH_NAME_MAX } from "@mcet/schemas";
 import { type FormEvent, useState } from "react";
 import { useRevalidator } from "react-router";
 import { Dialog } from "~/components/dialog";
@@ -140,7 +141,7 @@ export default function AccountPage({ loaderData }: Route.ComponentProps) {
               name="name"
               defaultValue={me.name}
               required
-              maxLength={120}
+              maxLength={AUTH_NAME_MAX}
               autoComplete="name"
             />
             <Field label={t.auth.fields.email} name="email" value={me.email} readOnly />

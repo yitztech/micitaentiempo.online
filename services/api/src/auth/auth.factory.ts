@@ -1,7 +1,7 @@
 import { cimd } from "@better-auth/cimd";
 import { oauthProvider } from "@better-auth/oauth-provider";
-import { authDe, authEn, authEs, authFr, authIt, authPt, isLang, type Lang, pathFor } from "@mcet/i18n";
-import { AUTH_NAME_MAX, AuthName, FullName, UpdateMe } from "@mcet/schemas";
+import { isLang, type Lang, pathFor } from "@mcet/i18n";
+import { AuthName, UpdateMe } from "@mcet/schemas";
 import { APIError, betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { createAuthMiddleware } from "better-auth/api";
@@ -198,7 +198,7 @@ export function createAuth(lang: Lang, { env, db, mail }: AuthDeps) {
           before: async (user) => {
             // OTP crea usuarios sin nombre; ese estado vacío es deliberado.
             if (user.name === "") return { data: user };
-            const result = FullName.safeParse(user.name);
+            const result = AuthName.safeParse(user.name);
             if (!result.success)
               throw new APIError("BAD_REQUEST", { code: "VALIDATION_FAILED", message: "Invalid name" });
             return { data: { ...user, name: result.data } };
@@ -207,7 +207,7 @@ export function createAuth(lang: Lang, { env, db, mail }: AuthDeps) {
         update: {
           before: async (user) => {
             if (user.name === undefined) return { data: user };
-            const result = FullName.safeParse(user.name);
+            const result = AuthName.safeParse(user.name);
             if (!result.success)
               throw new APIError("BAD_REQUEST", { code: "VALIDATION_FAILED", message: "Invalid name" });
             return { data: { ...user, name: result.data } };
@@ -217,28 +217,6 @@ export function createAuth(lang: Lang, { env, db, mail }: AuthDeps) {
     },
     hooks: {
       before: createAuthMiddleware(async (ctx) => {
-        if (ctx.path === "/sign-up/email") {
-          const body = ctx.body as Record<string, unknown> | undefined;
-          const name = AuthName.safeParse(body?.name);
-          if (!name.success) {
-            if (typeof body?.name !== "string") {
-              throw new APIError("BAD_REQUEST", { code: "INVALID_FORMAT", message: "Invalid name" });
-            }
-            const messages = { es: authEs, en: authEn, fr: authFr, pt: authPt, de: authDe, it: authIt }[lang]
-              .errors;
-            const value = body.name.trim().replace(/ +/g, " ");
-            const tooLong = Array.from(value).length > AUTH_NAME_MAX;
-            throw new APIError("UNPROCESSABLE_ENTITY", {
-              code: tooLong ? "TOO_LONG" : value ? "INVALID_CHARACTERS" : "VALIDATION_FAILED",
-              message: tooLong
-                ? messages.name_too_long.replace("{{max}}", String(AUTH_NAME_MAX))
-                : value
-                  ? messages.invalid_name_characters
-                  : messages.name_required,
-            });
-          }
-          if (body) body.name = name.data;
-        }
         if (ctx.path === "/sign-up/email" || ctx.path === "/update-user") {
           const body = ctx.body as Record<string, unknown> | undefined;
           const fields = ["name", "locale", "timezone", "timeFormat", "weekStart", "country"];

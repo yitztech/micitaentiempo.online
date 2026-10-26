@@ -4,11 +4,18 @@ import { FullName, freeText, singleLine } from "./text.ts";
 
 export { FullName } from "./text.ts";
 
-/** Nombre completo en un solo campo (culturalmente flexible: dos apellidos, nombre único…). */
+/** Nombre de una persona en la cuenta y el registro: letras, espacios, apóstrofos, guiones y puntos. */
+export const AUTH_NAME_MAX = 100;
+const AUTH_NAME_PATTERN = /^[\p{L}\p{M}](?:[\p{L}\p{M} '’.-]*[\p{L}\p{M}.])?$/u;
+export const AUTH_NAME_ALLOWED = /[^\p{L}\p{M} '’.-]/gu;
+export const AuthName = z
+  .string()
+  .transform((value) => value.trim().replace(/ +/g, " "))
+  .refine((value) => AUTH_NAME_PATTERN.test(value) && [...value].length <= AUTH_NAME_MAX);
 
 export const UpdateMe = z
   .object({
-    name: FullName,
+    name: AuthName,
     locale: Lang,
     timezone: TimeZone,
     timeFormat: z.enum(["12h", "24h"]),
@@ -34,16 +41,6 @@ export const NewsletterSignup = z
   .object({ email: z.string().trim().min(3).max(254), name: singleLine(120).optional() })
   .strict();
 export type NewsletterSignup = z.infer<typeof NewsletterSignup>;
-
-/** Límites y caracteres de nombres de personas en el registro. */
-export const AUTH_NAME_MAX = 100;
-export const AUTH_NAME_PATTERN = /^[\p{L}\p{M}](?:[\p{L}\p{M} '’.-]*[\p{L}\p{M}.])?$/u;
-export const AUTH_NAME_ALLOWED = /[^\p{L}\p{M} '’.-]/gu;
-export const AuthName = z
-  .string()
-  .transform((value) => value.trim().replace(/ +/g, " "))
-  .refine((value) => Array.from(value).length >= 1 && Array.from(value).length <= AUTH_NAME_MAX)
-  .refine((value) => AUTH_NAME_PATTERN.test(value));
 
 /** Validación estricta de correo electrónico: longitud mín 5, máx 254 y caracteres válidos RFC 5321/5322 */
 export const EmailField = z

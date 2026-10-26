@@ -50,6 +50,13 @@
       "when": 1792120548515,
       "tag": "0006_text_validation",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793047537804,
+      "tag": "0007_users_name_limit",
+      "breakpoints": true
     }
   ]
 }

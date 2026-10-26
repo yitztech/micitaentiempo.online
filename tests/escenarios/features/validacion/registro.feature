@@ -9,9 +9,9 @@ Característica: El registro valida nombres aunque se omita el frontend
       | nombre        | estado |
       | internacional | 200    |
       | texto de 100  | 200    |
-      | texto de 101  | 422    |
-      | vacío         | 422    |
-      | espacios      | 422    |
-      | control       | 422    |
-      | bidi          | 422    |
-      | etiquetas     | 422    |
+      | texto de 101  | 400    |
+      | vacío         | 400    |
+      | espacios      | 400    |
+      | control       | 400    |
+      | bidi          | 400    |
+      | etiquetas     | 400    |

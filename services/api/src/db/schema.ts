@@ -68,7 +68,7 @@ export const user = app.table(
   (t) => [
     check(
       "users_name_text",
-      sql`app.valid_text(${t.name}, 120, false) AND (${t.name} = '' OR length(btrim(${t.name})) > 0)`,
+      sql`app.valid_text(${t.name}, 100, false) AND (${t.name} = '' OR length(btrim(${t.name})) > 0)`,
     ),
     check("users_email_length", sql`length(${t.email}) BETWEEN 3 AND 254`),
   ],

@@ -92,7 +92,8 @@ No existe una longitud universal recomendada para todos los nombres. Se conserva
 
 | Campo | Máximo |
 |---|---:|
-| Nombre completo, negocio, tablero, feriado y nombre de servicio por idioma | 120 |
+| Nombre de la persona (cuenta, registro y perfil) | 100 |
+| Negocio, tablero, feriado, nombre de servicio por idioma y nombre de asistente | 120 |
 | Título y nota de excepción | 200 |
 | Dirección | 240 |
 | Etiqueta de turno | 60 |
