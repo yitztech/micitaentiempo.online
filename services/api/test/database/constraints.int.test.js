@@ -45,10 +45,10 @@ async function insertName(name) {
 }
 describe("SQL directo, sin pasar por Zod", () => {
   it("admite nombres internacionales y el estado sin nombre de OTP", async () => {
-    for (const name of ["", "Ana López O’Connor", "李 小龍", "Á".repeat(100), "🙂".repeat(100)])
+    for (const name of ["", "Ana López O’Connor", "李 小龍", "Á".repeat(120), "🙂".repeat(60)])
       await insertName(name);
   });
-  it.each([" ", "x".repeat(101), "🙂".repeat(101), "A\nB", "A\u0085B", "A\u202eB", "<script>"])(
+  it.each([" ", "x".repeat(121), "🙂".repeat(61), "A\nB", "A\u0085B", "A\u202eB", "<script>"])(
     "rechaza nombre inválido %j",
     async (name) => {
       await expect(insertName(name)).rejects.toMatchObject({ code: "23514" });
@@ -57,7 +57,7 @@ describe("SQL directo, sin pasar por Zod", () => {
   it("rechaza edición inválida sin modificar el valor anterior", async () => {
     await pool.query("INSERT INTO app.users (id,name,email) VALUES ('edit','Ana','edit@example.com')");
     await expect(
-      pool.query("UPDATE app.users SET name = $1 WHERE id = 'edit'", ["x".repeat(101)]),
+      pool.query("UPDATE app.users SET name = $1 WHERE id = 'edit'", ["x".repeat(121)]),
     ).rejects.toMatchObject({ code: "23514" });
     expect((await pool.query("SELECT name FROM app.users WHERE id='edit'")).rows[0].name).toBe("Ana");
   });
