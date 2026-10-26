@@ -1,10 +1,9 @@
 import { pathFor } from "@mcet/i18n";
+import { EmailField } from "@mcet/schemas";
 import { type FormEvent, useState } from "react";
 import { Link } from "react-router";
-import { AltchaStatus } from "~/components/altcha-status";
 import { AuthCard } from "~/components/auth";
 import { Alert, Button, Field } from "~/components/ui";
-import { useAltcha } from "~/lib/altcha";
 import { errorText, postJson } from "~/lib/api-client";
 import { useRoot } from "~/lib/i18n";
 import { metaFor } from "~/lib/seo";
@@ -16,7 +15,6 @@ export const meta = (args: Route.MetaArgs) =>
 export default function ForgotPassword() {
   const { site, t } = useRoot();
   const s = t.auth.forgot;
-  const altcha = useAltcha();
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -24,20 +22,17 @@ export default function ForgotPassword() {
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const email = String(new FormData(e.currentTarget).get("email") ?? "").trim();
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!email || email.length < 5 || email.length > 254 || !emailRegex.test(email)) {
+    if (!EmailField.safeParse(email).success) {
       setError(t.auth.errors.invalid_format);
       return;
     }
     setBusy(true);
     setError(null);
     try {
-      const token = await altcha.token();
-      await postJson(
-        "/api/auth/request-password-reset",
-        { email, redirectTo: pathFor("resetPassword", site.lang) },
-        { "x-altcha": token },
-      );
+      await postJson("/api/auth/request-password-reset", {
+        email,
+        redirectTo: pathFor("resetPassword", site.lang),
+      });
       setSent(true);
     } catch (err) {
       setError(errorText(t.auth.errors, err));
@@ -62,12 +57,7 @@ export default function ForgotPassword() {
       {sent ? (
         <Alert tone="success">{s.sent}</Alert>
       ) : (
-        <form
-          method="post"
-          onSubmit={onSubmit}
-          onFocus={() => void altcha.start().catch(() => undefined)}
-          className="space-y-5"
-        >
+        <form method="post" onSubmit={onSubmit} className="space-y-5">
           <Field
             label={t.auth.fields.email}
             name="email"
@@ -76,9 +66,7 @@ export default function ForgotPassword() {
             required
             minLength={5}
             maxLength={254}
-            pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}"
           />
-          <AltchaStatus state={altcha.state} onRetry={() => void altcha.start().catch(() => undefined)} />
           {error ? <Alert tone="danger">{error}</Alert> : null}
           <Button type="submit" size="lg" className="w-full" loading={busy}>
             {s.submit}

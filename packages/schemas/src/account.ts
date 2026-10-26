@@ -35,13 +35,23 @@ export const NewsletterSignup = z
   .strict();
 export type NewsletterSignup = z.infer<typeof NewsletterSignup>;
 
+/** Límites y caracteres de nombres de personas en el registro. */
+export const AUTH_NAME_MAX = 100;
+export const AUTH_NAME_PATTERN = /^[\p{L}\p{M}](?:[\p{L}\p{M} '’.-]*[\p{L}\p{M}.])?$/u;
+export const AUTH_NAME_ALLOWED = /[^\p{L}\p{M} '’.-]/gu;
+export const AuthName = z
+  .string()
+  .transform((value) => value.trim().replace(/ +/g, " "))
+  .refine((value) => Array.from(value).length >= 1 && Array.from(value).length <= AUTH_NAME_MAX)
+  .refine((value) => AUTH_NAME_PATTERN.test(value));
+
 /** Validación estricta de correo electrónico: longitud mín 5, máx 254 y caracteres válidos RFC 5321/5322 */
 export const EmailField = z
   .string()
   .trim()
   .min(5, "Mínimo 5 caracteres")
   .max(254, "Máximo 254 caracteres")
-  .regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, "Formato de correo no válido");
+  .pipe(z.email("Formato de correo no válido"));
 
 /** Validación de contraseña existente para inicio de sesión: mín 8, máx 128, sin caracteres de control */
 export const PasswordField = z
@@ -78,7 +88,7 @@ export type SignInInput = z.infer<typeof SignInInput>;
 
 export const SignUpInput = z
   .object({
-    name: FullName.refine((val) => val.length >= 2, "El nombre debe tener al menos 2 caracteres"),
+    name: AuthName,
     email: EmailField,
     password: NewPasswordField,
   })

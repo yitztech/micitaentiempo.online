@@ -1,13 +1,12 @@
 import { z } from "zod";
-import { EmailField, NewPasswordField, PasswordField, PhoneField } from "./account.ts";
-import { FullName } from "./text.ts";
+import { AuthName, EmailField, NewPasswordField, PasswordField, PhoneField } from "./account.ts";
 
 const MOBILE_REDIRECT_RE =
   /^(postmessage|(?:micitaentiempo|myappointmentontime|exp):\/\/[^\s]+|http:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?\/[^\s]*)$/;
 
 export const MobileSignUp = z
   .object({
-    name: FullName,
+    name: AuthName,
     email: EmailField,
     password: NewPasswordField,
     phone: PhoneField.optional(),

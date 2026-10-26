@@ -1,7 +1,7 @@
 import { cimd } from "@better-auth/cimd";
 import { oauthProvider } from "@better-auth/oauth-provider";
-import { isLang, type Lang, pathFor } from "@mcet/i18n";
-import { FullName, UpdateMe } from "@mcet/schemas";
+import { authDe, authEn, authEs, authFr, authIt, authPt, isLang, type Lang, pathFor } from "@mcet/i18n";
+import { AUTH_NAME_MAX, AuthName, FullName, UpdateMe } from "@mcet/schemas";
 import { APIError, betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { createAuthMiddleware } from "better-auth/api";
@@ -20,8 +20,6 @@ export interface AuthDeps {
   env: Env;
   db: Database;
   mail: MailService;
-  /** Verifica la cabecera x-altcha (antibots). */
-  verifyAltcha: (header: string | undefined) => Promise<boolean>;
 }
 
 const EMAIL_ERRORS: Record<Lang, Record<EmailProblem, string>> = {
@@ -57,15 +55,6 @@ const EMAIL_ERRORS: Record<Lang, Record<EmailProblem, string>> = {
   },
 };
 
-const ALTCHA_MESSAGE: Record<Lang, string> = {
-  es: "No pudimos comprobar que no eres un robot. Recarga la página e inténtalo de nuevo.",
-  en: "We couldn't verify you're not a robot. Reload the page and try again.",
-  fr: "Impossible de vérifier que vous n'êtes pas un robot. Rechargez la page et réessayez.",
-  pt: "Não foi possível verificar que você não é um robô. Recarregue a página e tente novamente.",
-  de: "Wir konnten nicht überprüfen, dass Sie kein Roboter sind. Laden Sie die Seite neu.",
-  it: "Impossibile verificare che non sei un robot. Ricarica la pagina e riprova.",
-};
-
 const PWNED_MESSAGE: Record<Lang, string> = {
   es: "Esa contraseña apareció en una filtración conocida. Elige otra.",
   en: "That password appeared in a known data breach. Choose another one.",
@@ -74,9 +63,6 @@ const PWNED_MESSAGE: Record<Lang, string> = {
   de: "Dieses Passwort ist in einem bekannten Datenleck aufgetaucht. Bitte wählen Sie ein anderes.",
   it: "Questa password è comparsa in una violazione nota. Scegline un'altra.",
 };
-
-/** Rutas que envían correos a direcciones nuevas: exigen ALTCHA. */
-const ALTCHA_PATHS = new Set(["/sign-up/email", "/request-password-reset", "/forget-password"]);
 
 /** Rutas de Better Auth que reciben un correo nuevo y deben validarlo (RF-02). */
 const EMAIL_PATHS = new Set(["/sign-up/email", "/email-otp/send-verification-otp", "/sign-in/email-otp"]);
@@ -109,7 +95,7 @@ function userLang(user: { locale?: unknown }, fallback: Lang): Lang {
  * Better Auth para un dominio (ADR 0006): baseURL, cookies y emisor propios; misma base de datos.
  * El idioma de los correos es el de la cuenta (y, al registrarse, el del dominio).
  */
-export function createAuth(lang: Lang, { env, db, mail, verifyAltcha }: AuthDeps) {
+export function createAuth(lang: Lang, { env, db, mail }: AuthDeps) {
   const baseURL = env.site.siteUrl[lang];
   const secure = baseURL.startsWith("https://");
   const testMode = Boolean(env.TEST_MODE);
@@ -231,8 +217,27 @@ export function createAuth(lang: Lang, { env, db, mail, verifyAltcha }: AuthDeps
     },
     hooks: {
       before: createAuthMiddleware(async (ctx) => {
-        if (ALTCHA_PATHS.has(ctx.path) && !(await verifyAltcha(ctx.headers?.get("x-altcha") ?? undefined))) {
-          throw new APIError("FORBIDDEN", { code: "ALTCHA_REQUIRED", message: ALTCHA_MESSAGE[lang] });
+        if (ctx.path === "/sign-up/email") {
+          const body = ctx.body as Record<string, unknown> | undefined;
+          const name = AuthName.safeParse(body?.name);
+          if (!name.success) {
+            if (typeof body?.name !== "string") {
+              throw new APIError("BAD_REQUEST", { code: "INVALID_FORMAT", message: "Invalid name" });
+            }
+            const messages = { es: authEs, en: authEn, fr: authFr, pt: authPt, de: authDe, it: authIt }[lang]
+              .errors;
+            const value = body.name.trim().replace(/ +/g, " ");
+            const tooLong = Array.from(value).length > AUTH_NAME_MAX;
+            throw new APIError("UNPROCESSABLE_ENTITY", {
+              code: tooLong ? "TOO_LONG" : value ? "INVALID_CHARACTERS" : "VALIDATION_FAILED",
+              message: tooLong
+                ? messages.name_too_long.replace("{{max}}", String(AUTH_NAME_MAX))
+                : value
+                  ? messages.invalid_name_characters
+                  : messages.name_required,
+            });
+          }
+          if (body) body.name = name.data;
         }
         if (ctx.path === "/sign-up/email" || ctx.path === "/update-user") {
           const body = ctx.body as Record<string, unknown> | undefined;

@@ -6,7 +6,6 @@ import { ENV } from "../config/config.module.js";
 import type { Env } from "../config/env.js";
 import { type Database, DB } from "../db/db.module.js";
 import { MailService } from "../mail/mail.service.js";
-import { AltchaService } from "../security/altcha.service.js";
 import { type Auth, createAuth } from "./auth.factory.js";
 
 export interface SessionUser {
@@ -31,9 +30,8 @@ export class AuthRegistry {
     @Inject(ENV) private readonly env: Env,
     @Inject(DB) db: Database,
     mail: MailService,
-    altcha: AltchaService,
   ) {
-    const deps = { env, db, mail, verifyAltcha: (h: string | undefined) => altcha.verify(h) };
+    const deps = { env, db, mail };
     const esAuth = createAuth("es", deps);
     const enAuth = createAuth("en", deps);
     this.instances = {

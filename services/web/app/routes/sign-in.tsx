@@ -1,4 +1,5 @@
 import { pathFor } from "@mcet/i18n";
+import { EmailField } from "@mcet/schemas";
 import { type FormEvent, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import { AuthCard, GoogleButton } from "~/components/auth";
@@ -58,13 +59,12 @@ export default function SignIn() {
     const password = String(form.get("password") ?? "");
 
     // Validaciones de formato, longitud y caracteres
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!email || email.length < 5 || email.length > 254 || !emailRegex.test(email)) {
+    if (!EmailField.safeParse(email).success) {
       setError({ text: t.auth.errors.invalid_format, tone: "danger" });
       return;
     }
     if (!password || password.length < 8) {
-      setError({ text: t.auth.errors.password_too_short, tone: "danger" });
+      setError({ text: t.auth.errors.login_password_too_short, tone: "danger" });
       return;
     }
     if (password.length > 128) {
@@ -175,7 +175,6 @@ export default function SignIn() {
           required
           minLength={5}
           maxLength={254}
-          pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}"
         />
         <Field
           label={t.auth.fields.password}

@@ -61,7 +61,7 @@ export class PublicMobileController {
     };
   }
 
-  /** Alta de cuenta desde la app móvil (mismas reglas de nombre, correo, contraseña y ALTCHA). */
+  /** Alta de cuenta desde la app móvil (mismas reglas de nombre, correo y contraseña). */
   @Post("auth/sign-up")
   async signUp(@Req() req: FastifyRequest, @Body(new ZodPipe(MobileSignUp)) body: MobileSignUp) {
     const res = await this.registry

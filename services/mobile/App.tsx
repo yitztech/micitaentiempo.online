@@ -14,6 +14,7 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
+import { AUTH_NAME_ALLOWED, AUTH_NAME_MAX, AuthName, EmailField } from "../../packages/schemas/dist/index.js";
 import {
   COUNTRIES,
   createMobileClient,
@@ -71,8 +72,15 @@ export default function App() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [confirmVisible, setConfirmVisible] = useState(false);
   const [phone, setPhone] = useState("");
-  const [selectedCountry, setSelectedCountry] = useState<(typeof COUNTRIES)[number]>(() => COUNTRIES[0]);
+  const [selectedCountry, setSelectedCountry] = useState<(typeof COUNTRIES)[number]>(() => {
+    const first = COUNTRIES[0];
+    if (!first) throw new Error("No hay países configurados");
+    return first;
+  });
   const [showCountryMenu, setShowCountryMenu] = useState(false);
 
   const [busy, setBusy] = useState(false);
@@ -127,9 +135,8 @@ export default function App() {
     setInfoMessage(null);
 
     // Validación de Correo: longitud 5-254 y formato RFC
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     const cleanEmail = email.trim();
-    if (!cleanEmail || cleanEmail.length < 5 || cleanEmail.length > 254 || !emailRegex.test(cleanEmail)) {
+    if (!EmailField.safeParse(cleanEmail).success) {
       setError(s.emailError);
       return false;
     }
@@ -155,16 +162,13 @@ export default function App() {
         return false;
       }
 
-      // Nombre en registro: mín 2, máx 120, sin etiquetas ni controles
-      const cleanName = name.trim();
-      if (
-        !cleanName ||
-        cleanName.length < 2 ||
-        cleanName.length > 120 ||
-        // biome-ignore lint/suspicious/noControlCharactersInRegex: validación de etiquetas y caracteres de control
-        /[<>\u0000-\u001f\u007f-\u009f]/.test(cleanName)
-      ) {
-        setError(s.nameError);
+      if (password !== confirmPassword) {
+        setError(t.auth.signUp.passwordMismatch);
+        return false;
+      }
+
+      if (!AuthName.safeParse(name).success) {
+        setError(t.auth.errors.invalid_name_characters);
         return false;
       }
 
@@ -180,7 +184,18 @@ export default function App() {
     }
 
     return true;
-  }, [authMode, email, password, name, phone, selectedCountry, s]);
+  }, [
+    authMode,
+    email,
+    password,
+    confirmPassword,
+    name,
+    phone,
+    selectedCountry,
+    s,
+    t.auth.signUp.passwordMismatch,
+    t.auth.errors.invalid_name_characters,
+  ]);
 
   const onSignIn = useCallback(async () => {
     if (!validateForm()) return;
@@ -204,13 +219,14 @@ export default function App() {
     try {
       const fullPhone = phone.trim() ? `${selectedCountry.dialCode} ${phone.trim()}` : undefined;
       await client.signUp({
-        name: name.trim(),
+        name: AuthName.parse(name),
         email: email.trim(),
         password,
         phone: fullPhone,
       });
       setInfoMessage(s.signUpSuccess);
       setPassword("");
+      setConfirmPassword("");
     } catch {
       setError(s.signInError);
     } finally {
@@ -273,6 +289,7 @@ export default function App() {
   const signedIn = summary !== null;
   const bannerText = conn === "connected" ? s.connected : conn === "offline" ? s.offline : s.connecting;
   const currentLangObj = MOBILE_LANGUAGES.find((l) => l.lang === lang) ?? MOBILE_LANGUAGES[0];
+  if (!currentLangObj) throw new Error("No hay idiomas configurados");
 
   const authTabs = (
     <View style={styles.tabRow}>
@@ -335,8 +352,12 @@ export default function App() {
             testID={MOBILE_SELECTORS.nameInput}
             accessibilityLabel={t.auth.fields.name}
             value={name}
-            onChangeText={setName}
-            maxLength={120}
+            onChangeText={(value) => {
+              const filtered = value.replace(AUTH_NAME_ALLOWED, "");
+              setError(filtered !== value ? t.auth.errors.invalid_name_characters : null);
+              setName(filtered);
+            }}
+            maxLength={AUTH_NAME_MAX}
             style={styles.input}
           />
         </>
@@ -358,21 +379,46 @@ export default function App() {
       {authMode !== "forgot" ? (
         <>
           <Text style={styles.label}>{t.auth.fields.password}</Text>
-          <TextInput
-            testID={MOBILE_SELECTORS.passwordInput}
-            accessibilityLabel={t.auth.fields.password}
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            autoComplete={authMode === "signIn" ? "current-password" : "new-password"}
-            maxLength={128}
-            style={styles.input}
-          />
+          <View style={styles.passwordRow}>
+            <TextInput
+              testID={MOBILE_SELECTORS.passwordInput}
+              accessibilityLabel={t.auth.fields.password}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!passwordVisible}
+              autoComplete={authMode === "signIn" ? "current-password" : "new-password"}
+              maxLength={128}
+              style={[styles.input, styles.passwordInput]}
+            />
+            <PasswordVisibility
+              visible={passwordVisible}
+              onPress={() => setPasswordVisible((v) => !v)}
+              label={passwordVisible ? t.common.ui.hidePassword : t.common.ui.showPassword}
+            />
+          </View>
         </>
       ) : null}
 
       {authMode === "signUp" ? (
         <>
+          <Text style={styles.label}>{t.auth.fields.confirmPassword}</Text>
+          <View style={styles.passwordRow}>
+            <TextInput
+              testID={MOBILE_SELECTORS.confirmPasswordInput}
+              accessibilityLabel={t.auth.fields.confirmPassword}
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              secureTextEntry={!confirmVisible}
+              autoComplete="new-password"
+              maxLength={128}
+              style={[styles.input, styles.passwordInput]}
+            />
+            <PasswordVisibility
+              visible={confirmVisible}
+              onPress={() => setConfirmVisible((v) => !v)}
+              label={confirmVisible ? t.common.ui.hidePassword : t.common.ui.showPassword}
+            />
+          </View>
           <Text style={styles.label}>{s.phoneLabel}</Text>
           <View style={styles.phoneContainer}>
             <Pressable
@@ -470,7 +516,7 @@ export default function App() {
               setInfoMessage(null);
             }}
           >
-            <Text style={styles.linkText}>{t.auth.signIn.forgotPassword}</Text>
+            <Text style={styles.linkText}>{t.auth.signIn.forgot}</Text>
           </Pressable>
         ) : (
           <Pressable
@@ -590,6 +636,31 @@ export default function App() {
   );
 }
 
+function PasswordVisibility({
+  visible,
+  onPress,
+  label,
+}: {
+  visible: boolean;
+  onPress: () => void;
+  label: string;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ selected: visible }}
+      onPress={onPress}
+      style={styles.passwordToggle}
+    >
+      <View style={styles.eye}>
+        <View style={styles.eyePupil} />
+      </View>
+      {visible ? <View style={styles.eyeSlash} /> : null}
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: "#f6f7f9" },
   scroll: { padding: 20, paddingTop: 48, gap: 16 },
@@ -661,6 +732,33 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#111827",
     minHeight: 48,
+  },
+  passwordRow: { flexDirection: "row", alignItems: "center" },
+  passwordInput: { flex: 1, paddingRight: 48 },
+  passwordToggle: {
+    position: "absolute",
+    right: 0,
+    width: 48,
+    height: 48,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  eye: {
+    width: 22,
+    height: 14,
+    borderWidth: 2,
+    borderColor: "#4b5563",
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  eyePupil: { width: 6, height: 6, borderRadius: 3, backgroundColor: "#4b5563" },
+  eyeSlash: {
+    position: "absolute",
+    width: 25,
+    height: 2,
+    backgroundColor: "#4b5563",
+    transform: [{ rotate: "-45deg" }],
   },
   phoneContainer: { flexDirection: "row", gap: 8, alignItems: "center" },
   countryPickerButton: {

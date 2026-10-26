@@ -250,7 +250,7 @@ Un hold caducado se revalida al confirmar: si el horario sigue libre, la reserva
 | Control | Detalle |
 |---|---|
 | Límites de peticiones | nginx (`limit_req` por IP real) + `@fastify/rate-limit` por usuario/token: inicio de sesión 10/min, registro 5/h por IP, OTP 5/h por correo, holds 30/min por IP, disponibilidad 120/min por IP, MCP 120/min por token y 600/min por organización |
-| Antibots | ALTCHA (prueba de trabajo autoalojada, sin terceros ni marcas) en registro, OTP, holds y newsletter |
+| Antibots | ALTCHA (prueba de trabajo autoalojada, sin terceros ni marcas) en OTP, holds y newsletter; registro, inicio de sesión y recuperación de contraseña sin CAPTCHA (decisión del 2026-10-26), con límites de intentos y verificación de correo en el registro |
 | CSRF | Cookies `SameSite=Lax`; las mutaciones de `/api/v1` exigen `Origin` igual al host y `Content-Type: application/json`; Better Auth valida orígenes |
 | CORS | Ninguno en `/api/v1` ni `/api/public/v1` (el embed es del mismo origen); `/mcp` y `/.well-known/*` con `*` y sin credenciales |
 | Cabeceras | `@fastify/helmet`: `default-src 'none'`, `frame-ancestors 'none'` en respuestas JSON |

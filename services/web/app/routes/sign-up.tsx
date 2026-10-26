@@ -1,10 +1,9 @@
 import { pathFor } from "@mcet/i18n";
+import { AUTH_NAME_ALLOWED, AUTH_NAME_MAX, AuthName, EmailField } from "@mcet/schemas";
 import { type FormEvent, useState } from "react";
 import { Link, useSearchParams } from "react-router";
-import { AltchaStatus } from "~/components/altcha-status";
 import { AuthCard, GoogleButton } from "~/components/auth";
 import { Alert, Button, Field } from "~/components/ui";
-import { useAltcha } from "~/lib/altcha";
 import { errorText, postJson } from "~/lib/api-client";
 import { fmt, useRoot } from "~/lib/i18n";
 import { metaFor } from "~/lib/seo";
@@ -20,9 +19,10 @@ export default function SignUp() {
   const [params] = useSearchParams();
   const plan = params.get("plan");
   const callbackURL = `${pathFor("dashboard", site.lang)}${plan === "personal" || plan === "branches" ? `?plan=${plan}` : ""}`;
-  const altcha = useAltcha();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [nameError, setNameError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
   const [sentTo, setSentTo] = useState<string | null>(null);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
@@ -31,15 +31,15 @@ export default function SignUp() {
     const name = String(form.get("name") ?? "").trim();
     const email = String(form.get("email") ?? "").trim();
     const password = String(form.get("password") ?? "");
+    const confirmation = String(form.get("confirmPassword") ?? "");
+    setPasswordError(null);
 
-    // Validaciones de longitud mínima, máxima y caracteres permitidos
-    // biome-ignore lint/suspicious/noControlCharactersInRegex: validación de controles y etiquetas
-    if (!name || name.length < 2 || name.length > 120 || /[<>\u0000-\u001f\u007f-\u009f]/.test(name)) {
-      setError(t.auth.errors.name_required || t.auth.errors.validation_failed);
+    const parsedName = AuthName.safeParse(name);
+    if (!parsedName.success) {
+      setNameError(t.auth.errors.invalid_name_characters);
       return;
     }
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!email || email.length < 5 || email.length > 254 || !emailRegex.test(email)) {
+    if (!EmailField.safeParse(email).success) {
       setError(t.auth.errors.invalid_format);
       return;
     }
@@ -57,21 +57,22 @@ export default function SignUp() {
       return;
     }
 
+    if (password !== confirmation) {
+      setError(null);
+      setPasswordError(s.passwordMismatch);
+      return;
+    }
+
     setBusy(true);
     setError(null);
     try {
-      const token = await altcha.token();
-      await postJson(
-        "/api/auth/sign-up/email",
-        {
-          name,
-          email,
-          password,
-          callbackURL,
-          locale: site.lang,
-        },
-        { "x-altcha": token },
-      );
+      await postJson("/api/auth/sign-up/email", {
+        name: parsedName.data,
+        email,
+        password,
+        callbackURL,
+        locale: site.lang,
+      });
       setSentTo(email);
     } catch (err) {
       setError(errorText(t.auth.errors, err));
@@ -116,20 +117,22 @@ export default function SignUp() {
       }
     >
       <GoogleButton callbackURL={callbackURL} />
-      <form
-        method="post"
-        onSubmit={onSubmit}
-        onFocus={() => void altcha.start().catch(() => undefined)}
-        className="space-y-5"
-      >
+      <form method="post" onSubmit={onSubmit} className="space-y-5">
         <Field
           label={f.name}
           name="name"
           autoComplete="name"
           required
-          minLength={2}
-          maxLength={120}
-          pattern="[^<>\u0000-\u001f\u007f-\u009f]+"
+          minLength={1}
+          maxLength={AUTH_NAME_MAX}
+          pattern="[\p{L}\p{M}](?:[\p{L}\p{M} '’ .\-]*[\p{L}\p{M}.])?"
+          error={nameError ?? undefined}
+          onInput={(event) => {
+            const input = event.currentTarget;
+            const filtered = input.value.replace(AUTH_NAME_ALLOWED, "");
+            setNameError(filtered !== input.value ? t.auth.errors.invalid_name_characters : null);
+            input.value = filtered;
+          }}
         />
         <Field
           label={f.email}
@@ -139,7 +142,6 @@ export default function SignUp() {
           required
           minLength={5}
           maxLength={254}
-          pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}"
           hint={f.emailHint}
         />
         <Field
@@ -152,7 +154,17 @@ export default function SignUp() {
           maxLength={128}
           hint={f.passwordHint}
         />
-        <AltchaStatus state={altcha.state} onRetry={() => void altcha.start().catch(() => undefined)} />
+        <Field
+          label={f.confirmPassword}
+          name="confirmPassword"
+          type="password"
+          autoComplete="new-password"
+          required
+          minLength={12}
+          maxLength={128}
+          error={passwordError ?? undefined}
+          onChange={() => setPasswordError(null)}
+        />
         {error ? <Alert tone="danger">{error}</Alert> : null}
         <Button
           type="submit"

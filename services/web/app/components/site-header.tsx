@@ -6,7 +6,7 @@ import { customerSession } from "~/lib/customer";
 import { cx, useRoot } from "~/lib/i18n";
 import { LanguageLink } from "./language-link";
 import { Logo } from "./logo";
-import { buttonClass, Container, LinkButton } from "./ui";
+import { Container, LinkButton } from "./ui";
 
 // Conecta tu IA sigue en el pie y desde Funciones (PROPUESTA.md § Arquitectura de navegación):
 // la cabecera deja sitio a Mis citas y al acceso del negocio sin partir etiquetas en dos líneas.
@@ -49,18 +49,9 @@ export function SiteHeader() {
   const account = hasSession ? (
     <LinkButton to={pathFor("dashboard", site.lang)}>{n.dashboard}</LinkButton>
   ) : (
-    <>
-      <NavLink to={pathFor("signIn", site.lang)} className={buttonClass("ghost", "md", "whitespace-nowrap")}>
-        {n.businessSignIn}
-      </NavLink>
-      <LinkButton
-        to={pathFor("signUp", site.lang)}
-        className="whitespace-nowrap"
-        data-umami-event="sign_up_started"
-      >
-        {n.createAgenda}
-      </LinkButton>
-    </>
+    <LinkButton to={pathFor("signIn", site.lang)} className="whitespace-nowrap">
+      {n.businessSignIn}
+    </LinkButton>
   );
   return (
     <header className="sticky top-0 z-40 border-b border-border/70 bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/75">
