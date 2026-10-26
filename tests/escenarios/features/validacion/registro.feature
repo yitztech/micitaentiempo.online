@@ -8,8 +8,8 @@ Característica: El registro valida nombres aunque se omita el frontend
     Ejemplos:
       | nombre        | estado |
       | internacional | 200    |
-      | texto de 120  | 200    |
-      | texto de 121  | 400    |
+      | texto de 100  | 200    |
+      | texto de 101  | 400    |
       | vacío         | 400    |
       | espacios      | 400    |
       | control       | 400    |

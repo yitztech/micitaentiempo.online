@@ -4,11 +4,18 @@ import { FullName, freeText, singleLine } from "./text.ts";
 
 export { FullName } from "./text.ts";
 
-/** Nombre completo en un solo campo (culturalmente flexible: dos apellidos, nombre único…). */
+/** Nombre de una persona en la cuenta y el registro: letras, espacios, apóstrofos, guiones y puntos. */
+export const AUTH_NAME_MAX = 100;
+const AUTH_NAME_PATTERN = /^[\p{L}\p{M}](?:[\p{L}\p{M} '’.-]*[\p{L}\p{M}.])?$/u;
+export const AUTH_NAME_ALLOWED = /[^\p{L}\p{M} '’.-]/gu;
+export const AuthName = z
+  .string()
+  .transform((value) => value.trim().replace(/ +/g, " "))
+  .refine((value) => AUTH_NAME_PATTERN.test(value) && [...value].length <= AUTH_NAME_MAX);
 
 export const UpdateMe = z
   .object({
-    name: FullName,
+    name: AuthName,
     locale: Lang,
     timezone: TimeZone,
     timeFormat: z.enum(["12h", "24h"]),
@@ -41,7 +48,7 @@ export const EmailField = z
   .trim()
   .min(5, "Mínimo 5 caracteres")
   .max(254, "Máximo 254 caracteres")
-  .regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, "Formato de correo no válido");
+  .pipe(z.email("Formato de correo no válido"));
 
 /** Validación de contraseña existente para inicio de sesión: mín 8, máx 128, sin caracteres de control */
 export const PasswordField = z
@@ -78,7 +85,7 @@ export type SignInInput = z.infer<typeof SignInInput>;
 
 export const SignUpInput = z
   .object({
-    name: FullName.refine((val) => val.length >= 2, "El nombre debe tener al menos 2 caracteres"),
+    name: AuthName,
     email: EmailField,
     password: NewPasswordField,
   })

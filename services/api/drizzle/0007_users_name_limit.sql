@@ -1,0 +1,2 @@
+ALTER TABLE "app"."users" DROP CONSTRAINT "users_name_text";--> statement-breakpoint
+ALTER TABLE "app"."users" ADD CONSTRAINT "users_name_text" CHECK (app.valid_text("app"."users"."name", 100, false) AND ("app"."users"."name" = '' OR length(btrim("app"."users"."name")) > 0));

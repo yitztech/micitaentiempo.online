@@ -13,6 +13,7 @@ import {
   OtpVerify,
   Service,
   UpdateEvent,
+  UpdateMe,
 } from "../../packages/schemas/dist/index.js";
 
 describe("contratos de texto compartidos", () => {
@@ -117,11 +118,23 @@ describe("contratos de texto compartidos", () => {
     ).toBe(true);
     expect(
       SignUpInput.safeParse({
-        name: "M", // < 2 caracteres
+        name: "M", // los nombres de un solo carácter son válidos
         email: "maria@example.com",
         password: "contrasena-muy-segura-12",
       }).success,
-    ).toBe(false);
+    ).toBe(true);
+    for (const bad of ["Ana123", "Ana 😀", "Á".repeat(101), "-Ana", "Ana-"]) {
+      expect(
+        SignUpInput.safeParse({ name: bad, email: "ana@example.com", password: "contrasena-muy-segura-12" })
+          .success,
+      ).toBe(false);
+    }
+    for (const bad of ["ana..x@example.com", "a@-example.com", "a@b..com"]) {
+      expect(EmailField.safeParse(bad).success).toBe(false);
+    }
+    // El mismo límite de 100 caracteres en el registro y en el perfil.
+    expect(UpdateMe.safeParse({ name: "A".repeat(100) }).success).toBe(true);
+    expect(UpdateMe.safeParse({ name: "A".repeat(101) }).success).toBe(false);
   });
 
   it("valida teléfono en formato internacional numérico E.164", async () => {

@@ -24,12 +24,12 @@ Característica: Límites de texto en todos los puntos de escritura
       | contacto  | 4001     |
 
   Esquema del escenario: El API permite el límite exacto
-    Cuando intenta guardar "<operacion>" con texto de longitud 120
+    Cuando intenta guardar "<operacion>" con texto de longitud <longitud>
     Entonces la respuesta tiene estado <estado>
 
     Ejemplos:
-      | operacion | estado |
-      | perfil    | 200    |
-      | negocio   | 200    |
-      | tablero   | 200    |
-      | servicio  | 201    |
+      | operacion | longitud | estado |
+      | perfil    | 100      | 200    |
+      | negocio   | 120      | 200    |
+      | tablero   | 120      | 200    |
+      | servicio  | 120      | 201    |

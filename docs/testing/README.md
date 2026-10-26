@@ -66,7 +66,7 @@ pnpm --filter @mcet/api exec vitest run test/zod-pipe.test.js
 La aplicación móvil Expo (`services/mobile`) para Android e iOS reutiliza los catálogos de `@mcet/i18n`, los esquemas y políticas de validación de `@mcet/schemas` (`services/web/app/lib/validation.ts`) y la estructura de interfaces del frontend, conectándose al backend mediante tokens `Bearer`:
 
 - `GET /api/public/v1/mobile/bootstrap`: devuelve el idioma del dominio (`es` o `en`), `siteUrl`, banderas de funciones (`google`, `googleClientId`), esquemas nativos (`micitaentiempo://`, `myappointmentontime://`) y el usuario autenticado si se envía `Authorization: Bearer <token>`.
-- `POST /api/public/v1/mobile/auth/sign-up`: registro móvil con las mismas validaciones de nombre (`FullName`), correo, contraseña (12–128 caracteres) y prueba de trabajo ALTCHA (`x-altcha`).
+- `POST /api/public/v1/mobile/auth/sign-up`: registro móvil con las mismas validaciones de nombre (`AuthName`), correo y contraseña (12–128 caracteres), sin CAPTCHA (decisión del 2026-10-26).
 - `POST /api/public/v1/mobile/auth/sign-in`: inicio de sesión móvil con correo y contraseña; devuelve `{ token, user, twoFactorRedirect }`.
 - `POST /api/public/v1/mobile/auth/google` y `POST /api/public/v1/google/verify`: inicio de sesión con Google («Continuar con Google») tanto para propietarios del panel como para clientes finales en reservas y «Mis citas», aceptando código OAuth PKCE (`code`, `redirectUri`, `codeVerifier`) o `idToken` nativo de Google.
 - `POST /api/public/v1/mobile/auth/sign-out`: revoca la sesión Bearer activa.
@@ -92,7 +92,8 @@ No existe una longitud universal recomendada para todos los nombres. Se conserva
 
 | Campo | Máximo |
 |---|---:|
-| Nombre completo, negocio, tablero, feriado y nombre de servicio por idioma | 120 |
+| Nombre de la persona (cuenta, registro y perfil) | 100 |
+| Negocio, tablero, feriado, nombre de servicio por idioma y nombre de asistente | 120 |
 | Título y nota de excepción | 200 |
 | Dirección | 240 |
 | Etiqueta de turno | 60 |

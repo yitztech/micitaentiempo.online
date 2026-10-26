@@ -88,6 +88,7 @@ export const MOBILE_SELECTORS = {
   googleButton: "auth-google-button",
   emailInput: "auth-email-input",
   passwordInput: "auth-password-input",
+  confirmPasswordInput: "auth-confirm-password-input",
   nameInput: "auth-name-input",
   phoneInput: "auth-phone-input",
   countrySelector: "auth-country-selector",

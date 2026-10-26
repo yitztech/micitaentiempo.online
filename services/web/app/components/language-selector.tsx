@@ -1,5 +1,5 @@
 import { type Lang, pathFor, translatePath } from "@mcet/i18n";
-import { Check, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router";
 import { cx, useRoot } from "~/lib/i18n";
@@ -90,15 +90,15 @@ export function LanguageSelector({ className }: { className?: string }) {
         aria-expanded={open}
         aria-haspopup="true"
         aria-label={`${t.common.language?.switchToLabel ?? "Cambiar idioma"}: ${currentLang.nativeName}`}
-        className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-[var(--radius-field)] border border-border/80 bg-surface px-2.5 py-1.5 text-sm font-medium text-text hover:bg-surface-2 focus:outline-none focus:ring-2 focus:ring-primary/40"
+        className="inline-flex h-8 shrink-0 items-center justify-center gap-1.5 rounded-lg border border-border bg-surface px-2 py-1 text-xs font-semibold text-text hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       >
-        <span className="text-lg leading-none" role="img" aria-label={currentLang.country}>
-          {currentLang.flag}
-        </span>
-        <span className="text-[14px] uppercase tracking-wider">{currentLang.code}</span>
+        <span className="uppercase tracking-wide">{currentLang.code}</span>
         <ChevronDown
           aria-hidden="true"
-          className={cx("size-3.5 text-muted transition-transform duration-200", open && "rotate-180")}
+          className={cx(
+            "size-3 fill-current text-text motion-safe:transition-transform motion-safe:duration-200",
+            open && "rotate-180",
+          )}
         />
       </button>
 
@@ -106,12 +106,9 @@ export function LanguageSelector({ className }: { className?: string }) {
         <div
           role="menu"
           aria-orientation="vertical"
-          className="absolute right-0 z-50 mt-1.5 w-48 origin-top-right rounded-lg border border-border bg-surface p-1 shadow-lg ring-1 ring-black/5 focus:outline-none"
+          className="absolute right-0 z-50 mt-1.5 max-h-[45dvh] lg:max-h-[min(32rem,70dvh)] w-max max-w-[calc(100vw-2rem)] origin-top-right overflow-y-auto rounded-lg border border-border bg-surface shadow-lg focus:outline-none"
         >
-          <div className="px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted">
-            {t.common.language?.switchToLabel ?? "Seleccionar idioma"}
-          </div>
-          <div className="divide-y divide-border/40">
+          <div className="divide-y divide-border">
             {SUPPORTED_LANGUAGES.map((lang) => {
               const isSelected = lang.code === site.lang;
               const targetUrl = getTargetUrl(lang.code);
@@ -121,22 +118,25 @@ export function LanguageSelector({ className }: { className?: string }) {
                   href={targetUrl}
                   hrefLang={lang.code}
                   role="menuitem"
+                  aria-current={isSelected ? "true" : undefined}
                   onClick={(e) => {
                     e.preventDefault();
                     handleSelect(lang.code, targetUrl);
                   }}
                   className={cx(
-                    "flex w-full items-center justify-between rounded-md px-2.5 py-2 text-sm transition-colors hover:bg-surface-2",
-                    isSelected ? "font-semibold text-primary bg-primary/5" : "text-text",
+                    "flex min-h-11 w-full items-center px-3 py-2 text-sm hover:bg-surface-2 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary",
+                    isSelected ? "font-semibold text-primary bg-surface-2" : "text-text",
                   )}
                 >
                   <div className="flex items-center gap-2.5">
-                    <span className="text-lg leading-none" role="img" aria-label={lang.country}>
+                    <span
+                      className="inline-flex h-6 w-8 shrink-0 items-center justify-center rounded border border-border bg-surface text-lg leading-none"
+                      aria-hidden="true"
+                    >
                       {lang.flag}
                     </span>
-                    <span className="text-[14px]">{lang.nativeName}</span>
+                    <span className="whitespace-nowrap">{lang.nativeName}</span>
                   </div>
-                  {isSelected && <Check className="size-4 text-primary" aria-hidden="true" />}
                 </a>
               );
             })}

@@ -18,3 +18,13 @@
 edef08805c868076b16ac26543fdefb77abdc8aa:tests/unit/mobile.test.js:generic-api-key:92
 edef08805c868076b16ac26543fdefb77abdc8aa:tests/unit/mobile.test.js:generic-api-key:104
 
+# Contraseñas ficticias de pruebas añadidas en 06ec3b6 (no son secretos).
+06ec3b6e76c0ab0abb6b757d03dd87dab58106f5:services/api/test/auth-captcha.test.ts:generic-api-key:53
+06ec3b6e76c0ab0abb6b757d03dd87dab58106f5:tests/escenarios/steps/acceso-unificado.steps.ts:generic-api-key:56
+06ec3b6e76c0ab0abb6b757d03dd87dab58106f5:tests/escenarios/steps/acceso-unificado.steps.ts:generic-api-key:79
+06ec3b6e76c0ab0abb6b757d03dd87dab58106f5:tests/escenarios/steps/acceso-unificado.steps.ts:generic-api-key:87
+06ec3b6e76c0ab0abb6b757d03dd87dab58106f5:tests/escenarios/steps/acceso-unificado.steps.ts:generic-api-key:88
+06ec3b6e76c0ab0abb6b757d03dd87dab58106f5:tests/escenarios/steps/acceso-unificado.steps.ts:generic-api-key:106
+06ec3b6e76c0ab0abb6b757d03dd87dab58106f5:tests/escenarios/steps/acceso-unificado.steps.ts:generic-api-key:107
+06ec3b6e76c0ab0abb6b757d03dd87dab58106f5:tests/escenarios/steps/validacion.steps.js:generic-api-key:94
+06ec3b6e76c0ab0abb6b757d03dd87dab58106f5:tests/unit/validation.test.js:generic-api-key:127

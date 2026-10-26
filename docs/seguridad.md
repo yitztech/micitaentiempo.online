@@ -23,7 +23,7 @@ oculta en `api` y en el gateway; ruta de los feeds ICS oculta).
 | Capítulo | Estado | Evidencia |
 |---|---|---|
 | V1 Codificación y saneamiento | Cumple | React escapa la salida; SQL parametrizado (Drizzle, pgx); Markdown legal solo del repositorio; ICS con `golang-ical`; correos con React Email |
-| V2 Validación y lógica de negocio | Cumple | Esquemas Zod compartidos (`packages/schemas`) en REST y MCP; `Idempotency-Key`; apartados de 10 min; restricción `EXCLUDE` contra dobles reservas; ALTCHA en altas y reservas |
+| V2 Validación y lógica de negocio | Cumple | Esquemas Zod compartidos (`packages/schemas`) en REST y MCP; `Idempotency-Key`; apartados de 10 min; restricción `EXCLUDE` contra dobles reservas; ALTCHA en reservas; altas, inicio de sesión y recuperación de contraseña sin CAPTCHA, con límites de intentos y verificación de correo en las altas |
 | V3 Seguridad del frontend | Cumple | CSP con nonce, `frame-ancestors 'none'` (el embed, con su lista), `X-Frame-Options`, COOP, CORP, `nosniff`, `Referrer-Policy`, `Permissions-Policy`, HSTS. `style-src 'unsafe-inline'` aceptado (solo estilos) |
 | V4 API y servicios web | Cumple | JSON obligatorio en mutaciones, cuerpo ≤ 256 KB, límites por IP en el gateway y por ruta en Better Auth, `problem+json` sin trazas |
 | V5 Archivos | No aplica | No hay subida de archivos |

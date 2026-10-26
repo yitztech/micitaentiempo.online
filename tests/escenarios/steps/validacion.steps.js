@@ -74,9 +74,10 @@ Given("el formulario de registro en {string}", async ({ page, estado }, lang) =>
 });
 When("escribe el nombre inválido y lo corrige", async ({ page }) => {
   const field = page.locator('input[name="name"]');
-  await expect(field).toHaveAttribute("maxlength", "120");
+  await expect(field).toHaveAttribute("maxlength", "100");
   await field.fill("<script>Ana</script>");
-  await expect.poll(() => field.evaluate((input) => input.validity.customError)).toBe(true);
+  await expect(field).not.toHaveValue(/</);
+  await expect(field).toHaveAttribute("aria-invalid", "true");
   await field.fill("李 O’Connor López");
 });
 Then("el nombre es válido para enviar", async ({ page }) => {
@@ -90,6 +91,7 @@ When("completa un registro válido desde el navegador", async ({ page, estado })
   await page.locator('input[name="name"]').fill("Ana López O’Connor");
   await page.locator('input[name="email"]').fill(estado.registrationEmail);
   await page.locator('input[name="password"]').fill("una-clave-bien-larga-2026");
+  await page.locator('input[name="confirmPassword"]').fill("una-clave-bien-larga-2026");
   const response = page.waitForResponse(
     (res) => res.url().endsWith("/api/auth/sign-up/email") && res.request().method() === "POST",
   );

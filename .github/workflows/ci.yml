@@ -92,6 +92,23 @@ jobs:
           docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:v8.30.1 git /repo
           --no-banner --redact --gitleaks-ignore-path /repo/.gitleaksignore
 
+  movil:
+    name: App móvil (APK)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - uses: actions/setup-java@v6
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - run: pnpm install --frozen-lockfile
+      - run: scripts/build-apk.sh
+
   gateway:
     name: Configuración de nginx
     runs-on: ubuntu-latest

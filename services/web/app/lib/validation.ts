@@ -1,4 +1,5 @@
 import {
+  AuthName,
   CancelBooking,
   CancelEvent,
   ConfirmHold,
@@ -9,7 +10,6 @@ import {
   CustomHoliday,
   DateOverride,
   EmailField,
-  FullName,
   MobileForgotPassword,
   MobileGoogleAuth,
   MobileSignIn,
@@ -33,7 +33,7 @@ export function validateRequest(method: string, path: string, body: unknown): un
   let schema: { parse: (body: unknown) => unknown } | undefined;
   if (method === "POST" && route === "/api/auth/sign-up/email") {
     const b = body as Record<string, unknown>;
-    const res: Record<string, unknown> = { ...b, name: FullName.parse(b?.name) };
+    const res: Record<string, unknown> = { ...b, name: AuthName.parse(b?.name) };
     if (b?.email !== undefined) res.email = EmailField.parse(b.email);
     if (b?.password !== undefined) res.password = NewPasswordField.parse(b.password);
     return res;
