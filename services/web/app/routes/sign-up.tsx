@@ -10,8 +10,7 @@ import { fmt, useRoot } from "~/lib/i18n";
 import { metaFor } from "~/lib/seo";
 import type { Route } from "./+types/sign-up";
 
-export const meta = (args: Route.MetaArgs) =>
-  metaFor(args, (t) => ({ title: t.auth.signUp.seoTitle, indexable: false }));
+export const meta = (args: Route.MetaArgs) => metaFor(args, (t) => ({ title: t.auth.signUp.seoTitle }));
 
 export default function SignUp() {
   const { site, t } = useRoot();

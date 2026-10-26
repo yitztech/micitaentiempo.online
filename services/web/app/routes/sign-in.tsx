@@ -9,8 +9,7 @@ import { type OAuthRedirect, oauthNext, signedOAuthQuery } from "~/lib/oauth";
 import { metaFor } from "~/lib/seo";
 import type { Route } from "./+types/sign-in";
 
-export const meta = (args: Route.MetaArgs) =>
-  metaFor(args, (t) => ({ title: t.auth.signIn.seoTitle, indexable: false }));
+export const meta = (args: Route.MetaArgs) => metaFor(args, (t) => ({ title: t.auth.signIn.seoTitle }));
 
 export default function SignIn() {
   const { site, t } = useRoot();

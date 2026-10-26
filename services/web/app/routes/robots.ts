@@ -6,13 +6,8 @@ export function loader({ request }: Route.LoaderArgs) {
   const body = [
     "User-agent: *",
     "Allow: /",
-    "Disallow: /api/",
-    "Disallow: /panel",
-    "Disallow: /dashboard",
-    "Disallow: /embed/",
-    "Disallow: /reservar/",
-    "Disallow: /book/",
-    "Disallow: /oauth/",
+    // Lo privado se excluye con noindex (meta en el HTML y X-Robots-Tag en la API), nunca con
+    // Disallow: una URL bloqueada que tiene enlaces se indexa sin leer su noindex (AGENTS.md §9.2)
     "",
     `Sitemap: ${site.siteUrl}/sitemap.xml`,
     "",
