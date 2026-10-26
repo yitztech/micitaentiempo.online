@@ -13,6 +13,9 @@ const PUBLISHED = new Set<RouteId>([
   "privacy",
   "terms",
   "credits",
+  "downloadApp",
+  "signUp",
+  "signIn",
 ]);
 
 /** Un sitemap por dominio: solo las páginas indexables, con su par en el otro idioma. */

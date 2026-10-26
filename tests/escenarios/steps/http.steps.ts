@@ -8,6 +8,8 @@ When(
     estado.status = res.status();
     estado.body = await res.text();
     estado.location = res.headers().location;
+    estado.headers = res.headers();
+    estado.dominio = dominio;
   },
 );
 
@@ -38,4 +40,28 @@ When("se fija el reloj del sistema en la hora real", async ({ request, estado })
 
 Then("la respuesta redirige a {string}", ({ estado }, destino: string) => {
   expect(estado.location).toBe(destino);
+});
+
+// ── Indexación (AGENTS.md §9.2) ──
+
+Then("la respuesta lleva X-Robots-Tag noindex", ({ estado }) => {
+  expect((estado.headers as Record<string, string>)["x-robots-tag"] ?? "").toMatch(/noindex/);
+});
+
+Then("robots.txt no lleva Disallow", ({ estado }) => {
+  expect((estado.headers as Record<string, string>)["content-type"]).toMatch(/^text\/plain/);
+  expect(String(estado.body)).not.toMatch(/^Disallow:\s*\S/im);
+});
+
+Then("cada URL del sitemap responde 200 sin noindex y con su canonical", async ({ request, estado }) => {
+  const urls = [...String(estado.body).matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1] ?? "");
+  expect(urls.length).toBeGreaterThan(0);
+  for (const url of urls) {
+    const res = await request.get(url, { maxRedirects: 0 });
+    expect(res.status(), url).toBe(200);
+    expect(res.headers()["x-robots-tag"] ?? "", url).not.toMatch(/noindex/);
+    const html = await res.text();
+    expect(html, url).not.toMatch(/<meta name="robots" content="[^"]*noindex/);
+    expect(html.match(/<link rel="canonical" href="([^"]*)"/)?.[1], url).toBe(url);
+  }
 });

@@ -36,10 +36,11 @@ Característica: Páginas públicas en español e inglés
     Cuando se consulta "/sitemap.xml" en el dominio "es"
     Entonces la respuesta contiene "http://micitaentiempo.localhost:8080/precios"
     Y la respuesta contiene "http://myappointmentontime.localhost:8080/pricing"
-    Y la respuesta no contiene "/entrar"
+    Y la respuesta contiene "http://micitaentiempo.localhost:8080/entrar"
+    Y la respuesta no contiene "/recuperar-contrasena"
 
-  Escenario: Las páginas de acceso no se indexan
-    Cuando un visitante abre la página "/entrar" del dominio "es"
+  Escenario: Los pasos de la contraseña no se indexan
+    Cuando un visitante abre la página "/recuperar-contrasena" del dominio "es"
     Entonces la página pide no indexarse
 
   @critico
