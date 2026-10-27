@@ -7,6 +7,10 @@ import { type AdminDatabase, createAdminDatabase } from "./db/admin-db.js";
 import { createPlatformDatabase, type PlatformDatabase } from "./db/platform-db.js";
 import { registerApiRoutes } from "./routes/api.routes.js";
 
+// Angular genera scripts externos y no necesita eval; los estilos inline los inyecta el propio framework.
+const CONTENT_SECURITY_POLICY =
+  "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self';";
+
 const MIME_TYPES: Record<string, string> = {
   ".html": "text/html; charset=utf-8",
   ".js": "application/javascript; charset=utf-8",
@@ -40,8 +44,8 @@ export async function buildAdminApp(
   // Registrar rutas de la API del panel
   registerApiRoutes(app, auth, adminDb, platformDb);
 
-  // Servidor de estáticos para el frontend en AngularJS 1.8.3
-  const publicDir = resolve(process.cwd(), "public");
+  // Servidor de estáticos para el frontend en Angular (salida de `ng build` en public/)
+  const publicDir = resolve(config.publicDir);
   const fallbackIndex = resolve(publicDir, "index.html");
 
   app.get("/*", async (req, reply) => {
@@ -58,13 +62,7 @@ export async function buildAdminApp(
       const ext = extname(targetFile);
       const mime = MIME_TYPES[ext] || "application/octet-stream";
       const content = readFileSync(targetFile);
-      return reply
-        .type(mime)
-        .header(
-          "Content-Security-Policy",
-          "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self';",
-        )
-        .send(content);
+      return reply.type(mime).header("Content-Security-Policy", CONTENT_SECURITY_POLICY).send(content);
     }
 
     // Fallback SPA al index.html
@@ -72,10 +70,7 @@ export async function buildAdminApp(
       const content = readFileSync(fallbackIndex);
       return reply
         .type("text/html; charset=utf-8")
-        .header(
-          "Content-Security-Policy",
-          "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self';",
-        )
+        .header("Content-Security-Policy", CONTENT_SECURITY_POLICY)
         .send(content);
     }
 

@@ -2,6 +2,7 @@ packages:
   - services/web
   - services/api
   - services/admin
+  - services/admin/ui
   - packages/*
   - tools/*
   - tests/escenarios
@@ -19,3 +20,7 @@ allowBuilds:
   cpu-features: false
   ssh2: false
   protobufjs: false
+  # Angular CLI (watch y caché): traen binarios precompilados por dependencias opcionales; no se compilan.
+  "@parcel/watcher": false
+  lmdb: false
+  msgpackr-extract: false

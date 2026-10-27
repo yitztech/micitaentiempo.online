@@ -13,6 +13,9 @@ const PUBLISHED = new Set<RouteId>([
   "privacy",
   "terms",
   "credits",
+  "downloadApp",
+  "signUp",
+  "signIn",
   "businessDirectory",
 ]);
 

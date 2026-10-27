@@ -121,7 +121,7 @@ export const ROUTES = {
     pt: "/pt/cadastro",
     de: "/de/registrieren",
     it: "/it/registrazione",
-    indexable: false,
+    indexable: true,
   },
   signIn: {
     es: "/entrar",
@@ -130,7 +130,7 @@ export const ROUTES = {
     pt: "/pt/entrar",
     de: "/de/anmelden",
     it: "/it/accedi",
-    indexable: false,
+    indexable: true,
   },
   forgotPassword: {
     es: "/recuperar-contrasena",
