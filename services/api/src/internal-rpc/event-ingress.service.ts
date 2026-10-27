@@ -3,6 +3,7 @@ import { timestampDate } from "@bufbuild/protobuf/wkt";
 import { type DomainEvent, DomainEventSchema } from "@mcet/contracts/mcet/api/v1/event_ingress_pb";
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { eq } from "drizzle-orm";
+import { BusinessProfileRepository } from "../businesses/business-profile.repository.js";
 import { type Database, DB } from "../db/db.module.js";
 import { customerLinks, inboundEvents } from "../db/schema.js";
 import { RealtimeBus } from "./realtime.bus.js";
@@ -15,6 +16,7 @@ export class EventIngressService {
   constructor(
     @Inject(DB) private readonly db: Database,
     private readonly bus: RealtimeBus,
+    private readonly profiles: BusinessProfileRepository,
   ) {}
 
   /**
@@ -62,6 +64,24 @@ export class EventIngressService {
 
   /** Efectos del negocio previos a los avisos (vincular al cliente final con la organización). */
   private async apply(event: DomainEvent): Promise<void> {
+    if (event.type === "calendar.snapshot" && event.orgId && event.calendarId && event.subject) {
+      const subject = event.subject as Record<string, unknown>;
+      const payload = {
+        eventId: event.eventId,
+        schemaVersion: Number(subject.schemaVersion ?? 1),
+        aggregateVersion: Number(subject.aggregateVersion),
+        occurredAt: event.occurredAt
+          ? timestampDate(event.occurredAt).toISOString()
+          : new Date().toISOString(),
+        businessId: event.orgId,
+        calendarId: event.calendarId,
+        state: String(subject.state ?? "active"),
+        slug: String(subject.slug ?? ""),
+        hasActiveServices: Boolean(subject.hasActiveServices),
+      };
+      await this.profiles.applyCalendarSnapshot(payload);
+      return;
+    }
     if (event.type !== "booking.created" || !event.orgId || !event.subject) return;
     const subject = event.subject;
     const userId = typeof subject.customer_user_id === "string" ? subject.customer_user_id : "";

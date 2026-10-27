@@ -19,6 +19,10 @@ export const PUBLIC_ROUTE = "mcet:public";
 /** Marca un endpoint como público (sin sesión). */
 export const Public = () => SetMetadata(PUBLIC_ROUTE, true);
 
+export const MULTIPART_ROUTE = "mcet:multipart";
+/** Permite multipart/form-data en mutaciones protegidas con cabecera Idempotency-Key. */
+export const MultipartUpload = () => SetMetadata(MULTIPART_ROUTE, true);
+
 export type AuthedRequest = FastifyRequest & { user?: SessionUser; sessionId?: string };
 
 const MUTATING = new Set(["POST", "PUT", "PATCH", "DELETE"]);
@@ -39,7 +43,10 @@ export class SessionGuard implements CanActivate {
     if (this.reflector.getAllAndOverride<boolean>(PUBLIC_ROUTE, [ctx.getHandler(), ctx.getClass()]))
       return true;
     const req = ctx.switchToHttp().getRequest<AuthedRequest>();
-    if (MUTATING.has(req.method) && !req.headers.authorization) this.checkOrigin(req);
+    const isMultipart = Boolean(
+      this.reflector.getAllAndOverride<boolean>(MULTIPART_ROUTE, [ctx.getHandler(), ctx.getClass()]),
+    );
+    if (MUTATING.has(req.method) && !req.headers.authorization) this.checkOrigin(req, isMultipart);
     const res = await this.registry.session(req);
     if (!res) throw new UnauthorizedException({ code: "unauthenticated", message: "Sesión no válida" });
     if (!res.user.emailVerified) {
@@ -50,8 +57,8 @@ export class SessionGuard implements CanActivate {
     return true;
   }
 
-  private checkOrigin(req: FastifyRequest): void {
-    checkOrigin(req, this.env);
+  private checkOrigin(req: FastifyRequest, isMultipart = false): void {
+    checkOrigin(req, this.env, isMultipart);
   }
 }
 
@@ -59,12 +66,27 @@ export class SessionGuard implements CanActivate {
  * Protección CSRF de mutaciones con cookie: Origin igual al sitio del Host y cuerpo JSON (los
  * navegadores no envían JSON entre orígenes sin preflight). Con TEST_MODE no se exige el Origin.
  */
-export function checkOrigin(req: FastifyRequest, env: Env): void {
+export function checkOrigin(req: FastifyRequest, env: Env, isMultipart = false): void {
   const expected = env.site.siteUrl[requestLang(req, env)];
   const origin = req.headers.origin;
   const type = req.headers["content-type"] ?? "";
   if (origin !== new URL(expected).origin && !env.TEST_MODE) {
     throw new ForbiddenException({ code: "bad_origin", message: "Origen no permitido" });
+  }
+  if (isMultipart) {
+    if (!String(type).includes("multipart/form-data")) {
+      throw new ForbiddenException({
+        code: "multipart_required",
+        message: "Se requiere multipart/form-data",
+      });
+    }
+    if (!req.headers["idempotency-key"]) {
+      throw new ForbiddenException({
+        code: "csrf_header_required",
+        message: "Se requiere cabecera de petición",
+      });
+    }
+    return;
   }
   if (req.body !== undefined && !String(type).includes("application/json")) {
     throw new ForbiddenException({ code: "json_required", message: "Se requiere JSON" });

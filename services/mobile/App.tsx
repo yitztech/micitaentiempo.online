@@ -17,7 +17,9 @@ import {
 import { AUTH_NAME_ALLOWED, AUTH_NAME_MAX, AuthName, EmailField } from "../../packages/schemas/dist/index.js";
 import {
   COUNTRIES,
+  createEncryptedStorage,
   createMobileClient,
+  createSyncEngine,
   getCatalog,
   MOBILE_LANGUAGES,
   MOBILE_SELECTORS,
@@ -26,6 +28,9 @@ import {
   type MobileLang,
   type MobilePanelSummary,
   type MobilePlatform,
+  type PrivateBusinessProfile,
+  type PublicBusinessProfile,
+  type PublicBusinessSummary,
   resolveDeviceLayout,
 } from "./src/index.ts";
 
@@ -46,6 +51,7 @@ function defaultBaseUrl(platform: MobilePlatform): string {
 type Booking = { id: string; status: string; start: string; end: string };
 type ConnState = "connecting" | "connected" | "offline";
 type AuthMode = "signIn" | "signUp" | "forgot";
+type NavTab = "directory" | "appointments" | "businessProfile" | "account";
 
 /**
  * App Expo (Android e iOS, teléfonos y tablets). Reutiliza los catálogos @mcet/i18n, la validación
@@ -57,9 +63,13 @@ export default function App() {
   const layout = resolveDeviceLayout({ width, height, platform });
   const [apiUrl, setApiUrl] = useState(() => defaultBaseUrl(platform));
   const client = useMemo(() => createMobileClient({ baseUrl: apiUrl, platform }), [apiUrl, platform]);
+  const storage = useMemo(() => createEncryptedStorage({ baseUrl: apiUrl }), [apiUrl]);
 
   const [conn, setConn] = useState<ConnState>("connecting");
   const [boot, setBoot] = useState<MobileBootstrapResponse | null>(null);
+
+  // Navegación principal
+  const [navTab, setNavTab] = useState<NavTab>("directory");
 
   // Idioma activo con soporte para los 6 idiomas y banderas
   const [userLang, setUserLang] = useState<MobileLang | null>(null);
@@ -68,7 +78,24 @@ export default function App() {
   // Modo de autenticación: entrada, registro o recuperación
   const [authMode, setAuthMode] = useState<AuthMode>("signIn");
 
-  // Campos de formulario
+  // Directorio y perfiles públicos
+  const [directorySearch, setDirectorySearch] = useState("");
+  const [directoryItems, setDirectoryItems] = useState<PublicBusinessSummary[]>([]);
+  const [selectedBusiness, setSelectedBusiness] = useState<PublicBusinessProfile | null>(null);
+
+  // Perfil de negocio del propietario
+  const [ownerProfile, setOwnerProfile] = useState<PrivateBusinessProfile | null>(null);
+  const [ownerDisplayName, setOwnerDisplayName] = useState("");
+  const [ownerDescription, setOwnerDescription] = useState("");
+  const [ownerPrimaryCategory, setOwnerPrimaryCategory] = useState<string | null>(null);
+  const [ownerWebsiteUrl, setOwnerWebsiteUrl] = useState("");
+  const [ownerTermsUrl, setOwnerTermsUrl] = useState("");
+
+  // Estado offline y sincronización
+  const [pendingOpsCount, setPendingOpsCount] = useState(0);
+  const [lastDataUpdate, setLastDataUpdate] = useState<string | null>(null);
+
+  // Campos de formulario auth
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -94,6 +121,17 @@ export default function App() {
   const t = getCatalog(lang);
   const s = MOBILE_STRINGS[lang] ?? MOBILE_STRINGS.es;
 
+  // Actualizar contador de operaciones pendientes
+  const refreshPendingCount = useCallback(async () => {
+    if (!summary?.user?.id) {
+      setPendingOpsCount(0);
+      return;
+    }
+    const q = await storage.getQueue(summary.user.id);
+    const active = q.filter((o) => o.state === "pending" || o.state === "conflict");
+    setPendingOpsCount(active.length);
+  }, [storage, summary?.user?.id]);
+
   useEffect(() => {
     let alive = true;
     async function init() {
@@ -114,20 +152,113 @@ export default function App() {
             return;
           } catch {}
         }
-        if (alive) setConn("offline");
+        if (alive) {
+          setConn("offline");
+          // Si estamos offline, cargar sesión previamente persistida
+          const cachedSession = await storage.loadSession();
+          if (cachedSession && alive) {
+            client.setToken(cachedSession.session.token);
+            setSummary({
+              user: cachedSession.session.user,
+              org: null,
+              calendars: [],
+            });
+            const cachedBookings = await storage.loadBookings(cachedSession.session.user.id);
+            if (cachedBookings && alive) {
+              setBookings(cachedBookings.data as Booking[]);
+              setLastDataUpdate(cachedBookings.cachedAt);
+            }
+          }
+          const cachedDir = await storage.loadDirectory();
+          if (cachedDir?.data?.businesses && alive) {
+            setDirectoryItems(cachedDir.data.businesses as PublicBusinessSummary[]);
+          }
+        }
       }
     }
     void init();
     return () => {
       alive = false;
     };
-  }, [client, apiUrl, platform]);
+  }, [client, apiUrl, platform, storage]);
+
+  // Sincronizar cola durable al conectar
+  useEffect(() => {
+    if (conn === "connected" && summary?.user?.id) {
+      const syncEngine = createSyncEngine({
+        client,
+        storage,
+        accountId: summary.user.id,
+      });
+      void syncEngine.sync().then(() => {
+        void refreshPendingCount();
+      });
+    }
+  }, [conn, client, storage, summary?.user?.id, refreshPendingCount]);
 
   const loadSession = useCallback(async () => {
     const [sum, list] = await Promise.all([client.panelSummary(), client.myBookings(false)]);
     setSummary(sum);
     setBookings(list);
-  }, [client]);
+    setLastDataUpdate(new Date().toISOString());
+    // Persiste sesión y citas de manera cifrada
+    const token = client.getToken();
+    if (token) {
+      await storage.saveSession({ token, user: sum.user });
+      await storage.saveBookings(sum.user.id, list);
+    }
+    await refreshPendingCount();
+  }, [client, storage, refreshPendingCount]);
+
+  // Carga de directorio
+  const loadDirectory = useCallback(async () => {
+    try {
+      const res = await client.searchBusinesses({ q: directorySearch || undefined });
+      setDirectoryItems(res.items);
+      await storage.saveDirectory({ businesses: res.items });
+    } catch {
+      const cached = await storage.loadDirectory();
+      if (cached?.data?.businesses) {
+        setDirectoryItems(cached.data.businesses as PublicBusinessSummary[]);
+      }
+    }
+  }, [client, directorySearch, storage]);
+
+  useEffect(() => {
+    void loadDirectory();
+  }, [loadDirectory]);
+
+  // Carga de perfil de propietario si tiene organización
+  const loadOwnerProfile = useCallback(async () => {
+    if (!summary?.org || !summary?.user?.id) return;
+    try {
+      const p = await client.getOwnerBusinessProfile();
+      setOwnerProfile(p);
+      setOwnerDisplayName(p.displayName);
+      setOwnerDescription(p.description);
+      setOwnerPrimaryCategory(p.primaryCategory);
+      setOwnerWebsiteUrl(p.websiteUrl ?? "");
+      setOwnerTermsUrl(p.termsUrl ?? "");
+      await storage.saveOwnerProfile(summary.user.id, p);
+    } catch {
+      const cached = await storage.loadOwnerProfile(summary.user.id);
+      if (cached?.data) {
+        const p = cached.data as PrivateBusinessProfile;
+        setOwnerProfile(p);
+        setOwnerDisplayName(p.displayName);
+        setOwnerDescription(p.description);
+        setOwnerPrimaryCategory(p.primaryCategory);
+        setOwnerWebsiteUrl(p.websiteUrl ?? "");
+        setOwnerTermsUrl(p.termsUrl ?? "");
+      }
+    }
+  }, [client, summary?.org, summary?.user?.id, storage]);
+
+  useEffect(() => {
+    if (summary?.org) {
+      void loadOwnerProfile();
+    }
+  }, [summary?.org, loadOwnerProfile]);
 
   // Validaciones del lado del cliente antes de enviar
   const validateForm = useCallback((): boolean => {
@@ -281,10 +412,107 @@ export default function App() {
   }, [boot, client, loadSession, s.googleUnavailable, s.signInError]);
 
   const onSignOut = useCallback(async () => {
+    if (summary?.user?.id) {
+      await storage.clearAccount(summary.user.id);
+    }
+    storage.clearSession();
     await client.signOut().catch(() => client.setToken(null));
     setSummary(null);
     setBookings(null);
-  }, [client]);
+    setOwnerProfile(null);
+    setPendingOpsCount(0);
+  }, [client, storage, summary?.user?.id]);
+
+  const onSaveOwnerProfile = useCallback(async () => {
+    if (!summary?.org || !summary?.user?.id) return;
+    setBusy(true);
+    setError(null);
+    setInfoMessage(null);
+    const updates = {
+      displayName: ownerDisplayName.trim(),
+      description: ownerDescription.trim(),
+      primaryCategory: (ownerPrimaryCategory as never) || null,
+      secondaryCategories: [],
+      websiteUrl: ownerWebsiteUrl.trim() || null,
+      termsUrl: ownerTermsUrl.trim() || null,
+      socialLinks: [],
+    };
+    try {
+      if (conn === "connected") {
+        const updated = await client.updateOwnerBusinessProfile(
+          updates,
+          ownerProfile?.version ?? 1,
+          crypto.randomUUID(),
+        );
+        setOwnerProfile(updated);
+        await storage.saveOwnerProfile(summary.user.id, updated);
+        setInfoMessage(t.panel.businessProfile.savedSuccess);
+      } else {
+        const syncEngine = createSyncEngine({ client, storage, accountId: summary.user.id });
+        await syncEngine.enqueue({
+          kind: "profile.update",
+          resourceId: summary.org.id,
+          businessId: summary.org.id,
+          baseVersion: ownerProfile?.version ?? 1,
+          payload: updates,
+        });
+        await refreshPendingCount();
+        setInfoMessage(s.offlineSaved);
+      }
+    } catch (err: unknown) {
+      const errObj = err as { body?: { message?: string } };
+      setError(errObj?.body?.message ?? "Error al guardar el perfil");
+    } finally {
+      setBusy(false);
+    }
+  }, [
+    summary?.org,
+    summary?.user?.id,
+    ownerDisplayName,
+    ownerDescription,
+    ownerPrimaryCategory,
+    ownerWebsiteUrl,
+    ownerTermsUrl,
+    ownerProfile?.version,
+    conn,
+    client,
+    storage,
+    refreshPendingCount,
+    t.panel.businessProfile.savedSuccess,
+    s.offlineSaved,
+  ]);
+
+  const onPublish = useCallback(async () => {
+    if (!summary?.org || !ownerProfile) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const updated = await client.publishBusiness(ownerProfile.version, crypto.randomUUID());
+      setOwnerProfile(updated);
+      setInfoMessage(t.panel.businessProfile.publishedSuccess);
+    } catch (err: unknown) {
+      const errObj = err as { body?: { message?: string } };
+      setError(errObj?.body?.message ?? "Error al publicar");
+    } finally {
+      setBusy(false);
+    }
+  }, [summary?.org, ownerProfile, client, t.panel.businessProfile.publishedSuccess]);
+
+  const onUnpublish = useCallback(async () => {
+    if (!summary?.org || !ownerProfile) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const updated = await client.unpublishBusiness(ownerProfile.version, crypto.randomUUID());
+      setOwnerProfile(updated);
+      setInfoMessage(t.panel.businessProfile.unpublishedSuccess);
+    } catch (err: unknown) {
+      const errObj = err as { body?: { message?: string } };
+      setError(errObj?.body?.message ?? "Error al despublicar");
+    } finally {
+      setBusy(false);
+    }
+  }, [summary?.org, ownerProfile, client, t.panel.businessProfile.unpublishedSuccess]);
 
   const signedIn = summary !== null;
   const bannerText = conn === "connected" ? s.connected : conn === "offline" ? s.offline : s.connecting;
@@ -551,11 +779,17 @@ export default function App() {
     </View>
   ) : null;
 
-  const appointmentsCard = signedIn ? (
+  const appointmentsCard = (
     <View style={styles.card}>
       <Text style={styles.h2} accessibilityRole="header">
         {t.booking.my.title}
       </Text>
+      {lastDataUpdate && conn === "offline" ? (
+        <Text testID={MOBILE_SELECTORS.offlineStatusBanner} style={styles.offlineNotice}>
+          {s.offlineStale} {new Date(lastDataUpdate).toLocaleString(lang === "es" ? "es-MX" : "en-US")} (
+          {s.offlineSaved})
+        </Text>
+      ) : null}
       <Text testID={MOBILE_SELECTORS.myAppointmentsList} style={styles.item}>
         {bookings && bookings.length > 0
           ? bookings
@@ -563,8 +797,160 @@ export default function App() {
                 (b) => `${new Date(b.start).toLocaleString(lang === "es" ? "es-MX" : "en-US")} · ${b.status}`,
               )
               .join("\n")
-          : t.booking.my.none}
+          : signedIn
+            ? t.booking.my.none
+            : t.auth.signIn.title}
       </Text>
+      {!signedIn && (
+        <Pressable style={[styles.button, styles.primary]} onPress={() => setNavTab("account")}>
+          <Text style={styles.primaryText}>{t.common.nav.signIn}</Text>
+        </Pressable>
+      )}
+    </View>
+  );
+
+  const directoryCard = (
+    <View style={styles.card}>
+      {selectedBusiness ? (
+        <View testID={MOBILE_SELECTORS.businessProfileView} style={styles.profileView}>
+          <Pressable
+            onPress={() => setSelectedBusiness(null)}
+            style={styles.backButton}
+            accessibilityLabel={t.public.businessProfile.backToDirectory}
+          >
+            <Text style={styles.linkText}>← {t.public.businessProfile.backToDirectory}</Text>
+          </Pressable>
+
+          <Text style={styles.h2}>{selectedBusiness.displayName}</Text>
+          <Text style={styles.badge}>{selectedBusiness.primaryCategory}</Text>
+          <Text style={styles.paragraph}>{selectedBusiness.description}</Text>
+
+          <Text style={styles.h3}>{t.public.businessProfile.locations}</Text>
+          {selectedBusiness.locations.map((loc) => (
+            <View key={loc.id} style={styles.locationItem}>
+              <Text style={styles.locationName}>{loc.name}</Text>
+              <Text style={styles.locationAddress}>
+                {loc.addressVisibility === "public"
+                  ? `${loc.address}, ${loc.locality}`
+                  : t.public.businessProfile.addressLocalityOnly.replace("{{locality}}", loc.locality)}
+              </Text>
+            </View>
+          ))}
+
+          <Text style={styles.h3}>{t.public.businessProfile.services}</Text>
+          {selectedBusiness.bookingTargets && selectedBusiness.bookingTargets.length > 0 ? (
+            selectedBusiness.bookingTargets.map((target) => (
+              <View key={target.calendarSlug} style={styles.targetRow}>
+                <Text style={styles.targetName}>{target.calendarName}</Text>
+                <Pressable
+                  testID={MOBILE_SELECTORS.businessProfileBookButton}
+                  style={[styles.button, styles.primary]}
+                  onPress={() => {
+                    setNavTab("appointments");
+                  }}
+                >
+                  <Text style={styles.primaryText}>{t.public.businessProfile.bookService}</Text>
+                </Pressable>
+              </View>
+            ))
+          ) : (
+            <Text style={styles.muted}>{t.public.businessProfile.noServices}</Text>
+          )}
+        </View>
+      ) : (
+        <View testID={MOBILE_SELECTORS.directoryList}>
+          <Text style={styles.h2} accessibilityRole="header">
+            {t.public.directory.title}
+          </Text>
+          <TextInput
+            testID={MOBILE_SELECTORS.directorySearchInput}
+            placeholder={t.public.directory.searchPlaceholder}
+            value={directorySearch}
+            onChangeText={setDirectorySearch}
+            style={styles.input}
+          />
+          <View style={styles.businessList}>
+            {directoryItems.map((biz) => (
+              <Pressable
+                key={biz.id}
+                testID={MOBILE_SELECTORS.directoryCard}
+                onPress={async () => {
+                  try {
+                    const full = await client.getBusinessProfile(biz.id);
+                    setSelectedBusiness(full);
+                  } catch {}
+                }}
+                style={styles.businessCard}
+              >
+                <Text style={styles.businessName}>{biz.displayName}</Text>
+                <Text style={styles.businessCategory}>{biz.primaryCategory}</Text>
+                <Text style={styles.businessLocality}>{biz.locality}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+      )}
+    </View>
+  );
+
+  const ownerProfileCard = summary?.org ? (
+    <View style={styles.card}>
+      <Text style={styles.h2} accessibilityRole="header">
+        {t.panel.businessProfile.title}
+      </Text>
+      <View style={styles.statusRow}>
+        <Text testID={MOBILE_SELECTORS.ownerProfileStatus} style={styles.statusText}>
+          {ownerProfile?.status === "published"
+            ? t.panel.businessProfile.status.published
+            : t.panel.businessProfile.status.draft}
+        </Text>
+        {ownerProfile?.status === "published" ? (
+          <Pressable
+            testID={MOBILE_SELECTORS.ownerProfileUnpublishButton}
+            onPress={onUnpublish}
+            disabled={busy || conn === "offline"}
+            style={[styles.button, styles.secondary]}
+          >
+            <Text style={styles.secondaryText}>{t.panel.businessProfile.unpublishAction}</Text>
+          </Pressable>
+        ) : (
+          <Pressable
+            testID={MOBILE_SELECTORS.ownerProfilePublishButton}
+            onPress={onPublish}
+            disabled={busy || conn === "offline"}
+            style={[styles.button, styles.primary]}
+          >
+            <Text style={styles.primaryText}>{t.panel.businessProfile.publishAction}</Text>
+          </Pressable>
+        )}
+      </View>
+
+      <Text style={styles.label}>{t.panel.businessProfile.fields.displayName}</Text>
+      <TextInput
+        value={ownerDisplayName}
+        onChangeText={setOwnerDisplayName}
+        maxLength={100}
+        style={styles.input}
+      />
+
+      <Text style={styles.label}>{t.panel.businessProfile.fields.description}</Text>
+      <TextInput
+        value={ownerDescription}
+        onChangeText={setOwnerDescription}
+        multiline
+        numberOfLines={3}
+        maxLength={5000}
+        style={[styles.input, styles.multilineInput]}
+      />
+
+      <Pressable
+        testID={MOBILE_SELECTORS.ownerProfileSaveButton}
+        onPress={onSaveOwnerProfile}
+        disabled={busy}
+        style={[styles.button, styles.primary]}
+      >
+        <Text style={styles.primaryText}>{t.panel.businessProfile.fields.save}</Text>
+      </Pressable>
     </View>
   ) : null;
 
@@ -577,7 +963,7 @@ export default function App() {
             {t.common.site.name}
           </Text>
 
-          {/* Selector de idioma con banderas (USA para EN, Brasil para PT) */}
+          {/* Selector de idioma con banderas */}
           <View style={styles.langSelectorWrapper}>
             <Pressable
               testID={MOBILE_SELECTORS.languageSelector}
@@ -610,6 +996,49 @@ export default function App() {
           </View>
         </View>
 
+        {/* Barra de navegación principal */}
+        <View style={styles.navBar}>
+          <Pressable
+            testID={MOBILE_SELECTORS.tabDirectory}
+            onPress={() => setNavTab("directory")}
+            style={[styles.navTabButton, navTab === "directory" && styles.navTabButtonActive]}
+          >
+            <Text style={[styles.navTabText, navTab === "directory" && styles.navTabTextActive]}>
+              {s.directoryTab}
+            </Text>
+          </Pressable>
+          <Pressable
+            testID={MOBILE_SELECTORS.tabMyAppointments}
+            onPress={() => setNavTab("appointments")}
+            style={[styles.navTabButton, navTab === "appointments" && styles.navTabButtonActive]}
+          >
+            <Text style={[styles.navTabText, navTab === "appointments" && styles.navTabTextActive]}>
+              {s.myAppointmentsTab}
+            </Text>
+          </Pressable>
+          {signedIn && summary?.org ? (
+            <Pressable
+              testID={MOBILE_SELECTORS.tabBusinessProfile}
+              onPress={() => setNavTab("businessProfile")}
+              style={[styles.navTabButton, navTab === "businessProfile" && styles.navTabButtonActive]}
+            >
+              <Text style={[styles.navTabText, navTab === "businessProfile" && styles.navTabTextActive]}>
+                {s.businessProfileTab}
+              </Text>
+            </Pressable>
+          ) : null}
+          <Pressable
+            testID={MOBILE_SELECTORS.tabAccount}
+            onPress={() => setNavTab("account")}
+            style={[styles.navTabButton, navTab === "account" && styles.navTabButtonActive]}
+          >
+            <Text style={[styles.navTabText, navTab === "account" && styles.navTabTextActive]}>
+              {signedIn ? summary.user.name.split(" ")[0] : t.common.nav.signIn}
+            </Text>
+          </Pressable>
+        </View>
+
+        {/* Banners de estado de conexión y cola durable */}
         <View
           accessibilityLiveRegion="polite"
           style={[
@@ -623,13 +1052,21 @@ export default function App() {
           <Text style={styles.bannerSub}>
             {apiUrl} · {layout.formFactor} · {lang}
           </Text>
+          {pendingOpsCount > 0 && (
+            <Text testID={MOBILE_SELECTORS.offlineQueueCounter} style={styles.offlineCounterText}>
+              {pendingOpsCount} {s.offlinePending}
+            </Text>
+          )}
         </View>
 
+        {/* Contenido según pestaña activa y diseño adaptativo */}
         <View style={layout.columns === 2 ? styles.row : undefined}>
-          <View style={layout.columns === 2 ? styles.col : undefined}>{signedIn ? panelCard : authCard}</View>
-          {appointmentsCard ? (
-            <View style={layout.columns === 2 ? styles.col : undefined}>{appointmentsCard}</View>
-          ) : null}
+          <View style={layout.columns === 2 ? styles.col : undefined}>
+            {navTab === "directory" ? directoryCard : null}
+            {navTab === "appointments" ? appointmentsCard : null}
+            {navTab === "businessProfile" ? ownerProfileCard : null}
+            {navTab === "account" ? (signedIn ? panelCard : authCard) : null}
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -797,4 +1234,74 @@ const styles = StyleSheet.create({
   linkText: { color: "#1d4ed8", fontSize: 14, fontWeight: "500" },
   muted: { color: "#4b5563", fontSize: 14 },
   item: { fontSize: 15, color: "#111827", paddingVertical: 4 },
+  navBar: {
+    flexDirection: "row",
+    gap: 4,
+    marginBottom: 12,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    padding: 4,
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+  },
+  navTabButton: { flex: 1, paddingVertical: 8, alignItems: "center", borderRadius: 6 },
+  navTabButtonActive: { backgroundColor: "#1d4ed8" },
+  navTabText: { fontSize: 13, fontWeight: "500", color: "#4b5563" },
+  navTabTextActive: { color: "#fff", fontWeight: "700" },
+  offlineNotice: {
+    fontSize: 12,
+    color: "#92400e",
+    backgroundColor: "#fef3c7",
+    padding: 6,
+    borderRadius: 6,
+    marginBottom: 8,
+  },
+  offlineCounterText: { fontSize: 12, fontWeight: "600", color: "#b45309", marginTop: 4 },
+  profileView: { gap: 8 },
+  backButton: { paddingVertical: 4, marginBottom: 4 },
+  badge: {
+    alignSelf: "flex-start",
+    backgroundColor: "#e0e7ff",
+    color: "#3730a3",
+    fontSize: 12,
+    fontWeight: "600",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  paragraph: { fontSize: 14, color: "#374151", lineHeight: 20 },
+  h3: { fontSize: 16, fontWeight: "600", color: "#111827", marginTop: 8 },
+  locationItem: { backgroundColor: "#f9fafb", padding: 8, borderRadius: 6, marginTop: 4 },
+  locationName: { fontSize: 14, fontWeight: "600", color: "#111827" },
+  locationAddress: { fontSize: 13, color: "#4b5563", marginTop: 2 },
+  targetRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "#f9fafb",
+    padding: 8,
+    borderRadius: 6,
+    marginTop: 4,
+  },
+  targetName: { fontSize: 14, fontWeight: "500", color: "#111827", flex: 1 },
+  businessList: { gap: 8, marginTop: 12 },
+  businessCard: {
+    backgroundColor: "#f9fafb",
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    borderRadius: 8,
+    padding: 12,
+    gap: 4,
+  },
+  businessName: { fontSize: 16, fontWeight: "600", color: "#111827" },
+  businessCategory: { fontSize: 12, color: "#6b7280" },
+  businessLocality: { fontSize: 13, color: "#4b5563" },
+  statusRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  statusText: { fontSize: 15, fontWeight: "600", color: "#111827" },
+  multilineInput: { minHeight: 80, textAlignVertical: "top" },
 });

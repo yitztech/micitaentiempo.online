@@ -2,32 +2,43 @@ import authDe from "../../../packages/i18n/src/locales/de/auth.json" with { type
 import bookingDe from "../../../packages/i18n/src/locales/de/booking.json" with { type: "json" };
 import commonDe from "../../../packages/i18n/src/locales/de/common.json" with { type: "json" };
 import panelDe from "../../../packages/i18n/src/locales/de/panel.json" with { type: "json" };
+import publicDe from "../../../packages/i18n/src/locales/de/public.json" with { type: "json" };
 import authEn from "../../../packages/i18n/src/locales/en/auth.json" with { type: "json" };
 import bookingEn from "../../../packages/i18n/src/locales/en/booking.json" with { type: "json" };
 import commonEn from "../../../packages/i18n/src/locales/en/common.json" with { type: "json" };
 import panelEn from "../../../packages/i18n/src/locales/en/panel.json" with { type: "json" };
+import publicEn from "../../../packages/i18n/src/locales/en/public.json" with { type: "json" };
 import authEs from "../../../packages/i18n/src/locales/es/auth.json" with { type: "json" };
 import bookingEs from "../../../packages/i18n/src/locales/es/booking.json" with { type: "json" };
 import commonEs from "../../../packages/i18n/src/locales/es/common.json" with { type: "json" };
 import panelEs from "../../../packages/i18n/src/locales/es/panel.json" with { type: "json" };
+import publicEs from "../../../packages/i18n/src/locales/es/public.json" with { type: "json" };
 import authFr from "../../../packages/i18n/src/locales/fr/auth.json" with { type: "json" };
 import bookingFr from "../../../packages/i18n/src/locales/fr/booking.json" with { type: "json" };
 import commonFr from "../../../packages/i18n/src/locales/fr/common.json" with { type: "json" };
 import panelFr from "../../../packages/i18n/src/locales/fr/panel.json" with { type: "json" };
+import publicFr from "../../../packages/i18n/src/locales/fr/public.json" with { type: "json" };
 import authIt from "../../../packages/i18n/src/locales/it/auth.json" with { type: "json" };
 import bookingIt from "../../../packages/i18n/src/locales/it/booking.json" with { type: "json" };
 import commonIt from "../../../packages/i18n/src/locales/it/common.json" with { type: "json" };
 import panelIt from "../../../packages/i18n/src/locales/it/panel.json" with { type: "json" };
+import publicIt from "../../../packages/i18n/src/locales/it/public.json" with { type: "json" };
 import authPt from "../../../packages/i18n/src/locales/pt/auth.json" with { type: "json" };
 import bookingPt from "../../../packages/i18n/src/locales/pt/booking.json" with { type: "json" };
 import commonPt from "../../../packages/i18n/src/locales/pt/common.json" with { type: "json" };
 import panelPt from "../../../packages/i18n/src/locales/pt/panel.json" with { type: "json" };
+import publicPt from "../../../packages/i18n/src/locales/pt/public.json" with { type: "json" };
 import type {
+  BusinessLocationContent,
+  BusinessProfileContent,
   ConfirmHold,
   MobileForgotPassword,
   MobileGoogleAuth,
   MobileSignIn,
   MobileSignUp,
+  PrivateBusinessProfile,
+  PublicBusinessProfile,
+  PublicBusinessSummary,
   PublicHold,
 } from "../../../packages/schemas/dist/index.js";
 import { validateRequest } from "../../web/app/lib/validation.ts";
@@ -104,6 +115,23 @@ export const MOBILE_SELECTORS = {
   tabSignUp: "auth-tab-sign-up",
   tabForgot: "auth-tab-forgot",
   languageSelector: "mobile-language-selector",
+  tabDirectory: "nav-tab-directory",
+  tabMyAppointments: "nav-tab-my-appointments",
+  tabBusinessProfile: "nav-tab-business-profile",
+  tabAccount: "nav-tab-account",
+  directorySearchInput: "directory-search-input",
+  directoryCategorySelector: "directory-category-selector",
+  directoryLocalitySelector: "directory-locality-selector",
+  directoryList: "directory-business-list",
+  directoryCard: "directory-business-card",
+  businessProfileView: "business-profile-view",
+  businessProfileBookButton: "business-profile-book-button",
+  ownerProfileStatus: "owner-profile-status",
+  ownerProfilePublishButton: "owner-profile-publish-button",
+  ownerProfileUnpublishButton: "owner-profile-unpublish-button",
+  ownerProfileSaveButton: "owner-profile-save-button",
+  offlineStatusBanner: "offline-status-banner",
+  offlineQueueCounter: "offline-queue-counter",
 } as const;
 
 /** Textos propios de la app nativa (estado de conexión, validación y flujos) en los 6 idiomas. */
@@ -125,6 +153,14 @@ export const MOBILE_STRINGS: Record<
     emailError: string;
     passwordError: string;
     phoneError: string;
+    directoryTab: string;
+    myAppointmentsTab: string;
+    businessProfileTab: string;
+    offlineSaved: string;
+    offlineStale: string;
+    offlinePending: string;
+    syncConflict: string;
+    quotaError: string;
   }
 > = {
   es: {
@@ -143,6 +179,14 @@ export const MOBILE_STRINGS: Record<
     emailError: "El correo no tiene un formato válido (5-254 caracteres).",
     passwordError: "La contraseña debe tener entre 12 y 128 caracteres (mínimo 8 al entrar).",
     phoneError: "El teléfono solo debe contener números (entre 7 y 20 caracteres).",
+    directoryTab: "Directorio",
+    myAppointmentsTab: "Mis citas",
+    businessProfileTab: "Mi negocio",
+    offlineSaved: "Guardado localmente sin conexión",
+    offlineStale: "Datos guardados el",
+    offlinePending: "operación(es) pendiente(s)",
+    syncConflict: "Conflicto al sincronizar. Revisa los cambios.",
+    quotaError: "Espacio de almacenamiento local lleno.",
   },
   en: {
     connecting: "Connecting to server…",
@@ -160,6 +204,14 @@ export const MOBILE_STRINGS: Record<
     emailError: "Email format is not valid (5-254 characters).",
     passwordError: "Password must be between 12 and 128 characters (min 8 to sign in).",
     phoneError: "Phone must only contain numbers (between 7 and 20 characters).",
+    directoryTab: "Directory",
+    myAppointmentsTab: "My appointments",
+    businessProfileTab: "My business",
+    offlineSaved: "Saved locally offline",
+    offlineStale: "Data saved on",
+    offlinePending: "pending operation(s)",
+    syncConflict: "Sync conflict. Review changes.",
+    quotaError: "Local storage quota exceeded.",
   },
   fr: {
     connecting: "Connexion au serveur…",
@@ -177,6 +229,14 @@ export const MOBILE_STRINGS: Record<
     emailError: "Le format de l'e-mail n'est pas valide (5-254 caractères).",
     passwordError: "Le mot de passe doit comporter entre 12 et 128 caractères.",
     phoneError: "Le téléphone ne doit contenir que des chiffres (7 à 20 caractères).",
+    directoryTab: "Répertoire",
+    myAppointmentsTab: "Mes rendez-vous",
+    businessProfileTab: "Mon entreprise",
+    offlineSaved: "Enregistré localement hors ligne",
+    offlineStale: "Données enregistrées le",
+    offlinePending: "opération(s) en attente",
+    syncConflict: "Conflit de synchronisation. Vérifiez les modifications.",
+    quotaError: "Espace de stockage local plein.",
   },
   pt: {
     connecting: "Conectando ao servidor…",
@@ -194,6 +254,14 @@ export const MOBILE_STRINGS: Record<
     emailError: "O formato do e-mail não é válido (5-254 caracteres).",
     passwordError: "A senha deve ter entre 12 e 128 caracteres.",
     phoneError: "O telefone deve conter apenas números (entre 7 e 20 caracteres).",
+    directoryTab: "Diretório",
+    myAppointmentsTab: "Minhas consultas",
+    businessProfileTab: "Meu negócio",
+    offlineSaved: "Salvo localmente off-line",
+    offlineStale: "Dados salvos em",
+    offlinePending: "operação(ões) pendente(s)",
+    syncConflict: "Conflito de sincronização. Revise as alterações.",
+    quotaError: "Espaço de armazenamento local cheio.",
   },
   de: {
     connecting: "Verbindung zum Server wird hergestellt…",
@@ -211,6 +279,14 @@ export const MOBILE_STRINGS: Record<
     emailError: "E-Mail-Format ist ungültig (5-254 Zeichen).",
     passwordError: "Das Passwort muss zwischen 12 und 128 Zeichen lang sein.",
     phoneError: "Das Telefon darf nur Ziffern enthalten (7 bis 20 Zeichen).",
+    directoryTab: "Verzeichnis",
+    myAppointmentsTab: "Meine Termine",
+    businessProfileTab: "Mein Unternehmen",
+    offlineSaved: "Lokal offline gespeichert",
+    offlineStale: "Daten gespeichert am",
+    offlinePending: "ausstehende Operation(en)",
+    syncConflict: "Synchronisierungskonflikt. Überprüfen Sie die Änderungen.",
+    quotaError: "Lokaler Speicherplatz voll.",
   },
   it: {
     connecting: "Connessione al server in corso…",
@@ -228,6 +304,14 @@ export const MOBILE_STRINGS: Record<
     emailError: "Il formato dell'email non è valido (5-254 caratteri).",
     passwordError: "La password deve avere tra 12 e 128 caratteri.",
     phoneError: "Il telefono deve contenere solo numeri (da 7 a 20 caratteri).",
+    directoryTab: "Elenco",
+    myAppointmentsTab: "I miei appuntamenti",
+    businessProfileTab: "La mia attività",
+    offlineSaved: "Salvato localmente offline",
+    offlineStale: "Dati salvati il",
+    offlinePending: "operazione/i in sospeso",
+    syncConflict: "Conflitto di sincronizzazione. Controlla le modifiche.",
+    quotaError: "Spazio di archiviazione locale pieno.",
   },
 };
 
@@ -238,14 +322,15 @@ const CATALOGS: Record<
     auth: typeof authEs;
     booking: typeof bookingEs;
     panel: typeof panelEs;
+    public: typeof publicEs;
   }
 > = {
-  es: { common: commonEs, auth: authEs, booking: bookingEs, panel: panelEs },
-  en: { common: commonEn, auth: authEn, booking: bookingEn, panel: panelEn },
-  fr: { common: commonFr, auth: authFr, booking: bookingFr, panel: panelFr },
-  pt: { common: commonPt, auth: authPt, booking: bookingPt, panel: panelPt },
-  de: { common: commonDe, auth: authDe, booking: bookingDe, panel: panelDe },
-  it: { common: commonIt, auth: authIt, booking: bookingIt, panel: panelIt },
+  es: { common: commonEs, auth: authEs, booking: bookingEs, panel: panelEs, public: publicEs },
+  en: { common: commonEn, auth: authEn, booking: bookingEn, panel: panelEn, public: publicEn },
+  fr: { common: commonFr, auth: authFr, booking: bookingFr, panel: panelFr, public: publicFr },
+  pt: { common: commonPt, auth: authPt, booking: bookingPt, panel: panelPt, public: publicPt },
+  de: { common: commonDe, auth: authDe, booking: bookingDe, panel: panelDe, public: publicDe },
+  it: { common: commonIt, auth: authIt, booking: bookingIt, panel: panelIt, public: publicIt },
 };
 
 export function getCatalog(lang: MobileLang) {
@@ -400,12 +485,106 @@ export function createMobileClient({
         "GET",
         `/api/public/v1/my/bookings?includePast=${includePast}`,
       ),
-    cancelBooking: (bookingId: string, input: { reason?: string } = {}) =>
+    cancelBooking: (bookingId: string, input: { reason?: string } = {}, idempKey?: string) =>
       request<{ id: string; status: string }>(
         "POST",
         `/api/public/v1/my/bookings/${encodeURIComponent(bookingId)}/cancel`,
         input,
+        idempKey ? { "idempotency-key": idempKey } : {},
       ),
+    listCategories: () =>
+      request<Array<{ id: string; label: string; count?: number }>>(
+        "GET",
+        "/api/public/v1/business-categories",
+      ),
+    listLocalities: (country?: string) =>
+      request<Array<{ country: string; locality: string; region?: string; count?: number }>>(
+        "GET",
+        `/api/public/v1/business-localities${country ? `?country=${encodeURIComponent(country)}` : ""}`,
+      ),
+    searchBusinesses: (
+      params: {
+        q?: string;
+        category?: string;
+        country?: string;
+        locality?: string;
+        lat?: number;
+        lon?: number;
+        radiusKm?: number;
+        cursor?: string;
+        limit?: number;
+      } = {},
+    ) => {
+      const q = new URLSearchParams();
+      if (params.q) q.set("q", params.q);
+      if (params.category) q.set("category", params.category);
+      if (params.country) q.set("country", params.country);
+      if (params.locality) q.set("locality", params.locality);
+      if (params.lat !== undefined) q.set("lat", String(params.lat));
+      if (params.lon !== undefined) q.set("lon", String(params.lon));
+      if (params.radiusKm !== undefined) q.set("radiusKm", String(params.radiusKm));
+      if (params.cursor) q.set("cursor", params.cursor);
+      if (params.limit !== undefined) q.set("limit", String(params.limit));
+      const qs = q.toString();
+      return request<{ items: PublicBusinessSummary[]; nextCursor: string | null }>(
+        "GET",
+        `/api/public/v1/businesses${qs ? `?${qs}` : ""}`,
+      );
+    },
+    getBusinessProfile: (id: string) =>
+      request<PublicBusinessProfile>("GET", `/api/public/v1/businesses/${encodeURIComponent(id)}`),
+    getOwnerBusinessProfile: () => request<PrivateBusinessProfile>("GET", "/api/business-profile"),
+    updateOwnerBusinessProfile: (
+      body: Partial<BusinessProfileContent>,
+      expectedVersion: number,
+      idempKey: string,
+    ) =>
+      request<PrivateBusinessProfile>(
+        "PATCH",
+        "/api/business-profile",
+        { ...body, expectedVersion },
+        { "idempotency-key": idempKey },
+      ),
+    publishBusiness: (expectedVersion: number, idempKey: string) =>
+      request<PrivateBusinessProfile>(
+        "POST",
+        "/api/business-profile/publish",
+        { expectedVersion },
+        { "idempotency-key": idempKey },
+      ),
+    unpublishBusiness: (expectedVersion: number, idempKey: string) =>
+      request<PrivateBusinessProfile>(
+        "POST",
+        "/api/business-profile/unpublish",
+        { expectedVersion },
+        { "idempotency-key": idempKey },
+      ),
+    addBusinessLocation: (body: BusinessLocationContent, expectedVersion: number, idempKey: string) =>
+      request<PrivateBusinessProfile>(
+        "POST",
+        "/api/business-profile/locations",
+        { ...body, expectedVersion },
+        { "idempotency-key": idempKey },
+      ),
+    deleteBusinessLocation: (locationId: string, expectedVersion: number) =>
+      request<PrivateBusinessProfile>(
+        "DELETE",
+        `/api/business-profile/locations/${encodeURIComponent(locationId)}?expectedVersion=${expectedVersion}`,
+      ),
+    assignCalendarLocation: (calendarId: string, locationId: string | null, expectedVersion: number) =>
+      request<PrivateBusinessProfile>(
+        "PUT",
+        `/api/business-profile/calendar-locations/${encodeURIComponent(calendarId)}`,
+        { locationId, expectedVersion },
+      ),
+    getOperationReceipt: (operationId: string) =>
+      request<{
+        operationId: string;
+        action: string;
+        status: number;
+        body: unknown;
+        createdAt: string;
+      }>("GET", `/api/offline/operations/${encodeURIComponent(operationId)}`),
   };
 }
 
@@ -428,15 +607,31 @@ export function renderMobileInterfaceSnapshot({
 }) {
   const layout = resolveDeviceLayout({ width, height, platform });
   const t = getCatalog(lang);
+  const s = MOBILE_STRINGS[lang] ?? MOBILE_STRINGS.es;
   const googleButtonHtml = googleEnabled
     ? `<button type="button" data-testid="${MOBILE_SELECTORS.googleButton}" aria-label="${t.auth.google}">${t.auth.google}</button>`
     : "";
   const html = [
     `<div data-platform="${platform}" data-layout="${layout.formFactor}" data-nav="${layout.navigationMode}" data-columns="${layout.columns}">`,
-    `<header><h1>${t.common.site.name}</h1><nav aria-label="${t.common.nav.main}"><span>${t.common.nav.myAppointments}</span><span>${t.common.nav.dashboard}</span></nav></header>`,
+    `<header><h1>${t.common.site.name}</h1><nav aria-label="${t.common.nav.main}">` +
+      `<button data-testid="${MOBILE_SELECTORS.tabDirectory}">${s.directoryTab}</button>` +
+      `<button data-testid="${MOBILE_SELECTORS.tabMyAppointments}">${s.myAppointmentsTab}</button>` +
+      `<button data-testid="${MOBILE_SELECTORS.tabBusinessProfile}">${s.businessProfileTab}</button>` +
+      `</nav></header>`,
     `<section aria-label="${t.auth.signIn.title}">${googleButtonHtml}<input name="email" data-testid="${MOBILE_SELECTORS.emailInput}" aria-label="${t.auth.fields.email}" /><input name="password" type="password" data-testid="${MOBILE_SELECTORS.passwordInput}" aria-label="${t.auth.fields.password}" /><button type="submit" data-testid="${MOBILE_SELECTORS.submitButton}">${t.auth.signIn.submit}</button></section>`,
     `<section aria-label="${t.booking.my.title}" data-master-detail="${layout.masterDetail}"><button type="button" data-testid="${MOBILE_SELECTORS.firstSlotButton}">${t.booking.slotStep.continue}</button><button type="button" data-testid="${MOBILE_SELECTORS.confirmBookingButton}">${t.booking.verify.confirm}</button><p data-testid="${MOBILE_SELECTORS.statusBanner}">${t.booking.done.title}</p><button type="button" data-testid="${MOBILE_SELECTORS.cancelBookingButton}">${t.booking.my.cancel}</button></section>`,
     `<section data-testid="${MOBILE_SELECTORS.panelSummaryCard}" aria-label="${t.panel.nav.calendars}"></section>`,
+    `<section aria-label="${t.public.directory.title}" data-testid="${MOBILE_SELECTORS.directoryList}">` +
+      `<input data-testid="${MOBILE_SELECTORS.directorySearchInput}" placeholder="${t.public.directory.searchPlaceholder}" />` +
+      `<div data-testid="${MOBILE_SELECTORS.directoryCard}"></div>` +
+      `</section>`,
+    `<section data-testid="${MOBILE_SELECTORS.businessProfileView}" aria-label="${t.public.businessProfile.about}">` +
+      `<button data-testid="${MOBILE_SELECTORS.businessProfileBookButton}">${t.public.businessProfile.bookService}</button>` +
+      `</section>`,
+    `<section data-testid="${MOBILE_SELECTORS.ownerProfileStatus}" aria-label="${t.panel.businessProfile.title}">` +
+      `<button data-testid="${MOBILE_SELECTORS.ownerProfilePublishButton}">${t.panel.businessProfile.publishAction}</button>` +
+      `<button data-testid="${MOBILE_SELECTORS.ownerProfileSaveButton}">${t.panel.businessProfile.fields.save}</button>` +
+      `</section>`,
     `</div>`,
   ].join("");
 
@@ -447,3 +642,6 @@ export function renderMobileInterfaceSnapshot({
     html,
   };
 }
+
+export * from "./storage.ts";
+export * from "./sync.ts";

@@ -44,7 +44,8 @@ WORKDIR /app
 COPY --from=build --chown=node:node /out ./
 # La imagen de ejecución no necesita gestores de paquetes: sin npm/corepack hay menos superficie y
 # menos CVE (tar, undici…) que no son de la aplicación.
-RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack \
+RUN mkdir -p /uploads && chown -R node:node /uploads \
+ && rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack \
            /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack /opt/yarn* /usr/local/bin/yarn*
 USER node
 EXPOSE 3000 3001

@@ -64,6 +64,20 @@
       "when": 1793128256457,
       "tag": "0008_business_profiles",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793132227038,
+      "tag": "0009_offline_operations",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1793134000000,
+      "tag": "0010_business_locations_geo",
+      "breakpoints": true
     }
   ]
 }

@@ -15,6 +15,7 @@ import (
 	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/clock"
 	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/extsync"
 	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/holidays"
+	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/outbox"
 	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/store"
 )
 
@@ -104,4 +105,34 @@ func storeErr(err error) error {
 	default:
 		return err
 	}
+}
+
+// emitCalendarSnapshot encola el snapshot ordenado por aggregateVersion en la misma transacción (outbox, ADR 0019).
+func (e *Engine) emitCalendarSnapshot(ctx context.Context, tx pgx.Tx, snap store.CalendarSnapshot, a auth.ActorClaims) error {
+	if e.Jobs == nil {
+		return nil
+	}
+	eventID := newEventID()
+	now := e.Clock.Now()
+	subject := map[string]any{
+		"eventId":           eventID,
+		"schemaVersion":     1,
+		"aggregateVersion":  snap.AggregateVersion,
+		"occurredAt":        now.Format(time.RFC3339),
+		"businessId":        snap.OrgID,
+		"calendarId":        snap.CalendarID,
+		"state":             snap.State,
+		"slug":              snap.Slug,
+		"hasActiveServices": snap.HasActiveServices,
+	}
+	return outbox.Enqueue(ctx, e.Jobs, tx, outbox.Event{
+		EventID:    eventID,
+		Type:       "calendar.snapshot",
+		OccurredAt: now,
+		OrgID:      snap.OrgID,
+		CalendarID: snap.CalendarID,
+		Actor:      a,
+		Subject:    subject,
+		Version:    1,
+	})
 }

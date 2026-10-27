@@ -1,4 +1,5 @@
 import "reflect-metadata";
+import fastifyMultipart from "@fastify/multipart";
 import { NestFactory } from "@nestjs/core";
 import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fastify";
 import { Logger } from "nestjs-pino";
@@ -16,6 +17,15 @@ async function bootstrap(): Promise<void> {
     { bufferLogs: true, rawBody: true },
   );
   app.useLogger(app.get(Logger));
+  await app.register(fastifyMultipart, {
+    limits: {
+      fieldNameSize: 100,
+      fieldSize: 100 * 1024,
+      fields: 10,
+      fileSize: 5 * 1024 * 1024,
+      files: 1,
+    },
+  });
   // Respuestas con datos de cuenta: sin caché salvo que la ruta diga otra cosa (metadatos públicos).
   app
     .getHttpAdapter()

@@ -1,3 +1,4 @@
+import { isLang, type Lang, panelDe, panelEn, panelEs, panelFr, panelIt, panelPt } from "@mcet/i18n";
 import {
   type ArgumentsHost,
   Catch,
@@ -7,6 +8,15 @@ import {
   Logger,
 } from "@nestjs/common";
 import type { FastifyReply, FastifyRequest } from "fastify";
+
+const ERROR_CATALOGS: Record<Lang, Record<string, string>> = {
+  es: panelEs.errors,
+  en: panelEn.errors,
+  fr: panelFr.errors,
+  de: panelDe.errors,
+  it: panelIt.errors,
+  pt: panelPt.errors,
+};
 
 /** Errores en application/problem+json (RFC 9457) con un `code` estable. */
 @Catch()
@@ -22,14 +32,24 @@ export class ProblemFilter implements ExceptionFilter {
     const body = exception instanceof HttpException ? exception.getResponse() : undefined;
     const details = typeof body === "object" && body !== null ? (body as Record<string, unknown>) : {};
     if (status >= 500) this.logger.error({ err: exception, url: req.url }, "error no controlado");
+
+    const appLocale = req.headers["x-app-locale"];
+    const lang: Lang = typeof appLocale === "string" && isLang(appLocale) ? appLocale : "es";
+    reply.header("Content-Language", lang);
+
+    const code = typeof details.code === "string" ? details.code : String(HttpStatus[status]).toLowerCase();
+    const catalog = ERROR_CATALOGS[lang];
+    const translated = catalog ? catalog[code] : undefined;
+    const title = translated ?? (typeof details.message === "string" ? details.message : HttpStatus[status]);
+
     void reply
       .status(status)
       .header("Content-Type", "application/problem+json")
       .send({
         type: "about:blank",
-        title: typeof details.message === "string" ? details.message : HttpStatus[status],
+        title,
         status,
-        code: typeof details.code === "string" ? details.code : String(HttpStatus[status]).toLowerCase(),
+        code,
         ...(details.errors ? { errors: details.errors } : {}),
         ...(details.conflicts ? { conflicts: details.conflicts } : {}),
       });

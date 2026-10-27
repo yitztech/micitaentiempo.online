@@ -16,6 +16,7 @@
   },
   "nav": {
     "main": "Main",
+    "directory": "Directory",
     "features": "Features",
     "pricing": "Pricing",
     "faq": "FAQ",
@@ -75,5 +76,19 @@
     "settings:write": "Change hours, breaks and exceptions (owner only)",
     "billing:read": "See plan, trial and invoices (owner only)",
     "notifications:read": "See recent notifications"
+  },
+  "businessCategories": {
+    "health": "Health",
+    "beauty": "Beauty",
+    "wellness": "Wellness",
+    "sport": "Sport",
+    "education": "Education",
+    "consulting": "Consulting",
+    "professional_services": "Professional services",
+    "home": "Home & maintenance",
+    "automotive": "Automotive",
+    "pets": "Pets",
+    "events": "Events",
+    "other": "Other services"
   }
 }

@@ -1,9 +1,12 @@
 import {
+  AssignBusinessCalendar,
   AuthName,
   CancelBooking,
   CancelEvent,
+  ChangeBusinessPublication,
   ConfirmHold,
   ContactMessage,
+  CreateBusinessLocation,
   CreateCalendar,
   CreateEvent,
   CreateOrg,
@@ -21,6 +24,9 @@ import {
   PublicHold,
   Reschedule,
   Service,
+  UpdateBusinessImages,
+  UpdateBusinessLocation,
+  UpdateBusinessProfile,
   UpdateCalendar,
   UpdateEvent,
   UpdateMe,
@@ -90,5 +96,18 @@ export function validateRequest(method: string, path: string, body: unknown): un
   if (/^\/api\/v1\/calendars\/[^/]+\/events\/[^/]+$/.test(route) && method === "PATCH") schema = UpdateEvent;
   if (/^\/api\/v1\/calendars\/[^/]+\/events\/[^/]+\/cancel$/.test(route) && method === "POST")
     schema = CancelEvent;
+  if (route === "/api/business-profile" && method === "PATCH") schema = UpdateBusinessProfile;
+  if (route === "/api/business-profile/locations" && method === "POST") schema = CreateBusinessLocation;
+  if (/^\/api\/business-profile\/locations\/[^/]+$/.test(route) && method === "PATCH")
+    schema = UpdateBusinessLocation;
+  if (/^\/api\/business-profile\/locations\/[^/]+$/.test(route) && method === "DELETE")
+    schema = ChangeBusinessPublication;
+  if (route === "/api/business-profile/publish" && method === "POST") schema = ChangeBusinessPublication;
+  if (route === "/api/business-profile/unpublish" && method === "POST") schema = ChangeBusinessPublication;
+  if (route === "/api/business-profile/images" && method === "PATCH") schema = UpdateBusinessImages;
+  if (/^\/api\/business-profile\/images\/[^/]+$/.test(route) && method === "DELETE")
+    schema = ChangeBusinessPublication;
+  if (/^\/api\/business-profile\/calendar-locations\/[^/]+$/.test(route) && method === "PUT")
+    schema = AssignBusinessCalendar;
   return schema ? schema.parse(body) : body;
 }

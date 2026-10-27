@@ -16,6 +16,7 @@
   },
   "nav": {
     "main": "Principale",
+    "directory": "Directory",
     "features": "Funzionalità",
     "pricing": "Prezzi",
     "faq": "FAQ",
@@ -75,5 +76,19 @@
     "settings:write": "Cambiar horario, descansos y excepciones (solo propietario)",
     "billing:read": "Ver plan, prueba y facturas (solo propietario)",
     "notifications:read": "Ver avisos recientes"
+  },
+  "businessCategories": {
+    "health": "Salute",
+    "beauty": "Bellezza",
+    "wellness": "Benessere",
+    "sport": "Sport",
+    "education": "Istruzione",
+    "consulting": "Consulenza",
+    "professional_services": "Servizi professionali",
+    "home": "Casa e manutenzione",
+    "automotive": "Automotive",
+    "pets": "Animali domestici",
+    "events": "Eventi",
+    "other": "Altri servizi"
   }
 }

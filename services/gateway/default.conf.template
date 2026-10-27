@@ -75,6 +75,12 @@ server {
         proxy_read_timeout 1h;
         proxy_pass http://api_upstream;
     }
+    location = /api/business-profile/images {
+        client_max_body_size 6m;
+        include /etc/nginx/snippets/proxy-headers.conf;
+        include /etc/nginx/snippets/security-headers.conf;
+        proxy_pass http://api_upstream;
+    }
     location /api/ {
         include /etc/nginx/snippets/proxy-headers.conf;
         include /etc/nginx/snippets/security-headers.conf;

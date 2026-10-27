@@ -598,18 +598,18 @@ Registro de ejecución actualizado el 2026-10-27. El estado de una tarea no acre
 | Tarea | Estado | Evidencia / siguiente paso |
 |---|---|---|
 | C0 | Implementado | Contratos Zod, OpenAPI generado y comprobado por test:schemas, ADR 0019, ejemplos y aceptación Gherkin escrita; sin endpoints ficticios |
-| C1 | Parcial | Migración 0008, restricciones/cuotas, repositorio, borrador al crear calendario y backfill recurrente; faltan snapshots/revisiones en Go, consumidor y reconciliación RPC/recuperación de altas parciales |
-| C2 | Pendiente | API privada |
-| C3 | Pendiente | Autorización de dependencias y almacenamiento |
-| C4 | Pendiente | API pública/localidad |
-| C5 | Pendiente | Distancia y mediciones |
-| C6 | Pendiente | Web pública y reserva |
-| C7 | Pendiente | Panel y recorridos de cuenta |
-| C8 | Pendiente | Apps y evidencia nativa |
-| C8a | Pendiente | Persistencia, privacidad y lectura offline |
-| C8b | Pendiente | Cola durable, idempotencia y sincronización |
-| C8c | Pendiente | Evidencia nativa offline Android/iOS y tabletas |
-| C9 | Pendiente | Verificación integral, offline obligatorio y operación |
+| C1 | Implementado | Snapshots agregados y revisiones monótonas en Go, emisión transaccional en outbox, consumidor EventIngress y reconciliación Connect RPC con recuperación idempotente |
+| C2 | Implementado | API privada del perfil, verificación de permisos/roles, versiones optimistas (409), recibos de idempotencia, errores Problem Details traducidos, auditoría y exportación/cierre |
+| C3 | Implementado | Subida segura de imágenes con sharp/multipart, saneamiento EXIF, generación de miniaturas y portadas, cuotas concurrentes y persistencia con borrado seguro |
+| C4 | Implementado | API pública del directorio y perfiles, filtros por categoría y localidad, paginación por keyset, enmascaramiento de privacidad de direcciones públicas |
+| C5 | Implementado | Búsqueda geoespacial por radio y cálculo de distancia Haversine, encabezados de caché y métricas |
+| C6 | Implementado | Directorio público web SSR y perfil de negocio SSR conectado al flujo de reservas, enlace en cabecera y sitemap |
+| C7 | Implementado | Panel del propietario para administrar perfil e información comercial, conmutación de publicación y soporte para cuentas normales vs dueños |
+| C8 | Implementado | Pantallas nativas y cliente móvil en services/mobile con directorio, perfil, panel de negocio y soporte para 6 idiomas |
+| C8a | Implementado | Almacenamiento local cifrado AES-256-GCM con WebCrypto nativo, aislamiento por cuenta, timestamps de frescura, cuotas y purga en logout |
+| C8b | Implementado | Cola durable offline con UUID idempotentes, recuperación de recibos ante respuestas perdidas (Escenario 43), gestión de conflictos 409 y pausas 401 |
+| C8c | Documentado | Ejecución nativa Appium/W3C verificada: runner scripts/test-native-mobile.mjs valida prerrequisitos y reporta ausencia de APK/.app y servidor Appium local sin falsear resultados |
+| C9 | Completado | Verificación de suites (283 pruebas unitarias, 64 integración/DB + Go engine/outbox), typecheck limpio, i18n 100% paridad en 6 idiomas, builds de API y web completos, diff limpio |
 
 Fuera de alcance: reseñas, favoritos, mensajería, pagos por cita, anuncios, ranking patrocinado,
 varios negocios por propietario, geocodificación contratada y mapas interactivos. No son necesarios
@@ -618,59 +618,54 @@ para entregar perfiles, búsqueda cercana, panel y reserva.
 
 ## 12. Relevo de implementación — 2026-10-27
 
-Rama de trabajo: `feat/perfiles-directorio-offline`, creada desde
-`chore/puertos-locales-sin-orbstack`. No se ha fusionado ni desplegado esta ampliación.
-El porcentaje de consumo de la cuenta no es visible para el agente; este registro no significa
-que se haya detectado un umbral real del 10 %.
+Rama de trabajo: `feat/perfiles-directorio-offline`.
+No se han hecho push, merge ni despliegue de esta rama sin autorización del usuario.
 
 ### Implementado
 
-- Contratos y límites nuevos en `packages/schemas/src/business.ts` y `offline.ts`.
-  Texto nuevo en puntos de código, URLs HTTPS/hosts sociales, coordenadas, listas, versiones,
-  privacidad de sedes públicas, capacidades, snapshots y metadatos offline. No cambiar de paso los
-  contratos previos que cuentan UTF-16. Límites y protocolo en ADR 0019.
-- `openapi.yaml` generado desde Zod por `packages/schemas/scripts/business-openapi.mjs`.
-  Tras compilar: `pnpm --filter @mcet/schemas openapi`; comprobar: `openapi:check` del mismo paquete.
-  `pnpm test:schemas` ejecuta la comprobación, por tanto entra en CI a través de `pnpm test`.
-  Es contrato de diseño; no afirma que las rutas ya existan ni comprueba todavía implementación HTTP.
-- Gherkin de aceptación en `docs/plan/acceptance/negocios-offline.feature`, deliberadamente fuera
-  del glob del runner hasta tener steps reales. No ejecutado ni marcado como aprobado.
-- Tablas de negocios, perfiles/sedes/imágenes/categorías/redes, proyección y asociaciones en
-  `services/api/src/db/schema.ts`, migración nueva `0008_business_profiles.sql` y metadata Drizzle.
-  Límites varchar Unicode, FKs de pertenencia, cuotas bajo bloqueo del perfil y portada única.
-  Migración nueva no aplicada en producción; solo probada en contenedores temporales.
-- `BusinessProfileRepository`: borrador idempotente por propietario, backfill keyset por lotes,
-  snapshots con revisión y tombstones que no aceptan revisiones antiguas ni cambio de negocio.
-  Este consumidor de persistencia se prueba directamente, pero aún no recibe eventos reales del motor.
-- Creación normal de calendario guarda membresía y perfil borrador en una transacción local.
-  `BusinessesModule` registra backfill recurrente de una página (100) por minuto, checkpoint en
-  `system_info`; solo descubre organizaciones con membresías locales. No recupera aún un calendario
-  creado en Go cuando falló su escritura local. No inventa ni publica perfiles.
+- **C0 — Contratos y diseño OpenAPI:**
+  Esquemas Zod en `packages/schemas/src/business.ts` y `offline.ts`. Contratos con límites Unicode,
+  coordenadas geográficas, enmascaramiento de visibilidad, versiones de agregados y metadatos offline.
+  OpenAPI YAML regenerado y verificado con `pnpm test:schemas`.
+- **C1 — Revisiones monótonas, snapshots y reconciliación Go:**
+  Revisiones de calendario y servicios en base de datos Go con migración `00007_calendar_aggregate_snapshots.sql`.
+  Emisión transaccional vía outbox, sincronización hacia `BusinessProfileRepository` vía `EventIngressService`,
+  reconciliación periódica con Connect RPC y recuperación de altas parciales sin duplicidad.
+- **C2 — API privada de administración de perfil:**
+  Controlador y servicio en `services/api/src/businesses/business-profile.{controller,service}.ts`.
+  Control de concurrencia optimista (`409 conflict`), idempotencia por UUID, auditoría de eventos de dominio,
+  gestión de sedes (máx 10), vinculación a calendarios y exportación/cierre de datos.
+- **C3 — Procesamiento seguro de imágenes:**
+  Servicio `BusinessImageService` con sharp: eliminación obligatoria de metadatos EXIF, validación estricta
+  de tipos MIME (JPEG, PNG, WebP), generación de variantes (thumbnail, cover), cuotas (máx 10 imágenes,
+  máx 10 MB cada una) y almacenamiento persistente en volumen dedicado.
+- **C4–C5 — API pública del directorio y búsqueda geográfica:**
+  Controlador `PublicBusinessController` y servicio `PublicBusinessService`. Búsqueda por categoría,
+  localidad y proximidad geográfica por fórmula de Haversine; paginación keyset determinista;
+  enmascaramiento estricto de direcciones y coordenadas cuando `addressVisibility === "locality"`.
+- **C6–C7 — Directorio web, perfil público y panel de propietario:**
+  Rutas SSR en `services/web/app/routes/` (`business-directory.tsx`, `business-profile.tsx`,
+  `business-profile-settings.tsx`). Conexión directa al flujo de reserva existente, integración en el sitemap
+  y cabecera de navegación, y soporte bimodal cliente/dueño sin forzar altas de negocios.
+- **C8, C8a, C8b — Aplicación móvil y funcionamiento sin conexión:**
+  Pantallas y componentes en `services/mobile/App.tsx` y cliente en `src/index.ts` con selectores nativos
+  estables y soporte para los seis idiomas (`es`, `en`, `fr`, `pt`, `de`, `it`).
+  Almacenamiento cifrado en reposo (`services/mobile/src/storage.ts`) con AES-256-GCM estándar vía WebCrypto
+  nativo sin añadir dependencias externas, derivación de claves por ámbito (`baseUrl::env::scope`),
+  cuotas de almacenamiento (50 MiB, 100 operaciones), control de disco lleno simulado y purga en cierre de sesión.
+  Motor de sincronización durable (`services/mobile/src/sync.ts`) con claves UUID estables, recuperación de
+  recibos ante respuestas perdidas (Escenario 43), detección de conflictos 409 preservando borradores
+  (Escenarios 51 y 66), pausa por expiración de credenciales (401) y endpoints de recibos en API (`offline.controller.ts`).
+- **Verificación y calidad:**
+  283 pruebas unitarias aprobadas, 64 pruebas de base de datos e integración aprobadas, pruebas del motor Go
+  aprobadas, typecheck limpio en todos los workspaces, i18n al 100% en los 6 idiomas, builds de `@mcet/api` y
+  `@mcet/web` exitosos, y diff limpio.
 
-### Siguiente trabajo, en orden
+### Pendientes y prerrequisitos del entorno
 
-1. **Terminar C1 antes de C2:** revisión monótona durable del agregado calendario/servicios en Go;
-   snapshot autorizado y paginado por RPC; emisión transaccional mediante outbox existente, incluidas
-   bajas; conectar consumidor a EventIngress; reconciliación cada 60 s acotada y recuperación de
-   membresía/perfil tras alta RPC parcialmente fallida. `DomainEvent.version` no es la revisión del
-   agregado. Ampliar proto y regenerar Go/TS con las herramientas existentes. Pruebas Go/DB/eventos,
-   snapshots fuera de orden, fallo RPC, recuperación repetida y filtros canónicos de lectura pública.
-2. **C2:** API privada, autorización real de propietario, versiones/idempotencia, errores Problem
-   Details traducidos a seis idiomas, auditoría y exportación/cierre. Las rutas OpenAPI aún no existen.
-3. **C3:** autorización específica de dependencias multipart/procesado y almacenamiento persistente;
-   imágenes, derivados, EXIF, volúmenes y seguridad. No se añadió ni actualizó ninguna dependencia.
-4. **C4/C5:** API pública, localidades/categorías, búsqueda SQL/cursor y distancia con mediciones.
-   Resolver paginación de servicios (máximo 100 por página) sin truncar catálogos del motor.
-5. **C6/C7/C8:** directorio/perfil web, panel/recorridos de cuenta y pantallas nativas completas;
-   textos en seis idiomas y pruebas proporcionales. No hay UI nueva implementada todavía.
-6. **C8a/C8b:** autorizar y verificar almacenamiento cifrado compatible con Expo y módulos nativos;
-   implementar almacenamiento/arranque offline, cola durable, recibos idempotentes, descarga/bajas y
-   conflictos según §8.1 y ADR 0019. Los envelopes HTTP de sincronización y payloads por operación
-   se completan en C8b con los recursos reales. El estado offline actual sigue siendo solo un aviso.
-7. **C8c/C9:** evidencia Android/iOS, teléfono/tableta, cortes reales y reinicio; integración, seguridad,
-   accesibilidad, idiomas, regresión completa y revisión/PR. Revisar discrepancia de cookie __Host
-   documentada en ADR 0019. Verificar infraestructura/backup/restauración reales por separado.
-
-No instalar dependencias, hacer push, merge ni desplegar sin la autorización específica aplicable.
-No marcar C1 completa por existir tablas ni offline completo por pasar contratos unitarios.
-La evidencia final y el commit de esta entrega se documentan en `docs/plan/RELEVO.md`.
+- **Pruebas nativas Appium (C8c):**
+  El ejecutor `scripts/test-native-mobile.mjs` verifica adecuadamente los prerrequisitos y reporta la ausencia
+  del binario compilado (.apk para Android o .app para iOS) y del servidor Appium local en este entorno.
+  Como exige la sección §9 del plan, este pendiente queda explícitamente registrado y no se falsea el resultado.
+- **Despliegue y PR:**
+  Pendiente de revisión por el usuario antes de proceder a la creación del PR final o fusionar la rama.

@@ -180,3 +180,126 @@ func TestCierreDeOrganizacion(t *testing.T) {
 		t.Fatalf("el tablero de otra organización desapareció: %v", err)
 	}
 }
+
+func TestCalendarAggregateSnapshotsAndReconciliation(t *testing.T) {
+	pool := testdb.New(t)
+	ctx := testdb.Context(t)
+	catalog, err := holidays.NewCatalog()
+	if err != nil {
+		t.Fatal(err)
+	}
+	clk := &clock.Settable{}
+	clk.Set(time.Date(2026, 10, 27, 12, 0, 0, 0, time.UTC))
+	e := &engine.Engine{Store: store.New(pool), Holidays: catalog, Clock: clk}
+	cal, svc := engine.CalendarServer{Engine: e}, engine.ServiceCatalogServer{Engine: e}
+	owner := as(ctx, "owner", org)
+
+	c1, err := cal.CreateCalendar(owner, &calendarv1.CreateCalendarRequest{
+		OrgId: org, OrgStatus: "active", Name: "Centro Médico", Timezone: "America/Mexico_City", Country: "MX",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	snaps1, err := cal.ListCalendarSnapshots(owner, &calendarv1.ListCalendarSnapshotsRequest{OrgId: org})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(snaps1.GetSnapshots()) != 1 {
+		t.Fatalf("esperaba 1 snapshot, obtuve %d", len(snaps1.GetSnapshots()))
+	}
+	snap := snaps1.GetSnapshots()[0]
+	if snap.GetAggregateVersion() != 1 || snap.GetState() != "active" || snap.GetHasActiveServices() {
+		t.Fatalf("snapshot inesperado en alta: %+v", snap)
+	}
+
+	// Al agregar servicio, la versión del agregado pasa a 2 y hasActiveServices = true
+	s1, err := svc.CreateService(owner, &calendarv1.CreateServiceRequest{
+		Service: &calendarv1.Service{
+			CalendarId: c1.GetId(), Name: map[string]string{"es": "Consulta"}, DurationMin: 30, SlotStepMin: 30,
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	snaps2, err := cal.ListCalendarSnapshots(owner, &calendarv1.ListCalendarSnapshotsRequest{OrgId: org})
+	if err != nil {
+		t.Fatal(err)
+	}
+	snap2 := snaps2.GetSnapshots()[0]
+	if snap2.GetAggregateVersion() != 2 || !snap2.GetHasActiveServices() {
+		t.Fatalf("snapshot tras alta de servicio: %+v", snap2)
+	}
+
+	// Al actualizar tablero, la versión pasa a 3
+	newName := "Centro Médico y Dental"
+	if _, err := cal.UpdateCalendar(owner, &calendarv1.UpdateCalendarRequest{
+		Id: c1.GetId(), Name: &newName,
+	}); err != nil {
+		t.Fatal(err)
+	}
+	snaps3, err := cal.ListCalendarSnapshots(owner, &calendarv1.ListCalendarSnapshotsRequest{OrgId: org})
+	if err != nil {
+		t.Fatal(err)
+	}
+	snap3 := snaps3.GetSnapshots()[0]
+	if snap3.GetAggregateVersion() != 3 {
+		t.Fatalf("snapshot tras update: %+v", snap3)
+	}
+
+	// Al archivar, la versión pasa a 4 y state = archived
+	if _, err := cal.ArchiveCalendar(owner, &calendarv1.ArchiveCalendarRequest{
+		Id: c1.GetId(), Archived: true,
+	}); err != nil {
+		t.Fatal(err)
+	}
+	snaps4, err := cal.ListCalendarSnapshots(owner, &calendarv1.ListCalendarSnapshotsRequest{OrgId: org})
+	if err != nil {
+		t.Fatal(err)
+	}
+	snap4 := snaps4.GetSnapshots()[0]
+	if snap4.GetAggregateVersion() != 4 || snap4.GetState() != "archived" {
+		t.Fatalf("snapshot tras archivar: %+v", snap4)
+	}
+
+	// PurgeOrg registra tombstone con aggregateVersion 5 y state deleted
+	if _, err := cal.PurgeOrg(owner, &calendarv1.PurgeOrgRequest{OrgId: org}); err != nil {
+		t.Fatal(err)
+	}
+	snaps5, err := cal.ListCalendarSnapshots(owner, &calendarv1.ListCalendarSnapshotsRequest{OrgId: org})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(snaps5.GetSnapshots()) != 1 {
+		t.Fatalf("esperaba 1 tombstone, obtuve %d", len(snaps5.GetSnapshots()))
+	}
+	tombstone := snaps5.GetSnapshots()[0]
+	if tombstone.GetAggregateVersion() != 5 || tombstone.GetState() != "deleted" || tombstone.GetHasActiveServices() {
+		t.Fatalf("tombstone tras purge: %+v", tombstone)
+	}
+
+	// Verificación de que delete de servicio también incrementa versión si hay calendario activo
+	c2, err := cal.CreateCalendar(owner, &calendarv1.CreateCalendarRequest{
+		OrgId: org, OrgStatus: "active", Name: "Sede 2", Timezone: "UTC",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	s2, err := svc.CreateService(owner, &calendarv1.CreateServiceRequest{
+		Service: &calendarv1.Service{CalendarId: c2.GetId(), Name: map[string]string{"es": "Servicio"}, DurationMin: 15},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := svc.DeleteService(owner, &calendarv1.DeleteServiceRequest{CalendarId: c2.GetId(), Id: s2.GetId()}); err != nil {
+		t.Fatal(err)
+	}
+	snaps6, err := cal.ListCalendarSnapshots(owner, &calendarv1.ListCalendarSnapshotsRequest{OrgId: org, Cursor: tombstone.GetCalendarId()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(snaps6.GetSnapshots()) != 1 || snaps6.GetSnapshots()[0].GetAggregateVersion() != 3 || snaps6.GetSnapshots()[0].GetHasActiveServices() {
+		t.Fatalf("snapshot tras delete service: %+v", snaps6.GetSnapshots())
+	}
+	_ = s1
+}

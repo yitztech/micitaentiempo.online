@@ -113,6 +113,8 @@ services:
       WHATSAPP_PHONE_NUMBER_ID: ${WHATSAPP_PHONE_NUMBER_ID:-}
       WHATSAPP_APP_SECRET: ${WHATSAPP_APP_SECRET:-}
       WHATSAPP_VERIFY_TOKEN: ${WHATSAPP_VERIFY_TOKEN:-}
+    volumes:
+      - uploads-data:/uploads
     depends_on:
       postgres: { condition: service_healthy }
     healthcheck:
@@ -203,6 +205,7 @@ services:
 volumes:
   postgres-data:
   admin-data:
+  uploads-data:
 
 networks:
   frontend:

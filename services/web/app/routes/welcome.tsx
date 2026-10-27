@@ -3,7 +3,7 @@ import { type FormEvent, useEffect, useState } from "react";
 import { CopyField, embedSnippets } from "~/components/copy-field";
 import { defaultWeek, HoursEditor, shiftsFromWeek } from "~/components/hours-editor";
 import { Select } from "~/components/select";
-import { Alert, Button, Card, Checkbox, Field } from "~/components/ui";
+import { Alert, Button, Card, Checkbox, Field, LinkButton } from "~/components/ui";
 import { apiRequest, errorText } from "~/lib/api-client";
 import { cx, fmt, useRoot } from "~/lib/i18n";
 import { panelGet } from "~/lib/panel.server";
@@ -368,12 +368,17 @@ export default function Welcome({ loaderData }: Route.ComponentProps) {
                 </>
               );
             })()}
-            <Button
-              size="lg"
-              onClick={() => window.location.assign(pathFor("calendar", site.lang, { id: board.id }))}
-            >
-              {w.finish}
-            </Button>
+            <div className="pt-2 flex flex-wrap items-center gap-3">
+              <Button
+                size="lg"
+                onClick={() => window.location.assign(pathFor("calendar", site.lang, { id: board.id }))}
+              >
+                {w.finish}
+              </Button>
+              <LinkButton to={pathFor("businessProfileSettings", site.lang)} variant="secondary" size="lg">
+                {t.panel.businessProfile.navLink}
+              </LinkButton>
+            </div>
           </div>
         ) : null}
       </Card>

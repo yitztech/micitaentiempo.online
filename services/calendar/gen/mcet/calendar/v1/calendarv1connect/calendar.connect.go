@@ -57,6 +57,9 @@ const (
 	// CalendarServicePurgeOrgProcedure is the fully-qualified name of the CalendarService's PurgeOrg
 	// RPC.
 	CalendarServicePurgeOrgProcedure = "/mcet.calendar.v1.CalendarService/PurgeOrg"
+	// CalendarServiceListCalendarSnapshotsProcedure is the fully-qualified name of the
+	// CalendarService's ListCalendarSnapshots RPC.
+	CalendarServiceListCalendarSnapshotsProcedure = "/mcet.calendar.v1.CalendarService/ListCalendarSnapshots"
 )
 
 // CalendarServiceClient is a client for the mcet.calendar.v1.CalendarService service.
@@ -72,6 +75,8 @@ type CalendarServiceClient interface {
 	// Cierre de la organización: borra sus tableros y todo lo que cuelga de ellos (citas, series,
 	// horarios, servicios, conexiones y feeds). No se puede deshacer.
 	PurgeOrg(context.Context, *v1.PurgeOrgRequest) (*v1.PurgeOrgResponse, error)
+	// Snapshots autorizados y paginados para proyección y reconciliación (ADR 0019).
+	ListCalendarSnapshots(context.Context, *v1.ListCalendarSnapshotsRequest) (*v1.ListCalendarSnapshotsResponse, error)
 }
 
 // NewCalendarServiceClient constructs a client for the mcet.calendar.v1.CalendarService service. By
@@ -133,19 +138,26 @@ func NewCalendarServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 			connect.WithSchema(calendarServiceMethods.ByName("PurgeOrg")),
 			connect.WithClientOptions(opts...),
 		),
+		listCalendarSnapshots: connect.NewClient[v1.ListCalendarSnapshotsRequest, v1.ListCalendarSnapshotsResponse](
+			httpClient,
+			baseURL+CalendarServiceListCalendarSnapshotsProcedure,
+			connect.WithSchema(calendarServiceMethods.ByName("ListCalendarSnapshots")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // calendarServiceClient implements CalendarServiceClient.
 type calendarServiceClient struct {
-	createCalendar    *connect.Client[v1.CreateCalendarRequest, v1.Calendar]
-	getCalendar       *connect.Client[v1.GetCalendarRequest, v1.Calendar]
-	getCalendarBySlug *connect.Client[v1.GetCalendarBySlugRequest, v1.Calendar]
-	listCalendars     *connect.Client[v1.ListCalendarsRequest, v1.ListCalendarsResponse]
-	updateCalendar    *connect.Client[v1.UpdateCalendarRequest, v1.Calendar]
-	archiveCalendar   *connect.Client[v1.ArchiveCalendarRequest, v1.Calendar]
-	setOrgStatus      *connect.Client[v1.SetOrgStatusRequest, v1.SetOrgStatusResponse]
-	purgeOrg          *connect.Client[v1.PurgeOrgRequest, v1.PurgeOrgResponse]
+	createCalendar        *connect.Client[v1.CreateCalendarRequest, v1.Calendar]
+	getCalendar           *connect.Client[v1.GetCalendarRequest, v1.Calendar]
+	getCalendarBySlug     *connect.Client[v1.GetCalendarBySlugRequest, v1.Calendar]
+	listCalendars         *connect.Client[v1.ListCalendarsRequest, v1.ListCalendarsResponse]
+	updateCalendar        *connect.Client[v1.UpdateCalendarRequest, v1.Calendar]
+	archiveCalendar       *connect.Client[v1.ArchiveCalendarRequest, v1.Calendar]
+	setOrgStatus          *connect.Client[v1.SetOrgStatusRequest, v1.SetOrgStatusResponse]
+	purgeOrg              *connect.Client[v1.PurgeOrgRequest, v1.PurgeOrgResponse]
+	listCalendarSnapshots *connect.Client[v1.ListCalendarSnapshotsRequest, v1.ListCalendarSnapshotsResponse]
 }
 
 // CreateCalendar calls mcet.calendar.v1.CalendarService.CreateCalendar.
@@ -220,6 +232,15 @@ func (c *calendarServiceClient) PurgeOrg(ctx context.Context, req *v1.PurgeOrgRe
 	return nil, err
 }
 
+// ListCalendarSnapshots calls mcet.calendar.v1.CalendarService.ListCalendarSnapshots.
+func (c *calendarServiceClient) ListCalendarSnapshots(ctx context.Context, req *v1.ListCalendarSnapshotsRequest) (*v1.ListCalendarSnapshotsResponse, error) {
+	response, err := c.listCalendarSnapshots.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // CalendarServiceHandler is an implementation of the mcet.calendar.v1.CalendarService service.
 type CalendarServiceHandler interface {
 	CreateCalendar(context.Context, *v1.CreateCalendarRequest) (*v1.Calendar, error)
@@ -233,6 +254,8 @@ type CalendarServiceHandler interface {
 	// Cierre de la organización: borra sus tableros y todo lo que cuelga de ellos (citas, series,
 	// horarios, servicios, conexiones y feeds). No se puede deshacer.
 	PurgeOrg(context.Context, *v1.PurgeOrgRequest) (*v1.PurgeOrgResponse, error)
+	// Snapshots autorizados y paginados para proyección y reconciliación (ADR 0019).
+	ListCalendarSnapshots(context.Context, *v1.ListCalendarSnapshotsRequest) (*v1.ListCalendarSnapshotsResponse, error)
 }
 
 // NewCalendarServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -290,6 +313,12 @@ func NewCalendarServiceHandler(svc CalendarServiceHandler, opts ...connect.Handl
 		connect.WithSchema(calendarServiceMethods.ByName("PurgeOrg")),
 		connect.WithHandlerOptions(opts...),
 	)
+	calendarServiceListCalendarSnapshotsHandler := connect.NewUnaryHandlerSimple(
+		CalendarServiceListCalendarSnapshotsProcedure,
+		svc.ListCalendarSnapshots,
+		connect.WithSchema(calendarServiceMethods.ByName("ListCalendarSnapshots")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mcet.calendar.v1.CalendarService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case CalendarServiceCreateCalendarProcedure:
@@ -308,6 +337,8 @@ func NewCalendarServiceHandler(svc CalendarServiceHandler, opts ...connect.Handl
 			calendarServiceSetOrgStatusHandler.ServeHTTP(w, r)
 		case CalendarServicePurgeOrgProcedure:
 			calendarServicePurgeOrgHandler.ServeHTTP(w, r)
+		case CalendarServiceListCalendarSnapshotsProcedure:
+			calendarServiceListCalendarSnapshotsHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -347,4 +378,8 @@ func (UnimplementedCalendarServiceHandler) SetOrgStatus(context.Context, *v1.Set
 
 func (UnimplementedCalendarServiceHandler) PurgeOrg(context.Context, *v1.PurgeOrgRequest) (*v1.PurgeOrgResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mcet.calendar.v1.CalendarService.PurgeOrg is not implemented"))
+}
+
+func (UnimplementedCalendarServiceHandler) ListCalendarSnapshots(context.Context, *v1.ListCalendarSnapshotsRequest) (*v1.ListCalendarSnapshotsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mcet.calendar.v1.CalendarService.ListCalendarSnapshots is not implemented"))
 }

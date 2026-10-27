@@ -71,11 +71,11 @@ func nullLimit(n int) any {
 	return n
 }
 
-// CreateService da de alta un servicio al final de la lista.
-func (s *Store) CreateService(ctx context.Context, sv Service) (Service, error) {
+// CreateServiceTx da de alta un servicio al final de la lista dentro de una transacción.
+func (s *Store) CreateServiceTx(ctx context.Context, tx pgx.Tx, sv Service) (Service, error) {
 	name, _ := json.Marshal(sv.Name)
 	desc, _ := json.Marshal(sv.Description)
-	return scanService(s.Pool.QueryRow(ctx, `insert into services (calendar_id, name, description, duration_min,
+	return scanService(tx.QueryRow(ctx, `insert into services (calendar_id, name, description, duration_min,
 		buffer_before_min, buffer_after_min, min_notice_min, max_advance_days, slot_step_min, daily_limit, color, active, position)
 		values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12,
 			(select coalesce(max(position) + 1, 0) from services where calendar_id = $1))
@@ -84,15 +84,46 @@ func (s *Store) CreateService(ctx context.Context, sv Service) (Service, error) 
 		sv.MaxAdvanceDays, sv.SlotStepMin, nullLimit(sv.DailyLimit), sv.Color, sv.Active))
 }
 
-// UpdateService sustituye los datos de un servicio.
-func (s *Store) UpdateService(ctx context.Context, sv Service) (Service, error) {
+// CreateService da de alta un servicio al final de la lista.
+func (s *Store) CreateService(ctx context.Context, sv Service) (Service, error) {
+	var out Service
+	err := s.InTx(ctx, func(tx pgx.Tx) error {
+		var err error
+		out, err = s.CreateServiceTx(ctx, tx, sv)
+		return err
+	})
+	return out, err
+}
+
+// UpdateServiceTx sustituye los datos de un servicio dentro de una transacción.
+func (s *Store) UpdateServiceTx(ctx context.Context, tx pgx.Tx, sv Service) (Service, error) {
 	name, _ := json.Marshal(sv.Name)
 	desc, _ := json.Marshal(sv.Description)
-	return scanService(s.Pool.QueryRow(ctx, `update services set name = $3, description = $4, duration_min = $5,
+	return scanService(tx.QueryRow(ctx, `update services set name = $3, description = $4, duration_min = $5,
 		buffer_before_min = $6, buffer_after_min = $7, min_notice_min = $8, max_advance_days = $9, slot_step_min = $10,
 		daily_limit = $11, color = $12, active = $13 where calendar_id = $1 and id = $2 returning `+serviceColumns,
 		sv.CalendarID, sv.ID, name, desc, sv.DurationMin, sv.BufferBeforeMin, sv.BufferAfterMin, sv.MinNoticeMin,
 		sv.MaxAdvanceDays, sv.SlotStepMin, nullLimit(sv.DailyLimit), sv.Color, sv.Active))
+}
+
+// UpdateService sustituye los datos de un servicio.
+func (s *Store) UpdateService(ctx context.Context, sv Service) (Service, error) {
+	var out Service
+	err := s.InTx(ctx, func(tx pgx.Tx) error {
+		var err error
+		out, err = s.UpdateServiceTx(ctx, tx, sv)
+		return err
+	})
+	return out, err
+}
+
+// DeleteServiceTx borra un servicio dentro de una transacción.
+func (s *Store) DeleteServiceTx(ctx context.Context, tx pgx.Tx, calendarID, id string) error {
+	tag, err := tx.Exec(ctx, `delete from services where calendar_id = $1 and id = $2`, calendarID, id)
+	if err == nil && tag.RowsAffected() == 0 {
+		return ErrNotFound
+	}
+	return err
 }
 
 // DeleteService borra un servicio.
@@ -104,14 +135,19 @@ func (s *Store) DeleteService(ctx context.Context, calendarID, id string) error 
 	return err
 }
 
+// ReorderServicesTx fija el orden según la lista de ids dentro de una transacción.
+func (s *Store) ReorderServicesTx(ctx context.Context, tx pgx.Tx, calendarID string, ids []string) error {
+	for i, id := range ids {
+		if _, err := tx.Exec(ctx, `update services set position = $3 where calendar_id = $1 and id = $2`, calendarID, id, i); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // ReorderServices fija el orden según la lista de ids.
 func (s *Store) ReorderServices(ctx context.Context, calendarID string, ids []string) error {
-	return s.tx(ctx, func(tx pgx.Tx) error {
-		for i, id := range ids {
-			if _, err := tx.Exec(ctx, `update services set position = $3 where calendar_id = $1 and id = $2`, calendarID, id, i); err != nil {
-				return err
-			}
-		}
-		return nil
+	return s.InTx(ctx, func(tx pgx.Tx) error {
+		return s.ReorderServicesTx(ctx, tx, calendarID, ids)
 	})
 }

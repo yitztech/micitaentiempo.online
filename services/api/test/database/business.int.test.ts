@@ -2,16 +2,23 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import type { DescService } from "@bufbuild/protobuf";
+import type { Client } from "@connectrpc/connect";
 import { BUSINESS_LIMITS, BusinessCategory } from "@mcet/schemas";
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from "@testcontainers/postgresql";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import pg from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { AuditService } from "../../src/audit/audit.service.js";
 import { BusinessBackfill } from "../../src/businesses/business-backfill.service.js";
 import { BusinessProfileRepository } from "../../src/businesses/business-profile.repository.js";
+import { CalendarAccess } from "../../src/calendars/access.service.js";
+import { CalendarsService } from "../../src/calendars/calendars.service.js";
 import { runMigrations } from "../../src/db/migrate.js";
 import * as schema from "../../src/db/schema.js";
+import type { CalendarClients } from "../../src/internal-rpc/calendar-client.js";
+import { OrgsService } from "../../src/orgs/orgs.service.js";
 
 let container: StartedPostgreSqlContainer;
 let pool: pg.Pool;
@@ -241,5 +248,139 @@ describe("business persistence with real PostgreSQL", () => {
     expect(
       (await pool.query("SELECT count(*) FROM app.business_locations WHERE org_id=$1", [orgB])).rows[0].count,
     ).toBe("0");
+  });
+
+  it("reconciles RPC snapshots, recovers owner membership, and handles temporary RPC outage safely", async () => {
+    const db = drizzle(pool, { schema });
+    const snapCalId = "019a0000-0000-7000-8000-000000000021";
+    let rpcThrows = false;
+
+    const mockCalendarClients: CalendarClients = {
+      client: <T extends DescService>(_service: T) =>
+        ({
+          listCalendarSnapshots: async () => {
+            if (rpcThrows) throw new Error("RPC unavailable");
+            return {
+              snapshots: [
+                {
+                  calendarId: snapCalId,
+                  orgId: orgA,
+                  aggregateVersion: 5,
+                  state: "active",
+                  slug: "clinica-rec",
+                  hasActiveServices: true,
+                  updatedAt: undefined,
+                },
+              ],
+              nextCursor: "",
+            };
+          },
+        }) as unknown as Client<T>,
+    };
+
+    const worker = new BusinessBackfill(db, repository, mockCalendarClients);
+
+    // 1. Reconcile succeeds and applies projection + recovers owner membership
+    await worker.reconcileOrg(orgA, "owner-a");
+
+    const [proj] = (
+      await pool.query("SELECT * FROM app.business_calendar_projection WHERE calendar_id=$1", [snapCalId])
+    ).rows;
+    expect(proj).toMatchObject({
+      calendar_id: snapCalId,
+      org_id: orgA,
+      aggregate_version: 5,
+      state: "active",
+      slug: "clinica-rec",
+      has_active_services: true,
+    });
+
+    const [member] = (
+      await pool.query(
+        "SELECT * FROM app.calendar_members WHERE calendar_id=$1 AND user_id='owner-a' AND role='owner'",
+        [snapCalId],
+      )
+    ).rows;
+    expect(member).toBeDefined();
+
+    // 2. Outage: RPC throws error; local projection and members are preserved, not deleted
+    rpcThrows = true;
+    await expect(worker.reconcileOrg(orgA, "owner-a")).resolves.not.toThrow();
+
+    const [projAfterOutage] = (
+      await pool.query("SELECT * FROM app.business_calendar_projection WHERE calendar_id=$1", [snapCalId])
+    ).rows;
+    expect(projAfterOutage).toBeDefined();
+  });
+
+  it("recovers an orphaned calendar on create without creating duplicates or hitting plan limit", async () => {
+    const db = drizzle(pool, { schema });
+    const audit = new AuditService(db);
+    const orgs = new OrgsService(db, audit);
+    const access = new CalendarAccess(db);
+
+    const orphanedCalId = "019a0000-0000-7000-8000-000000000031";
+    let createCalendarCalled = false;
+
+    const mockCalendarClients: CalendarClients = {
+      client: <T extends DescService>(_service: T) =>
+        ({
+          listCalendars: async () => ({
+            calendars: [
+              {
+                id: orphanedCalId,
+                slug: "consulta-express",
+                name: "Consulta Express",
+                timezone: "America/Mexico_City",
+                capacity: 1,
+                country: "MX",
+                subdivision: "",
+                address: "",
+                embedPolicy: { mode: "any", origins: [] },
+                bookingPolicy: { cancelMinNoticeMinutes: 0, contactMode: "email" },
+                status: "active",
+                orgStatus: "active",
+              },
+            ],
+          }),
+          createCalendar: async () => {
+            createCalendarCalled = true;
+            throw new Error("createCalendar should not be called when recovering orphaned calendar");
+          },
+        }) as unknown as Client<T>,
+    };
+
+    const calendarsService = new CalendarsService(mockCalendarClients, db, orgs, access, audit);
+
+    const user = {
+      id: "owner-a",
+      email: "a@example.com",
+      name: "Ana",
+      locale: "es" as const,
+      timezone: "America/Mexico_City",
+      roles: [],
+      calendarIds: [],
+      emailVerified: true,
+    };
+
+    // User attempts to create calendar with same name
+    const result = await calendarsService.create(user, {
+      name: "Consulta Express",
+      timezone: "America/Mexico_City",
+      capacity: 1,
+    });
+
+    expect(createCalendarCalled).toBe(false);
+    expect(result.id).toBe(orphanedCalId);
+    expect(result.role).toBe("owner");
+
+    // Local membership exists now
+    const [member] = (
+      await pool.query(
+        "SELECT * FROM app.calendar_members WHERE calendar_id=$1 AND user_id='owner-a' AND role='owner'",
+        [orphanedCalId],
+      )
+    ).rows;
+    expect(member).toBeDefined();
   });
 });

@@ -7,7 +7,18 @@ import { AuthRegistry, type SessionUser } from "../auth/auth.registry.js";
 import { toHeaders } from "../common/request.js";
 import { ZodPipe } from "../common/zod.pipe.js";
 import { type Database, DB } from "../db/db.module.js";
-import { calendarMembers, customerLinks, organizations, user as users } from "../db/schema.js";
+import {
+  businessCalendarLocations,
+  businessImages,
+  businessLocations,
+  businessProfileCategories,
+  businessProfiles,
+  businessSocialLinks,
+  calendarMembers,
+  customerLinks,
+  organizations,
+  user as users,
+} from "../db/schema.js";
 import { OrgsService } from "../orgs/orgs.service.js";
 
 @Controller("v1/me")
@@ -43,6 +54,12 @@ export class MeController {
       twoFactorEnabled: u?.twoFactorEnabled ?? false,
       organization: org ? { id: org.id, name: org.name, plan: org.plan, status: org.status } : null,
       memberships,
+      capabilities: {
+        canCreateBusiness: !org,
+        canManageBusinessProfile: Boolean(org && org.status !== "suspended"),
+        canBook: true,
+        businessId: org ? org.id : null,
+      },
     };
   }
 
@@ -62,12 +79,44 @@ export class MeController {
       .from(calendarMembers)
       .where(eq(calendarMembers.userId, current.id));
     const businesses = await this.db.select().from(customerLinks).where(eq(customerLinks.userId, current.id));
+    let businessProfile: Record<string, unknown> | null = null;
+    if (org) {
+      const [bp] = await this.db.select().from(businessProfiles).where(eq(businessProfiles.orgId, org.id));
+      if (bp) {
+        const categories = await this.db
+          .select()
+          .from(businessProfileCategories)
+          .where(eq(businessProfileCategories.orgId, org.id));
+        const locations = await this.db
+          .select()
+          .from(businessLocations)
+          .where(eq(businessLocations.orgId, org.id));
+        const socialLinks = await this.db
+          .select()
+          .from(businessSocialLinks)
+          .where(eq(businessSocialLinks.orgId, org.id));
+        const calendarLocations = await this.db
+          .select()
+          .from(businessCalendarLocations)
+          .where(eq(businessCalendarLocations.orgId, org.id));
+        const images = await this.db.select().from(businessImages).where(eq(businessImages.orgId, org.id));
+        businessProfile = {
+          ...bp,
+          categories,
+          locations,
+          socialLinks,
+          calendarLocations,
+          images,
+        };
+      }
+    }
     return {
       exportedAt: new Date().toISOString(),
       user: u,
       organization: org ?? null,
       memberships,
       businesses,
+      businessProfile,
     };
   }
 

@@ -80,6 +80,7 @@ const EnvSchema = z.object({
   LISTMONK_LIST_UUID: optional,
   LISTMONK_URL_EN: optional,
   LISTMONK_LIST_UUID_EN: optional,
+  UPLOADS_DIR: z.string().default("/uploads"),
   TEST_MODE: optional,
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
 });

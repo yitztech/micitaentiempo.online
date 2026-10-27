@@ -13,6 +13,7 @@ const PUBLISHED = new Set<RouteId>([
   "privacy",
   "terms",
   "credits",
+  "businessDirectory",
 ]);
 
 /** Un sitemap por dominio: solo las páginas indexables, con su par en el otro idioma. */

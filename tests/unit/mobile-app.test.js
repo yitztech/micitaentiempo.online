@@ -104,6 +104,52 @@ describe("apps móviles Expo (Android e iOS, teléfonos y tablets)", () => {
           }),
         );
       }
+      if (u.includes("/api/public/v1/business-categories")) {
+        return new Response(JSON.stringify([{ id: "health_medicine", label: "Salud", count: 5 }]));
+      }
+      if (u.includes("/api/public/v1/business-localities")) {
+        return new Response(JSON.stringify([{ country: "ES", locality: "Madrid", count: 3 }]));
+      }
+      if (u.includes("/api/public/v1/businesses/b-1")) {
+        return new Response(
+          JSON.stringify({
+            id: "b-1",
+            displayName: "Clínica Sol",
+            primaryCategory: "health_medicine",
+            version: 2,
+            status: "published",
+          }),
+        );
+      }
+      if (u.includes("/api/public/v1/businesses")) {
+        return new Response(
+          JSON.stringify({
+            items: [{ id: "b-1", displayName: "Clínica Sol", primaryCategory: "health_medicine" }],
+            nextCursor: null,
+          }),
+        );
+      }
+      if (u.endsWith("/api/business-profile")) {
+        return new Response(
+          JSON.stringify({
+            id: "b-1",
+            displayName: "Clínica Sol",
+            version: 2,
+            status: "published",
+          }),
+        );
+      }
+      if (u.includes("/api/offline/operations/op-1")) {
+        return new Response(
+          JSON.stringify({
+            operationId: "op-1",
+            action: "profile.update",
+            status: 200,
+            body: { ok: true },
+            createdAt: "2026-10-27T10:00:00Z",
+          }),
+        );
+      }
       if (u.includes("/api/public/v1/my/bookings") && u.endsWith("/cancel")) {
         return new Response(JSON.stringify({ id: "bk-1", status: "cancelled" }));
       }
@@ -157,12 +203,34 @@ describe("apps móviles Expo (Android e iOS, teléfonos y tablets)", () => {
     const cancelled = await client.cancelBooking("bk-1", { reason: "Cambio de agenda" });
     expect(cancelled.status).toBe("cancelled");
 
+    // Verifica métodos de directorio y perfil de negocio en el cliente móvil
+    const categories = await client.listCategories();
+    expect(categories).toHaveLength(1);
+    expect(categories[0].id).toBe("health_medicine");
+
+    const localities = await client.listLocalities("ES");
+    expect(localities).toHaveLength(1);
+    expect(localities[0].locality).toBe("Madrid");
+
+    const search = await client.searchBusinesses({ q: "Clínica" });
+    expect(search.items).toHaveLength(1);
+    expect(search.items[0].displayName).toBe("Clínica Sol");
+
+    const profile = await client.getBusinessProfile("b-1");
+    expect(profile.displayName).toBe("Clínica Sol");
+
+    const ownerProfile = await client.getOwnerBusinessProfile();
+    expect(ownerProfile.displayName).toBe("Clínica Sol");
+
+    const receipt = await client.getOperationReceipt("op-1");
+    expect(receipt.operationId).toBe("op-1");
+
     // Verifica que las llamadas autenticadas envían Authorization: Bearer
     const summaryCall = calls.find((c) => c.url.endsWith("/api/v1/mobile/summary"));
     expect(summaryCall?.headers).toMatchObject({ authorization: "Bearer tok-google-123" });
   });
 
-  it("reutiliza las interfaces del frontend (acceso con Google, reserva, mis citas y panel) en teléfono y tablet", () => {
+  it("reutiliza las interfaces del frontend (acceso con Google, reserva, mis citas, directorio y perfil) en teléfono y tablet", () => {
     const phoneEs = renderMobileInterfaceSnapshot({
       lang: "es",
       platform: "android",
@@ -174,7 +242,11 @@ describe("apps móviles Expo (Android e iOS, teléfonos y tablets)", () => {
     expect(phoneEs.selectors).toEqual(MOBILE_SELECTORS);
     expect(phoneEs.html).toContain("Continuar con Google");
     expect(phoneEs.html).toContain("Mis citas");
+    expect(phoneEs.html).toContain("Directorio");
     expect(phoneEs.html).toContain('data-layout="phone"');
+    expect(phoneEs.html).toContain('data-testid="directory-search-input"');
+    expect(phoneEs.html).toContain('data-testid="business-profile-book-button"');
+    expect(phoneEs.html).toContain('data-testid="owner-profile-publish-button"');
 
     const tabletEn = renderMobileInterfaceSnapshot({
       lang: "en",
@@ -187,6 +259,9 @@ describe("apps móviles Expo (Android e iOS, teléfonos y tablets)", () => {
     expect(tabletEn.layout.masterDetail).toBe(true);
     expect(tabletEn.html).toContain("Continue with Google");
     expect(tabletEn.html).toContain("My appointments");
+    expect(tabletEn.html).toContain("Directory");
+    expect(tabletEn.html).toContain('data-layout="tablet"');
+    expect(tabletEn.html).toContain('data-testid="directory-search-input"');
     expect(tabletEn.html).toContain('data-layout="tablet"');
   });
 

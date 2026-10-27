@@ -5,6 +5,7 @@ import (
 	"regexp"
 
 	"connectrpc.com/connect"
+	"github.com/jackc/pgx/v5"
 	calendarv1 "github.com/yitztech/micitaentiempo.online/services/calendar/gen/mcet/calendar/v1"
 	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/store"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -72,10 +73,23 @@ func (s CalendarServer) CreateCalendar(ctx context.Context, req *calendarv1.Crea
 	if err := s.validatePlace(req.GetCountry(), req.GetSubdivision()); err != nil {
 		return nil, err
 	}
-	c, err := s.Store.CreateCalendar(ctx, store.NewCalendar{
-		OrgID: req.GetOrgId(), OrgStatus: req.GetOrgStatus(), Name: req.GetName(), Slug: req.GetSlug(),
-		Timezone: req.GetTimezone(), Capacity: capacity, Country: req.GetCountry(), Subdivision: req.GetSubdivision(),
-		Address: req.GetAddress(),
+	var c store.Calendar
+	var snap store.CalendarSnapshot
+	err = s.Store.InTx(ctx, func(tx pgx.Tx) error {
+		var err error
+		c, err = s.Store.CreateCalendarTx(ctx, tx, store.NewCalendar{
+			OrgID: req.GetOrgId(), OrgStatus: req.GetOrgStatus(), Name: req.GetName(), Slug: req.GetSlug(),
+			Timezone: req.GetTimezone(), Capacity: capacity, Country: req.GetCountry(), Subdivision: req.GetSubdivision(),
+			Address: req.GetAddress(),
+		})
+		if err != nil {
+			return err
+		}
+		snap, err = s.Store.GetCalendarSnapshotTx(ctx, tx, c.ID)
+		if err != nil {
+			return err
+		}
+		return s.emitCalendarSnapshot(ctx, tx, snap, a)
 	})
 	if err != nil {
 		return nil, storeErr(err)
@@ -178,7 +192,21 @@ func (s CalendarServer) UpdateCalendar(ctx context.Context, req *calendarv1.Upda
 			ContactMode:            cm,
 		}
 	}
-	c, err := s.Store.UpdateCalendar(ctx, req.GetId(), p)
+	var c store.Calendar
+	var snap store.CalendarSnapshot
+	err = s.Store.InTx(ctx, func(tx pgx.Tx) error {
+		var err error
+		c, err = s.Store.UpdateCalendarTx(ctx, tx, req.GetId(), p)
+		if err != nil {
+			return err
+		}
+		snap, err = s.Store.GetCalendarSnapshotTx(ctx, tx, c.ID)
+		if err != nil {
+			return err
+		}
+		a, _ := actorOf(ctx)
+		return s.emitCalendarSnapshot(ctx, tx, snap, a)
+	})
 	if err != nil {
 		return nil, storeErr(err)
 	}
@@ -190,7 +218,21 @@ func (s CalendarServer) ArchiveCalendar(ctx context.Context, req *calendarv1.Arc
 	if _, _, err := s.calendar(ctx, req.GetId(), true); err != nil {
 		return nil, err
 	}
-	c, err := s.Store.SetArchived(ctx, req.GetId(), req.GetArchived())
+	var c store.Calendar
+	var snap store.CalendarSnapshot
+	err := s.Store.InTx(ctx, func(tx pgx.Tx) error {
+		var err error
+		c, err = s.Store.SetArchivedTx(ctx, tx, req.GetId(), req.GetArchived())
+		if err != nil {
+			return err
+		}
+		snap, err = s.Store.GetCalendarSnapshotTx(ctx, tx, c.ID)
+		if err != nil {
+			return err
+		}
+		a, _ := actorOf(ctx)
+		return s.emitCalendarSnapshot(ctx, tx, snap, a)
+	})
 	if err != nil {
 		return nil, storeErr(err)
 	}
@@ -221,9 +263,55 @@ func (s CalendarServer) PurgeOrg(ctx context.Context, req *calendarv1.PurgeOrgRe
 	if err := requireOrg(a, req.GetOrgId(), "owner"); err != nil {
 		return nil, err
 	}
-	n, err := s.Store.PurgeOrg(ctx, req.GetOrgId())
+	var n int
+	var tombstones []store.CalendarSnapshot
+	err = s.Store.InTx(ctx, func(tx pgx.Tx) error {
+		var err error
+		n, tombstones, err = s.Store.PurgeOrgTx(ctx, tx, req.GetOrgId())
+		if err != nil {
+			return err
+		}
+		for _, snap := range tombstones {
+			if err := s.emitCalendarSnapshot(ctx, tx, snap, a); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 	if err != nil {
 		return nil, err
 	}
 	return &calendarv1.PurgeOrgResponse{CalendarsDeleted: int32(min(n, 1<<30))}, nil //nolint:gosec // acotado
+}
+
+// ListCalendarSnapshots devuelve los snapshots vigentes y tombstones de la organización con paginación keyset.
+func (s CalendarServer) ListCalendarSnapshots(ctx context.Context, req *calendarv1.ListCalendarSnapshotsRequest) (*calendarv1.ListCalendarSnapshotsResponse, error) {
+	a, err := actorOf(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if err := requireOrg(a, req.GetOrgId()); err != nil {
+		return nil, err
+	}
+	limit := int(req.GetLimit())
+	if limit <= 0 || limit > 100 {
+		limit = 100
+	}
+	snaps, nextCursor, err := s.Store.ListCalendarSnapshots(ctx, req.GetOrgId(), req.GetCursor(), limit)
+	if err != nil {
+		return nil, err
+	}
+	out := &calendarv1.ListCalendarSnapshotsResponse{NextCursor: nextCursor}
+	for _, snap := range snaps {
+		out.Snapshots = append(out.Snapshots, &calendarv1.CalendarSnapshot{
+			CalendarId:        snap.CalendarID,
+			OrgId:             snap.OrgID,
+			AggregateVersion:  int32(snap.AggregateVersion),
+			State:             snap.State,
+			Slug:              snap.Slug,
+			HasActiveServices: snap.HasActiveServices,
+			UpdatedAt:         timestamppb.New(snap.UpdatedAt),
+		})
+	}
+	return out, nil
 }

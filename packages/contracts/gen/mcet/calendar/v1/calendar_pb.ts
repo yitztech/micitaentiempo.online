@@ -12,7 +12,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file mcet/calendar/v1/calendar.proto.
  */
 export const file_mcet_calendar_v1_calendar: GenFile = /*@__PURE__*/
-  fileDesc("Ch9tY2V0L2NhbGVuZGFyL3YxL2NhbGVuZGFyLnByb3RvEhBtY2V0LmNhbGVuZGFyLnYxIiwKC0VtYmVkUG9saWN5EgwKBG1vZGUYASABKAkSDwoHb3JpZ2lucxgCIAMoCSJICg1Cb29raW5nUG9saWN5EiEKGWNhbmNlbF9taW5fbm90aWNlX21pbnV0ZXMYASABKAUSFAoMY29udGFjdF9tb2RlGAIgASgJIt8CCghDYWxlbmRhchIKCgJpZBgBIAEoCRIOCgZvcmdfaWQYAiABKAkSDAoEc2x1ZxgDIAEoCRIMCgRuYW1lGAQgASgJEhAKCHRpbWV6b25lGAUgASgJEhAKCGNhcGFjaXR5GAYgASgFEg8KB2NvdW50cnkYByABKAkSEwoLc3ViZGl2aXNpb24YCCABKAkSDwoHYWRkcmVzcxgJIAEoCRIzCgxlbWJlZF9wb2xpY3kYCiABKAsyHS5tY2V0LmNhbGVuZGFyLnYxLkVtYmVkUG9saWN5EjcKDmJvb2tpbmdfcG9saWN5GAsgASgLMh8ubWNldC5jYWxlbmRhci52MS5Cb29raW5nUG9saWN5Eg4KBnN0YXR1cxgMIAEoCRIuCgpjcmVhdGVkX2F0GA0gASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBISCgpvcmdfc3RhdHVzGA4gASgJIrIBChVDcmVhdGVDYWxlbmRhclJlcXVlc3QSDgoGb3JnX2lkGAEgASgJEhIKCm9yZ19zdGF0dXMYAiABKAkSDAoEbmFtZRgDIAEoCRIMCgRzbHVnGAQgASgJEhAKCHRpbWV6b25lGAUgASgJEhAKCGNhcGFjaXR5GAYgASgFEg8KB2NvdW50cnkYByABKAkSEwoLc3ViZGl2aXNpb24YCCABKAkSDwoHYWRkcmVzcxgJIAEoCSIgChJHZXRDYWxlbmRhclJlcXVlc3QSCgoCaWQYASABKAkiKAoYR2V0Q2FsZW5kYXJCeVNsdWdSZXF1ZXN0EgwKBHNsdWcYASABKAkiQAoUTGlzdENhbGVuZGFyc1JlcXVlc3QSDgoGb3JnX2lkGAEgASgJEhgKEGluY2x1ZGVfYXJjaGl2ZWQYAiABKAgiRgoVTGlzdENhbGVuZGFyc1Jlc3BvbnNlEi0KCWNhbGVuZGFycxgBIAMoCzIaLm1jZXQuY2FsZW5kYXIudjEuQ2FsZW5kYXIi/wIKFVVwZGF0ZUNhbGVuZGFyUmVxdWVzdBIKCgJpZBgBIAEoCRIRCgRuYW1lGAIgASgJSACIAQESEQoEc2x1ZxgDIAEoCUgBiAEBEhUKCHRpbWV6b25lGAQgASgJSAKIAQESFQoIY2FwYWNpdHkYBSABKAVIA4gBARIUCgdjb3VudHJ5GAYgASgJSASIAQESGAoLc3ViZGl2aXNpb24YByABKAlIBYgBARIUCgdhZGRyZXNzGAggASgJSAaIAQESMwoMZW1iZWRfcG9saWN5GAkgASgLMh0ubWNldC5jYWxlbmRhci52MS5FbWJlZFBvbGljeRI3Cg5ib29raW5nX3BvbGljeRgKIAEoCzIfLm1jZXQuY2FsZW5kYXIudjEuQm9va2luZ1BvbGljeUIHCgVfbmFtZUIHCgVfc2x1Z0ILCglfdGltZXpvbmVCCwoJX2NhcGFjaXR5QgoKCF9jb3VudHJ5Qg4KDF9zdWJkaXZpc2lvbkIKCghfYWRkcmVzcyI2ChZBcmNoaXZlQ2FsZW5kYXJSZXF1ZXN0EgoKAmlkGAEgASgJEhAKCGFyY2hpdmVkGAIgASgIIjUKE1NldE9yZ1N0YXR1c1JlcXVlc3QSDgoGb3JnX2lkGAEgASgJEg4KBnN0YXR1cxgCIAEoCSIWChRTZXRPcmdTdGF0dXNSZXNwb25zZSIhCg9QdXJnZU9yZ1JlcXVlc3QSDgoGb3JnX2lkGAEgASgJIi0KEFB1cmdlT3JnUmVzcG9uc2USGQoRY2FsZW5kYXJzX2RlbGV0ZWQYASABKAUy2gUKD0NhbGVuZGFyU2VydmljZRJVCg5DcmVhdGVDYWxlbmRhchInLm1jZXQuY2FsZW5kYXIudjEuQ3JlYXRlQ2FsZW5kYXJSZXF1ZXN0GhoubWNldC5jYWxlbmRhci52MS5DYWxlbmRhchJPCgtHZXRDYWxlbmRhchIkLm1jZXQuY2FsZW5kYXIudjEuR2V0Q2FsZW5kYXJSZXF1ZXN0GhoubWNldC5jYWxlbmRhci52MS5DYWxlbmRhchJbChFHZXRDYWxlbmRhckJ5U2x1ZxIqLm1jZXQuY2FsZW5kYXIudjEuR2V0Q2FsZW5kYXJCeVNsdWdSZXF1ZXN0GhoubWNldC5jYWxlbmRhci52MS5DYWxlbmRhchJgCg1MaXN0Q2FsZW5kYXJzEiYubWNldC5jYWxlbmRhci52MS5MaXN0Q2FsZW5kYXJzUmVxdWVzdBonLm1jZXQuY2FsZW5kYXIudjEuTGlzdENhbGVuZGFyc1Jlc3BvbnNlElUKDlVwZGF0ZUNhbGVuZGFyEicubWNldC5jYWxlbmRhci52MS5VcGRhdGVDYWxlbmRhclJlcXVlc3QaGi5tY2V0LmNhbGVuZGFyLnYxLkNhbGVuZGFyElcKD0FyY2hpdmVDYWxlbmRhchIoLm1jZXQuY2FsZW5kYXIudjEuQXJjaGl2ZUNhbGVuZGFyUmVxdWVzdBoaLm1jZXQuY2FsZW5kYXIudjEuQ2FsZW5kYXISXQoMU2V0T3JnU3RhdHVzEiUubWNldC5jYWxlbmRhci52MS5TZXRPcmdTdGF0dXNSZXF1ZXN0GiYubWNldC5jYWxlbmRhci52MS5TZXRPcmdTdGF0dXNSZXNwb25zZRJRCghQdXJnZU9yZxIhLm1jZXQuY2FsZW5kYXIudjEuUHVyZ2VPcmdSZXF1ZXN0GiIubWNldC5jYWxlbmRhci52MS5QdXJnZU9yZ1Jlc3BvbnNlQuQBChRjb20ubWNldC5jYWxlbmRhci52MUINQ2FsZW5kYXJQcm90b1ABWltnaXRodWIuY29tL3lpdHp0ZWNoL21pY2l0YWVudGllbXBvLm9ubGluZS9zZXJ2aWNlcy9jYWxlbmRhci9nZW4vbWNldC9jYWxlbmRhci92MTtjYWxlbmRhcnYxogIDTUNYqgIQTWNldC5DYWxlbmRhci5WMcoCEE1jZXRcQ2FsZW5kYXJcVjHiAhxNY2V0XENhbGVuZGFyXFYxXEdQQk1ldGFkYXRh6gISTWNldDo6Q2FsZW5kYXI6OlYxYgZwcm90bzM", [file_google_protobuf_timestamp]);
+  fileDesc("Ch9tY2V0L2NhbGVuZGFyL3YxL2NhbGVuZGFyLnByb3RvEhBtY2V0LmNhbGVuZGFyLnYxIiwKC0VtYmVkUG9saWN5EgwKBG1vZGUYASABKAkSDwoHb3JpZ2lucxgCIAMoCSJICg1Cb29raW5nUG9saWN5EiEKGWNhbmNlbF9taW5fbm90aWNlX21pbnV0ZXMYASABKAUSFAoMY29udGFjdF9tb2RlGAIgASgJIt8CCghDYWxlbmRhchIKCgJpZBgBIAEoCRIOCgZvcmdfaWQYAiABKAkSDAoEc2x1ZxgDIAEoCRIMCgRuYW1lGAQgASgJEhAKCHRpbWV6b25lGAUgASgJEhAKCGNhcGFjaXR5GAYgASgFEg8KB2NvdW50cnkYByABKAkSEwoLc3ViZGl2aXNpb24YCCABKAkSDwoHYWRkcmVzcxgJIAEoCRIzCgxlbWJlZF9wb2xpY3kYCiABKAsyHS5tY2V0LmNhbGVuZGFyLnYxLkVtYmVkUG9saWN5EjcKDmJvb2tpbmdfcG9saWN5GAsgASgLMh8ubWNldC5jYWxlbmRhci52MS5Cb29raW5nUG9saWN5Eg4KBnN0YXR1cxgMIAEoCRIuCgpjcmVhdGVkX2F0GA0gASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBISCgpvcmdfc3RhdHVzGA4gASgJIrIBChVDcmVhdGVDYWxlbmRhclJlcXVlc3QSDgoGb3JnX2lkGAEgASgJEhIKCm9yZ19zdGF0dXMYAiABKAkSDAoEbmFtZRgDIAEoCRIMCgRzbHVnGAQgASgJEhAKCHRpbWV6b25lGAUgASgJEhAKCGNhcGFjaXR5GAYgASgFEg8KB2NvdW50cnkYByABKAkSEwoLc3ViZGl2aXNpb24YCCABKAkSDwoHYWRkcmVzcxgJIAEoCSIgChJHZXRDYWxlbmRhclJlcXVlc3QSCgoCaWQYASABKAkiKAoYR2V0Q2FsZW5kYXJCeVNsdWdSZXF1ZXN0EgwKBHNsdWcYASABKAkiQAoUTGlzdENhbGVuZGFyc1JlcXVlc3QSDgoGb3JnX2lkGAEgASgJEhgKEGluY2x1ZGVfYXJjaGl2ZWQYAiABKAgiRgoVTGlzdENhbGVuZGFyc1Jlc3BvbnNlEi0KCWNhbGVuZGFycxgBIAMoCzIaLm1jZXQuY2FsZW5kYXIudjEuQ2FsZW5kYXIi/wIKFVVwZGF0ZUNhbGVuZGFyUmVxdWVzdBIKCgJpZBgBIAEoCRIRCgRuYW1lGAIgASgJSACIAQESEQoEc2x1ZxgDIAEoCUgBiAEBEhUKCHRpbWV6b25lGAQgASgJSAKIAQESFQoIY2FwYWNpdHkYBSABKAVIA4gBARIUCgdjb3VudHJ5GAYgASgJSASIAQESGAoLc3ViZGl2aXNpb24YByABKAlIBYgBARIUCgdhZGRyZXNzGAggASgJSAaIAQESMwoMZW1iZWRfcG9saWN5GAkgASgLMh0ubWNldC5jYWxlbmRhci52MS5FbWJlZFBvbGljeRI3Cg5ib29raW5nX3BvbGljeRgKIAEoCzIfLm1jZXQuY2FsZW5kYXIudjEuQm9va2luZ1BvbGljeUIHCgVfbmFtZUIHCgVfc2x1Z0ILCglfdGltZXpvbmVCCwoJX2NhcGFjaXR5QgoKCF9jb3VudHJ5Qg4KDF9zdWJkaXZpc2lvbkIKCghfYWRkcmVzcyI2ChZBcmNoaXZlQ2FsZW5kYXJSZXF1ZXN0EgoKAmlkGAEgASgJEhAKCGFyY2hpdmVkGAIgASgIIjUKE1NldE9yZ1N0YXR1c1JlcXVlc3QSDgoGb3JnX2lkGAEgASgJEg4KBnN0YXR1cxgCIAEoCSIWChRTZXRPcmdTdGF0dXNSZXNwb25zZSIhCg9QdXJnZU9yZ1JlcXVlc3QSDgoGb3JnX2lkGAEgASgJIi0KEFB1cmdlT3JnUmVzcG9uc2USGQoRY2FsZW5kYXJzX2RlbGV0ZWQYASABKAUiTQocTGlzdENhbGVuZGFyU25hcHNob3RzUmVxdWVzdBIOCgZvcmdfaWQYASABKAkSDQoFbGltaXQYAiABKAUSDgoGY3Vyc29yGAMgASgJIrwBChBDYWxlbmRhclNuYXBzaG90EhMKC2NhbGVuZGFyX2lkGAEgASgJEg4KBm9yZ19pZBgCIAEoCRIZChFhZ2dyZWdhdGVfdmVyc2lvbhgDIAEoBRINCgVzdGF0ZRgEIAEoCRIMCgRzbHVnGAUgASgJEhsKE2hhc19hY3RpdmVfc2VydmljZXMYBiABKAgSLgoKdXBkYXRlZF9hdBgHIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAiawodTGlzdENhbGVuZGFyU25hcHNob3RzUmVzcG9uc2USNQoJc25hcHNob3RzGAEgAygLMiIubWNldC5jYWxlbmRhci52MS5DYWxlbmRhclNuYXBzaG90EhMKC25leHRfY3Vyc29yGAIgASgJMtQGCg9DYWxlbmRhclNlcnZpY2USVQoOQ3JlYXRlQ2FsZW5kYXISJy5tY2V0LmNhbGVuZGFyLnYxLkNyZWF0ZUNhbGVuZGFyUmVxdWVzdBoaLm1jZXQuY2FsZW5kYXIudjEuQ2FsZW5kYXISTwoLR2V0Q2FsZW5kYXISJC5tY2V0LmNhbGVuZGFyLnYxLkdldENhbGVuZGFyUmVxdWVzdBoaLm1jZXQuY2FsZW5kYXIudjEuQ2FsZW5kYXISWwoRR2V0Q2FsZW5kYXJCeVNsdWcSKi5tY2V0LmNhbGVuZGFyLnYxLkdldENhbGVuZGFyQnlTbHVnUmVxdWVzdBoaLm1jZXQuY2FsZW5kYXIudjEuQ2FsZW5kYXISYAoNTGlzdENhbGVuZGFycxImLm1jZXQuY2FsZW5kYXIudjEuTGlzdENhbGVuZGFyc1JlcXVlc3QaJy5tY2V0LmNhbGVuZGFyLnYxLkxpc3RDYWxlbmRhcnNSZXNwb25zZRJVCg5VcGRhdGVDYWxlbmRhchInLm1jZXQuY2FsZW5kYXIudjEuVXBkYXRlQ2FsZW5kYXJSZXF1ZXN0GhoubWNldC5jYWxlbmRhci52MS5DYWxlbmRhchJXCg9BcmNoaXZlQ2FsZW5kYXISKC5tY2V0LmNhbGVuZGFyLnYxLkFyY2hpdmVDYWxlbmRhclJlcXVlc3QaGi5tY2V0LmNhbGVuZGFyLnYxLkNhbGVuZGFyEl0KDFNldE9yZ1N0YXR1cxIlLm1jZXQuY2FsZW5kYXIudjEuU2V0T3JnU3RhdHVzUmVxdWVzdBomLm1jZXQuY2FsZW5kYXIudjEuU2V0T3JnU3RhdHVzUmVzcG9uc2USUQoIUHVyZ2VPcmcSIS5tY2V0LmNhbGVuZGFyLnYxLlB1cmdlT3JnUmVxdWVzdBoiLm1jZXQuY2FsZW5kYXIudjEuUHVyZ2VPcmdSZXNwb25zZRJ4ChVMaXN0Q2FsZW5kYXJTbmFwc2hvdHMSLi5tY2V0LmNhbGVuZGFyLnYxLkxpc3RDYWxlbmRhclNuYXBzaG90c1JlcXVlc3QaLy5tY2V0LmNhbGVuZGFyLnYxLkxpc3RDYWxlbmRhclNuYXBzaG90c1Jlc3BvbnNlQuQBChRjb20ubWNldC5jYWxlbmRhci52MUINQ2FsZW5kYXJQcm90b1ABWltnaXRodWIuY29tL3lpdHp0ZWNoL21pY2l0YWVudGllbXBvLm9ubGluZS9zZXJ2aWNlcy9jYWxlbmRhci9nZW4vbWNldC9jYWxlbmRhci92MTtjYWxlbmRhcnYxogIDTUNYqgIQTWNldC5DYWxlbmRhci5WMcoCEE1jZXRcQ2FsZW5kYXJcVjHiAhxNY2V0XENhbGVuZGFyXFYxXEdQQk1ldGFkYXRh6gISTWNldDo6Q2FsZW5kYXI6OlYxYgZwcm90bzM", [file_google_protobuf_timestamp]);
 
 /**
  * @generated from message mcet.calendar.v1.EmbedPolicy
@@ -438,6 +438,104 @@ export const PurgeOrgResponseSchema: GenMessage<PurgeOrgResponse> = /*@__PURE__*
   messageDesc(file_mcet_calendar_v1_calendar, 13);
 
 /**
+ * @generated from message mcet.calendar.v1.ListCalendarSnapshotsRequest
+ */
+export type ListCalendarSnapshotsRequest = Message<"mcet.calendar.v1.ListCalendarSnapshotsRequest"> & {
+  /**
+   * @generated from field: string org_id = 1;
+   */
+  orgId: string;
+
+  /**
+   * @generated from field: int32 limit = 2;
+   */
+  limit: number;
+
+  /**
+   * @generated from field: string cursor = 3;
+   */
+  cursor: string;
+};
+
+/**
+ * Describes the message mcet.calendar.v1.ListCalendarSnapshotsRequest.
+ * Use `create(ListCalendarSnapshotsRequestSchema)` to create a new message.
+ */
+export const ListCalendarSnapshotsRequestSchema: GenMessage<ListCalendarSnapshotsRequest> = /*@__PURE__*/
+  messageDesc(file_mcet_calendar_v1_calendar, 14);
+
+/**
+ * @generated from message mcet.calendar.v1.CalendarSnapshot
+ */
+export type CalendarSnapshot = Message<"mcet.calendar.v1.CalendarSnapshot"> & {
+  /**
+   * @generated from field: string calendar_id = 1;
+   */
+  calendarId: string;
+
+  /**
+   * @generated from field: string org_id = 2;
+   */
+  orgId: string;
+
+  /**
+   * @generated from field: int32 aggregate_version = 3;
+   */
+  aggregateVersion: number;
+
+  /**
+   * "active" | "archived" | "deleted"
+   *
+   * @generated from field: string state = 4;
+   */
+  state: string;
+
+  /**
+   * @generated from field: string slug = 5;
+   */
+  slug: string;
+
+  /**
+   * @generated from field: bool has_active_services = 6;
+   */
+  hasActiveServices: boolean;
+
+  /**
+   * @generated from field: google.protobuf.Timestamp updated_at = 7;
+   */
+  updatedAt?: Timestamp | undefined;
+};
+
+/**
+ * Describes the message mcet.calendar.v1.CalendarSnapshot.
+ * Use `create(CalendarSnapshotSchema)` to create a new message.
+ */
+export const CalendarSnapshotSchema: GenMessage<CalendarSnapshot> = /*@__PURE__*/
+  messageDesc(file_mcet_calendar_v1_calendar, 15);
+
+/**
+ * @generated from message mcet.calendar.v1.ListCalendarSnapshotsResponse
+ */
+export type ListCalendarSnapshotsResponse = Message<"mcet.calendar.v1.ListCalendarSnapshotsResponse"> & {
+  /**
+   * @generated from field: repeated mcet.calendar.v1.CalendarSnapshot snapshots = 1;
+   */
+  snapshots: CalendarSnapshot[];
+
+  /**
+   * @generated from field: string next_cursor = 2;
+   */
+  nextCursor: string;
+};
+
+/**
+ * Describes the message mcet.calendar.v1.ListCalendarSnapshotsResponse.
+ * Use `create(ListCalendarSnapshotsResponseSchema)` to create a new message.
+ */
+export const ListCalendarSnapshotsResponseSchema: GenMessage<ListCalendarSnapshotsResponse> = /*@__PURE__*/
+  messageDesc(file_mcet_calendar_v1_calendar, 16);
+
+/**
  * Tableros (calendarios de reservas). Un tablero = una sucursal en el plan Sucursales.
  *
  * @generated from service mcet.calendar.v1.CalendarService
@@ -511,6 +609,16 @@ export const CalendarService: GenService<{
     methodKind: "unary";
     input: typeof PurgeOrgRequestSchema;
     output: typeof PurgeOrgResponseSchema;
+  },
+  /**
+   * Snapshots autorizados y paginados para proyección y reconciliación (ADR 0019).
+   *
+   * @generated from rpc mcet.calendar.v1.CalendarService.ListCalendarSnapshots
+   */
+  listCalendarSnapshots: {
+    methodKind: "unary";
+    input: typeof ListCalendarSnapshotsRequestSchema;
+    output: typeof ListCalendarSnapshotsResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_mcet_calendar_v1_calendar, 0);

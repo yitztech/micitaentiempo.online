@@ -60,6 +60,8 @@ services:
       RPC_SECRET_CALENDAR_TO_API: ${RPC_SECRET_CALENDAR_TO_API:-dev-rpc-calendar-to-api-000000000000000000}
       TEST_MODE: "1"
       LOG_LEVEL: debug
+    volumes:
+      - uploads-dev:/uploads
     env_file: [{ path: .env, required: false }]
     depends_on:
       postgres: { condition: service_healthy }
@@ -134,3 +136,4 @@ services:
 volumes:
   postgres-dev:
   admin-dev:
+  uploads-dev:

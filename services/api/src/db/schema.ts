@@ -653,6 +653,7 @@ export const businessLocations = app.table(
   (t) => [
     uniqueIndex("business_locations_org_id").on(t.orgId, t.id),
     index("business_locations_search").on(t.country, t.region, t.localityKey, t.orgId),
+    index("business_locations_geo").on(t.latitude, t.longitude),
     check("business_location_country", sql`${t.country} ~ '^[A-Z]{2}$'`),
     check("business_location_visibility", sql`${t.addressVisibility} IN ('public','locality')`),
     check(
@@ -774,5 +775,24 @@ export const businessImages = app.table(
       "business_image_alt",
       sql`length(btrim(${t.alt})) > 0 AND app.valid_text(${t.alt}, ${sql.raw(String(BUSINESS_LIMITS.alt * 2))}, false)`,
     ),
+  ],
+);
+
+/** Durable operation idempotency and receipts (ADR 0019 §1-3, C2/C8b). */
+export const offlineOperations = app.table(
+  "offline_operations",
+  {
+    operationId: uuid("operation_id").primaryKey(),
+    orgId: text("org_id").references(() => organizations.id, { onDelete: "cascade" }),
+    actorUserId: text("actor_user_id").notNull(),
+    action: varchar("action", { length: 64 }).notNull(),
+    requestHash: varchar("request_hash", { length: 64 }).notNull(),
+    responseStatus: integer("response_status").notNull(),
+    responseBody: jsonb("response_body"),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    index("offline_operations_actor").on(t.actorUserId, t.createdAt),
+    index("offline_operations_org").on(t.orgId, t.createdAt),
   ],
 );

@@ -1,12 +1,12 @@
 import { pathFor } from "@mcet/i18n";
-import { CalendarDays, Clock3 } from "lucide-react";
+import { Building2, CalendarDays, Clock3 } from "lucide-react";
 import { redirect } from "react-router";
 import { CopyField, embedSnippets } from "~/components/copy-field";
 import { Alert, Card, LinkButton } from "~/components/ui";
 import { siteContext } from "~/lib/context";
 import { fmt, useRoot } from "~/lib/i18n";
-import { panelGet } from "~/lib/panel.server";
-import type { BoardView, EventView } from "~/lib/panel-types";
+import { panelGet, panelGetOptional } from "~/lib/panel.server";
+import type { BoardView, EventView, Org } from "~/lib/panel-types";
 import { metaFor } from "~/lib/seo";
 import { formatDateTime } from "~/lib/time";
 import { usePanel } from "./_panel";
@@ -14,8 +14,14 @@ import type { Route } from "./+types/dashboard";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   const { lang } = context.get(siteContext);
-  const calendars = await panelGet<BoardView[]>(request, context, "/api/v1/calendars");
-  if (calendars.length === 0) throw redirect(pathFor("welcome", lang));
+  const [calendars, org] = await Promise.all([
+    panelGet<BoardView[]>(request, context, "/api/v1/calendars"),
+    panelGetOptional<Org>(request, context, "/api/v1/org"),
+  ]);
+  if (calendars.length === 0) {
+    if (org) throw redirect(pathFor("welcome", lang));
+    throw redirect(pathFor("myAppointments", lang));
+  }
   const from = new Date().toISOString();
   const to = new Date(Date.now() + 7 * 86_400_000).toISOString();
   const lists = await Promise.all(
@@ -56,6 +62,25 @@ export default function PanelHome({ loaderData }: Route.ComponentProps) {
       {org?.status === "read_only" ? <Alert tone="warning">{p.readOnly}</Alert> : null}
       {org?.status === "trialing" ? (
         <Alert tone="info">{features.stripe && days !== null ? fmt(p.trialDays, { days }) : p.trial}</Alert>
+      ) : null}
+
+      {org ? (
+        <Card className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between bg-primary-soft/30 border-primary/20">
+          <div className="flex items-center gap-3">
+            <Building2 aria-hidden className="size-6 text-primary shrink-0" />
+            <div>
+              <p className="font-semibold text-text">{t.panel.businessProfile.title}</p>
+              <p className="text-xs text-muted">{t.panel.businessProfile.lead}</p>
+            </div>
+          </div>
+          <LinkButton
+            to={pathFor("businessProfileSettings", site.lang)}
+            variant="secondary"
+            className="text-sm shrink-0"
+          >
+            {t.panel.businessProfile.navLink}
+          </LinkButton>
+        </Card>
       ) : null}
 
       <section aria-labelledby="proximas">

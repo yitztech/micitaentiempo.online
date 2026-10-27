@@ -5,6 +5,7 @@ import (
 	"slices"
 
 	"connectrpc.com/connect"
+	"github.com/jackc/pgx/v5"
 	calendarv1 "github.com/yitztech/micitaentiempo.online/services/calendar/gen/mcet/calendar/v1"
 	"github.com/yitztech/micitaentiempo.online/services/calendar/internal/store"
 )
@@ -94,7 +95,23 @@ func (s ServiceCatalogServer) CreateService(ctx context.Context, req *calendarv1
 		return nil, err
 	}
 	sv.Active = true
-	created, err := s.Store.CreateService(ctx, sv)
+	var created store.Service
+	err = s.Store.InTx(ctx, func(tx pgx.Tx) error {
+		var err error
+		created, err = s.Store.CreateServiceTx(ctx, tx, sv)
+		if err != nil {
+			return err
+		}
+		if _, err := s.Store.IncrementCalendarVersionTx(ctx, tx, in.GetCalendarId()); err != nil {
+			return err
+		}
+		snap, err := s.Store.GetCalendarSnapshotTx(ctx, tx, in.GetCalendarId())
+		if err != nil {
+			return err
+		}
+		a, _ := actorOf(ctx)
+		return s.emitCalendarSnapshot(ctx, tx, snap, a)
+	})
 	if err != nil {
 		return nil, storeErr(err)
 	}
@@ -111,7 +128,23 @@ func (s ServiceCatalogServer) UpdateService(ctx context.Context, req *calendarv1
 	if err != nil {
 		return nil, err
 	}
-	updated, err := s.Store.UpdateService(ctx, sv)
+	var updated store.Service
+	err = s.Store.InTx(ctx, func(tx pgx.Tx) error {
+		var err error
+		updated, err = s.Store.UpdateServiceTx(ctx, tx, sv)
+		if err != nil {
+			return err
+		}
+		if _, err := s.Store.IncrementCalendarVersionTx(ctx, tx, in.GetCalendarId()); err != nil {
+			return err
+		}
+		snap, err := s.Store.GetCalendarSnapshotTx(ctx, tx, in.GetCalendarId())
+		if err != nil {
+			return err
+		}
+		a, _ := actorOf(ctx)
+		return s.emitCalendarSnapshot(ctx, tx, snap, a)
+	})
 	if err != nil {
 		return nil, storeErr(err)
 	}
@@ -123,7 +156,24 @@ func (s ServiceCatalogServer) DeleteService(ctx context.Context, req *calendarv1
 	if _, _, err := s.calendar(ctx, req.GetCalendarId(), true); err != nil {
 		return nil, err
 	}
-	return &calendarv1.DeleteServiceResponse{}, storeErr(s.Store.DeleteService(ctx, req.GetCalendarId(), req.GetId()))
+	err := s.Store.InTx(ctx, func(tx pgx.Tx) error {
+		if err := s.Store.DeleteServiceTx(ctx, tx, req.GetCalendarId(), req.GetId()); err != nil {
+			return err
+		}
+		if _, err := s.Store.IncrementCalendarVersionTx(ctx, tx, req.GetCalendarId()); err != nil {
+			return err
+		}
+		snap, err := s.Store.GetCalendarSnapshotTx(ctx, tx, req.GetCalendarId())
+		if err != nil {
+			return err
+		}
+		a, _ := actorOf(ctx)
+		return s.emitCalendarSnapshot(ctx, tx, snap, a)
+	})
+	if err != nil {
+		return nil, storeErr(err)
+	}
+	return &calendarv1.DeleteServiceResponse{}, nil
 }
 
 // ReorderServices fija el orden de los servicios.
@@ -131,8 +181,22 @@ func (s ServiceCatalogServer) ReorderServices(ctx context.Context, req *calendar
 	if _, _, err := s.calendar(ctx, req.GetCalendarId(), true); err != nil {
 		return nil, err
 	}
-	if err := s.Store.ReorderServices(ctx, req.GetCalendarId(), req.GetIds()); err != nil {
-		return nil, err
+	err := s.Store.InTx(ctx, func(tx pgx.Tx) error {
+		if err := s.Store.ReorderServicesTx(ctx, tx, req.GetCalendarId(), req.GetIds()); err != nil {
+			return err
+		}
+		if _, err := s.Store.IncrementCalendarVersionTx(ctx, tx, req.GetCalendarId()); err != nil {
+			return err
+		}
+		snap, err := s.Store.GetCalendarSnapshotTx(ctx, tx, req.GetCalendarId())
+		if err != nil {
+			return err
+		}
+		a, _ := actorOf(ctx)
+		return s.emitCalendarSnapshot(ctx, tx, snap, a)
+	})
+	if err != nil {
+		return nil, storeErr(err)
 	}
 	return s.ListServices(ctx, &calendarv1.ListServicesRequest{CalendarId: req.GetCalendarId(), IncludeInactive: true})
 }

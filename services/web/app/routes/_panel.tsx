@@ -3,6 +3,7 @@ import {
   Bell,
   BellRing,
   Bot,
+  Building2,
   CalendarDays,
   CreditCard,
   Home,
@@ -94,6 +95,12 @@ export default function PanelLayout({ loaderData }: Route.ComponentProps) {
         <BellRing aria-hidden className="size-5" />
         {p.nav.notificationSettings}
       </NavLink>
+      {org ? (
+        <NavLink to={pathFor("businessProfileSettings", site.lang)} className={item}>
+          <Building2 aria-hidden className="size-5" />
+          {p.nav.businessProfile}
+        </NavLink>
+      ) : null}
       {org ? (
         <NavLink to={pathFor("billing", site.lang)} className={item}>
           <CreditCard aria-hidden className="size-5" />

@@ -18,6 +18,9 @@ import type { Env } from "../config/env.js";
 import { type Database, DB } from "../db/db.module.js";
 import {
   billingEvents,
+  businessCalendarLocations,
+  businessCalendarProjection,
+  businessProfiles,
   calendarMembers,
   customerLinks,
   invitations,
@@ -137,6 +140,12 @@ export class BillingService {
       await tx.delete(invitations).where(eq(invitations.orgId, org.id));
       await tx.delete(customerLinks).where(eq(customerLinks.orgId, org.id));
       await tx.delete(calendarMembers).where(eq(calendarMembers.orgId, org.id));
+      await tx
+        .update(businessProfiles)
+        .set({ status: "unpublished", updatedAt: this.clock.now() })
+        .where(eq(businessProfiles.orgId, org.id));
+      await tx.delete(businessCalendarLocations).where(eq(businessCalendarLocations.orgId, org.id));
+      await tx.delete(businessCalendarProjection).where(eq(businessCalendarProjection.orgId, org.id));
       await tx
         .update(organizations)
         .set({ deletedAt: this.clock.now(), status: "suspended", stripeSubscriptionId: null })

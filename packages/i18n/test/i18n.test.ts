@@ -23,6 +23,9 @@ describe("rutas traducidas", () => {
   it("relaciona cada ruta con su par", () => {
     expect(translatePath("/citas", "en")).toBe("/appointments");
     expect(translatePath("/pricing", "es")).toBe("/precios");
+    expect(translatePath("/directorio", "en")).toBe("/directory");
+    expect(translatePath("/directory", "es")).toBe("/directorio");
+    expect(translatePath("/b/123", "en")).toBe("/b/123");
     expect(translatePath("/reservar/clinica-sol", "en")).toBe("/book/clinica-sol");
     expect(translatePath("/no-existe", "en")).toBeNull();
   });

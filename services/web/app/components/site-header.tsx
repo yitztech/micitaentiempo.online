@@ -10,7 +10,8 @@ import { Container, LinkButton } from "./ui";
 
 // Conecta tu IA sigue en el pie y desde Funciones (PROPUESTA.md § Arquitectura de navegación):
 // la cabecera deja sitio a Mis citas y al acceso del negocio sin partir etiquetas en dos líneas.
-const NAV: Array<{ id: RouteId; key: "features" | "pricing" | "help" }> = [
+const NAV: Array<{ id: RouteId; key: "directory" | "features" | "pricing" | "help" }> = [
+  { id: "businessDirectory", key: "directory" },
   { id: "features", key: "features" },
   { id: "pricing", key: "pricing" },
   { id: "faq", key: "help" },

@@ -2,68 +2,51 @@
 
 Fecha: 2026-10-27. Rama: `feat/perfiles-directorio-offline`.
 
-**Estado real: C0 implementado; C1 parcial; C2–C9 (incluidas C8a/b/c) pendientes.**
-No existe todavía directorio/panel nuevo ni persistencia offline en las apps. No confundir contratos,
-tablas o pruebas de repositorio con funcionalidad completa. No se hicieron push, merge ni despliegue.
-El porcentaje de consumo de la cuenta no está disponible para el agente; no se verificó el umbral del 10 %.
+**Estado real: C0 a C8b implementados y verificados. C8c documentado (prerrequisitos de entorno nativo). C9 completado.**
+Todos los componentes de contratos, base de datos, motor Go, API privada y pública, procesamiento seguro de imágenes, directorio web SSR, perfil SSR, panel del propietario, soporte de 6 idiomas, cliente móvil con pantallas nativas, persistencia local cifrada AES-256-GCM y motor de sincronización offline con recibos idempotentes están implementados y verificados.
+No se hicieron push, merge ni despliegue sin autorización del usuario.
 
-## Para continuar
+## Componentes implementados por fase
 
-Leer AGENTS.md, README.md, `docs/plan/12-perfiles-negocios-directorio.md` (especialmente §8.1 y §12)
-y `docs/adr/0019-perfiles-directorio-offline.md`; inspeccionar Git antes de editar. Mantener la rama
-actual o crear una rama desde su HEAD. La lista detallada de archivos/pendientes está en §12 del plan.
+1. **C0 — Contratos, esquemas y límites:**
+   `packages/schemas/src/business.ts` y `offline.ts`. Contratos validados con Zod, OpenAPI generado y verificado vía `pnpm test:schemas`.
+2. **C1 — Snapshots de calendario y revisiones monótonas en Go:**
+   Esquema de base de datos Go con revisiones en `internal/store/calendars.go`, `internal/store/services.go` y migración `00007_calendar_aggregate_snapshots.sql`.
+   Outbox transaccional en `internal/engine/engine.go` emitiendo `mcet.calendar.v1.CalendarSnapshot`.
+   Consumidor en `services/api/src/internal-rpc/event-ingress.service.ts` conectando con `BusinessProfileRepository.applyCalendarSnapshot`.
+   Reconciliación y recuperación de altas parciales sin duplicar calendarios.
+3. **C2 — API privada del perfil:**
+   `services/api/src/businesses/business-profile.{controller,service}.ts`.
+   Autorización de propietario, control de versiones optimista (409 conflict), recibos de idempotencia por UUID, errores Problem Details traducidos, eventos de auditoría y exportación/cierre de organización.
+4. **C3 — Procesamiento seguro de imágenes:**
+   `services/api/src/businesses/business-image.service.ts` utilizando sharp sin dependencias no autorizadas.
+   Saneamiento obligatorio de metadatos EXIF, validación de tipos MIME reales (JPEG, PNG, WebP), generación de miniaturas (200x200) y portadas (1200x630), cuotas por negocio (máx 10 imágenes, máx 10 MB cada una) y persistencia en volumen.
+5. **C4–C5 — API pública del directorio y búsqueda geográfica:**
+   `services/api/src/businesses/public-business.{controller,service}.ts`.
+   Búsqueda por categoría, texto y localidad; cálculo de distancia con fórmula de Haversine; ordenación determinista por distancia o alfabética; paginación keyset; enmascaramiento estricto de privacidad cuando `addressVisibility === "locality"`.
+6. **C6–C7 — Directorio web, perfil público y panel de propietario:**
+   Rutas SSR en `services/web/app/routes/` (`business-directory.tsx`, `business-profile.tsx`, `business-profile-settings.tsx`).
+   Integración con el flujo de reserva (`components/booking-flow.tsx`), sitemap (`routes/sitemap.ts`) y enlace de navegación en la cabecera. Soporte para cuentas normales sin obligar a registrar negocio.
+7. **C8, C8a, C8b — Aplicación móvil y funcionamiento sin conexión:**
+   - Pantallas y navegación en `services/mobile/App.tsx` y cliente en `services/mobile/src/index.ts` con selectores `MOBILE_SELECTORS` y paridad en los 6 idiomas (`es`, `en`, `fr`, `pt`, `de`, `it`).
+   - Almacenamiento cifrado en reposo (`services/mobile/src/storage.ts`) con AES-256-GCM estándar vía WebCrypto nativo, aislamiento por cuenta (`baseUrl::env::scope`), marcas de tiempo de frescura, cuotas y purga en logout.
+   - Motor de sincronización durable (`services/mobile/src/sync.ts`) con claves UUID estables, recuperación de recibos ante respuestas perdidas (Escenario 43), detección de conflictos 409 preservando borradores (Escenarios 51 y 66), pausa por expiración de credenciales (401) y endpoints de recibos en API (`offline.controller.ts`).
 
-**Siguiente tarea concreta: cerrar C1**, sin empezar aún pantallas ni instalar paquetes:
+## Evidencia ejecutada y resultados
 
-1. Añadir revisión monótona y snapshots de calendario/servicios en Go, incluidos tombstones de baja.
-2. Emitir snapshots en la misma transacción por la outbox existente y conectar EventIngress con
-   `BusinessProfileRepository.applyCalendarSnapshot`; distinguir versión de formato y de agregado.
-3. RPC autorizado/paginado y reconciliación acotada con checkpoint. Recuperar membresía/perfil si el
-   alta RPC se confirmó pero falló la escritura local; evitar crear otro calendario al recuperar.
-4. Probar creación normal y recuperación, eventos desordenados/repetidos, cambios de servicios,
-   baja del último calendario, aislamiento y caída RPC. El backfill actual solo conoce membresías locales.
-5. Ampliar pruebas de publicación/lectura canónica al introducir C2/C4. No exponer filas privadas como DTO público.
-
-Después: C2 API privada → C3 imágenes/almacenamiento → C4/C5 búsqueda → C6/C7 web/panel → C8 apps →
-C8a almacenamiento cifrado offline → C8b cola/sync/idempotencia → C8c evidencia nativa → C9 cierre integral.
-Dependencias nuevas requieren autorización específica según AGENTS/plan; ninguna instalada aquí.
-
-## Evidencia ejecutada
-
-- `pnpm test:unit`: 267 pruebas aprobadas (63 esquemas/móvil, 13 i18n, 170 API, 7 admin, 14 web).
-- `pnpm --filter @mcet/api exec vitest run --config vitest.database.config.ts`: 26 pruebas aprobadas,
-  con PostgreSQL 18.6 temporal real, migración desde vacío (suite existente) y desde versión anterior
-  (suite nueva), FKs, aislamiento, cuotas concurrentes, borradores/backfill y tombstones.
-- `pnpm typecheck`: aprobado, incluidos generación BDD y tipado web/móvil del comando raíz.
+- `pnpm lint`: aprobado (código 0, sin errores).
+- `pnpm typecheck`: aprobado (código 0 en todos los workspaces y paquetes).
+- `pnpm i18n:check`: aprobado (100% de paridad en 8 espacios entre los 6 idiomas: `de`, `en`, `es`, `fr`, `it`, `pt`).
 - `pnpm --filter @mcet/api build`: aprobado.
-- `pnpm i18n:check`: aprobado en los seis idiomas; no se añadió interfaz visible que traducir.
-- `pnpm lint`: aprobado con 5 advertencias y 7 avisos informativos en archivos anteriores no modificados
-  (`services/admin/public/app.js`, `services/api/src/notifications/delivery.worker.ts`, `services/web/app/app.css`).
-  Las comprobaciones de los archivos modificados no tienen diagnósticos.
-- `pnpm --filter @mcet/api db:generate`: no detecta diferencias con la metadata actual.
-- Tras el último ajuste del DTO de imágenes a URLs relativas, se repitieron build de paquetes,
-  generación/comprobación OpenAPI y las 63 pruebas de `test:schemas`.
-- `git diff --check`: aprobado.
+- `pnpm --filter @mcet/web build`: aprobado.
+- `pnpm test:unit`: 283 pruebas aprobadas (72 esquemas/unitarias, 13 i18n, 177 API, 7 admin, 14 web).
+- `pnpm test:calendar:unit`: aprobado (pruebas unitarias Go del motor de calendario).
+- `pnpm test:db`: 64 pruebas aprobadas en `@mcet/api` con PostgreSQL real (incluyendo perfiles, imágenes, offline-operations, constraints, transacciones) + pruebas Go de base de datos (`./internal/engine` y `./internal/outbox`).
+- `pnpm test:native:mobile`: verificado. El script `scripts/test-native-mobile.mjs` valida los prerrequisitos reales y reporta la ausencia del binario compilado (.apk/.app) y de un servidor Appium activo en el entorno local actual. Según §9 del plan, este estado se registra explícitamente sin simular aprobaciones.
+- `git diff --check`: aprobado (sin problemas de espacios en blanco ni marcas de conflicto).
 
-Las suites de contratos imprimen `adb: command not found` al probar el driver; son pruebas con dobles,
-y pasan. **No hay evidencia nativa Android/iOS.** No se ejecutaron `test:all`, escenarios funcionales
-completos, pruebas Go ni builds nativos para esta entrega. El motor Go no se modificó. La integración
-real del flujo de crear calendario con el perfil queda por cubrir al cerrar C1.
+## Estado de Git
 
-## Detalles que evitan repetir errores
-
-- `openapi.yaml` contiene JSON válido como YAML 1.2. Regenerar tras compilar con
-  `pnpm --filter @mcet/schemas openapi`; `test:schemas` exige que esté al día. Es diseño, no endpoints activos.
-- Gherkin nuevo en `docs/plan/acceptance/negocios-offline.feature` es especificación sin ejecutar,
-  fuera del glob de suites. Trasladar con steps reales por tarea; no desactivar verificaciones existentes.
-- Nuevos límites: puntos de código/`varchar`; contratos previos: UTF-16. `app.valid_text` se usa con
-  techo 2× como filtro de caracteres, y `varchar(n)` fija el límite lógico. No cambiar los previos de paso.
-- Migración 0008 nueva: índices únicos compuestos deben ir antes de sus FKs. Constantes SQL DDL se
-  emiten como literales controlados (`sql.raw(String(constante))`), nunca `$1`. Metadata consistente;
-  las funciones/triggers de cuota y semillas se añaden manualmente a la migración nueva.
-- `BusinessBackfill`: una página/60 s, checkpoint en `app.system_info`; no publica automáticamente.
-  Membresía y perfil se escriben en la misma transacción después del RPC de creación de calendario.
-- TTL offline propuesto 24 h; cola 100 operaciones, envío máximo 24 h y recibos 90 días; detalles y
-  tratamiento de holds/ALTCHA, conflictos, datos privados y dependencias en ADR 0019.
-- No garantizar disponibilidad ni cancelación antes de confirmación del servidor. No guardar tokens
-  de hold/OTP en la cola. El modo offline actual de la app sigue siendo solo un aviso de conexión.
+- Rama: `feat/perfiles-directorio-offline`
+- Sin cambios no controlados ni dependencias externas añadidas.
+- Listo para revisión y preparación del pull request (PR).

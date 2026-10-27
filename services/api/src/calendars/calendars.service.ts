@@ -2,6 +2,7 @@ import type { Calendar } from "@mcet/contracts/mcet/calendar/v1/calendar_pb";
 import { CalendarService } from "@mcet/contracts/mcet/calendar/v1/calendar_pb";
 import type { CreateCalendar, UpdateCalendar } from "@mcet/schemas";
 import { ConflictException, ForbiddenException, Inject, Injectable } from "@nestjs/common";
+import { and, eq } from "drizzle-orm";
 import { AuditService } from "../audit/audit.service.js";
 import type { SessionUser } from "../auth/auth.registry.js";
 import { type Database, DB } from "../db/db.module.js";
@@ -61,6 +62,47 @@ export class CalendarsService {
     };
     const existing = await rpc(this.client.listCalendars({ orgId: org.id }, asActor({ actor })));
     const limit = this.orgs.limits(org).calendars;
+
+    const localMemberships = await this.db
+      .select({ calendarId: calendarMembers.calendarId })
+      .from(calendarMembers)
+      .where(and(eq(calendarMembers.orgId, org.id), eq(calendarMembers.userId, user.id)));
+    const localIds = new Set(localMemberships.map((m) => m.calendarId));
+
+    const orphaned =
+      existing.calendars.find(
+        (c) => !localIds.has(c.id) && (input.slug ? c.slug === input.slug : c.name === input.name),
+      ) ??
+      (existing.calendars.length >= limit ? existing.calendars.find((c) => !localIds.has(c.id)) : undefined);
+
+    if (orphaned) {
+      await this.db.transaction(async (tx) => {
+        await tx
+          .insert(calendarMembers)
+          .values({
+            calendarId: orphaned.id,
+            orgId: org.id,
+            userId: user.id,
+            role: "owner",
+            notify: true,
+            addedBy: user.id,
+          })
+          .onConflictDoNothing();
+        await tx
+          .insert(businessProfiles)
+          .values({ orgId: org.id, displayName: org.name })
+          .onConflictDoNothing();
+      });
+      await this.audit.record({
+        orgId: org.id,
+        actorUserId: user.id,
+        via: "panel",
+        action: "calendar.recovered",
+        target: orphaned.id,
+      });
+      return calendarView(orphaned, "owner");
+    }
+
     if (existing.calendars.length >= limit) {
       throw new ConflictException({ code: "plan_limit", message: `Tu plan permite ${limit} tablero(s)` });
     }

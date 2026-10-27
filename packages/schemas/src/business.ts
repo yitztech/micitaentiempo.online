@@ -61,6 +61,7 @@ export const BusinessSocialPlatform = z.enum([
   "threads",
   "pinterest",
 ]);
+export type BusinessSocialPlatform = z.infer<typeof BusinessSocialPlatform>;
 const SOCIAL_HOSTS: Record<z.infer<typeof BusinessSocialPlatform>, readonly string[]> = {
   facebook: ["facebook.com", "www.facebook.com"],
   instagram: ["instagram.com", "www.instagram.com"],
@@ -124,6 +125,7 @@ export const BusinessProfileContent = z
     message: "duplicate_category",
     path: ["secondaryCategories"],
   });
+export type BusinessProfileContent = z.infer<typeof BusinessProfileContent>;
 /** PUT-like content within PATCH: complete editable content avoids ambiguous list merges. */
 export const UpdateBusinessProfile = z
   .object({
@@ -162,6 +164,7 @@ export const CreateBusinessLocation = z
   })
   .strict();
 export const UpdateBusinessLocation = CreateBusinessLocation;
+export type UpdateBusinessLocation = CreateBusinessLocation;
 export const AssignBusinessCalendar = z
   .object({
     expectedVersion: BusinessVersion,
@@ -186,6 +189,7 @@ export const UpdateBusinessImages = z
   .strict()
   .refine((v) => new Set(v.images.map((i) => i.id)).size === v.images.length, "duplicate_image")
   .refine((v) => v.images.filter((i) => i.cover).length <= 1, "multiple_covers");
+export type UpdateBusinessImages = z.infer<typeof UpdateBusinessImages>;
 
 const queryNumber = z
   .union([z.number(), z.string().regex(/^-?[0-9]+(?:\.[0-9]+)?$/)])
@@ -216,8 +220,14 @@ export const BusinessDirectoryQuery = z
     "coordinates_required",
   )
   .refine((v) => v.lat === undefined || (!v.country && !v.region && !v.locality), "ambiguous_location")
-  .transform((v) => ({ ...v, radiusKm: v.lat === undefined ? undefined : (v.radiusKm ?? 10) }));
+  .transform((v) => {
+    if (v.lat !== undefined && v.radiusKm === undefined) {
+      return { ...v, radiusKm: 10 };
+    }
+    return v;
+  });
 export type BusinessDirectoryQuery = z.infer<typeof BusinessDirectoryQuery>;
+export type BusinessDirectoryQueryInput = z.input<typeof BusinessDirectoryQuery>;
 
 /** State derived server-side; consumers cannot use this DTO as authorization input. */
 export const BusinessAccountCapabilities = z
@@ -359,6 +369,36 @@ export const PrivateBusinessProfile = z
     updatedAt: z.iso.datetime(),
   })
   .strict();
+export type PrivateBusinessProfile = z.infer<typeof PrivateBusinessProfile>;
+
+export const PrivateLocation = z
+  .object({
+    id: Id,
+    version: BusinessVersion,
+    location: BusinessLocationContent,
+  })
+  .strict();
+export type PrivateLocation = z.infer<typeof PrivateLocation>;
+
+export const LocationPage = z
+  .object({
+    items: z.array(PrivateLocation).max(BUSINESS_LIMITS.locations),
+    nextCursor: z.string().min(1).max(BUSINESS_LIMITS.cursor).nullable(),
+  })
+  .strict();
+export type LocationPage = z.infer<typeof LocationPage>;
+
+export type BusinessAccountCapabilities = z.infer<typeof BusinessAccountCapabilities>;
+export type BusinessCategory = z.infer<typeof BusinessCategory>;
+export type BusinessPageQuery = z.infer<typeof BusinessPageQuery>;
+export type BusinessDirectoryPage = z.infer<typeof BusinessDirectoryPage>;
+export type PublicBusinessProfile = z.infer<typeof PublicBusinessProfile>;
+export type PublicBusinessSummary = z.infer<typeof PublicBusinessSummary>;
+export type PublicBusinessLocation = z.infer<typeof PublicBusinessLocation>;
+export type BusinessLocationContent = z.infer<typeof BusinessLocationContent>;
+export type CreateBusinessLocation = z.infer<typeof CreateBusinessLocation>;
+export type ChangeBusinessPublication = z.infer<typeof ChangeBusinessPublication>;
+export type AssignBusinessCalendar = z.infer<typeof AssignBusinessCalendar>;
 export const BusinessLocalitiesQuery = z
   .object({
     ...page,
@@ -367,3 +407,37 @@ export const BusinessLocalitiesQuery = z
     q: text(BUSINESS_LIMITS.query).min(1),
   })
   .strict();
+export type BusinessLocalitiesQuery = z.infer<typeof BusinessLocalitiesQuery>;
+
+export const CategoryItem = z
+  .object({
+    code: BusinessCategory,
+    label: text(150),
+  })
+  .strict();
+export type CategoryItem = z.infer<typeof CategoryItem>;
+
+export const CategoryPage = z
+  .object({
+    items: z.array(CategoryItem).max(100),
+    nextCursor: z.string().min(1).max(BUSINESS_LIMITS.cursor).nullable(),
+  })
+  .strict();
+export type CategoryPage = z.infer<typeof CategoryPage>;
+
+export const LocalityItem = z
+  .object({
+    country: Country,
+    region: text(BUSINESS_LIMITS.region),
+    locality: text(BUSINESS_LIMITS.locality),
+  })
+  .strict();
+export type LocalityItem = z.infer<typeof LocalityItem>;
+
+export const LocalityPage = z
+  .object({
+    items: z.array(LocalityItem).max(100),
+    nextCursor: z.string().min(1).max(BUSINESS_LIMITS.cursor).nullable(),
+  })
+  .strict();
+export type LocalityPage = z.infer<typeof LocalityPage>;
