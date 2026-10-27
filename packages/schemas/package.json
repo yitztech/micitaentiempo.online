@@ -18,7 +18,9 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "typecheck": "tsc -p tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json",
+    "openapi": "node scripts/business-openapi.mjs",
+    "openapi:check": "node scripts/business-openapi.mjs --check"
   },
   "dependencies": {
     "zod": "4.6.5"

@@ -57,6 +57,13 @@
       "when": 1793047537804,
       "tag": "0007_users_name_limit",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793128256457,
+      "tag": "0008_business_profiles",
+      "breakpoints": true
     }
   ]
 }

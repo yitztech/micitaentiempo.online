@@ -5,7 +5,7 @@ import { ConflictException, ForbiddenException, Inject, Injectable } from "@nest
 import { AuditService } from "../audit/audit.service.js";
 import type { SessionUser } from "../auth/auth.registry.js";
 import { type Database, DB } from "../db/db.module.js";
-import { calendarMembers } from "../db/schema.js";
+import { businessProfiles, calendarMembers } from "../db/schema.js";
 import { asActor, type CalendarClients } from "../internal-rpc/calendar-client.js";
 import { CALENDAR } from "../internal-rpc/internal-rpc.module.js";
 import { OrgsService } from "../orgs/orgs.service.js";
@@ -80,13 +80,19 @@ export class CalendarsService {
         asActor({ actor }),
       ),
     );
-    await this.db.insert(calendarMembers).values({
-      calendarId: created.id,
-      orgId: org.id,
-      userId: user.id,
-      role: "owner",
-      notify: true,
-      addedBy: user.id,
+    await this.db.transaction(async (tx) => {
+      await tx.insert(calendarMembers).values({
+        calendarId: created.id,
+        orgId: org.id,
+        userId: user.id,
+        role: "owner",
+        notify: true,
+        addedBy: user.id,
+      });
+      await tx
+        .insert(businessProfiles)
+        .values({ orgId: org.id, displayName: org.name })
+        .onConflictDoNothing();
     });
     await this.audit.record({
       orgId: org.id,

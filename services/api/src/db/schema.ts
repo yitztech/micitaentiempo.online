@@ -1,8 +1,11 @@
+import { BUSINESS_LIMITS } from "@mcet/schemas";
 import { sql } from "drizzle-orm";
 import {
   bigint,
   boolean,
   check,
+  doublePrecision,
+  foreignKey,
   index,
   integer,
   jsonb,
@@ -11,6 +14,8 @@ import {
   text,
   timestamp,
   uniqueIndex,
+  uuid,
+  varchar,
 } from "drizzle-orm/pg-core";
 
 export const app = pgSchema("app");
@@ -568,4 +573,206 @@ export const mcpGrants = app.table(
     createdAt: createdAt(),
   },
   (t) => [primaryKey({ columns: [t.clientId, t.userId] })],
+);
+
+// Business profile/directory: new text limits use PostgreSQL Unicode code points.
+export const businessCategories = app.table("business_categories", {
+  code: varchar("code", { length: 64 }).primaryKey(),
+  active: boolean("active").notNull().default(true),
+  position: integer("position").notNull().default(0),
+});
+export const businessProfiles = app.table(
+  "business_profiles",
+  {
+    orgId: text("org_id")
+      .primaryKey()
+      .references(() => organizations.id, { onDelete: "cascade" }),
+    displayName: varchar("display_name", { length: BUSINESS_LIMITS.displayName }).notNull(),
+    description: varchar("description", { length: BUSINESS_LIMITS.description }).notNull().default(""),
+    primaryCategoryId: varchar("primary_category_id", { length: 64 }).references(
+      () => businessCategories.code,
+    ),
+    websiteUrl: varchar("website_url", { length: BUSINESS_LIMITS.url }),
+    termsUrl: varchar("terms_url", { length: BUSINESS_LIMITS.url }),
+    status: varchar("status", { length: 16 }).notNull().default("draft"),
+    version: integer("version").notNull().default(1),
+    publishedAt: timestamp("published_at", { withTimezone: true }),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [
+    check("business_profile_state", sql`${t.status} in ('draft','published','unpublished')`),
+    check("business_profile_version", sql`${t.version} >= 1`),
+    check(
+      "business_profile_name",
+      sql`length(btrim(${t.displayName})) > 0 AND app.valid_text(${t.displayName}, ${sql.raw(String(BUSINESS_LIMITS.displayName * 2))}, false)`,
+    ),
+    check(
+      "business_profile_description",
+      sql`app.valid_text(${t.description}, ${sql.raw(String(BUSINESS_LIMITS.description * 2))}, true)`,
+    ),
+    check(
+      "business_profile_publication",
+      sql`${t.status} <> 'published' OR (${t.primaryCategoryId} IS NOT NULL AND length(btrim(${t.description})) > 0 AND ${t.publishedAt} IS NOT NULL)`,
+    ),
+    index("business_profiles_public_category").on(t.status, t.primaryCategoryId, t.orgId),
+  ],
+);
+export const businessProfileCategories = app.table(
+  "business_profile_categories",
+  {
+    orgId: text("org_id")
+      .notNull()
+      .references(() => businessProfiles.orgId, { onDelete: "cascade" }),
+    categoryId: varchar("category_id", { length: 64 })
+      .notNull()
+      .references(() => businessCategories.code),
+  },
+  (t) => [primaryKey({ columns: [t.orgId, t.categoryId] })],
+);
+export const businessLocations = app.table(
+  "business_locations",
+  {
+    id: uuid("id").primaryKey().default(sql`uuidv7()`),
+    orgId: text("org_id")
+      .notNull()
+      .references(() => businessProfiles.orgId, { onDelete: "cascade" }),
+    name: varchar("name", { length: BUSINESS_LIMITS.locationName }).notNull(),
+    country: varchar("country", { length: 2 }).notNull(),
+    region: varchar("region", { length: BUSINESS_LIMITS.region }).notNull().default(""),
+    locality: varchar("locality", { length: BUSINESS_LIMITS.locality }).notNull(),
+    localityKey: varchar("locality_key", { length: BUSINESS_LIMITS.locality * 3 }).notNull(),
+    address: varchar("address", { length: BUSINESS_LIMITS.address }).notNull().default(""),
+    postalCode: varchar("postal_code", { length: BUSINESS_LIMITS.postalCode }).notNull().default(""),
+    latitude: doublePrecision("latitude"),
+    longitude: doublePrecision("longitude"),
+    addressVisibility: varchar("address_visibility", { length: 16 }).notNull().default("locality"),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [
+    uniqueIndex("business_locations_org_id").on(t.orgId, t.id),
+    index("business_locations_search").on(t.country, t.region, t.localityKey, t.orgId),
+    check("business_location_country", sql`${t.country} ~ '^[A-Z]{2}$'`),
+    check("business_location_visibility", sql`${t.addressVisibility} IN ('public','locality')`),
+    check(
+      "business_location_coordinates",
+      sql`(${t.latitude} IS NULL AND ${t.longitude} IS NULL) OR (${t.latitude} IS NOT NULL AND ${t.longitude} IS NOT NULL AND ${t.latitude} BETWEEN -90 AND 90 AND ${t.longitude} BETWEEN -180 AND 180)`,
+    ),
+    check(
+      "business_location_name",
+      sql`length(btrim(${t.name})) > 0 AND app.valid_text(${t.name}, ${sql.raw(String(BUSINESS_LIMITS.locationName * 2))}, false)`,
+    ),
+    check(
+      "business_location_locality",
+      sql`length(btrim(${t.locality})) > 0 AND app.valid_text(${t.locality}, ${sql.raw(String(BUSINESS_LIMITS.locality * 2))}, false)`,
+    ),
+    check(
+      "business_location_address",
+      sql`app.valid_text(${t.address}, ${sql.raw(String(BUSINESS_LIMITS.address * 2))}, false)`,
+    ),
+    check(
+      "business_location_region",
+      sql`app.valid_text(${t.region}, ${sql.raw(String(BUSINESS_LIMITS.region * 2))}, false)`,
+    ),
+    check(
+      "business_location_postal",
+      sql`app.valid_text(${t.postalCode}, ${sql.raw(String(BUSINESS_LIMITS.postalCode * 2))}, false)`,
+    ),
+  ],
+);
+/** No cross-service FK: snapshots arrive by authenticated RPC/event ingress. Tombstones are retained. */
+export const businessCalendarProjection = app.table(
+  "business_calendar_projection",
+  {
+    calendarId: uuid("calendar_id").primaryKey(),
+    orgId: text("org_id")
+      .notNull()
+      .references(() => businessProfiles.orgId, { onDelete: "cascade" }),
+    aggregateVersion: integer("aggregate_version").notNull(),
+    state: varchar("state", { length: 16 }).notNull(),
+    slug: varchar("slug", { length: 255 }).notNull(),
+    hasActiveServices: boolean("has_active_services").notNull(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [
+    uniqueIndex("business_calendar_projection_org_id").on(t.orgId, t.calendarId),
+    index("business_calendar_projection_eligible").on(t.orgId, t.state, t.hasActiveServices),
+    check("business_calendar_projection_state", sql`${t.state} IN ('active','archived','deleted')`),
+    check("business_calendar_projection_version", sql`${t.aggregateVersion} >= 1`),
+  ],
+);
+export const businessCalendarLocations = app.table(
+  "business_calendar_locations",
+  {
+    calendarId: uuid("calendar_id").primaryKey(),
+    orgId: text("org_id").notNull(),
+    locationId: uuid("location_id").notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [
+    foreignKey({
+      columns: [t.orgId, t.locationId],
+      foreignColumns: [businessLocations.orgId, businessLocations.id],
+      name: "business_calendar_location_same_org",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [t.orgId, t.calendarId],
+      foreignColumns: [businessCalendarProjection.orgId, businessCalendarProjection.calendarId],
+      name: "business_calendar_projection_same_org",
+    }).onDelete("cascade"),
+  ],
+);
+export const businessSocialLinks = app.table(
+  "business_social_links",
+  {
+    id: uuid("id").primaryKey().default(sql`uuidv7()`),
+    orgId: text("org_id")
+      .notNull()
+      .references(() => businessProfiles.orgId, { onDelete: "cascade" }),
+    platform: varchar("platform", { length: 32 }).notNull(),
+    url: varchar("url", { length: BUSINESS_LIMITS.url }).notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [
+    uniqueIndex("business_social_links_platform").on(t.orgId, t.platform),
+    check(
+      "business_social_platform",
+      sql`${t.platform} IN ('facebook','instagram','linkedin','youtube','tiktok','x','threads','pinterest')`,
+    ),
+  ],
+);
+export const businessImages = app.table(
+  "business_images",
+  {
+    id: uuid("id").primaryKey().default(sql`uuidv7()`),
+    orgId: text("org_id")
+      .notNull()
+      .references(() => businessProfiles.orgId, { onDelete: "cascade" }),
+    storageKey: varchar("storage_key", { length: 255 }).notNull().unique(),
+    mimeType: varchar("mime_type", { length: 32 }).notNull(),
+    bytes: integer("bytes").notNull(),
+    width: integer("width").notNull(),
+    height: integer("height").notNull(),
+    alt: varchar("alt", { length: BUSINESS_LIMITS.alt }).notNull(),
+    position: integer("position").notNull().default(0),
+    cover: boolean("cover").notNull().default(false),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [
+    uniqueIndex("business_images_cover").on(t.orgId).where(sql`cover`),
+    check("business_image_format", sql`${t.mimeType} IN ('image/jpeg','image/png','image/webp')`),
+    check(
+      "business_image_dimensions",
+      sql`${t.bytes} BETWEEN 1 AND ${sql.raw(String(BUSINESS_LIMITS.imageBytes))} AND ${t.width} > 0 AND ${t.height} > 0 AND ${t.width}::bigint * ${t.height}::bigint <= ${sql.raw(String(BUSINESS_LIMITS.imagePixels))}`,
+    ),
+    check("business_image_key", sql`${t.storageKey} ~ '^[a-zA-Z0-9_-]+$'`),
+    check(
+      "business_image_alt",
+      sql`length(btrim(${t.alt})) > 0 AND app.valid_text(${t.alt}, ${sql.raw(String(BUSINESS_LIMITS.alt * 2))}, false)`,
+    ),
+  ],
 );

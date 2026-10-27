@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 import { LoggerModule } from "nestjs-pino";
 import { AuthModule } from "./auth/auth.module.js";
 import { BillingModule } from "./billing/billing.module.js";
+import { BusinessesModule } from "./businesses/businesses.module.js";
 import { CalendarsModule } from "./calendars/calendars.module.js";
 import { requestSerializer } from "./common/log-redact.js";
 import { ConfigModule } from "./config/config.module.js";
@@ -36,6 +37,7 @@ const testControllers = process.env.TEST_MODE ? [TestSupportController] : [];
     InternalRpcModule,
     AuthModule,
     CalendarsModule,
+    BusinessesModule,
     EventsModule,
     NotificationsModule,
     BillingModule,

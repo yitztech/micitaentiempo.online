@@ -5,7 +5,8 @@
     "declaration": true,
     "rootDir": "src",
     "outDir": "dist",
-    "rewriteRelativeImportExtensions": true
+    "rewriteRelativeImportExtensions": true,
+    "lib": ["es2024", "dom"]
   },
   "include": ["src"]
 }

@@ -42,6 +42,7 @@ nada.
 | [09-pruebas.md](09-pruebas.md) | Estrategia de pruebas y pruebas automatizadas por escenarios |
 | [10-fases.md](10-fases.md) | Trece fases con tareas, criterios de aceptación y modelo/esfuerzo |
 | [11-dayotter.md](11-dayotter.md) | Qué características de DayOtter se aprovechan y cuáles no |
+| [12-perfiles-negocios-directorio.md](12-perfiles-negocios-directorio.md) | Propuesta de ampliación: perfil único por negocio, buscador por localidad/distancia y administración web/móvil y funcionamiento obligatorio sin internet en apps; tareas pequeñas para un modelo ejecutor |
 
 ## Decisiones clave
 
