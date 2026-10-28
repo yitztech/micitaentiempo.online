@@ -56,6 +56,8 @@ services:
       UMAMI_SCRIPT_URL: ${UMAMI_SCRIPT_URL:-}
       UMAMI_WEBSITE_ID: ${UMAMI_WEBSITE_ID:-}
       STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT:-production}
     healthcheck:
       test: [CMD, wget, -q, -O, /dev/null, "http://127.0.0.1:3000/healthz"]
       interval: 10s
@@ -79,6 +81,8 @@ services:
       DB_USER: api
       DB_PASSWORD: ${API_DB_PASSWORD:?Define API_DB_PASSWORD}
       CALENDAR_RPC_URL: http://calendar:8081
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT:-production}
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?Define BETTER_AUTH_SECRET}
       APP_ENC_KEY: ${APP_ENC_KEY:?Define APP_ENC_KEY}
       ALTCHA_HMAC_KEY: ${ALTCHA_HMAC_KEY:?Define ALTCHA_HMAC_KEY}

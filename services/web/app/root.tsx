@@ -1,5 +1,6 @@
 import interLatin from "@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url";
 import { isLang, matchRoute, pathFor, ROUTES } from "@mcet/i18n";
+import { useEffect } from "react";
 import {
   isRouteErrorResponse,
   Links,
@@ -15,6 +16,7 @@ import "./app.css";
 import { features } from "./lib/api.server";
 import { catalog } from "./lib/catalog.server";
 import { nonceContext, siteContext } from "./lib/context";
+import { reportError, startErrors } from "./lib/errors.client";
 import { messages } from "./lib/i18n";
 import { newNonce } from "./lib/security.server";
 import { siteConfig, siteForRequest } from "./lib/site.server";
@@ -55,6 +57,14 @@ export async function loader({ context, request }: Route.LoaderArgs) {
       process.env.UMAMI_SCRIPT_URL && process.env.UMAMI_WEBSITE_ID
         ? { src: process.env.UMAMI_SCRIPT_URL, id: process.env.UMAMI_WEBSITE_ID }
         : null,
+    // Registro de errores del navegador (Bugsink); la CSP abre su origen en connect-src.
+    errors: process.env.SENTRY_DSN
+      ? {
+          dsn: process.env.SENTRY_DSN,
+          release: process.env.RELEASE_SHA,
+          environment: process.env.SENTRY_ENVIRONMENT || "production",
+        }
+      : null,
   };
 }
 
@@ -89,6 +99,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  const errors = useRouteLoaderData<typeof loader>("root")?.errors;
+  useEffect(() => {
+    if (errors) startErrors(errors);
+  }, [errors]);
   return <Outlet />;
 }
 
@@ -98,6 +112,9 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   const t = messages(lang);
   const notFound = isRouteErrorResponse(error) && error.status === 404;
   const status = isRouteErrorResponse(error) ? error.status : 500;
+  useEffect(() => {
+    if (!isRouteErrorResponse(error)) reportError(error);
+  }, [error]);
   return (
     <main
       id="contenido"
