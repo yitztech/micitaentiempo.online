@@ -1,0 +1,16 @@
+# Solo en GitHub Actions: las imágenes de pruebas reutilizan la caché gha que deja deploy.yml al publicar
+# (mismo scope por servicio). En local no se usa: el driver docker no lee la caché gha.
+#   docker compose -f compose.prod.yml -f compose.ci.yml -f compose.ci-cache.yml --env-file .env.ci build
+services:
+  gateway:
+    build: { cache_from: ["type=gha,scope=gateway"] }
+  web:
+    build: { cache_from: ["type=gha,scope=web"] }
+  api:
+    build: { cache_from: ["type=gha,scope=api"] }
+  calendar:
+    build: { cache_from: ["type=gha,scope=calendar"] }
+  admin:
+    build: { cache_from: ["type=gha,scope=admin"] }
+  postgres:
+    build: { cache_from: ["type=gha,scope=postgres"] }

@@ -50,9 +50,10 @@ WhatsApp necesita además las plantillas aprobadas `mcet_aviso` y `mcet_codigo` 
 
 ## Desplegar
 
-1. Fusionar en `main` (PR revisado). `deploy.yml` corre las pruebas, publica las 5 imágenes en GHCR con
-   las etiquetas `main` y el SHA, llama al webhook de Coolify y espera a que `/version.json` y
-   `/api/healthz` sirvan el SHA nuevo (hasta 10 minutos).
+1. Fusionar en `main` (PR revisado). `deploy.yml` corre las pruebas y, en paralelo, publica las 6 imágenes
+   en GHCR con la etiqueta del SHA; solo si las pruebas pasan mueve `main` a ese SHA (la que usa producción),
+   llama al webhook de Coolify y espera a que `/version.json` y `/api/healthz` sirvan el SHA nuevo (hasta
+   10 minutos).
 2. Coolify reinicia los contenedores (~1 minuto de corte): fusionar fuera de horas pico.
 3. Cada servicio aplica sus migraciones al arrancar (expandir/contraer, `08-infraestructura.md` §8.10).
 4. Comprobar en producción:
