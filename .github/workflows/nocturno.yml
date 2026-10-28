@@ -36,9 +36,9 @@ jobs:
       - run: pnpm --filter "@mcet/escenarios^..." build
       - name: Catálogo completo de escenarios
         run: pnpm --filter @mcet/escenarios exec ./correr.sh
-      - name: ZAP baseline (excepciones revisadas en tests/seguridad/zap-reglas.tsv)
+      - name: ZAP baseline (excepciones revisadas en tests/security/zap-reglas.tsv)
         run: |
-          mkdir -p zap && cp tests/seguridad/zap-reglas.tsv zap/ && chmod -R 777 zap
+          mkdir -p zap && cp tests/security/zap-reglas.tsv zap/ && chmod -R 777 zap
           docker run --rm --network host --add-host micitaentiempo.localhost:127.0.0.1 -v "$PWD/zap:/zap/wrk:rw" ghcr.io/zaproxy/zaproxy:2.17.0 \
             zap-baseline.py -t http://micitaentiempo.localhost:8080 -c zap-reglas.tsv -r zap.html
       - name: Carga (k6) y memoria por servicio
