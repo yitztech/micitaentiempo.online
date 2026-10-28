@@ -1,6 +1,11 @@
 # Publica las imágenes en GHCR y despliega en Coolify cuando cambia main.
 #
-#   pruebas (ci.yml) → publicar (5 imágenes) → desplegar (webhook de Coolify) → comprobar
+#   pruebas (ci.yml) ┐
+#                    ├→ promover (:main) → desplegar (webhook de Coolify) → comprobar
+#   publicar (:sha)  ┘
+#
+# Publicar corre en paralelo con las pruebas, pero solo con la etiqueta del SHA. `:main`, la que usa
+# producción (compose.prod.yml), se mueve después de que las pruebas pasan: un commit que falla nunca la toca.
 #
 # El entorno `production` (secretos COOLIFY_WEBHOOK y COOLIFY_TOKEN, variables SITE_URL y SITE_URL_EN)
 # lo rellena el alta del cliente. Mientras no exista, se publican las imágenes pero no se despliega.
@@ -55,17 +60,38 @@ jobs:
           push: true
           build-args: |
             RELEASE_SHA=${{ github.sha }}
-          tags: |
-            ${{ steps.image.outputs.name }}:main
-            ${{ steps.image.outputs.name }}:${{ github.sha }}
+          tags: ${{ steps.image.outputs.name }}:${{ github.sha }}
           cache-from: type=gha,scope=${{ matrix.name }}
           cache-to: type=gha,mode=max,scope=${{ matrix.name }}
           provenance: true
           sbom: true
 
+  promover:
+    name: Promover a main
+    needs: [pruebas, publicar]
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      # Copia el manifiesto en el registro, sin reconstruir: :main queda idéntica a la imagen probada.
+      - env:
+          REPOSITORY: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+        run: |
+          for name in gateway web api calendar postgres admin; do
+            image="ghcr.io/${REPOSITORY,,}-${name}"
+            docker buildx imagetools create --tag "${image}:main" "${image}:${SHA}"
+          done
+
   desplegar:
     name: Desplegar en Coolify
-    needs: [pruebas, publicar]
+    needs: [promover]
     runs-on: ubuntu-latest
     environment: production
     steps:
