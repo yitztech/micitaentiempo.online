@@ -27,7 +27,6 @@ jobs:
 
   publicar:
     name: Publicar ${{ matrix.name }}
-    needs: pruebas
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -66,7 +65,7 @@ jobs:
 
   desplegar:
     name: Desplegar en Coolify
-    needs: publicar
+    needs: [pruebas, publicar]
     runs-on: ubuntu-latest
     environment: production
     steps:
