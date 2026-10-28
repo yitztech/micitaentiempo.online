@@ -5,8 +5,8 @@ import { CopyField, embedSnippets } from "~/components/copy-field";
 import { Alert, Card, LinkButton } from "~/components/ui";
 import { siteContext } from "~/lib/context";
 import { fmt, useRoot } from "~/lib/i18n";
-import { panelGet, panelGetOptional } from "~/lib/panel.server";
-import type { BoardView, EventView, Org } from "~/lib/panel-types";
+import { panelGet } from "~/lib/panel.server";
+import type { BoardView, EventView } from "~/lib/panel-types";
 import { metaFor } from "~/lib/seo";
 import { formatDateTime } from "~/lib/time";
 import { usePanel } from "./_panel";
@@ -14,13 +14,9 @@ import type { Route } from "./+types/dashboard";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   const { lang } = context.get(siteContext);
-  const [calendars, org] = await Promise.all([
-    panelGet<BoardView[]>(request, context, "/api/v1/calendars"),
-    panelGetOptional<Org>(request, context, "/api/v1/org"),
-  ]);
+  const calendars = await panelGet<BoardView[]>(request, context, "/api/v1/calendars");
   if (calendars.length === 0) {
-    if (org) throw redirect(pathFor("welcome", lang));
-    throw redirect(pathFor("myAppointments", lang));
+    throw redirect(pathFor("welcome", lang));
   }
   const from = new Date().toISOString();
   const to = new Date(Date.now() + 7 * 86_400_000).toISOString();
