@@ -49,29 +49,12 @@ jobs:
         env:
           REPOSITORY: ${{ github.repository }}
         run: echo "name=ghcr.io/${REPOSITORY,,}-${{ matrix.name }}" >> "$GITHUB_OUTPUT"
-      - name: Instalar Node y pnpm
+      - name: Descargar APK Android precompilado
         if: matrix.name == 'web'
-        uses: pnpm/action-setup@v6
+        uses: actions/download-artifact@v7
         with:
-          version: 12.9.1
-      - name: Configurar Node
-        if: matrix.name == 'web'
-        uses: actions/setup-node@v7
-        with:
-          node-version: 24
-          cache: 'pnpm'
-      - name: Configurar Java
-        if: matrix.name == 'web'
-        uses: actions/setup-java@v6
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-      - name: Instalar dependencias del monorepo
-        if: matrix.name == 'web'
-        run: pnpm install --frozen-lockfile
-      - name: Compilar APK Android
-        if: matrix.name == 'web'
-        run: scripts/build-apk.sh
+          name: app-apk
+          path: services/web/public
       - uses: docker/build-push-action@v7
         with:
           context: .
@@ -124,18 +107,18 @@ jobs:
           SITE_URL: ${{ vars.SITE_URL }}
           EXPECTED_SHA: ${{ github.sha }}
         run: |
-          for attempt in $(seq 1 60); do
+          for attempt in $(seq 1 120); do
             gateway=$(curl --fail --silent --max-time 10 "$SITE_URL/version.json" | jq -r '.revision' || true)
             api=$(curl --fail --silent --max-time 10 "$SITE_URL/api/healthz" | jq -r '.revision' || true)
             if [ "$gateway" = "$EXPECTED_SHA" ] && [ "$api" = "$EXPECTED_SHA" ]; then
               echo "Desplegado: $EXPECTED_SHA"
               exit 0
             fi
-            if [ "$attempt" -eq 60 ]; then
+            if [ "$attempt" -eq 120 ]; then
               echo "::error::Coolify no sirvió la revisión esperada en 10 minutos (gateway=$gateway, api=$api)."
               exit 1
             fi
-            sleep 10
+            sleep 5
           done
 
       # Humo de solo lectura en los dos dominios (features/humo/produccion.feature).

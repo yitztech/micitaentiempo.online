@@ -106,8 +106,17 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+      - name: Configurar Gradle y caché optimizada
+        uses: gradle/actions/setup-gradle@v4
       - run: pnpm install --frozen-lockfile
       - run: scripts/build-apk.sh
+      - name: Publicar artefacto APK para el despliegue
+        uses: actions/upload-artifact@v7
+        with:
+          name: app-apk
+          path: services/web/public/app.apk
+          if-no-files-found: error
+          retention-days: 1
 
   gateway:
     name: Configuración de nginx
@@ -154,6 +163,13 @@ jobs:
           severity: CRITICAL
           ignore-unfixed: true
           exit-code: "1"
+      - name: Caché de navegadores Playwright
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
       - run: pnpm --filter @mcet/escenarios exec playwright install --with-deps chromium
       # Los pasos importan paquetes del monorepo (p. ej. @mcet/i18n): se compilan antes.
       - run: pnpm --filter "@mcet/escenarios^..." build
