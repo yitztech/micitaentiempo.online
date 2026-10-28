@@ -25,28 +25,28 @@ type BookingPolicy struct {
 
 // Calendar es un tablero.
 type Calendar struct {
-	ID            string
-	OrgID         string
-	Slug          string
-	Name          string
-	Timezone      string
-	Capacity      int
-	Country       string
-	Subdivision   string
-	Address       string
-	EmbedPolicy   EmbedPolicy
-	BookingPolicy BookingPolicy
+	ID               string
+	OrgID            string
+	Slug             string
+	Name             string
+	Timezone         string
+	Capacity         int
+	Country          string
+	Subdivision      string
+	Address          string
+	EmbedPolicy      EmbedPolicy
+	BookingPolicy    BookingPolicy
 	Status           string
 	CreatedAt        time.Time
 	OrgStatus        string
-	AggregateVersion int
+	AggregateVersion int32
 }
 
 // CalendarSnapshot es el estado del agregado tablero/servicios para proyección y reconciliación (ADR 0019).
 type CalendarSnapshot struct {
 	CalendarID        string
 	OrgID             string
-	AggregateVersion  int
+	AggregateVersion  int32
 	State             string // "active", "archived", "deleted"
 	Slug              string
 	HasActiveServices bool
@@ -274,7 +274,7 @@ func (s *Store) PurgeOrgTx(ctx context.Context, tx pgx.Tx, orgID string) (int, [
 	var tombstones []CalendarSnapshot
 	for rows.Next() {
 		var snap CalendarSnapshot
-		var v int
+		var v int32
 		if err := rows.Scan(&snap.CalendarID, &snap.Slug, &v, &snap.UpdatedAt); err != nil {
 			return 0, nil, err
 		}

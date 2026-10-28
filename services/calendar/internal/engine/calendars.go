@@ -306,7 +306,7 @@ func (s CalendarServer) ListCalendarSnapshots(ctx context.Context, req *calendar
 		out.Snapshots = append(out.Snapshots, &calendarv1.CalendarSnapshot{
 			CalendarId:        snap.CalendarID,
 			OrgId:             snap.OrgID,
-			AggregateVersion:  int32(snap.AggregateVersion),
+			AggregateVersion:  snap.AggregateVersion,
 			State:             snap.State,
 			Slug:              snap.Slug,
 			HasActiveServices: snap.HasActiveServices,
