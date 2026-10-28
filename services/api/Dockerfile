@@ -24,6 +24,7 @@ RUN pnpm --filter "@mcet/api..." build \
 # better-auth declara drizzle-kit y vitest como peers opcionales y pnpm los deja en el árbol de
 # producción con sus propios esbuild y vite. Nunca se cargan en ejecución: se quitan aquí y la
 # construcción falla si queda alguna herramienta de desarrollo (esbuild, vite, vitest, drizzle-kit, tsx).
+# Los paquetes @sentry/* traen plugins para bundlers (esbuild.js) que no son esbuild: no cuentan.
 RUN cd /out/node_modules/.pnpm \
  && rm -rf esbuild@* @esbuild+* @esbuild-kit+* drizzle-kit@* vitest@* @vitest+* vite@* tsx@* \
  && rm -rf node_modules/esbuild node_modules/@esbuild node_modules/@esbuild-kit node_modules/.bin/esbuild \
@@ -32,7 +33,7 @@ RUN cd /out/node_modules/.pnpm \
       \( -name esbuild -o -name @esbuild -o -name @esbuild-kit -o -name vite -o -name vitest -o -name drizzle-kit -o -name tsx \) -delete \
  && find -L /out/node_modules -type l -exec rm -f {} + \
  && find /out/node_modules -type d -path "*/fastify/test" -prune -exec rm -rf {} + \
- && ! find /out -name "*esbuild*" | grep . \
+ && ! find /out -name "*esbuild*" -not -path "*/@sentry/*" | grep . \
  && ! ls /out/node_modules/.pnpm | grep -E '^(@?esbuild|vite@|vitest@|drizzle-kit@|tsx@)'
 
 FROM node:24.22.0-alpine3.24
