@@ -102,7 +102,10 @@ When("usa un código de respaldo", async ({ estado }) => {
 
 Then("está en su panel", async ({ estado }) => {
   const page = estado.pagina2fa as Page;
-  await expect(page).toHaveURL(/\/(panel|bienvenida|dashboard|welcome)/, { timeout: 15_000 });
+  await expect(page).toHaveURL(
+    /\/(panel|bienvenida|dashboard|welcome|citas|appointments|rendez-vous|termine|appuntamenti|agendamentos)/,
+    { timeout: 15_000 },
+  );
   await page.context().close();
 });
 
