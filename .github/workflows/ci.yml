@@ -110,10 +110,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: docker/setup-buildx-action@v4
-      # Expone el token de la caché de Actions a docker compose (compose.ci-cache.yml).
-      - uses: crazy-max/ghaction-github-runtime@v4
       - name: Construir imágenes api y web
-        run: docker compose -f compose.prod.yml -f compose.ci.yml -f compose.ci-cache.yml --env-file .env.ci build api web
+        run: docker compose -f compose.prod.yml -f compose.ci.yml --env-file .env.ci build api web
       - name: Escanear imagen api
         uses: aquasecurity/trivy-action@v0.36.0
         with:
@@ -141,8 +139,6 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: docker/setup-buildx-action@v4
-      # Expone el token de la caché de Actions a docker compose (compose.ci-cache.yml).
-      - uses: crazy-max/ghaction-github-runtime@v4
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v7
         with:
@@ -152,7 +148,7 @@ jobs:
       - name: Dominios locales
         run: echo "127.0.0.1 micitaentiempo.localhost myappointmentontime.localhost admin.micitaentiempo.localhost admin.myappointmentontime.localhost" | sudo tee -a /etc/hosts
       - name: Construir y levantar la topología de producción
-        run: docker compose -f compose.prod.yml -f compose.ci.yml -f compose.ci-cache.yml --env-file .env.ci -p ci up -d --build --wait
+        run: docker compose -f compose.prod.yml -f compose.ci.yml --env-file .env.ci -p ci up -d --build --wait
       - name: Caché de navegadores Playwright
         uses: actions/cache@v6
         with:
