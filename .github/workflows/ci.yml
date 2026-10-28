@@ -161,6 +161,16 @@ jobs:
       - run: pnpm --filter "@mcet/escenarios^..." build
       - name: Backend y frontend - catálogo Gherkin completo en escritorio
         run: pnpm test:behavior -- --shard=${{ matrix.shard }}/4
+      # ZAP pasivo en cada PR (AUDITORIA SEG-08), solo en el shard más corto y con el mismo entorno:
+      # falla con cualquier aviso nuevo. Las excepciones, con su motivo, en tests/security/zap-reglas.tsv.
+      # El Nocturno lo repite tras el catálogo completo.
+      - name: ZAP baseline
+        if: matrix.shard == 4
+        timeout-minutes: 6
+        run: |
+          mkdir -p zap && cp tests/security/zap-reglas.tsv zap/ && chmod -R 777 zap
+          docker run --rm --network host --add-host micitaentiempo.localhost:127.0.0.1 -v "$PWD/zap:/zap/wrk:rw" ghcr.io/zaproxy/zaproxy:2.17.0 \
+            zap-baseline.py -t http://micitaentiempo.localhost:8080 -c zap-reglas.tsv -r zap.html
       - name: Logs si falla
         if: failure()
         run: docker compose -f compose.prod.yml -f compose.ci.yml --env-file .env.ci -p ci logs --no-color | tail -n 300
@@ -172,4 +182,5 @@ jobs:
             tests/escenarios/playwright-report*
             tests/escenarios/cucumber-report*
             tests/escenarios/test-results*/results.json
+            zap/zap.html
           retention-days: 14
