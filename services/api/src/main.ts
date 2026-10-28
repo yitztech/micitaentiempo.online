@@ -1,3 +1,4 @@
+import "./sentry.js";
 import "reflect-metadata";
 import fastifyMultipart from "@fastify/multipart";
 import { NestFactory } from "@nestjs/core";

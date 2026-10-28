@@ -19,6 +19,8 @@ export function contentSecurityPolicy(
   opts: { frameAncestors?: string; stripe?: boolean; google?: boolean } = {},
 ): string {
   const umami = originOf(process.env.UMAMI_SCRIPT_URL);
+  // Registro de errores de la plataforma (Bugsink): el SDK del navegador envía a su origen.
+  const errors = originOf(process.env.SENTRY_DSN);
   const extra = umami ? ` ${umami}` : "";
   // Solo en facturación y con Stripe activo (07-frontend.md §7.10).
   const stripeScript = opts.stripe ? " https://js.stripe.com" : "";
@@ -35,7 +37,7 @@ export function contentSecurityPolicy(
     `style-src 'self' 'unsafe-inline'${gsi && " https://accounts.google.com/gsi/style"}`,
     "img-src 'self' data: blob:",
     "font-src 'self' data:",
-    `connect-src 'self'${extra}${stripeConnect}${gsi}`,
+    `connect-src 'self'${extra}${errors && ` ${errors}`}${stripeConnect}${gsi}`,
     ...(frames.length ? [`frame-src ${frames.join(" ")}`] : []),
     `frame-ancestors ${opts.frameAncestors ?? "'none'"}`,
     "base-uri 'self'",
