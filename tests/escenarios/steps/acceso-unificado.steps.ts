@@ -31,10 +31,12 @@ When("abre la entrada al negocio {string}", async ({ page }, texto: string) => {
   const href = await link.getAttribute("href");
   await link.click();
   await expect(page).toHaveURL(new RegExp(`${href}$`));
+  await expect(page.locator('form input[name="email"]')).toBeVisible();
 });
 
 Then("puede crear una cuenta desde el acceso en {string}", async ({ page }, registro: string) => {
-  await expect(page.locator(`main a[href="${registro}"]`)).toBeVisible();
+  await expect(page.locator('form input[name="email"]')).toBeVisible();
+  await expect(page.locator(`main a[href="${registro}"]`).first()).toBeVisible();
 });
 
 Then("el formulario de acceso envía las credenciales sin solicitar CAPTCHA", async ({ page }) => {
