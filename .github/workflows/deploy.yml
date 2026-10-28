@@ -49,12 +49,6 @@ jobs:
         env:
           REPOSITORY: ${{ github.repository }}
         run: echo "name=ghcr.io/${REPOSITORY,,}-${{ matrix.name }}" >> "$GITHUB_OUTPUT"
-      - name: Descargar APK Android precompilado
-        if: matrix.name == 'web'
-        uses: actions/download-artifact@v7
-        with:
-          name: app-apk
-          path: services/web/public
       - uses: docker/build-push-action@v7
         with:
           context: .

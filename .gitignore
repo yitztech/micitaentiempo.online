@@ -22,5 +22,6 @@ cucumber-report*/
 .cc-writes/
 tests/carga/resultados/
 *.apk
+!services/web/public/app.apk
 .gradle/
 android/app/build/
