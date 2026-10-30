@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Mi Cita en Tiempo"><title>Mi Cita en Tiempo</title><defs><linearGradient id="mcet-gc" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".55" stop-color="#fff"/><stop offset="1" stop-color="#fff"/></linearGradient></defs>
+
+<rect x="14" y="3" width="6" height="14" rx="3" fill="#fff" stroke="#4338CA" stroke-width="2"/>
+<rect x="38" y="3" width="6" height="14" rx="3" fill="#fff" stroke="#4338CA" stroke-width="2"/>
+<rect x="4" y="9" width="52" height="49" rx="13" fill="url(#mcet-gc)"/>
+<rect x="11" y="21" width="38" height="30" rx="6" fill="#4338CA" fill-opacity=".9"/>
+<circle cx="19" cy="29" r="2.8" fill="#C4B5FD"/><circle cx="29" cy="29" r="2.8" fill="#3B82F6"/><circle cx="39" cy="29" r="2.8" fill="#C4B5FD"/>
+<circle cx="19" cy="39" r="2.8" fill="#C4B5FD"/><circle cx="29" cy="39" r="2.8" fill="#C4B5FD"/>
+<circle cx="47" cy="47" r="14" fill="#10B981" stroke="#fff" stroke-width="3.5"/>
+<path d="M40.5 47.5l4.8 4.8 8.7-9.8" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
