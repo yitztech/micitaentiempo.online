@@ -114,12 +114,12 @@ export default function BusinessDirectory({ loaderData }: Route.ComponentProps) 
     <Container className="py-10 sm:py-14">
       {/* Encabezado */}
       <div className="max-w-2xl">
-        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{d.title}</h1>
+        <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">{d.title}</h1>
         <p className="mt-3 text-lg text-muted">{d.lead}</p>
       </div>
 
       {/* Barra de búsqueda y filtros */}
-      <Card className="mt-8 p-4 sm:p-6">
+      <Card className="mt-8 rounded-[var(--radius-panel)] p-4 sm:p-6">
         <Form method="get" className="flex flex-col gap-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {/* Texto de búsqueda */}
@@ -256,7 +256,7 @@ function BusinessCard({ business }: { business: PublicBusinessSummary }) {
       : `${loc.address}, ${loc.locality}`;
 
   return (
-    <Card className="flex flex-col overflow-hidden transition-shadow hover:shadow-md">
+    <Card className="flex flex-col overflow-hidden transition-shadow hover:shadow-[var(--shadow-pop)]">
       {/* Portada */}
       <div className="relative h-44 w-full bg-surface-2 overflow-hidden">
         {business.cover?.url ? (
@@ -267,12 +267,12 @@ function BusinessCard({ business }: { business: PublicBusinessSummary }) {
             className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-muted/50">
+          <div className="flex h-full w-full items-center justify-center text-primary/40">
             <Building2 aria-hidden className="size-12" />
           </div>
         )}
         {business.distanceKm !== null ? (
-          <div className="absolute bottom-2 right-2 rounded-full bg-background/90 backdrop-blur px-2.5 py-1 text-xs font-semibold text-text shadow-sm">
+          <div className="absolute bottom-2 right-2 rounded-full bg-surface/95 backdrop-blur px-2.5 py-1 text-xs font-semibold text-text shadow-sm">
             {fmt(d.distanceKm, { distance: business.distanceKm.toFixed(1) })}
           </div>
         ) : null}
@@ -284,7 +284,7 @@ function BusinessCard({ business }: { business: PublicBusinessSummary }) {
           <Badge>{categoryLabel(business.primaryCategory, site.lang)}</Badge>
         </div>
 
-        <h2 className="mt-2 text-xl font-semibold tracking-tight text-text hover:text-primary transition-colors">
+        <h2 className="mt-2.5 text-xl font-bold tracking-tight text-text hover:text-primary transition-colors">
           <Link to={profileHref}>{business.displayName}</Link>
         </h2>
 

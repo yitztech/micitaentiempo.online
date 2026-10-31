@@ -1,0 +1,7 @@
+# Raíz propia: el rediseño es independiente del workspace del monorepo.
+packages: []
+minimumReleaseAgeExclude:
+  - lucide-react@1.64.0
+onlyBuiltDependencies:
+  - esbuild
+  - sharp

@@ -18,8 +18,8 @@ export function AuthCard({
 }) {
   return (
     <>
-      <Card className="p-6 sm:p-8">
-        <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+      <Card className="p-6 shadow-[var(--shadow-pop)] sm:p-8">
+        <h1 className="text-2xl font-extrabold tracking-tight">{title}</h1>
         {lead ? <p className="mt-2 text-muted">{lead}</p> : null}
         <div className="mt-6">{children}</div>
       </Card>

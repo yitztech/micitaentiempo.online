@@ -1,0 +1,222 @@
+[
+  {
+    "nombre": "Logotipo horizontal",
+    "ubicacion": "src/assets/branding/logo-horizontal.svg",
+    "formato": "SVG",
+    "dimensiones": "viewBox 252×64",
+    "uso": "Cabecera, pie y autenticación (fondo claro)",
+    "estado": "generado (vectorial)",
+    "referencia": "Logotipo superior izquierdo",
+    "existe": true
+  },
+  {
+    "nombre": "Logotipo horizontal oscuro",
+    "ubicacion": "src/assets/branding/logo-horizontal-dark.svg",
+    "formato": "SVG",
+    "dimensiones": "viewBox 252×64",
+    "uso": "Fondos oscuros o índigo (CTA, pie)",
+    "estado": "generado (vectorial)",
+    "referencia": "Logotipo · variante fondo oscuro",
+    "existe": true
+  },
+  {
+    "nombre": "Isotipo",
+    "ubicacion": "src/assets/branding/isotipo.svg",
+    "formato": "SVG",
+    "dimensiones": "viewBox 64×64",
+    "uso": "Avatar de marca, sidebar colapsado, móvil",
+    "estado": "generado (vectorial)",
+    "referencia": "Isotipo calendario + check verde",
+    "existe": true
+  },
+  {
+    "nombre": "Isotipo claro",
+    "ubicacion": "src/assets/branding/isotipo-claro.svg",
+    "formato": "SVG",
+    "dimensiones": "viewBox 64×64",
+    "uso": "Sobre fondos índigo",
+    "estado": "generado (vectorial)",
+    "referencia": "Isotipo · variante monocromática",
+    "existe": true
+  },
+  {
+    "nombre": "Favicon",
+    "ubicacion": "src/assets/branding/favicon.svg",
+    "formato": "SVG",
+    "dimensiones": "viewBox 64×64",
+    "uso": "Pestaña del navegador",
+    "estado": "generado (vectorial)",
+    "referencia": "Isotipo",
+    "existe": true
+  },
+  {
+    "nombre": "Destello",
+    "ubicacion": "src/assets/decorations/sparkle.svg",
+    "formato": "SVG",
+    "dimensiones": "viewBox 48×48",
+    "uso": "Acento junto a fotografías",
+    "estado": "generado (vectorial)",
+    "referencia": "Trazos violeta junto a la foto del hero",
+    "existe": true
+  },
+  {
+    "nombre": "Resplandor del hero",
+    "ubicacion": "src/assets/decorations/hero-glow.svg",
+    "formato": "SVG",
+    "dimensiones": "viewBox 1200×800",
+    "uso": "Fondo del hero",
+    "estado": "generado (vectorial)",
+    "referencia": "Degradado lila del hero",
+    "existe": true
+  },
+  {
+    "nombre": "Rejilla de puntos",
+    "ubicacion": "src/assets/decorations/dots-grid.svg",
+    "formato": "SVG",
+    "dimensiones": "viewBox 120×120",
+    "uso": "Textura decorativa",
+    "estado": "generado (vectorial)",
+    "referencia": "Ambiente del hero",
+    "existe": true
+  },
+  {
+    "nombre": "Fondo CTA",
+    "ubicacion": "src/assets/decorations/cta-glow.svg",
+    "formato": "SVG",
+    "dimensiones": "viewBox 1200×400",
+    "uso": "Bloque CTA final y paneles índigo",
+    "estado": "generado (vectorial)",
+    "referencia": "Gradiente índigo → violeta",
+    "existe": true
+  },
+  {
+    "nombre": "Avatar LT",
+    "ubicacion": "src/assets/images/avatars/laura-torres.svg",
+    "formato": "SVG",
+    "dimensiones": "viewBox 64×64",
+    "uso": "Citas, clientes, testimonios",
+    "estado": "generado (iniciales; la lámina solo trae rostros de ~25 px)",
+    "referencia": "Avatares del panel",
+    "existe": true
+  },
+  {
+    "nombre": "Avatar AG",
+    "ubicacion": "src/assets/images/avatars/ana-garcia.svg",
+    "formato": "SVG",
+    "dimensiones": "viewBox 64×64",
+    "uso": "Citas, clientes, testimonios",
+    "estado": "generado (iniciales; la lámina solo trae rostros de ~25 px)",
+    "referencia": "Avatares del panel",
+    "existe": true
+  },
+  {
+    "nombre": "Avatar CM",
+    "ubicacion": "src/assets/images/avatars/carlos-mendez.svg",
+    "formato": "SVG",
+    "dimensiones": "viewBox 64×64",
+    "uso": "Citas, clientes, testimonios",
+    "estado": "generado (iniciales; la lámina solo trae rostros de ~25 px)",
+    "referencia": "Avatares del panel",
+    "existe": true
+  },
+  {
+    "nombre": "Avatar PR",
+    "ubicacion": "src/assets/images/avatars/pedro-ramirez.svg",
+    "formato": "SVG",
+    "dimensiones": "viewBox 64×64",
+    "uso": "Citas, clientes, testimonios",
+    "estado": "generado (iniciales; la lámina solo trae rostros de ~25 px)",
+    "referencia": "Avatares del panel",
+    "existe": true
+  },
+  {
+    "nombre": "Avatar ML",
+    "ubicacion": "src/assets/images/avatars/maria-lopez.svg",
+    "formato": "SVG",
+    "dimensiones": "viewBox 64×64",
+    "uso": "Citas, clientes, testimonios",
+    "estado": "generado (iniciales; la lámina solo trae rostros de ~25 px)",
+    "referencia": "Avatares del panel",
+    "existe": true
+  },
+  {
+    "nombre": "Avatar SR",
+    "ubicacion": "src/assets/images/avatars/sofia-ruiz.svg",
+    "formato": "SVG",
+    "dimensiones": "viewBox 64×64",
+    "uso": "Citas, clientes, testimonios",
+    "estado": "generado (iniciales; la lámina solo trae rostros de ~25 px)",
+    "referencia": "Avatares del panel",
+    "existe": true
+  },
+  {
+    "nombre": "Avatar DH",
+    "ubicacion": "src/assets/images/avatars/diego-herrera.svg",
+    "formato": "SVG",
+    "dimensiones": "viewBox 64×64",
+    "uso": "Citas, clientes, testimonios",
+    "estado": "generado (iniciales; la lámina solo trae rostros de ~25 px)",
+    "referencia": "Avatares del panel",
+    "existe": true
+  },
+  {
+    "nombre": "Avatar VC",
+    "ubicacion": "src/assets/images/avatars/valeria-cruz.svg",
+    "formato": "SVG",
+    "dimensiones": "viewBox 64×64",
+    "uso": "Citas, clientes, testimonios",
+    "estado": "generado (iniciales; la lámina solo trae rostros de ~25 px)",
+    "referencia": "Avatares del panel",
+    "existe": true
+  },
+  {
+    "nombre": "Fotografía hero-profesional 480w",
+    "ubicacion": "src/assets/images/hero/hero-profesional-480.webp",
+    "formato": "WebP",
+    "dimensiones": "480×462",
+    "uso": "Hero de la home",
+    "estado": "PROVISIONAL: extraída de la lámina de referencia (baja resolución); sustituir por fotografía original",
+    "referencia": "Hero · fotografía principal (profesional sonriendo)",
+    "existe": true
+  },
+  {
+    "nombre": "Fotografía hero-profesional 960w",
+    "ubicacion": "src/assets/images/hero/hero-profesional-960.webp",
+    "formato": "WebP",
+    "dimensiones": "960×924",
+    "uso": "Hero de la home",
+    "estado": "PROVISIONAL: extraída de la lámina de referencia (baja resolución); sustituir por fotografía original",
+    "referencia": "Hero · fotografía principal (profesional sonriendo)",
+    "existe": true
+  },
+  {
+    "nombre": "Fotografía negocio-tablet 640w",
+    "ubicacion": "src/assets/images/professionals/negocio-tablet-640.webp",
+    "formato": "WebP",
+    "dimensiones": "640×410",
+    "uso": "Sección de funcionalidades de la home",
+    "estado": "PROVISIONAL: extraída de la lámina de referencia (baja resolución); sustituir por fotografía original",
+    "referencia": "Sección «Agenda, gestiona y haz crecer tu negocio»",
+    "existe": true
+  },
+  {
+    "nombre": "Fotografía negocio-tablet 1100w",
+    "ubicacion": "src/assets/images/professionals/negocio-tablet-1100.webp",
+    "formato": "WebP",
+    "dimensiones": "1100×704",
+    "uso": "Sección de funcionalidades de la home",
+    "estado": "PROVISIONAL: extraída de la lámina de referencia (baja resolución); sustituir por fotografía original",
+    "referencia": "Sección «Agenda, gestiona y haz crecer tu negocio»",
+    "existe": true
+  },
+  {
+    "nombre": "Iconos de categorías",
+    "ubicacion": "(lucide-react)",
+    "formato": "SVG (componente)",
+    "dimensiones": "n/a",
+    "uso": "Tarjetas de categoría",
+    "estado": "usa Lucide; sin archivos propios",
+    "referencia": "Fila «Una solución, muchas posibilidades»",
+    "existe": true
+  }
+]

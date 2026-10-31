@@ -2,8 +2,9 @@
 @import "@fontsource-variable/inter/wght.css";
 
 /*
- * Tokens de diseño (docs/plan/07-frontend.md §7.7). Los colores viven en variables CSS para que el
- * modo oscuro solo cambie valores; Tailwind los expone como utilidades (bg-primary, text-muted…).
+ * Tokens de diseño · Rediseño Mi Cita en Tiempo (docs/plan/07-frontend.md §7.7).
+ * Paleta aprobada: índigo #4338CA · violeta #6D28D9 · azul #2563EB · esmeralda #047857/#10B981 · fondo #F8F7FF · texto #17162E.
+ * Los colores viven en variables CSS para que el modo oscuro solo cambie valores; Tailwind los expone como utilidades.
  */
 @theme {
   --color-primary: var(--primary);
@@ -12,6 +13,8 @@
   --color-on-primary: var(--on-primary);
   --color-secondary: var(--secondary);
   --color-accent: var(--accent);
+  --color-violet: var(--violet);
+  --color-blue: var(--blue);
   --color-background: var(--background);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
@@ -26,87 +29,138 @@
   --color-warning-soft: var(--warning-soft);
   --color-danger: var(--danger);
   --color-danger-soft: var(--danger-soft);
-  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
-  --radius-card: 12px;
-  --radius-field: 10px;
-  --shadow-soft: 0 1px 2px rgb(31 42 48 / 0.06), 0 4px 16px rgb(31 42 48 / 0.06);
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --radius-field: 12px;
+  --radius-card: 16px;
+  --radius-panel: 20px;
+  --shadow-soft: var(--shadow-card);
+  --shadow-pop: var(--shadow-elevated);
+  --shadow-photo: var(--shadow-media);
 }
 
 :root {
   color-scheme: light;
-  --primary: #1d6f86;
-  --primary-hover: #175c70;
-  --primary-soft: #e3f1f4;
+  --primary: #4338ca;
+  --primary-hover: #3730a3;
+  --primary-soft: #f1f0ff;
   --on-primary: #ffffff;
-  --secondary: #6e9e87;
-  --accent: #e8a37a;
-  --background: #faf8f4;
+  --secondary: #6d28d9;
+  --accent: #10b981;
+  --violet: #6d28d9;
+  --blue: #2563eb;
+  --background: #f8f7ff;
   --surface: #ffffff;
-  --surface-2: #f3f0ea;
-  --border: #e4e1da;
-  --border-field: #7d898e; /* 3,60:1 blanco · 3,39:1 Arena · 3,16:1 surface-2 */
-  --text: #1f2a30;
-  --text-muted: #55626b;
-  --success: #2e7d5b;
-  --success-soft: #e6f3ec;
-  --warning: #9a5b00;
-  --warning-soft: #fff4e0;
-  --danger: #b3261e;
-  --danger-soft: #fbe9e7;
+  --surface-2: #f1f0ff;
+  --border: #e7e5f6;
+  --border-field: #767b96; /* ≥3,7:1 sobre #ffffff, #f8f7ff y #f1f0ff (WCAG 1.4.11) */
+  --text: #17162e;
+  --text-muted: #525d72; /* ≥5,5:1 sobre #ffffff, #f8f7ff y #f1f0ff (WCAG 1.4.3) */
+  --success: #047857;
+  --success-soft: #d8f6ea;
+  --warning: #b45309;
+  --warning-soft: #fff1dc;
+  --danger: #b91c1c;
+  --danger-soft: #fde8e8;
+  --shadow-card: 0 1px 2px rgb(23 22 46 / 0.04), 0 10px 28px -10px rgb(67 56 202 / 0.12);
+  --shadow-elevated: 0 14px 44px -14px rgb(67 56 202 / 0.28), 0 2px 6px rgb(23 22 46 / 0.05);
+  --shadow-media: 0 24px 60px -24px rgb(67 56 202 / 0.35);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --primary: #5fb3c8;
-    --primary-hover: #7cc3d4;
-    --primary-soft: #16323b;
-    --on-primary: #0f1a1f;
-    --background: #0f1a1f;
-    --surface: #16232a;
-    --surface-2: #1b2b33;
-    --border: #2a3b44;
-    --border-field: #6b818a; /* 3,92:1 surface · 4,32:1 fondo · 3,56:1 surface-2 */
-    --text: #e8eef0;
-    --text-muted: #a9b7be;
-    --success: #6cc49a;
-    --success-soft: #16302a;
-    --warning: #f0b45c;
-    --warning-soft: #33280f;
-    --danger: #f2877e;
-    --danger-soft: #3a1c1a;
+    --primary: #818cf8;
+    --primary-hover: #a5b4fc;
+    --primary-soft: #1e1b4b;
+    --on-primary: #0f0e21;
+    --secondary: #a78bfa;
+    --accent: #34d399;
+    --violet: #a78bfa;
+    --blue: #60a5fa;
+    --background: #0f0e21;
+    --surface: #17162e;
+    --surface-2: #222042;
+    --border: #2e2c54;
+    --border-field: #7877a3; /* ≥3,5:1 sobre surface, background y surface-2 */
+    --text: #f1f0ff;
+    --text-muted: #b0b3cc;
+    --success: #6ee7b7;
+    --success-soft: #112e28;
+    --warning: #fbbf24;
+    --warning-soft: #33240d;
+    --danger: #fca5a5;
+    --danger-soft: #3b181c;
+    --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 10px 28px -10px rgb(0 0 0 / 0.45);
+    --shadow-elevated: 0 14px 44px -14px rgb(0 0 0 / 0.6), 0 2px 6px rgb(0 0 0 / 0.35);
+    --shadow-media: 0 24px 60px -24px rgb(0 0 0 / 0.65);
   }
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --primary: #5fb3c8;
-  --primary-hover: #7cc3d4;
-  --primary-soft: #16323b;
-  --on-primary: #0f1a1f;
-  --background: #0f1a1f;
-  --surface: #16232a;
-  --surface-2: #1b2b33;
-  --border: #2a3b44;
-  --border-field: #6b818a;
-  --text: #e8eef0;
-  --text-muted: #a9b7be;
-  --success: #6cc49a;
-  --success-soft: #16302a;
-  --warning: #f0b45c;
-  --warning-soft: #33280f;
-  --danger: #f2877e;
-  --danger-soft: #3a1c1a;
+  --primary: #818cf8;
+  --primary-hover: #a5b4fc;
+  --primary-soft: #1e1b4b;
+  --on-primary: #0f0e21;
+  --secondary: #a78bfa;
+  --accent: #34d399;
+  --violet: #a78bfa;
+  --blue: #60a5fa;
+  --background: #0f0e21;
+  --surface: #17162e;
+  --surface-2: #222042;
+  --border: #2e2c54;
+  --border-field: #7877a3;
+  --text: #f1f0ff;
+  --text-muted: #b0b3cc;
+  --success: #6ee7b7;
+  --success-soft: #112e28;
+  --warning: #fbbf24;
+  --warning-soft: #33240d;
+  --danger: #fca5a5;
+  --danger-soft: #3b181c;
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 10px 28px -10px rgb(0 0 0 / 0.45);
+  --shadow-elevated: 0 14px 44px -14px rgb(0 0 0 / 0.6), 0 2px 6px rgb(0 0 0 / 0.35);
+  --shadow-media: 0 24px 60px -24px rgb(0 0 0 / 0.65);
 }
 
 html {
   background: var(--background);
   color: var(--text);
   font-family: var(--font-sans);
+  font-feature-settings: "cv11", "ss03";
+  -webkit-font-smoothing: antialiased;
   font-size: 16px;
   line-height: 1.5;
   -webkit-text-size-adjust: 100%;
   text-rendering: optimizeLegibility;
+}
+
+@utility gradient-text {
+  background-image: linear-gradient(95deg, var(--blue) 0%, var(--primary) 45%, var(--violet) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility gradient-brand {
+  background-image: linear-gradient(135deg, #4338ca 0%, #5b3fd1 55%, #6d28d9 100%);
+}
+
+@utility bg-hero-glow {
+  background-image:
+    radial-gradient(
+      circle at 78% 28%,
+      color-mix(in srgb, var(--primary) 14%, transparent) 0%,
+      transparent 45%
+    ),
+    radial-gradient(circle at 10% 85%, color-mix(in srgb, var(--violet) 12%, transparent) 0%, transparent 38%);
+}
+
+@utility bg-cta-glow {
+  background-image:
+    radial-gradient(circle at 85% 10%, rgb(255 255 255 / 0.22) 0%, transparent 50%),
+    linear-gradient(135deg, #4338ca 0%, #5b3fd1 60%, #6d28d9 100%);
 }
 
 h1,

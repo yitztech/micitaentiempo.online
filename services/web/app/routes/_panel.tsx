@@ -44,8 +44,8 @@ export function usePanel(): PanelData {
 
 const item = ({ isActive }: { isActive: boolean }) =>
   cx(
-    "flex min-h-11 items-center gap-3 rounded-[var(--radius-field)] px-3 text-[15px] hover:bg-surface-2",
-    isActive && "bg-primary-soft font-semibold text-primary",
+    "flex min-h-11 items-center gap-3 rounded-[var(--radius-field)] px-3.5 text-[15px] font-medium transition-colors hover:bg-primary-soft/60 hover:text-primary",
+    isActive ? "bg-primary-soft font-semibold text-primary shadow-2xs" : "text-text/85",
   );
 
 /** Panel del personal: barra lateral en escritorio y cajón en móvil. */
@@ -120,12 +120,31 @@ export default function PanelLayout({ loaderData }: Route.ComponentProps) {
     </nav>
   );
 
+  const initials = (me.name || me.email)
+    .split(/[\s@]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((s) => s[0]?.toUpperCase() ?? "")
+    .join("");
+
   const footer = (
-    <div className="mt-6 border-t border-border pt-4">
-      <p className="truncate px-3 text-sm font-medium">{me.name || me.email}</p>
-      <p className="truncate px-3 text-xs text-muted">{me.email}</p>
-      <div className="mt-2 flex flex-col">
-        <LanguageLink />
+    <div className="mt-6 border-t border-border/80 pt-4">
+      <div className="flex items-center gap-3 px-2 py-1.5">
+        <span
+          aria-hidden
+          className="gradient-brand flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white shadow-xs"
+        >
+          {initials || "MC"}
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold text-text">{me.name || me.email}</p>
+          <p className="truncate text-xs text-muted">{me.email}</p>
+        </div>
+      </div>
+      <div className="mt-2.5 flex flex-col gap-1">
+        <div className="px-2 py-1">
+          <LanguageLink />
+        </div>
         <button type="button" onClick={() => void signOut()} className={item({ isActive: false })}>
           <LogOut aria-hidden className="size-5" />
           {p.nav.signOut}
@@ -135,22 +154,22 @@ export default function PanelLayout({ loaderData }: Route.ComponentProps) {
   );
 
   return (
-    <div className="min-h-dvh lg:grid lg:grid-cols-[17rem_1fr]">
+    <div className="min-h-dvh bg-background lg:grid lg:grid-cols-[17.5rem_1fr]">
       <a
         href="#contenido"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-50 focus:rounded-md focus:bg-surface focus:px-3 focus:py-2"
       >
         {t.common.nav.skipToContent}
       </a>
-      <aside className="hidden border-r border-border bg-surface lg:flex lg:min-h-dvh lg:flex-col lg:p-4">
-        <div className="mb-6 px-1">
+      <aside className="hidden border-r border-border/80 bg-surface lg:sticky lg:top-0 lg:flex lg:h-dvh lg:flex-col lg:overflow-y-auto lg:p-4">
+        <div className="mb-6 px-1.5">
           <Logo />
         </div>
         {nav}
         {footer}
       </aside>
       <div className="min-w-0">
-        <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-background/95 px-3 backdrop-blur lg:justify-end lg:px-6">
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border/80 bg-surface/90 px-3 backdrop-blur-md lg:justify-end lg:px-6">
           <button
             type="button"
             className="inline-flex size-11 shrink-0 items-center justify-center rounded-[var(--radius-field)] hover:bg-surface-2 lg:hidden"
@@ -166,11 +185,15 @@ export default function PanelLayout({ loaderData }: Route.ComponentProps) {
           </div>
           <NotificationBell />
         </header>
-        <div id="panel-cajon" hidden={!open} className="border-b border-border bg-surface p-4 lg:hidden">
+        <div
+          id="panel-cajon"
+          hidden={!open}
+          className="border-b border-border bg-surface p-4 shadow-[var(--shadow-soft)] lg:hidden"
+        >
           {nav}
           {footer}
         </div>
-        <main id="contenido" className="mx-auto w-full max-w-6xl p-4 sm:p-6">
+        <main id="contenido" className="mx-auto w-full max-w-6xl p-4 sm:p-6 lg:p-8">
           <Outlet />
         </main>
       </div>
