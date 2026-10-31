@@ -80,32 +80,65 @@ function StructuredData() {
   );
 }
 
-/** Maqueta interactiva visual de alta fidelidad para el Hero. */
+/** Maqueta interactiva visual de alta fidelidad para el Hero (línea estética del rediseño). */
 function HeroPreview() {
   const { t } = useRoot();
   const h = t.public.home;
   const [selectedTime, setSelectedTime] = useState(2);
 
   return (
-    <div className="relative mx-auto w-full max-w-md">
-      {/* Resplandores ambientales de fondo */}
+    <div className="relative mx-auto w-full max-w-lg">
+      {/* Resplandores ambientales y decoración de destello */}
       <div
         aria-hidden
-        className="absolute -top-6 -right-6 -z-10 size-48 rounded-full bg-primary/20 blur-3xl"
+        className="absolute -top-6 -right-6 -z-10 size-52 rounded-full bg-primary/15 blur-3xl"
       />
       <div
         aria-hidden
-        className="absolute -bottom-8 -left-8 -z-10 size-48 rounded-full bg-accent/25 blur-3xl"
+        className="absolute -bottom-8 -left-8 -z-10 size-52 rounded-full bg-secondary/15 blur-3xl"
+      />
+      <img
+        src="/images/redesign/sparkle.svg"
+        alt=""
+        aria-hidden
+        className="pointer-events-none absolute -right-3 -top-7 hidden size-12 sm:block"
       />
 
-      {/* Tarjeta principal simulando dispositivo móvil / tarjeta de reserva */}
+      {/* Fotografía superior estilo collage del rediseño */}
+      <div className="relative mb-4 hidden overflow-hidden rounded-[22px] border border-border/80 shadow-[var(--shadow-photo)] sm:block">
+        <img
+          src="/images/redesign/hero-profesional-960.webp"
+          srcSet="/images/redesign/hero-profesional-480.webp 480w, /images/redesign/hero-profesional-960.webp 960w"
+          sizes="(min-width: 1024px) 420px, 85vw"
+          alt={h.previewProvider}
+          width={960}
+          height={640}
+          fetchPriority="high"
+          className="h-44 w-full object-cover object-[50%_35%]"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#17162e]/60 via-transparent to-transparent"
+        />
+        <div className="absolute bottom-3 left-3.5 right-3.5 flex items-center justify-between gap-2 text-white">
+          <div className="flex items-center gap-2.5">
+            <span className="inline-flex size-2.5 rounded-full bg-[#10b981] ring-4 ring-[#10b981]/30" />
+            <span className="text-xs font-semibold tracking-wide">{h.previewNoCollisions}</span>
+          </div>
+          <span className="rounded-full bg-white/20 px-2.5 py-0.5 text-[11px] font-semibold backdrop-blur-xs">
+            24/7
+          </span>
+        </div>
+      </div>
+
+      {/* Tarjeta principal simulando agenda y reserva interactiva */}
       <Card
-        className="relative overflow-hidden border-border/80 bg-surface/95 p-6 shadow-2xl backdrop-blur"
+        className="relative overflow-hidden border-border/80 bg-surface/95 p-6 shadow-[var(--shadow-pop)] backdrop-blur"
         role="region"
         aria-label={h.previewLabel}
       >
         {/* Cabecera del negocio ficticio con valoración */}
-        <div className="flex items-center justify-between border-b border-border/60 pb-4">
+        <div className="flex items-center justify-between border-b border-border/70 pb-4">
           <div className="flex items-center gap-3">
             <img
               src="/images/testimonials/dr-carlos-mendoza.jpg"
@@ -116,21 +149,21 @@ function HeroPreview() {
             />
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-semibold text-text">{h.previewProvider}</span>
+                <span className="font-bold text-text">{h.previewProvider}</span>
                 <span className="inline-block size-2 rounded-full bg-success" title="En línea" />
               </div>
               <p className="text-xs text-muted">{h.previewService}</p>
             </div>
           </div>
-          <div className="flex items-center gap-1 rounded-full bg-warning-soft px-2.5 py-0.5 text-xs font-semibold text-warning">
-            <Star className="size-3 fill-warning text-warning" />
+          <div className="flex items-center gap-1 rounded-full bg-warning-soft px-2.5 py-1 text-xs font-bold text-warning">
+            <Star className="size-3.5 fill-current" />
             <span>4.9</span>
           </div>
         </div>
 
         {/* Selector de fecha */}
         <div className="mt-4 flex items-center justify-between text-sm">
-          <span className="font-medium text-text capitalize">{h.previewDay}</span>
+          <span className="font-semibold text-text capitalize">{h.previewDay}</span>
           <span className="text-xs text-muted">{h.previewTimezone}</span>
         </div>
 
@@ -144,17 +177,17 @@ function HeroPreview() {
                 key={time}
                 onClick={() => setSelectedTime(i)}
                 className={cx(
-                  "relative flex min-h-11 items-center justify-center rounded-[var(--radius-field)] text-sm font-medium tabular transition-all",
+                  "relative flex min-h-11 items-center justify-center rounded-[var(--radius-field)] text-sm font-semibold tabular transition-all",
                   isSelected
-                    ? "bg-primary font-semibold text-on-primary shadow-md ring-2 ring-primary/30"
-                    : "border border-border-field/70 bg-surface text-text hover:border-primary hover:bg-surface-2",
+                    ? "bg-primary text-on-primary shadow-[0_6px_16px_-6px_rgb(67_56_202/0.6)] ring-2 ring-primary/30"
+                    : "border border-border-field/70 bg-surface text-text hover:border-primary hover:bg-primary-soft/60",
                 )}
               >
                 {time}
                 {isSelected && (
                   <span
                     aria-hidden
-                    className="absolute -top-1 -right-1 size-2 rounded-full bg-accent ring-2 ring-surface"
+                    className="absolute -top-1 -right-1 size-2.5 rounded-full bg-[#10b981] ring-2 ring-surface"
                   />
                 )}
               </button>
@@ -163,8 +196,8 @@ function HeroPreview() {
         </div>
 
         {/* Estado de confirmación instantánea */}
-        <div className="mt-5 rounded-[var(--radius-field)] border border-success/40 bg-success-soft p-3 text-sm">
-          <div className="flex items-center gap-2 font-medium text-text">
+        <div className="mt-5 rounded-[var(--radius-field)] border border-success/35 bg-success-soft p-3.5 text-sm">
+          <div className="flex items-center gap-2 font-semibold text-text">
             <CheckCircle2 className="size-4 shrink-0 text-success" />
             <span>{h.previewConfirm}</span>
           </div>
@@ -172,9 +205,9 @@ function HeroPreview() {
         </div>
 
         {/* Integraciones soportadas */}
-        <div className="mt-4 flex items-center justify-between border-t border-border/50 pt-3 text-[11px] text-muted">
+        <div className="mt-4 flex items-center justify-between border-t border-border/60 pt-3 text-[11px] text-muted">
           <span>{h.previewSync}</span>
-          <div className="flex items-center gap-2 font-medium text-text">
+          <div className="flex items-center gap-2 font-semibold text-text">
             <span>Google</span>
             <span>·</span>
             <span>Outlook</span>
@@ -187,18 +220,18 @@ function HeroPreview() {
       {/* Insignia flotante superior izquierda */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -top-4 -left-4 hidden rounded-full border border-border bg-surface px-3 py-1.5 text-xs font-semibold shadow-lg sm:flex sm:items-center sm:gap-1.5"
+        className="pointer-events-none absolute -top-3 -left-3 hidden rounded-full border border-border bg-surface px-3.5 py-1.5 text-xs font-semibold text-text shadow-[var(--shadow-pop)] sm:flex sm:items-center sm:gap-1.5"
       >
-        <ShieldCheck className="size-3.5 text-success" />
+        <ShieldCheck className="size-4 text-success" />
         <span>{h.previewNoCollisions}</span>
       </div>
 
       {/* Insignia flotante inferior derecha */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -bottom-4 -right-2 hidden rounded-full border border-border bg-surface px-3.5 py-1.5 text-xs font-semibold text-text shadow-lg sm:flex sm:items-center sm:gap-1.5"
+        className="pointer-events-none absolute -bottom-3 -right-2 hidden rounded-full border border-border bg-surface px-3.5 py-1.5 text-xs font-semibold text-text shadow-[var(--shadow-pop)] sm:flex sm:items-center sm:gap-1.5"
       >
-        <Clock3 className="size-3.5 text-primary" />
+        <Clock3 className="size-4 text-primary" />
         <span>{h.previewReminder}</span>
       </div>
     </div>
@@ -226,14 +259,14 @@ export default function Home() {
       <StructuredData />
 
       {/* ─── 1. HERO SECTION ─── */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-surface to-background pb-16 pt-10 sm:pb-24 sm:pt-16 lg:pb-28">
-        <Container className="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
+      <section className="bg-hero-glow relative overflow-hidden pb-16 pt-10 sm:pb-24 sm:pt-16 lg:pb-28">
+        <Container className="grid items-center gap-12 lg:grid-cols-[1.08fr_0.92fr]">
           <div>
-            <Badge>
+            <Badge className="bg-surface px-3.5 py-1.5 shadow-[var(--shadow-soft)]">
               <Clock3 aria-hidden className="size-4" />
               {h.eyebrow}
             </Badge>
-            <h1 className="mt-5 text-4xl font-semibold tracking-tight text-text sm:text-5xl lg:text-6xl">
+            <h1 className="mt-6 text-4xl font-extrabold leading-[1.08] tracking-tight text-text sm:text-5xl lg:text-6xl">
               {h.title}
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted">{h.lead}</p>
@@ -249,45 +282,47 @@ export default function Home() {
                 {t.common.nav.downloadApp}
               </LinkButton>
             </div>
-            <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted">
-              <span>{h.trialNote}</span>
-              <span className="hidden sm:inline">·</span>
-              <span className="flex items-center gap-1 text-text">
-                <ShieldCheck className="size-4 text-success" />
+            <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-medium text-muted">
+              <span className="flex items-center gap-1.5">
+                <CheckCircle2 aria-hidden className="size-4 text-success" />
+                <span>{h.trialNote}</span>
+              </span>
+              <span className="flex items-center gap-1.5 text-text">
+                <ShieldCheck aria-hidden className="size-4 text-success" />
                 <span>{h.cancelAnytime}</span>
               </span>
             </div>
 
             {/* Micro prueba social en el Hero */}
-            <div className="mt-8 flex items-center gap-3 border-t border-border/60 pt-5">
+            <div className="mt-8 flex items-center gap-3 border-t border-border/70 pt-5">
               <div className="flex -space-x-2 overflow-hidden">
                 <img
                   src="/images/testimonials/dra-elena-ramos.jpg"
                   alt="Dra. Elena Ramos"
-                  width={32}
-                  height={32}
-                  className="inline-block size-8 rounded-full object-cover ring-2 ring-surface shadow-xs"
+                  width={34}
+                  height={34}
+                  className="inline-block size-8.5 rounded-full object-cover ring-2 ring-surface shadow-xs"
                 />
                 <img
                   src="/images/testimonials/sofia-benitez.jpg"
                   alt="Sofía Benítez"
-                  width={32}
-                  height={32}
-                  className="inline-block size-8 rounded-full object-cover ring-2 ring-surface shadow-xs"
+                  width={34}
+                  height={34}
+                  className="inline-block size-8.5 rounded-full object-cover ring-2 ring-surface shadow-xs"
                 />
                 <img
                   src="/images/testimonials/roberto-mendez.jpg"
                   alt="Lic. Roberto Méndez"
-                  width={32}
-                  height={32}
-                  className="inline-block size-8 rounded-full object-cover ring-2 ring-surface shadow-xs"
+                  width={34}
+                  height={34}
+                  className="inline-block size-8.5 rounded-full object-cover ring-2 ring-surface shadow-xs"
                 />
                 <img
                   src="/images/testimonials/dr-carlos-mendoza.jpg"
                   alt="Dr. Carlos Mendoza"
-                  width={32}
-                  height={32}
-                  className="inline-block size-8 rounded-full object-cover ring-2 ring-surface shadow-xs"
+                  width={34}
+                  height={34}
+                  className="inline-block size-8.5 rounded-full object-cover ring-2 ring-surface shadow-xs"
                 />
               </div>
               <div className="text-xs text-muted">
@@ -296,7 +331,7 @@ export default function Home() {
                     // biome-ignore lint/suspicious/noArrayIndexKey: iconos estaticos
                     <Star key={i} className="size-3.5 fill-warning text-warning" />
                   ))}
-                  <span className="ml-1 font-semibold text-text">4.9 / 5</span>
+                  <span className="ml-1 font-bold text-text">4.9 / 5</span>
                 </div>
                 <span>{h.socialProof}</span>
               </div>
@@ -307,32 +342,54 @@ export default function Home() {
       </section>
 
       {/* ─── 2. BARRA DE CIFRAS Y CONFIANZA (STATS) ─── */}
-      <section className="border-y border-border/80 bg-surface py-10">
+      <section className="relative z-10 -mt-6 pb-8">
         <Container>
-          <div className="grid grid-cols-2 gap-6 sm:grid-cols-4 sm:gap-8">
-            <div className="text-center sm:text-left">
-              <p className="text-3xl font-bold tracking-tight text-primary sm:text-4xl tabular">
-                {stats.businessesValue}
-              </p>
-              <p className="mt-1 text-sm font-medium text-muted">{stats.businessesLabel}</p>
+          <div className="grid grid-cols-2 gap-6 rounded-[var(--radius-panel)] border border-border/80 bg-surface p-6 shadow-[var(--shadow-soft)] sm:grid-cols-4 sm:gap-8 sm:p-8">
+            <div className="flex items-center gap-3.5">
+              <span className="hidden size-12 shrink-0 items-center justify-center rounded-2xl bg-primary-soft text-primary sm:flex">
+                <Briefcase aria-hidden className="size-6" />
+              </span>
+              <div>
+                <p className="text-2xl font-extrabold tracking-tight text-primary sm:text-3xl tabular">
+                  {stats.businessesValue}
+                </p>
+                <p className="mt-0.5 text-xs font-medium text-muted sm:text-sm">{stats.businessesLabel}</p>
+              </div>
             </div>
-            <div className="text-center sm:text-left">
-              <p className="text-3xl font-bold tracking-tight text-primary sm:text-4xl tabular">
-                {stats.bookingsValue}
-              </p>
-              <p className="mt-1 text-sm font-medium text-muted">{stats.bookingsLabel}</p>
+            <div className="flex items-center gap-3.5">
+              <span className="hidden size-12 shrink-0 items-center justify-center rounded-2xl bg-primary-soft text-primary sm:flex">
+                <Calendar aria-hidden className="size-6" />
+              </span>
+              <div>
+                <p className="text-2xl font-extrabold tracking-tight text-primary sm:text-3xl tabular">
+                  {stats.bookingsValue}
+                </p>
+                <p className="mt-0.5 text-xs font-medium text-muted sm:text-sm">{stats.bookingsLabel}</p>
+              </div>
             </div>
-            <div className="text-center sm:text-left">
-              <p className="text-3xl font-bold tracking-tight text-success sm:text-4xl tabular">
-                {stats.zeroCollisionsValue}
-              </p>
-              <p className="mt-1 text-sm font-medium text-muted">{stats.zeroCollisionsLabel}</p>
+            <div className="flex items-center gap-3.5">
+              <span className="hidden size-12 shrink-0 items-center justify-center rounded-2xl bg-success-soft text-success sm:flex">
+                <ShieldCheck aria-hidden className="size-6" />
+              </span>
+              <div>
+                <p className="text-2xl font-extrabold tracking-tight text-success sm:text-3xl tabular">
+                  {stats.zeroCollisionsValue}
+                </p>
+                <p className="mt-0.5 text-xs font-medium text-muted sm:text-sm">
+                  {stats.zeroCollisionsLabel}
+                </p>
+              </div>
             </div>
-            <div className="text-center sm:text-left">
-              <p className="text-3xl font-bold tracking-tight text-primary sm:text-4xl tabular">
-                {stats.uptimeValue}
-              </p>
-              <p className="mt-1 text-sm font-medium text-muted">{stats.uptimeLabel}</p>
+            <div className="flex items-center gap-3.5">
+              <span className="hidden size-12 shrink-0 items-center justify-center rounded-2xl bg-primary-soft text-primary sm:flex">
+                <Globe2 aria-hidden className="size-6" />
+              </span>
+              <div>
+                <p className="text-2xl font-extrabold tracking-tight text-primary sm:text-3xl tabular">
+                  {stats.uptimeValue}
+                </p>
+                <p className="mt-0.5 text-xs font-medium text-muted sm:text-sm">{stats.uptimeLabel}</p>
+              </div>
             </div>
           </div>
         </Container>
@@ -348,7 +405,7 @@ export default function Home() {
             </Badge>
             <h2
               id="sectores-titulo"
-              className="mt-4 text-3xl font-semibold tracking-tight text-text sm:text-4xl"
+              className="mt-4 text-3xl font-extrabold tracking-tight text-text sm:text-4xl"
             >
               {h.sectorsTitle}
             </h2>
@@ -366,10 +423,10 @@ export default function Home() {
                   key={sec.id}
                   onClick={() => setActiveSector(idx)}
                   className={cx(
-                    "flex min-h-11 items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all sm:px-5",
+                    "flex min-h-11 items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all sm:px-5",
                     isActive
-                      ? "bg-primary text-on-primary shadow-md"
-                      : "border border-border bg-surface text-muted hover:border-primary/50 hover:text-text",
+                      ? "bg-primary text-on-primary shadow-[0_6px_16px_-6px_rgb(67_56_202/0.55)]"
+                      : "border border-border bg-surface text-muted hover:border-primary/50 hover:bg-primary-soft/50 hover:text-primary",
                   )}
                 >
                   <Icon className="size-4 shrink-0" />
@@ -379,21 +436,23 @@ export default function Home() {
             })}
           </div>
 
-          {/* Tarjeta detallada de la industria seleccionada con maqueta visual */}
-          <div className="mt-8 rounded-2xl border border-border/80 bg-surface p-6 shadow-sm sm:p-10">
-            <div className="grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr]">
+          {/* Tarjeta detallada de la industria seleccionada con maqueta visual estilo Showcase */}
+          <div className="mt-8 rounded-[28px] border border-primary/15 bg-gradient-to-br from-primary-soft/60 via-surface to-surface p-6 shadow-[var(--shadow-soft)] sm:p-10">
+            <div className="grid items-center gap-10 lg:grid-cols-[1.08fr_0.92fr]">
               <div>
-                <span className="inline-block rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
+                <span className="inline-block rounded-full bg-primary-soft px-3.5 py-1 text-xs font-semibold text-primary ring-1 ring-primary/15">
                   {currentSector.badge}
                 </span>
-                <h3 className="mt-3 text-2xl font-bold text-text sm:text-3xl">{currentSector.name}</h3>
-                <p className="mt-1 text-base font-medium text-primary">{currentSector.tagline}</p>
+                <h3 className="mt-3 text-2xl font-extrabold tracking-tight text-text sm:text-3xl">
+                  {currentSector.name}
+                </h3>
+                <p className="mt-1 text-base font-semibold text-primary">{currentSector.tagline}</p>
                 <p className="mt-4 text-base leading-relaxed text-muted">{currentSector.description}</p>
 
                 <ul className="mt-6 space-y-3">
                   {currentSector.points.map((pt) => (
-                    <li key={pt} className="flex items-start gap-2.5 text-sm text-text">
-                      <CheckCircle2 className="size-4 shrink-0 text-success" />
+                    <li key={pt} className="flex items-start gap-2.5 text-[15px] font-medium text-text">
+                      <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-success" />
                       <span>{pt}</span>
                     </li>
                   ))}
@@ -402,7 +461,7 @@ export default function Home() {
                 <div className="mt-8">
                   <LinkButton
                     to={pathFor("signUp", site.lang)}
-                    size="md"
+                    size="lg"
                     className="inline-flex items-center gap-2"
                   >
                     <span>{h.sectorsCta}</span>
@@ -412,29 +471,35 @@ export default function Home() {
               </div>
 
               {/* Fotografía ambiental del sector y Maqueta representativa de la cita */}
-              <div className="space-y-4">
-                <div className="relative overflow-hidden rounded-xl border border-border/80 shadow-md">
+              <div className="relative space-y-4">
+                <img
+                  src="/images/redesign/sparkle.svg"
+                  alt=""
+                  aria-hidden
+                  className="pointer-events-none absolute -right-2 -top-6 z-10 hidden size-12 sm:block"
+                />
+                <div className="relative overflow-hidden rounded-[22px] border border-border/80 shadow-[var(--shadow-photo)]">
                   <img
                     src={SECTOR_IMAGES[activeSector] ?? SECTOR_IMAGES[0]}
                     alt={currentSector.name}
                     width={640}
                     height={360}
-                    className="h-44 w-full object-cover sm:h-52"
+                    className="h-48 w-full object-cover sm:h-56"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent pointer-events-none" />
-                  <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-full bg-surface/90 px-3 py-1 text-xs font-semibold text-text shadow-xs backdrop-blur-xs">
+                  <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-full bg-surface/95 px-3 py-1 text-xs font-semibold text-text shadow-xs backdrop-blur-xs">
                     <SectorIcon className="size-3.5 text-primary" />
                     <span>{currentSector.badge}</span>
                   </div>
                 </div>
 
-                <div className="rounded-xl border border-border bg-surface-2 p-5 shadow-xs">
-                  <div className="flex items-center justify-between border-b border-border pb-3">
+                <div className="rounded-[var(--radius-card)] border border-border/80 bg-surface p-5 shadow-[var(--shadow-pop)]">
+                  <div className="flex items-center justify-between border-b border-border/70 pb-3">
                     <div className="flex items-center gap-2">
                       <span className="flex size-7 items-center justify-center rounded-lg bg-primary text-on-primary">
                         <SectorIcon className="size-3.5" />
                       </span>
-                      <span className="text-xs font-semibold uppercase tracking-wider text-muted">
+                      <span className="text-xs font-bold uppercase tracking-wider text-muted">
                         {h.mockupView}
                       </span>
                     </div>
@@ -448,8 +513,8 @@ export default function Home() {
                     <p className="text-xs text-muted">{currentSector.mockupProvider}</p>
                   </div>
 
-                  <div className="mt-3 flex items-center justify-between rounded-lg border border-border/80 bg-surface px-3 py-2 text-xs">
-                    <div className="flex items-center gap-2 text-text font-medium">
+                  <div className="mt-3 flex items-center justify-between rounded-xl border border-border/80 bg-surface-2/60 px-3 py-2 text-xs">
+                    <div className="flex items-center gap-2 font-semibold text-text">
                       <Calendar className="size-3.5 text-primary" />
                       <span>{currentSector.mockupTime}</span>
                     </div>
@@ -470,7 +535,7 @@ export default function Home() {
         <Container>
           <div className="max-w-2xl">
             <Badge>{h.featuresBadge}</Badge>
-            <h2 id="destacados" className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">
+            <h2 id="destacados" className="mt-4 text-3xl font-extrabold tracking-tight sm:text-4xl">
               {h.highlightsTitle}
             </h2>
           </div>
@@ -480,12 +545,12 @@ export default function Home() {
               return (
                 <li
                   key={item.title}
-                  className="group relative rounded-[var(--radius-card)] border border-border bg-background p-6 transition-all hover:border-primary/50 hover:shadow-md"
+                  className="group relative rounded-[var(--radius-card)] border border-border/80 bg-background p-6 shadow-[var(--shadow-soft)] transition-all hover:border-primary/40 hover:shadow-[var(--shadow-pop)]"
                 >
-                  <span className="flex size-11 items-center justify-center rounded-[var(--radius-field)] bg-primary-soft text-primary transition-colors group-hover:bg-primary group-hover:text-on-primary">
-                    <Icon aria-hidden className="size-5" />
+                  <span className="flex size-12 items-center justify-center rounded-2xl bg-primary-soft text-primary transition-colors group-hover:bg-primary group-hover:text-on-primary">
+                    <Icon aria-hidden className="size-6" />
                   </span>
-                  <h3 className="mt-4 text-lg font-semibold text-text">{item.title}</h3>
+                  <h3 className="mt-4 text-lg font-bold text-text">{item.title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-muted">{item.body}</p>
                 </li>
               );
@@ -500,7 +565,7 @@ export default function Home() {
           <div className="mx-auto max-w-2xl text-center">
             <h2
               id="comparativa-titulo"
-              className="text-3xl font-semibold tracking-tight text-text sm:text-4xl"
+              className="text-3xl font-extrabold tracking-tight text-text sm:text-4xl"
             >
               {h.comparisonTitle}
             </h2>
@@ -511,7 +576,7 @@ export default function Home() {
             {/* Antes: El método tradicional */}
             <Card className="border-danger/30 bg-danger-soft/30 p-8">
               <div className="flex items-center gap-3">
-                <span className="flex size-10 items-center justify-center rounded-full bg-danger-soft text-danger">
+                <span className="flex size-11 items-center justify-center rounded-2xl bg-danger-soft text-danger">
                   <XCircle className="size-5" />
                 </span>
                 <h3 className="text-xl font-bold text-danger">{h.comparisonBeforeTitle}</h3>
@@ -527,16 +592,16 @@ export default function Home() {
             </Card>
 
             {/* Después: Con Mi Cita en Tiempo */}
-            <Card className="border-primary/40 bg-primary-soft/30 p-8 shadow-md">
+            <Card className="border-primary/40 bg-primary-soft/40 p-8 shadow-[var(--shadow-pop)]">
               <div className="flex items-center gap-3">
-                <span className="flex size-10 items-center justify-center rounded-full bg-primary text-on-primary">
+                <span className="flex size-11 items-center justify-center rounded-2xl bg-primary text-on-primary">
                   <CheckCircle2 className="size-5" />
                 </span>
                 <h3 className="text-xl font-bold text-primary">{h.comparisonAfterTitle}</h3>
               </div>
               <ul className="mt-6 space-y-4">
                 {h.comparisonAfterItems.map((item) => (
-                  <li key={item} className="flex items-start gap-3 text-sm text-text font-medium">
+                  <li key={item} className="flex items-start gap-3 text-sm font-medium text-text">
                     <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-success" />
                     <span>{item}</span>
                   </li>
@@ -551,7 +616,7 @@ export default function Home() {
       <section aria-labelledby="pasos" className="border-t border-border/60 bg-surface py-20 sm:py-24">
         <Container>
           <div className="mx-auto max-w-2xl text-center">
-            <h2 id="pasos" className="text-3xl font-semibold tracking-tight sm:text-4xl">
+            <h2 id="pasos" className="text-3xl font-extrabold tracking-tight sm:text-4xl">
               {h.stepsTitle}
             </h2>
             <p className="mt-3 text-muted">{h.stepsSubtitle}</p>
@@ -560,15 +625,15 @@ export default function Home() {
             {h.steps.map((step, i) => (
               <li
                 key={step.title}
-                className="relative rounded-2xl border border-border bg-background p-6 shadow-sm"
+                className="relative rounded-[var(--radius-panel)] border border-border/80 bg-background p-6 shadow-[var(--shadow-soft)]"
               >
                 <span
-                  className="flex size-12 items-center justify-center rounded-xl bg-primary text-xl font-bold text-on-primary tabular shadow-md"
+                  className="gradient-brand flex size-12 items-center justify-center rounded-2xl text-xl font-extrabold text-white tabular shadow-md"
                   aria-hidden
                 >
                   {i + 1}
                 </span>
-                <h3 className="mt-5 text-xl font-semibold text-text">{step.title}</h3>
+                <h3 className="mt-5 text-xl font-bold text-text">{step.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-muted">{step.body}</p>
               </li>
             ))}
@@ -583,7 +648,7 @@ export default function Home() {
             <Badge className="mx-auto">{h.testimonialsBadge}</Badge>
             <h2
               id="testimonios-titulo"
-              className="mt-4 text-3xl font-semibold tracking-tight text-text sm:text-4xl"
+              className="mt-4 text-3xl font-extrabold tracking-tight text-text sm:text-4xl"
             >
               {h.testimonialsTitle}
             </h2>
@@ -600,19 +665,21 @@ export default function Home() {
                       <Star key={i} className="size-4 fill-warning text-warning" />
                     ))}
                   </div>
-                  <blockquote className="mt-4 text-sm leading-relaxed text-text">"{item.quote}"</blockquote>
+                  <blockquote className="mt-4 text-[15px] leading-relaxed text-text">
+                    "{item.quote}"
+                  </blockquote>
                 </div>
-                <div className="mt-6 flex items-center gap-3.5 border-t border-border pt-4">
+                <div className="mt-6 flex items-center gap-3.5 border-t border-border/70 pt-4">
                   <img
                     src={TESTIMONIAL_AVATARS[idx] ?? TESTIMONIAL_AVATARS[0]}
                     alt={item.author}
                     width={44}
                     height={44}
-                    className="size-11 rounded-full object-cover ring-2 ring-primary/20 shadow-xs shrink-0"
+                    className="size-11 shrink-0 rounded-full object-cover ring-2 ring-primary/20 shadow-xs"
                   />
                   <div>
-                    <p className="font-semibold text-text">{item.author}</p>
-                    <p className="text-xs text-primary">{item.role}</p>
+                    <p className="font-bold text-text">{item.author}</p>
+                    <p className="text-xs font-medium text-primary">{item.role}</p>
                     <p className="mt-0.5 text-xs text-muted">{item.city}</p>
                   </div>
                 </div>
@@ -629,21 +696,24 @@ export default function Home() {
       >
         <Container width="prose">
           <div className="text-center">
-            <h2 id="faq-home-titulo" className="text-3xl font-semibold tracking-tight text-text sm:text-4xl">
+            <h2 id="faq-home-titulo" className="text-3xl font-extrabold tracking-tight text-text sm:text-4xl">
               {h.faqHomeTitle}
             </h2>
             <p className="mt-3 text-muted">{h.faqHomeSubtitle}</p>
           </div>
 
-          <div className="mt-10 space-y-4">
+          <div className="mt-10 space-y-3.5">
             {faqList.map((item) => (
               <details
                 key={item.q}
-                className="group rounded-[var(--radius-card)] border border-border bg-background p-5 open:bg-surface open:shadow-sm"
+                className="group rounded-[var(--radius-card)] border border-border/80 bg-background p-5 shadow-[var(--shadow-soft)] open:bg-surface open:shadow-[var(--shadow-pop)]"
               >
                 <summary className="flex cursor-pointer items-center justify-between font-semibold text-text list-none [&::-webkit-details-marker]:hidden">
                   <span>{item.q}</span>
-                  <span aria-hidden className="text-xs text-muted transition-transform group-open:rotate-180">
+                  <span
+                    aria-hidden
+                    className="text-xs text-primary transition-transform group-open:rotate-180"
+                  >
                     ▼
                   </span>
                 </summary>
@@ -657,17 +727,19 @@ export default function Home() {
       {/* ─── 9. LLAMADO A LA ACCIÓN FINAL (CTA BAND) ─── */}
       <section className="py-16 sm:py-20">
         <Container>
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-primary via-primary-hover to-primary p-8 text-on-primary shadow-xl sm:p-14">
-            <div
+          <div className="bg-cta-glow relative overflow-hidden rounded-[28px] p-8 text-white shadow-[var(--shadow-pop)] sm:p-14">
+            <img
+              src="/images/redesign/sparkle.svg"
+              alt=""
               aria-hidden
-              className="absolute -right-16 -top-16 size-64 rounded-full bg-white/10 blur-2xl"
+              className="pointer-events-none absolute right-10 top-8 hidden size-14 opacity-70 sm:block"
             />
             <div className="relative z-10 flex flex-col items-start justify-between gap-8 sm:flex-row sm:items-center">
               <div className="max-w-xl">
                 <span className="inline-block rounded-full bg-white/20 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-white">
                   {h.bannerBadge}
                 </span>
-                <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">{h.ctaBandTitle}</h2>
+                <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">{h.ctaBandTitle}</h2>
                 <p className="mt-2 text-base text-white/90">{h.ctaBandBody}</p>
               </div>
               <LinkButton

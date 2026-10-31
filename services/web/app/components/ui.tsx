@@ -8,13 +8,13 @@ type Variant = "primary" | "secondary" | "ghost" | "danger";
 type Size = "md" | "lg";
 
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-[var(--radius-field)] font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-60 select-none";
+  "inline-flex items-center justify-center gap-2 rounded-[var(--radius-field)] font-semibold transition-[background,box-shadow,transform,color,border-color] duration-150 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 select-none";
 const sizes: Record<Size, string> = { md: "min-h-11 px-4 text-[15px]", lg: "min-h-12 px-6 text-base" };
 const variants: Record<Variant, string> = {
-  primary: "bg-primary text-on-primary hover:bg-primary-hover shadow-[var(--shadow-soft)]",
-  secondary: "border border-border bg-surface text-text hover:bg-surface-2",
+  primary: "bg-primary text-on-primary shadow-[0_6px_16px_-6px_rgb(67_56_202/0.55)] hover:bg-primary-hover",
+  secondary: "border border-primary/40 bg-surface text-primary hover:bg-primary-soft",
   ghost: "text-text hover:bg-surface-2",
-  danger: "bg-danger text-white hover:opacity-90",
+  danger: "bg-[#b91c1c] text-white hover:bg-[#991b1b]",
 };
 
 export function buttonClass(variant: Variant = "primary", size: Size = "md", extra?: string) {
@@ -93,7 +93,7 @@ export function Card({ className, ...props }: ComponentProps<"div">) {
     <div
       {...props}
       className={cx(
-        "rounded-[var(--radius-card)] border border-border bg-surface shadow-[var(--shadow-soft)]",
+        "rounded-[var(--radius-card)] border border-border/80 bg-surface shadow-[var(--shadow-soft)]",
         className,
       )}
     />
@@ -105,7 +105,7 @@ export function Badge({ className, ...props }: ComponentProps<"span">) {
     <span
       {...props}
       className={cx(
-        "inline-flex items-center gap-1 rounded-full bg-primary-soft px-3 py-1 text-sm font-medium text-primary",
+        "inline-flex items-center gap-1.5 rounded-full bg-primary-soft px-3.5 py-1 text-xs font-semibold text-primary ring-1 ring-primary/15",
         className,
       )}
     />

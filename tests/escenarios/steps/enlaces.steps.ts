@@ -10,8 +10,12 @@ async function abrirMenuSiHaceFalta(page: Page) {
     // Las navegaciones internas cierran el menú en un efecto de React. Esperar ese cierre evita
     // pulsar el botón mientras todavía conserva el estado de la página anterior.
     await expect(menu).toHaveAttribute("aria-expanded", "false");
-    await menu.click();
-    await expect(menu).toHaveAttribute("aria-expanded", "true");
+    await expect(async () => {
+      if ((await menu.getAttribute("aria-expanded")) !== "true") {
+        await menu.click();
+      }
+      await expect(menu).toHaveAttribute("aria-expanded", "true", { timeout: 1_000 });
+    }).toPass({ timeout: 10_000 });
   }
 }
 
@@ -84,30 +88,25 @@ When("hace clic en el logo de la cabecera", async ({ page }) => {
 When("cambia de idioma usando el enlace de idioma de la cabecera", async ({ page }) => {
   await abrirMenuSiHaceFalta(page);
   const selectorBtn = page.locator("header button[aria-haspopup='true']:visible").first();
-  if (await selectorBtn.isVisible()) {
-    await selectorBtn.click();
-    const otroIdioma = page.url().includes("myappointmentontime") || page.url().includes("/en") ? "es" : "en";
-    const opcion = page.locator(`header a[hreflang='${otroIdioma}']:visible`).first();
-    await expect(opcion).toBeVisible({ timeout: 10_000 });
-    const destino = await opcion.getAttribute("href");
-    expect(destino).toBeTruthy();
-    await opcion.click();
-    if (destino) {
-      if (destino.startsWith("http://") || destino.startsWith("https://")) {
-        await expect(page).toHaveURL(destino);
-      } else {
-        await expect(page).toHaveURL((url) => url.pathname === destino);
-      }
+  await expect(selectorBtn).toBeVisible({ timeout: 10_000 });
+  const otroIdioma = page.url().includes("myappointmentontime") || page.url().includes("/en") ? "es" : "en";
+  const opcion = page.locator(`header a[hreflang='${otroIdioma}']:visible`).first();
+  await expect(async () => {
+    if ((await selectorBtn.getAttribute("aria-expanded")) !== "true") {
+      await selectorBtn.click();
     }
-    await page.waitForLoadState("load");
-    return;
-  }
-  const enlace = page.locator("header a[hreflang]:visible").first();
-  await expect(enlace).toBeVisible({ timeout: 10_000 });
-  const destino = await enlace.getAttribute("href");
+    await expect(opcion).toBeVisible({ timeout: 1_000 });
+  }).toPass({ timeout: 10_000 });
+  const destino = await opcion.getAttribute("href");
   expect(destino).toBeTruthy();
-  await enlace.click();
-  await expect(page).toHaveURL(destino as string);
+  await opcion.click();
+  if (destino) {
+    if (destino.startsWith("http://") || destino.startsWith("https://")) {
+      await expect(page).toHaveURL(destino);
+    } else {
+      await expect(page).toHaveURL((url) => url.pathname === destino);
+    }
+  }
   await page.waitForLoadState("load");
 });
 
@@ -115,9 +114,13 @@ When("cambia al idioma {string} usando el selector de idioma", async ({ page }, 
   await abrirMenuSiHaceFalta(page);
   const selectorBtn = page.locator("header button[aria-haspopup='true']:visible").first();
   await expect(selectorBtn).toBeVisible({ timeout: 10_000 });
-  await selectorBtn.click();
   const opcion = page.locator(`header a[hreflang='${targetLang}']:visible`).first();
-  await expect(opcion).toBeVisible({ timeout: 10_000 });
+  await expect(async () => {
+    if ((await selectorBtn.getAttribute("aria-expanded")) !== "true") {
+      await selectorBtn.click();
+    }
+    await expect(opcion).toBeVisible({ timeout: 1_000 });
+  }).toPass({ timeout: 10_000 });
   const destino = await opcion.getAttribute("href");
   expect(destino).toBeTruthy();
   await opcion.click();

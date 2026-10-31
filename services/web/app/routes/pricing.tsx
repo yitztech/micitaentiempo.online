@@ -20,22 +20,29 @@ export default function Pricing() {
   return (
     <Container className="py-14 sm:py-20">
       <header className="mx-auto max-w-2xl text-center">
-        <h1 className="text-4xl font-semibold tracking-tight">{p.title}</h1>
+        <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">{p.title}</h1>
         <p className="mt-4 text-lg text-muted">{p.lead}</p>
       </header>
       <div className="mx-auto mt-12 grid max-w-4xl gap-6 md:grid-cols-2">
         {plans.map(({ key, plan, featured }) => (
-          <Card key={key} className={featured ? "relative border-primary p-7 ring-1 ring-primary" : "p-7"}>
+          <Card
+            key={key}
+            className={
+              featured
+                ? "relative flex flex-col rounded-[var(--radius-panel)] border-primary p-7 shadow-[var(--shadow-pop)] ring-2 ring-primary/30"
+                : "flex flex-col rounded-[var(--radius-panel)] p-7"
+            }
+          >
             <div className="flex items-center justify-between gap-3">
-              <h2 className="text-xl font-semibold">{plan.name}</h2>
+              <h2 className="text-xl font-bold">{plan.name}</h2>
               <Badge>{p.trialBadge}</Badge>
             </div>
             <p className="mt-2 text-muted">{plan.description}</p>
             <p className="mt-6 flex items-baseline gap-1.5">
-              <span className="text-4xl font-semibold tracking-tight tabular">{plan.price}</span>
+              <span className="text-5xl font-extrabold tracking-tight tabular">{plan.price}</span>
               <span className="text-muted">{p.perMonth}</span>
             </p>
-            <ul className="mt-6 space-y-2.5">
+            <ul className="mt-6 flex-1 space-y-3">
               {plan.features.map((f) => (
                 <li key={f} className="flex gap-2.5">
                   <Check aria-hidden className="mt-1 size-4 shrink-0 text-success" />
@@ -65,10 +72,10 @@ export default function Pricing() {
         )}
       </div>
       <section aria-labelledby="faq-precios" className="mx-auto mt-16 max-w-3xl">
-        <h2 id="faq-precios" className="text-2xl font-semibold">
+        <h2 id="faq-precios" className="text-2xl font-extrabold tracking-tight">
           {p.faqTitle}
         </h2>
-        <dl className="mt-6 divide-y divide-border rounded-[var(--radius-card)] border border-border bg-surface">
+        <dl className="mt-6 divide-y divide-border rounded-[var(--radius-card)] border border-border/80 bg-surface shadow-[var(--shadow-soft)]">
           {p.faq.map((item) => (
             <div key={item.q} className="p-5">
               <dt className="font-semibold">{item.q}</dt>

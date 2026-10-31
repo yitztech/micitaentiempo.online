@@ -32,8 +32,8 @@ export function SiteHeader() {
   const n = t.common.nav;
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
     cx(
-      "inline-flex min-h-11 items-center whitespace-nowrap rounded-[var(--radius-field)] px-3 text-[15px] hover:bg-surface-2",
-      isActive && "font-semibold text-primary",
+      "inline-flex min-h-11 items-center whitespace-nowrap rounded-[var(--radius-field)] px-3.5 text-[15px] font-medium transition-colors hover:bg-primary-soft/60 hover:text-primary",
+      isActive ? "bg-primary-soft/80 font-semibold text-primary" : "text-text/85",
     );
   const links = NAV.map(({ id, key }) => (
     <NavLink key={id} to={pathFor(id, site.lang)} className={navLinkClass}>
@@ -55,19 +55,19 @@ export function SiteHeader() {
     </LinkButton>
   );
   return (
-    <header className="sticky top-0 z-40 border-b border-border/70 bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/75">
+    <header className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur-md supports-[backdrop-filter]:bg-background/75">
       <a
         href="#contenido"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-50 focus:rounded-md focus:bg-surface focus:px-3 focus:py-2"
       >
         {n.skipToContent}
       </a>
-      <Container className="flex h-16 items-center justify-between gap-4">
+      <Container className="flex h-[72px] items-center justify-between gap-4">
         <Logo />
         <nav aria-label={n.main} className="hidden items-center gap-1 lg:flex">
           {links}
         </nav>
-        <div className="hidden items-center gap-2 lg:flex">
+        <div className="hidden items-center gap-2.5 lg:flex">
           <LanguageLink />
           {myAppointments}
           {account}
@@ -83,7 +83,11 @@ export function SiteHeader() {
           {open ? <X aria-hidden className="size-6" /> : <Menu aria-hidden className="size-6" />}
         </button>
       </Container>
-      <div id="menu-movil" hidden={!open} className="border-t border-border bg-background lg:hidden">
+      <div
+        id="menu-movil"
+        hidden={!open}
+        className="border-t border-border bg-surface shadow-[var(--shadow-soft)] lg:hidden"
+      >
         <Container className="flex flex-col gap-1 py-4">
           <nav aria-label={n.main} className="flex flex-col gap-1">
             {myAppointments}
