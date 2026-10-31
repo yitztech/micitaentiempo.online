@@ -9,7 +9,7 @@ el TLS y las copias son de la plataforma (`docs/plan/08-infraestructura.md` §8.
 |---|---|---|
 | Secretos en todo el historial (gitleaks 8.30.1) | CI (`secretos`) | 0 hallazgos; 5 valores ficticios de pruebas revisados en `.gitleaksignore` |
 | Imágenes (Trivy, críticas con arreglo) | CI (`escenarios`) | Sin hallazgos |
-| ZAP baseline 2.17.0 | Nocturno | 0 fallos y 0 avisos; 8 reglas aceptadas y justificadas en `tests/seguridad/zap-reglas.tsv` |
+| ZAP baseline 2.17.0 | Nocturno | 0 fallos y 0 avisos; 8 reglas aceptadas y justificadas en `tests/security/zap-reglas.tsv` |
 | Cabeceras y CSP en los dos dominios | `@humo-produccion` (local y tras cada despliegue) | En verde |
 | Permisos rol × endpoint y rol × herramienta MCP | Escenarios `@critico` y `services/api/test/mcp.test.ts` | En verde |
 

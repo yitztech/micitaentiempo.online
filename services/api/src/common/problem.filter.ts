@@ -8,6 +8,7 @@ import {
   Logger,
 } from "@nestjs/common";
 import type { FastifyReply, FastifyRequest } from "fastify";
+import { reportError } from "../sentry.js";
 
 const ERROR_CATALOGS: Record<Lang, Record<string, string>> = {
   es: panelEs.errors,
@@ -31,7 +32,11 @@ export class ProblemFilter implements ExceptionFilter {
       exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
     const body = exception instanceof HttpException ? exception.getResponse() : undefined;
     const details = typeof body === "object" && body !== null ? (body as Record<string, unknown>) : {};
-    if (status >= 500) this.logger.error({ err: exception, url: req.url }, "error no controlado");
+    if (status >= 500) {
+      this.logger.error({ err: exception, url: req.url }, "error no controlado");
+      // pino-http deja en req.raw.id el id que llevan los logs (genReqId en app.module.ts).
+      reportError(exception, String((req.raw as { id?: unknown }).id ?? req.id));
+    }
 
     const appLocale = req.headers["x-app-locale"];
     const lang: Lang = typeof appLocale === "string" && isLang(appLocale) ? appLocale : "es";

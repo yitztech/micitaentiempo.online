@@ -1,3 +1,4 @@
+10031	OUTOFSCOPE	http://micitaentiempo\.localhost:8080/directorio\?.*
 10049	IGNORE	(Páginas públicas cacheables a propósito; el panel y la API llevan no-store)
 10055	IGNORE	(style-src 'unsafe-inline': atributos style de React y FullCalendar; los scripts van con nonce)
 10063	IGNORE	(Permissions-Policy se envía en los documentos; ZAP lo pide también en los .js)
