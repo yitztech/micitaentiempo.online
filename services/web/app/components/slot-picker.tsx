@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight, Loader2, RotateCcw } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { cx, fmt, useRoot } from "~/lib/i18n";
 import {
   allTimeZones,
@@ -51,6 +51,7 @@ export function SlotPicker({
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
   const [loadError, setLoadError] = useState(false);
   const [localReload, setLocalReload] = useState(0);
+  const autoAdvanced = useRef(false);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: recargar tras cambio de mes, slug, servicio o señal externa/local
   useEffect(() => {
@@ -95,11 +96,21 @@ export function SlotPicker({
   }, [slots, tz, month]);
 
   useEffect(() => {
-    if (slots && (!day || !byDay.has(day))) {
+    if (slots === null || loadError) return;
+    if (byDay.size === 0 && !autoAdvanced.current && month === today.slice(0, 7)) {
+      autoAdvanced.current = true;
+      const [cy, cm] = month.split("-").map(Number) as [number, number];
+      const next = new Date(Date.UTC(cy, cm, 1));
+      setMonth(`${next.getUTCFullYear()}-${String(next.getUTCMonth() + 1).padStart(2, "0")}`);
+      setDay(null);
+      setSelectedSlot(null);
+      return;
+    }
+    if (!day || !byDay.has(day)) {
       const firstAvailableDay = [...byDay.keys()].sort()[0] ?? null;
       setDay(firstAvailableDay);
     }
-  }, [byDay, slots, day]);
+  }, [byDay, slots, loadError, day, month, today]);
 
   const [y, m] = month.split("-").map(Number) as [number, number];
   const days = monthDays(y, m);
