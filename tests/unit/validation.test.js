@@ -239,12 +239,12 @@ describe("contratos de texto compartidos", () => {
   });
 
   it("verifica validaciones en todos los tipos de campo de formularios (email, nombre, teléfono, contraseña)", async () => {
-    const { EmailField, FullName, AuthName, Attendee, SignUpInput, SignInInput, ContactMessage, Invitation } =
+    const { EmailField, AuthName, Attendee, SignUpInput, SignInInput, ContactMessage, Invitation } =
       await import("../../packages/schemas/dist/index.js");
 
     // 1. Campos de correo: longitud 5..254 y RFC
     const validEmails = ["test@example.com", "a.b@domain.org", "first+tag@company.co.uk"];
-    const invalidEmails = ["a@b", "bad", "bad@", "@bad.com", "a".repeat(250) + "@b.com", "user name@dom.com"];
+    const invalidEmails = ["a@b", "bad", "bad@", "@bad.com", `${"a".repeat(250)}@b.com`, "user name@dom.com"];
     for (const email of validEmails) {
       expect(EmailField.safeParse(email).success).toBe(true);
       expect(

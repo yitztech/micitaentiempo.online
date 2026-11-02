@@ -1,7 +1,7 @@
-import { EmailField } from "@mcet/schemas";
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import { errorText, postJson } from "~/lib/api-client";
 import { setCustomerSession } from "~/lib/customer";
+import { isValidEmail } from "~/lib/email";
 import { fmt, useT } from "~/lib/i18n";
 import { GoogleVerify } from "./google-verify";
 import { Alert, Button, Field } from "./ui";
@@ -73,24 +73,29 @@ export function OtpForm({
     }
   }
 
+  async function submitEmail(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const trimmed = email.trim();
+    setEmailError(null);
+    let valid: boolean;
+    try {
+      valid = await isValidEmail(trimmed);
+    } catch {
+      setError(b.errors.generic);
+      return;
+    }
+    if (!valid) {
+      setEmailError(b.errors.invalid_format);
+      return;
+    }
+    await send(trimmed);
+  }
+
   const google = <GoogleVerify email={given} onVerified={onVerified} />;
   if (!sent) {
     return (
       <>
-        <form
-          method="post"
-          onSubmit={(e) => {
-            e.preventDefault();
-            const trimmed = email.trim();
-            setEmailError(null);
-            if (!EmailField.safeParse(trimmed).success) {
-              setEmailError(b.errors.invalid_format);
-              return;
-            }
-            void send(trimmed);
-          }}
-          className="space-y-4"
-        >
+        <form method="post" onSubmit={submitEmail} className="space-y-4">
           {given ? null : (
             <Field
               label={b.details.email}
@@ -106,10 +111,14 @@ export function OtpForm({
                 setEmail(e.target.value);
               }}
               onBlur={(e) => {
-                const val = e.currentTarget.value.trim();
-                if (val && !EmailField.safeParse(val).success) {
-                  setEmailError(b.errors.invalid_format);
-                }
+                const input = e.currentTarget;
+                const value = input.value.trim();
+                if (!value) return;
+                void isValidEmail(value)
+                  .then((ok) => {
+                    if (!ok && input.value.trim() === value) setEmailError(b.errors.invalid_format);
+                  })
+                  .catch(() => undefined);
               }}
             />
           )}

@@ -1,16 +1,17 @@
-import { EmailField } from "@mcet/schemas";
 import { CalendarCheck2, CheckCircle2, Clock3, Download, MapPin } from "lucide-react";
-import { type FormEvent, useEffect, useRef, useState } from "react";
+import { type FormEvent, lazy, Suspense, useEffect, useRef, useState } from "react";
 import { useAltcha } from "~/lib/altcha";
 import { type ApiError, errorText, postJson } from "~/lib/api-client";
 import { type Booking, calendarLinks, type PublicCalendar } from "~/lib/booking-types";
 import { customerRequest, customerSession, downloadIcs } from "~/lib/customer";
+import { isValidEmail } from "~/lib/email";
 import { cx, fmt, useRoot } from "~/lib/i18n";
 import { browserTz, formatDateTime, formatTime, tzLabel } from "~/lib/time";
 import { AltchaStatus } from "./altcha-status";
-import { OtpForm } from "./otp-form";
 import { type Slot, SlotPicker } from "./slot-picker";
 import { Alert, Button, buttonClass, Field, PhoneField, TextArea } from "./ui";
+
+const OtpForm = lazy(() => import("./otp-form").then(({ OtpForm }) => ({ default: OtpForm })));
 
 /** Lo que dura un horario apartado (igual que el motor). */
 const HOLD_MS = 10 * 60_000;
@@ -102,18 +103,17 @@ export function BookingFlow({
     if (!slot) return;
     const email = person.email.trim();
     setEmailError(null);
-    if (email) {
-      if (!EmailField.safeParse(email).success) {
-        setEmailError(b.errors.invalid_format);
-        return;
-      }
-    } else if (calendar.bookingContactMode !== "phone" && calendar.bookingContactMode !== "name_only") {
+    if (!email && calendar.bookingContactMode !== "phone" && calendar.bookingContactMode !== "name_only") {
       setEmailError(b.errors.invalid_format);
       return;
     }
     setBusy(true);
     setError(null);
     try {
+      if (email && !(await isValidEmail(email))) {
+        setEmailError(b.errors.invalid_format);
+        return;
+      }
       const token = await altcha.token();
       const res = await postJson<{ hold: Booking; holdToken: string }>(
         `/api/public/v1/calendars/${calendar.slug}/holds`,
@@ -388,10 +388,14 @@ export function BookingFlow({
                 setPerson({ ...person, email: e.target.value });
               }}
               onBlur={(e) => {
-                const val = e.currentTarget.value.trim();
-                if (val && !EmailField.safeParse(val).success) {
-                  setEmailError(b.errors.invalid_format);
-                }
+                const input = e.currentTarget;
+                const value = input.value.trim();
+                if (!value) return;
+                void isValidEmail(value)
+                  .then((ok) => {
+                    if (!ok && input.value.trim() === value) setEmailError(b.errors.invalid_format);
+                  })
+                  .catch(() => undefined);
               }}
             />
             <PhoneField
@@ -452,13 +456,15 @@ export function BookingFlow({
             </p>
           </div>
           <div className="mt-4">
-            <OtpForm
-              email={person.email}
-              name={person.name}
-              autoSend
-              submitLabel={b.verify.confirm}
-              onVerified={() => confirm()}
-            />
+            <Suspense fallback={<p className="text-muted">{t.common.ui.loading}</p>}>
+              <OtpForm
+                email={person.email}
+                name={person.name}
+                autoSend
+                submitLabel={b.verify.confirm}
+                onVerified={() => confirm()}
+              />
+            </Suspense>
           </div>
         </section>
       ) : null}

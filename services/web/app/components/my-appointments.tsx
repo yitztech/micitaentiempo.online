@@ -1,14 +1,15 @@
 import { CalendarClock, Download, Loader2, MapPin, Sparkles } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { type ApiError, errorText } from "~/lib/api-client";
 import type { MyBooking } from "~/lib/booking-types";
 import { customerRequest, customerSession, downloadIcs, setCustomerSession } from "~/lib/customer";
 import { cx, fmt, useRoot } from "~/lib/i18n";
 import { browserTz, formatDateTime, tzLabel } from "~/lib/time";
 import { CopyField } from "./copy-field";
-import { OtpForm } from "./otp-form";
 import { type Slot, SlotPicker } from "./slot-picker";
 import { Alert, Badge, Button, Card } from "./ui";
+
+const OtpForm = lazy(() => import("./otp-form").then(({ OtpForm }) => ({ default: OtpForm })));
 
 /**
  * «Mis citas» del cliente final:
@@ -107,7 +108,16 @@ export function MyAppointments() {
         <h2 className="text-xl font-semibold text-text">{m.signInTitle}</h2>
         <p className="mt-2 text-muted">{m.signInLead}</p>
         <div className="mt-5">
-          <OtpForm submitLabel={m.enter} onVerified={() => load()} />
+          <Suspense
+            fallback={
+              <p className="flex items-center gap-2 text-muted">
+                <Loader2 aria-hidden className="size-4 animate-spin text-primary" />
+                {t.common.ui.loading}
+              </p>
+            }
+          >
+            <OtpForm submitLabel={m.enter} onVerified={() => load()} />
+          </Suspense>
         </div>
       </Card>
     );
