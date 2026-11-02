@@ -28,13 +28,8 @@ export function loader({ request: _request }: Route.LoaderArgs) {
     }
   }
 
-  // Fallback dummy APK zip signature if file is not on disk yet
-  const dummyApk = Buffer.from("PK\x03\x04\x14\x00\x00\x00\x08\x00micitaentiempo-apk");
-  return new Response(dummyApk, {
-    headers: {
-      "Content-Type": "application/vnd.android.package-archive",
-      "Content-Disposition": 'attachment; filename="micitaentiempo.apk"',
-      "Cache-Control": "no-cache",
-    },
+  return new Response(null, {
+    status: 404,
+    headers: { "Cache-Control": "no-store", "X-Robots-Tag": "noindex" },
   });
 }
