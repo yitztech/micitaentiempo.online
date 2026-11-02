@@ -54,7 +54,8 @@
     "or": "ou",
     "sending": "Enviando…",
     "comingSoon": "Disponível em breve",
-    "invalidText": "Verifique o tamanho e remova caracteres de controle ou tags."
+    "invalidText": "Verifique o tamanho e remova caracteres de controle ou tags.",
+    "invalidEmail": "Digite um e-mail válido, por exemplo nome@dominio.com."
   },
   "errors": {
     "notFoundTitle": "Página não encontrada",

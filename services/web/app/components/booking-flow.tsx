@@ -1,3 +1,4 @@
+import { EmailField } from "@mcet/schemas";
 import { CalendarCheck2, CheckCircle2, Clock3, Download, MapPin } from "lucide-react";
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import { useAltcha } from "~/lib/altcha";
@@ -57,6 +58,7 @@ export function BookingFlow({
   const [booking, setBooking] = useState<Booking | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [refresh, setRefresh] = useState(0);
   const [now, setNow] = useState(Date.now());
@@ -98,6 +100,17 @@ export function BookingFlow({
   async function submitDetails(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!slot) return;
+    const email = person.email.trim();
+    setEmailError(null);
+    if (email) {
+      if (!EmailField.safeParse(email).success) {
+        setEmailError(b.errors.invalid_format);
+        return;
+      }
+    } else if (calendar.bookingContactMode !== "phone" && calendar.bookingContactMode !== "name_only") {
+      setEmailError(b.errors.invalid_format);
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
@@ -361,14 +374,25 @@ export function BookingFlow({
               optional={
                 calendar.bookingContactMode === "phone" || calendar.bookingContactMode === "name_only"
               }
+              minLength={5}
               maxLength={254}
+              error={emailError ?? undefined}
               hint={
                 calendar.bookingContactMode === "phone" || calendar.bookingContactMode === "name_only"
                   ? b.details.emailOptionalHint
                   : b.details.emailHint
               }
               value={person.email}
-              onChange={(e) => setPerson({ ...person, email: e.target.value })}
+              onChange={(e) => {
+                setEmailError(null);
+                setPerson({ ...person, email: e.target.value });
+              }}
+              onBlur={(e) => {
+                const val = e.currentTarget.value.trim();
+                if (val && !EmailField.safeParse(val).success) {
+                  setEmailError(b.errors.invalid_format);
+                }
+              }}
             />
             <PhoneField
               name="phone"

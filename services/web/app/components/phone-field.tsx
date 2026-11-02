@@ -182,7 +182,7 @@ export function PhoneField({
             placeholder="612345678"
             aria-invalid={error ? true : undefined}
             aria-describedby={describedBy}
-            className="block min-h-11 w-full rounded-[var(--radius-field)] border border-border-field bg-surface px-3 text-base text-text placeholder:text-muted/60 focus:border-primary focus:outline-none focus-visible:outline-3 focus-visible:outline-primary aria-[invalid=true]:border-danger"
+            className="block min-h-11 w-full rounded-[var(--radius-field)] border border-border-field bg-surface px-3 text-base text-text placeholder:text-muted/60 focus:border-primary focus:outline-none focus-visible:outline-3 focus-visible:outline-primary aria-[invalid=true]:border-danger aria-[invalid=true]:bg-danger-soft/20 aria-[invalid=true]:ring-1 aria-[invalid=true]:ring-danger aria-[invalid=true]:focus:border-danger aria-[invalid=true]:focus:ring-2 aria-[invalid=true]:focus:ring-danger aria-[invalid=true]:focus-visible:outline-danger"
           />
         </div>
       </div>

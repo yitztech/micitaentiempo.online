@@ -232,7 +232,10 @@ export const invitations = app.table(
     revokedAt: timestamp("revoked_at", { withTimezone: true }),
     createdAt: createdAt(),
   },
-  (t) => [index("invitations_calendar").on(t.calendarId)],
+  (t) => [
+    index("invitations_calendar").on(t.calendarId),
+    check("invitations_email_length", sql`length(${t.email}) BETWEEN 3 AND 254`),
+  ],
 );
 
 /** Clientes finales de cada negocio. */

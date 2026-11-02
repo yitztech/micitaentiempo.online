@@ -1,4 +1,5 @@
 import { pathFor } from "@mcet/i18n";
+import { EmailField } from "@mcet/schemas";
 import { type FormEvent, useState } from "react";
 import { useSearchParams } from "react-router";
 import { AuthCard } from "~/components/auth";
@@ -19,14 +20,21 @@ export default function VerifyEmail() {
   const [busy, setBusy] = useState(false);
   const [resent, setResent] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const email = String(new FormData(e.currentTarget).get("email") ?? "").trim();
+    setEmailError(null);
+    if (!EmailField.safeParse(email).success) {
+      setEmailError(t.auth.errors.invalid_format);
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
       await postJson("/api/auth/send-verification-email", {
-        email: String(new FormData(e.currentTarget).get("email") ?? "").trim(),
+        email,
         callbackURL: pathFor("dashboard", site.lang),
       });
       setResent(true);
@@ -47,13 +55,23 @@ export default function VerifyEmail() {
       {resent ? (
         <Alert tone="success">{s.resent}</Alert>
       ) : (
-        <form method="post" onSubmit={onSubmit} className="space-y-5">
+        <form noValidate method="post" onSubmit={onSubmit} className="space-y-5">
           <Field
             label={t.auth.fields.email}
             name="email"
             type="email"
             autoComplete="email"
             required
+            minLength={5}
+            maxLength={254}
+            error={emailError ?? undefined}
+            onInput={() => setEmailError(null)}
+            onBlur={(e) => {
+              const val = e.currentTarget.value.trim();
+              if (val && !EmailField.safeParse(val).success) {
+                setEmailError(t.auth.errors.invalid_format);
+              }
+            }}
             defaultValue={params.get("email") ?? ""}
           />
           {error ? <Alert tone="danger">{error}</Alert> : null}

@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { type Connection, SyncService } from "@mcet/contracts/mcet/calendar/v1/sync_pb";
 import { type Lang, pathFor } from "@mcet/i18n";
+import { EmailField } from "@mcet/schemas";
 import {
   Body,
   Controller,
@@ -43,9 +44,7 @@ const SCOPES: Record<OAuthProvider, string> = {
   microsoft: "openid email offline_access User.Read Calendars.ReadWrite",
 };
 
-const ICloud = z
-  .object({ appleId: z.string().trim().min(3).max(254), appPassword: z.string().trim().min(8).max(64) })
-  .strict();
+const ICloud = z.object({ appleId: EmailField, appPassword: z.string().trim().min(8).max(64) }).strict();
 const ExtUpdate = z.object({ useAsBusy: z.boolean(), writeTarget: z.boolean() }).strict();
 const FeedBody = z
   .object({ scope: z.enum(["full", "busy"]), label: z.string().trim().max(80).optional() })

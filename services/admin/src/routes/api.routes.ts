@@ -22,7 +22,14 @@ export function registerApiRoutes(
   // ── Autenticación ──
   app.post("/api/auth/login", async (req: FastifyRequest<{ Body: LoginBody }>, reply: FastifyReply) => {
     const { username, password } = req.body || {};
-    if (!username || !password) {
+    if (
+      !username ||
+      !password ||
+      typeof username !== "string" ||
+      typeof password !== "string" ||
+      username.length > 100 ||
+      password.length > 128
+    ) {
       return reply.status(400).send({ error: "Usuario y contraseña requeridos" });
     }
 

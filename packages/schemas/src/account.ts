@@ -26,22 +26,6 @@ export const UpdateMe = z
   .strict();
 export type UpdateMe = z.infer<typeof UpdateMe>;
 
-/** Formulario de contacto de las páginas públicas. */
-export const ContactMessage = z
-  .object({
-    name: FullName,
-    email: z.string().trim().min(3).max(254),
-    message: freeText(4000).trim().min(10),
-    newsletter: z.boolean().default(false),
-  })
-  .strict();
-export type ContactMessage = z.infer<typeof ContactMessage>;
-
-export const NewsletterSignup = z
-  .object({ email: z.string().trim().min(3).max(254), name: singleLine(120).optional() })
-  .strict();
-export type NewsletterSignup = z.infer<typeof NewsletterSignup>;
-
 /** Validación estricta de correo electrónico: longitud mín 5, máx 254 y caracteres válidos RFC 5321/5322 */
 export const EmailField = z
   .string()
@@ -49,6 +33,20 @@ export const EmailField = z
   .min(5, "Mínimo 5 caracteres")
   .max(254, "Máximo 254 caracteres")
   .pipe(z.email("Formato de correo no válido"));
+
+/** Formulario de contacto de las páginas públicas. */
+export const ContactMessage = z
+  .object({
+    name: FullName,
+    email: EmailField,
+    message: freeText(4000).trim().min(10),
+    newsletter: z.boolean().default(false),
+  })
+  .strict();
+export type ContactMessage = z.infer<typeof ContactMessage>;
+
+export const NewsletterSignup = z.object({ email: EmailField, name: singleLine(120).optional() }).strict();
+export type NewsletterSignup = z.infer<typeof NewsletterSignup>;
 
 /** Validación de contraseña existente para inicio de sesión: mín 8, máx 128, sin caracteres de control */
 export const PasswordField = z

@@ -1,3 +1,4 @@
+import { EmailField } from "@mcet/schemas";
 import { type FormEvent, useEffect, useState } from "react";
 import { type ApiError, apiRequest, errorText } from "~/lib/api-client";
 import { useRoot } from "~/lib/i18n";
@@ -56,6 +57,7 @@ export function EventEditor({
     reason: "seat_unavailable" | "blocked";
   }> | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [confirmCancel, setConfirmCancel] = useState(false);
   const [reason, setReason] = useState("");
@@ -102,6 +104,12 @@ export function EventEditor({
   const fail = (err: unknown) => setError(errorText(t.panel.errors, err));
 
   async function save(onConflict: "abort" | "skip" = "abort") {
+    const trimmedEmail = attendee.email?.trim();
+    setEmailError(null);
+    if (trimmedEmail && !EmailField.safeParse(trimmedEmail).success) {
+      setEmailError(t.auth.errors.invalid_format);
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
@@ -266,8 +274,21 @@ export function EventEditor({
               <Field
                 label={e.attendeeEmail}
                 type="email"
+                autoComplete="email"
+                minLength={5}
+                maxLength={254}
                 value={attendee.email}
-                onChange={(x) => setAttendee({ ...attendee, email: x.target.value })}
+                error={emailError ?? undefined}
+                onChange={(x) => {
+                  setEmailError(null);
+                  setAttendee({ ...attendee, email: x.target.value });
+                }}
+                onBlur={(x) => {
+                  const val = x.currentTarget.value.trim();
+                  if (val && !EmailField.safeParse(val).success) {
+                    setEmailError(t.auth.errors.invalid_format);
+                  }
+                }}
                 optional
               />
               <PhoneField

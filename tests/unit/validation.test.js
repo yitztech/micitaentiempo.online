@@ -137,6 +137,49 @@ describe("contratos de texto compartidos", () => {
     expect(UpdateMe.safeParse({ name: "A".repeat(101) }).success).toBe(false);
   });
 
+  it("valida formato y longitud máxima de correo en todos los esquemas de la API", async () => {
+    const { ContactMessage, NewsletterSignup, Invitation, Attendee, OtpSend, OtpVerify } = await import(
+      "../../packages/schemas/dist/index.js"
+    );
+
+    // Validos
+    expect(
+      ContactMessage.safeParse({ name: "Carlos", email: "carlos@test.com", message: "Consulta sobre cita" })
+        .success,
+    ).toBe(true);
+    expect(NewsletterSignup.safeParse({ email: "boletin@test.com" }).success).toBe(true);
+    expect(Invitation.safeParse({ email: "socio@test.com", role: "editor" }).success).toBe(true);
+    expect(Attendee.safeParse({ name: "Carlos", email: "cliente@test.com" }).success).toBe(true);
+    expect(Attendee.safeParse({ name: "Carlos", email: "" }).success).toBe(true);
+    expect(Attendee.safeParse({ name: "Carlos" }).success).toBe(true);
+    expect(OtpSend.safeParse({ email: "otp@test.com" }).success).toBe(true);
+    expect(OtpVerify.safeParse({ email: "otp@test.com", code: "123456" }).success).toBe(true);
+
+    // Formato inválido rechazado
+    for (const bad of ["invalido", "sin-arroba.com", "@sin-usuario.com", "a@b", "correo@.com"]) {
+      expect(
+        ContactMessage.safeParse({ name: "Carlos", email: bad, message: "Consulta sobre cita" }).success,
+      ).toBe(false);
+      expect(NewsletterSignup.safeParse({ email: bad }).success).toBe(false);
+      expect(Invitation.safeParse({ email: bad, role: "editor" }).success).toBe(false);
+      expect(Attendee.safeParse({ name: "Carlos", email: bad }).success).toBe(false);
+      expect(OtpSend.safeParse({ email: bad }).success).toBe(false);
+      expect(OtpVerify.safeParse({ email: bad, code: "123456" }).success).toBe(false);
+    }
+
+    // Longitud mayor a 254 caracteres rechazada
+    const tooLongEmail = `user@${"a".repeat(250)}.com`;
+    expect(
+      ContactMessage.safeParse({ name: "Carlos", email: tooLongEmail, message: "Consulta sobre cita" })
+        .success,
+    ).toBe(false);
+    expect(NewsletterSignup.safeParse({ email: tooLongEmail }).success).toBe(false);
+    expect(Invitation.safeParse({ email: tooLongEmail, role: "editor" }).success).toBe(false);
+    expect(Attendee.safeParse({ name: "Carlos", email: tooLongEmail }).success).toBe(false);
+    expect(OtpSend.safeParse({ email: tooLongEmail }).success).toBe(false);
+    expect(OtpVerify.safeParse({ email: tooLongEmail, code: "123456" }).success).toBe(false);
+  });
+
   it("valida teléfono en formato internacional numérico E.164", async () => {
     const { Attendee } = await import("../../packages/schemas/dist/index.js");
     expect(Attendee.safeParse({ name: "Carlos", phone: "+34612345678" }).success).toBe(true);
@@ -193,5 +236,67 @@ describe("contratos de texto compartidos", () => {
         phone: "+525512345678",
       }).success,
     ).toBe(true);
+  });
+
+  it("verifica validaciones en todos los tipos de campo de formularios (email, nombre, teléfono, contraseña)", async () => {
+    const { EmailField, FullName, AuthName, Attendee, SignUpInput, SignInInput, ContactMessage, Invitation } =
+      await import("../../packages/schemas/dist/index.js");
+
+    // 1. Campos de correo: longitud 5..254 y RFC
+    const validEmails = ["test@example.com", "a.b@domain.org", "first+tag@company.co.uk"];
+    const invalidEmails = ["a@b", "bad", "bad@", "@bad.com", "a".repeat(250) + "@b.com", "user name@dom.com"];
+    for (const email of validEmails) {
+      expect(EmailField.safeParse(email).success).toBe(true);
+      expect(
+        ContactMessage.safeParse({ name: "Carlos", email, message: "Mensaje válido de prueba" }).success,
+      ).toBe(true);
+      expect(Invitation.safeParse({ email, role: "editor" }).success).toBe(true);
+      expect(Attendee.safeParse({ name: "Carlos", email }).success).toBe(true);
+    }
+    expect(EmailField.safeParse("").success).toBe(false);
+    expect(
+      ContactMessage.safeParse({ name: "Carlos", email: "", message: "Mensaje válido de prueba" }).success,
+    ).toBe(false);
+    for (const email of invalidEmails) {
+      expect(EmailField.safeParse(email).success).toBe(false);
+      expect(
+        ContactMessage.safeParse({ name: "Carlos", email, message: "Mensaje válido de prueba" }).success,
+      ).toBe(false);
+      expect(Invitation.safeParse({ email, role: "editor" }).success).toBe(false);
+      expect(Attendee.safeParse({ name: "Carlos", email }).success).toBe(false);
+    }
+
+    // 2. Campos de nombre: letras, espacios, apóstrofo, guion, punto, longitud 1..100
+    expect(AuthName.safeParse("Jean-Luc O’Connor").success).toBe(true);
+    expect(AuthName.safeParse("María José").success).toBe(true);
+    expect(AuthName.safeParse("Dr. Smith").success).toBe(true);
+    expect(AuthName.safeParse("").success).toBe(false);
+    expect(AuthName.safeParse("User123").success).toBe(false); // números no permitidos
+    expect(AuthName.safeParse("<script>").success).toBe(false); // etiquetas no permitidas
+    expect(AuthName.safeParse("A".repeat(101)).success).toBe(false); // max 100 caracteres
+
+    // 3. Campos de teléfono: E.164 con 8 a 15 dígitos
+    expect(Attendee.safeParse({ name: "Ana", phone: "+34612345678" }).success).toBe(true);
+    expect(Attendee.safeParse({ name: "Ana", phone: "+15551234567" }).success).toBe(true);
+    expect(Attendee.safeParse({ name: "Ana", phone: "12345678" }).success).toBe(false); // sin +
+    expect(Attendee.safeParse({ name: "Ana", phone: "+12" }).success).toBe(false); // muy corto
+    expect(Attendee.safeParse({ name: "Ana", phone: "+12345678901234567" }).success).toBe(false); // muy largo
+    expect(Attendee.safeParse({ name: "Ana", phone: "+34 612 34 56 78" }).success).toBe(false); // espacios en E.164 API
+
+    // 4. Campos de contraseña
+    expect(SignInInput.safeParse({ email: "user@test.com", password: "password" }).success).toBe(true);
+    expect(SignInInput.safeParse({ email: "user@test.com", password: "1234567" }).success).toBe(false); // < 8
+    expect(SignInInput.safeParse({ email: "user@test.com", password: "a".repeat(129) }).success).toBe(false); // > 128
+
+    expect(
+      SignUpInput.safeParse({ name: "Ana Gómez", email: "ana@test.com", password: "segura-password-12" })
+        .success,
+    ).toBe(true);
+    expect(
+      SignUpInput.safeParse({ name: "Ana Gómez", email: "ana@test.com", password: "corta-11car" }).success,
+    ).toBe(false); // < 12
+    expect(
+      SignUpInput.safeParse({ name: "Ana Gómez", email: "ana@test.com", password: "a".repeat(129) }).success,
+    ).toBe(false); // > 128
   });
 });

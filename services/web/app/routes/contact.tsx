@@ -1,3 +1,4 @@
+import { EmailField } from "@mcet/schemas";
 import { type FormEvent, useState } from "react";
 import { AltchaStatus } from "~/components/altcha-status";
 import { Alert, Button, Checkbox, Container, Field, TextArea } from "~/components/ui";
@@ -18,10 +19,17 @@ export default function Contact() {
   const altcha = useAltcha();
   const [status, setStatus] = useState<"idle" | "sending" | "sent">("idle");
   const [error, setError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
+    const email = String(form.get("email") ?? "").trim();
+    setEmailError(null);
+    if (!EmailField.safeParse(email).success) {
+      setEmailError(t.auth.errors.invalid_format);
+      return;
+    }
     setStatus("sending");
     setError(null);
     try {
@@ -30,7 +38,7 @@ export default function Contact() {
         "/api/public/v1/contact",
         {
           name: String(form.get("name") ?? ""),
-          email: String(form.get("email") ?? ""),
+          email,
           message: String(form.get("message") ?? ""),
           newsletter: form.get("newsletter") === "on",
         },
@@ -60,7 +68,23 @@ export default function Contact() {
           noValidate={false}
         >
           <Field label={c.name} name="name" autoComplete="name" required maxLength={120} />
-          <Field label={c.email} name="email" type="email" autoComplete="email" required maxLength={254} />
+          <Field
+            label={c.email}
+            name="email"
+            type="email"
+            autoComplete="email"
+            required
+            minLength={5}
+            maxLength={254}
+            error={emailError ?? undefined}
+            onInput={() => setEmailError(null)}
+            onBlur={(e) => {
+              const val = e.currentTarget.value.trim();
+              if (val && !EmailField.safeParse(val).success) {
+                setEmailError(t.auth.errors.invalid_format);
+              }
+            }}
+          />
           <TextArea label={c.message} name="message" required minLength={10} maxLength={4000} />
           {features.newsletter[site.lang] ? <Checkbox name="newsletter" label={c.newsletter} /> : null}
           <AltchaStatus state={altcha.state} onRetry={() => void altcha.start().catch(() => undefined)} />

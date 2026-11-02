@@ -21,6 +21,7 @@ export default function SignUp() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [nameError, setNameError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [sentTo, setSentTo] = useState<string | null>(null);
 
@@ -31,6 +32,7 @@ export default function SignUp() {
     const email = String(form.get("email") ?? "").trim();
     const password = String(form.get("password") ?? "");
     const confirmation = String(form.get("confirmPassword") ?? "");
+    setEmailError(null);
     setPasswordError(null);
 
     const parsedName = AuthName.safeParse(name);
@@ -39,7 +41,7 @@ export default function SignUp() {
       return;
     }
     if (!EmailField.safeParse(email).success) {
-      setError(t.auth.errors.invalid_format);
+      setEmailError(t.auth.errors.invalid_format);
       return;
     }
     if (!password || password.length < 12) {
@@ -116,7 +118,7 @@ export default function SignUp() {
       }
     >
       <GoogleButton callbackURL={callbackURL} />
-      <form method="post" onSubmit={onSubmit} className="space-y-5">
+      <form noValidate method="post" onSubmit={onSubmit} className="space-y-5">
         <Field
           label={f.name}
           name="name"
@@ -142,6 +144,14 @@ export default function SignUp() {
           minLength={5}
           maxLength={254}
           hint={f.emailHint}
+          error={emailError ?? undefined}
+          onInput={() => setEmailError(null)}
+          onBlur={(e) => {
+            const val = e.currentTarget.value.trim();
+            if (val && !EmailField.safeParse(val).success) {
+              setEmailError(t.auth.errors.invalid_format);
+            }
+          }}
         />
         <Field
           label={f.password}

@@ -1,3 +1,4 @@
+import { EmailField } from "@mcet/schemas";
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import { errorText, postJson } from "~/lib/api-client";
 import { setCustomerSession } from "~/lib/customer";
@@ -28,6 +29,7 @@ export function OtpForm({
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
 
   async function send(to: string) {
     setBusy(true);
@@ -79,7 +81,13 @@ export function OtpForm({
           method="post"
           onSubmit={(e) => {
             e.preventDefault();
-            void send(email.trim());
+            const trimmed = email.trim();
+            setEmailError(null);
+            if (!EmailField.safeParse(trimmed).success) {
+              setEmailError(b.errors.invalid_format);
+              return;
+            }
+            void send(trimmed);
           }}
           className="space-y-4"
         >
@@ -89,8 +97,20 @@ export function OtpForm({
               type="email"
               autoComplete="email"
               required
+              minLength={5}
+              maxLength={254}
+              error={emailError ?? undefined}
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmailError(null);
+                setEmail(e.target.value);
+              }}
+              onBlur={(e) => {
+                const val = e.currentTarget.value.trim();
+                if (val && !EmailField.safeParse(val).success) {
+                  setEmailError(b.errors.invalid_format);
+                }
+              }}
             />
           )}
           {error ? <Alert tone="danger">{error}</Alert> : null}
@@ -112,6 +132,7 @@ export function OtpForm({
           inputMode="numeric"
           autoComplete="one-time-code"
           pattern="\d{6}"
+          minLength={6}
           maxLength={6}
           required
           className="max-w-48"

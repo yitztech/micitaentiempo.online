@@ -54,7 +54,8 @@
     "or": "or",
     "sending": "Sending…",
     "comingSoon": "Coming soon",
-    "invalidText": "Check the length and remove control characters or tags."
+    "invalidText": "Check the length and remove control characters or tags.",
+    "invalidEmail": "Enter a valid email, for example name@domain.com."
   },
   "errors": {
     "notFoundTitle": "Page not found",

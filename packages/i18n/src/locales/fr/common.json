@@ -54,7 +54,8 @@
     "or": "ou",
     "sending": "Envoi en cours…",
     "comingSoon": "Bientôt disponible",
-    "invalidText": "Vérifiez la longueur et supprimez les caractères de contrôle ou les balises."
+    "invalidText": "Vérifiez la longueur et supprimez les caractères de contrôle ou les balises.",
+    "invalidEmail": "Entrez une adresse e-mail valide, par exemple nom@domaine.com."
   },
   "errors": {
     "notFoundTitle": "Page non trouvée",

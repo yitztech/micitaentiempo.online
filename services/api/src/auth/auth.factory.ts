@@ -65,7 +65,15 @@ const PWNED_MESSAGE: Record<Lang, string> = {
 };
 
 /** Rutas de Better Auth que reciben un correo nuevo y deben validarlo (RF-02). */
-const EMAIL_PATHS = new Set(["/sign-up/email", "/email-otp/send-verification-otp", "/sign-in/email-otp"]);
+const EMAIL_PATHS = new Set([
+  "/sign-up/email",
+  "/sign-in/email",
+  "/email-otp/send-verification-otp",
+  "/sign-in/email-otp",
+  "/send-verification-email",
+  "/request-password-reset",
+  "/forget-password",
+]);
 
 /**
  * Muchos clientes MCP de escritorio y CLI se registran (DCR) con retorno loopback o esquema propio

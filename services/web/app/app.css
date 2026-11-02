@@ -181,8 +181,19 @@ p {
   border-radius: 6px;
 }
 
+[aria-invalid="true"]:focus-visible,
+:focus-visible[aria-invalid="true"] {
+  outline-color: var(--danger);
+}
+
 .tabular {
   font-variant-numeric: tabular-nums;
+}
+
+/* Oculta el botón nativo de Edge/IE para no duplicar el botón personalizado de mostrar/ocultar contraseña */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
 }
 
 /* Texto largo de Markdown (legales y créditos). */

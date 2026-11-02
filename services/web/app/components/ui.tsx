@@ -100,6 +100,31 @@ export function Card({ className, ...props }: ComponentProps<"div">) {
   );
 }
 
+export function CardHeader({ className, ...props }: ComponentProps<"div">) {
+  return <div {...props} className={cx("flex flex-col space-y-1.5 p-6 pb-4", className)} />;
+}
+
+export function CardTitle({ className, ...props }: ComponentProps<"h2">) {
+  return (
+    <h2
+      {...props}
+      className={cx("font-display text-xl font-semibold leading-tight tracking-tight text-text", className)}
+    />
+  );
+}
+
+export function CardDescription({ className, ...props }: ComponentProps<"p">) {
+  return <p {...props} className={cx("text-sm text-muted", className)} />;
+}
+
+export function CardContent({ className, ...props }: ComponentProps<"div">) {
+  return <div {...props} className={cx("p-6 pt-0", className)} />;
+}
+
+export function CardFooter({ className, ...props }: ComponentProps<"div">) {
+  return <div {...props} className={cx("flex items-center p-6 pt-0", className)} />;
+}
+
 export function Badge({ className, ...props }: ComponentProps<"span">) {
   return (
     <span
@@ -145,31 +170,69 @@ interface FieldProps extends Omit<ComponentProps<"input">, "id"> {
   label: string;
   hint?: string;
   error?: string;
+  errorPosition?: "top" | "bottom";
   optional?: boolean;
 }
 
 const inputClass =
-  "block min-h-11 w-full rounded-[var(--radius-field)] border border-border-field bg-surface px-3 text-base text-text placeholder:text-muted/70 focus:border-primary focus:outline-none focus-visible:outline-3 focus-visible:outline-primary aria-[invalid=true]:border-danger";
+  "block min-h-11 w-full rounded-[var(--radius-field)] border border-border-field bg-surface px-3 text-base text-text placeholder:text-muted/70 focus:border-primary focus:outline-none focus-visible:outline-3 focus-visible:outline-primary aria-[invalid=true]:border-danger aria-[invalid=true]:bg-danger-soft/20 aria-[invalid=true]:ring-1 aria-[invalid=true]:ring-danger aria-[invalid=true]:focus:border-danger aria-[invalid=true]:focus:ring-2 aria-[invalid=true]:focus:ring-danger aria-[invalid=true]:focus-visible:outline-danger";
 
 /** Campo con etiqueta, ayuda y error asociados (aria-describedby). */
-export function Field({ label, hint, error, optional, className, type, ...props }: FieldProps) {
+export function Field({
+  label,
+  hint,
+  error,
+  errorPosition = "bottom",
+  optional,
+  className,
+  type,
+  ...props
+}: FieldProps) {
   const id = useId();
   const t = useT();
   const [visible, setVisible] = useState(false);
   const describedBy =
     [hint ? `${id}-hint` : "", error ? `${id}-error` : ""].filter(Boolean).join(" ") || undefined;
   const isPassword = type === "password";
+  const isEmail = type === "email";
+  const maxLength = props.maxLength ?? (isEmail ? 254 : undefined);
+  const minLength = props.minLength ?? (isEmail && props.required ? 5 : undefined);
   return (
     <div className={className}>
       <label htmlFor={id} className="block text-[15px] font-medium">
         {label}
         {optional ? <span className="ml-1 font-normal text-muted">({t.common.ui.optional})</span> : null}
       </label>
+      {error && errorPosition === "top" ? (
+        <p
+          id={`${id}-error`}
+          role="alert"
+          className="mt-1 flex items-center gap-1.5 text-sm font-medium text-danger"
+        >
+          <AlertCircle aria-hidden className="size-4 shrink-0" />
+          {error}
+        </p>
+      ) : null}
       <div className="relative mt-1.5">
         <input
           {...props}
+          maxLength={maxLength}
+          minLength={minLength}
           onInput={(event) => {
             props.onInput?.(event);
+            if (isEmail) {
+              const value = event.currentTarget.value;
+              const trimmed = value.trim();
+              const valid =
+                value.length <= (maxLength ?? 254) &&
+                (!props.required || trimmed.length >= (minLength ?? 5)) &&
+                (!trimmed ||
+                  /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/.test(
+                    trimmed,
+                  ));
+              event.currentTarget.setCustomValidity(valid ? "" : t.common.ui.invalidEmail);
+              return;
+            }
             if (type && type !== "text") return;
             const value = event.currentTarget.value;
             const valid =
@@ -177,6 +240,15 @@ export function Field({ label, hint, error, optional, className, type, ...props 
               value.length <= (props.maxLength ?? 200) &&
               (!props.required || value.trim().length > 0);
             event.currentTarget.setCustomValidity(valid ? "" : t.common.ui.invalidText);
+          }}
+          onInvalid={(event) => {
+            props.onInvalid?.(event);
+            if (
+              isEmail &&
+              (event.currentTarget.validity.typeMismatch || event.currentTarget.validity.patternMismatch)
+            ) {
+              event.currentTarget.setCustomValidity(t.common.ui.invalidEmail);
+            }
           }}
           id={id}
           type={isPassword && visible ? "text" : type}
@@ -188,9 +260,11 @@ export function Field({ label, hint, error, optional, className, type, ...props 
           <button
             type="button"
             onClick={() => setVisible((v) => !v)}
+            onMouseDown={(e) => e.preventDefault()}
             aria-label={visible ? t.common.ui.hidePassword : t.common.ui.showPassword}
             aria-pressed={visible}
-            className="absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-r-[var(--radius-field)] text-muted hover:text-text"
+            aria-controls={id}
+            className="absolute inset-y-0 right-0 flex w-11 cursor-pointer items-center justify-center rounded-r-[var(--radius-field)] text-muted hover:text-text focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-[-2px]"
           >
             {visible ? <EyeOff aria-hidden className="size-5" /> : <Eye aria-hidden className="size-5" />}
           </button>
@@ -201,8 +275,8 @@ export function Field({ label, hint, error, optional, className, type, ...props 
           {hint}
         </p>
       ) : null}
-      {error ? (
-        <p id={`${id}-error`} className="mt-1.5 flex items-center gap-1.5 text-sm text-danger">
+      {error && errorPosition !== "top" ? (
+        <p id={`${id}-error`} role="alert" className="mt-1.5 flex items-center gap-1.5 text-sm text-danger">
           <AlertCircle aria-hidden className="size-4 shrink-0" />
           {error}
         </p>
@@ -281,3 +355,4 @@ export function OrDivider() {
 }
 
 export * from "./phone-field";
+export * from "./ui/tabs";

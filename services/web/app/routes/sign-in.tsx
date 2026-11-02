@@ -19,6 +19,7 @@ export default function SignIn() {
   const next = safeNext(params.get("next"), pathFor("dashboard", site.lang));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<{ text: string; tone: "danger" | "warning" } | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
   // Segundo paso: código de la app de autenticación (o de respaldo) si la cuenta lo tiene activado.
   const [twoFactor, setTwoFactor] = useState<null | "totp" | "backup">(null);
 
@@ -56,10 +57,15 @@ export default function SignIn() {
     const form = new FormData(e.currentTarget);
     const email = String(form.get("email") ?? "").trim();
     const password = String(form.get("password") ?? "");
+    setEmailError(null);
 
     // Validaciones de formato, longitud y caracteres
+    if (!email) {
+      setEmailError(t.auth.errors.email_required);
+      return;
+    }
     if (!EmailField.safeParse(email).success) {
-      setError({ text: t.auth.errors.invalid_format, tone: "danger" });
+      setEmailError(t.auth.errors.invalid_format);
       return;
     }
     if (!password || password.length < 8) {
@@ -165,7 +171,7 @@ export default function SignIn() {
       }
     >
       <GoogleButton callbackURL={next} />
-      <form method="post" onSubmit={onSubmit} className="space-y-5">
+      <form noValidate method="post" onSubmit={onSubmit} className="space-y-5">
         <Field
           label={t.auth.fields.email}
           name="email"
@@ -174,6 +180,17 @@ export default function SignIn() {
           required
           minLength={5}
           maxLength={254}
+          error={emailError ?? undefined}
+          errorPosition="top"
+          onInput={() => {
+            if (emailError) setEmailError(null);
+          }}
+          onBlur={(e) => {
+            const val = e.currentTarget.value.trim();
+            if (val && !EmailField.safeParse(val).success) {
+              setEmailError(t.auth.errors.invalid_format);
+            }
+          }}
         />
         <Field
           label={t.auth.fields.password}

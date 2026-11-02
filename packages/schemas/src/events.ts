@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { EmailField } from "./account.ts";
 import { TimeZone } from "./common.ts";
 import { FullName, freeText, singleLine } from "./text.ts";
 
@@ -9,7 +10,7 @@ const Uuid = z.uuid();
 export const Attendee = z
   .object({
     name: FullName,
-    email: z.string().trim().min(3).max(254).optional().or(z.literal("")),
+    email: EmailField.optional().or(z.literal("")),
     phone: z
       .string()
       .regex(/^\+[1-9]\d{6,14}$/, "teléfono E.164")
@@ -125,12 +126,12 @@ export type ConfirmHold = z.infer<typeof ConfirmHold>;
 
 export const ReleaseHold = z.object({ holdToken: HoldToken }).strict();
 
-export const OtpSend = z.object({ email: z.string().trim().min(3).max(254) }).strict();
+export const OtpSend = z.object({ email: EmailField }).strict();
 export type OtpSend = z.infer<typeof OtpSend>;
 
 export const OtpVerify = z
   .object({
-    email: z.string().trim().min(3).max(254),
+    email: EmailField,
     code: z.string().regex(/^\d{6}$/),
     name: FullName.optional(),
   })

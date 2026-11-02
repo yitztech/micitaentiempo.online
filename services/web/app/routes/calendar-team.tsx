@@ -1,3 +1,4 @@
+import { EmailField } from "@mcet/schemas";
 import { type FormEvent, useState } from "react";
 import { useRevalidator } from "react-router";
 import { Select } from "~/components/select";
@@ -36,6 +37,7 @@ export default function CalendarTeam({ loaderData }: Route.ComponentProps) {
   const revalidator = useRevalidator();
   const [role, setRole] = useState<"editor" | "observer">("observer");
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const owner = board.role === "owner";
 
@@ -43,6 +45,11 @@ export default function CalendarTeam({ loaderData }: Route.ComponentProps) {
     e.preventDefault();
     const form = e.currentTarget;
     const email = String(new FormData(form).get("email") ?? "").trim();
+    setEmailError(null);
+    if (!EmailField.safeParse(email).success) {
+      setEmailError(t.auth.errors.invalid_format);
+      return;
+    }
     setBusy(true);
     try {
       await apiRequest("POST", `/api/v1/calendars/${board.id}/invitations`, { email, role });
@@ -78,7 +85,23 @@ export default function CalendarTeam({ loaderData }: Route.ComponentProps) {
             onSubmit={invite}
             className="mt-4 grid gap-4 sm:grid-cols-[1fr_14rem_auto] sm:items-end"
           >
-            <Field label={tm.email} name="email" type="email" required autoComplete="off" />
+            <Field
+              label={tm.email}
+              name="email"
+              type="email"
+              required
+              minLength={5}
+              maxLength={254}
+              autoComplete="off"
+              error={emailError ?? undefined}
+              onInput={() => setEmailError(null)}
+              onBlur={(e) => {
+                const val = e.currentTarget.value.trim();
+                if (val && !EmailField.safeParse(val).success) {
+                  setEmailError(t.auth.errors.invalid_format);
+                }
+              }}
+            />
             <Select label={tm.role} value={role} onChange={(e) => setRole(e.target.value as typeof role)}>
               <option value="observer">{tm.roles.observer}</option>
               <option value="editor">{tm.roles.editor}</option>
