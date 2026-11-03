@@ -3,6 +3,11 @@ import { resolve } from "node:path";
 import { Readable } from "node:stream";
 import type { Route } from "./+types/app-apk";
 
+/** Activo del release de GitHub: el APK no se versiona en el repositorio (pesa ~40 MB). */
+const APK_URL =
+  process.env.APK_URL ??
+  "https://github.com/yitztech/micitaentiempo.online/releases/download/apk-v1/micitaentiempo.apk";
+
 export function loader({ request: _request }: Route.LoaderArgs) {
   const possiblePaths = [
     resolve(process.cwd(), "public/app.apk"),
@@ -28,13 +33,12 @@ export function loader({ request: _request }: Route.LoaderArgs) {
     }
   }
 
-  // Fallback dummy APK zip signature if file is not on disk yet
-  const dummyApk = Buffer.from("PK\x03\x04\x14\x00\x00\x00\x08\x00micitaentiempo-apk");
-  return new Response(dummyApk, {
+  return new Response(null, {
+    status: 302,
     headers: {
-      "Content-Type": "application/vnd.android.package-archive",
-      "Content-Disposition": 'attachment; filename="micitaentiempo.apk"',
-      "Cache-Control": "no-cache",
+      Location: APK_URL,
+      "Cache-Control": "no-store",
+      "X-Robots-Tag": "noindex",
     },
   });
 }

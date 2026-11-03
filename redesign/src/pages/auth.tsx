@@ -44,9 +44,10 @@ function PasswordInput({
       <button
         type="button"
         onClick={onToggle}
+        onMouseDown={(e) => e.preventDefault()}
         aria-label={show ? "Ocultar contraseña" : "Mostrar contraseña"}
         aria-pressed={show}
-        className="absolute right-1 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-lg text-muted hover:text-ink"
+        className="absolute right-1 top-1/2 grid size-10 -translate-y-1/2 cursor-pointer place-items-center rounded-lg text-muted hover:text-ink focus-visible:outline-2 focus-visible:outline-primary"
       >
         {show ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
       </button>

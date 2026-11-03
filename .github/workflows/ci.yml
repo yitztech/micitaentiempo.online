@@ -50,6 +50,25 @@ jobs:
           working-directory: services/calendar
       - run: go test -short -race ./...
 
+  base-datos:
+    name: Base de datos
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: services/calendar/go.mod
+          cache-dependency-path: services/calendar/go.sum
+      - run: pnpm install --frozen-lockfile
+      # Migraciones desde cero y pruebas de integración contra PostgreSQL real (testcontainers).
+      - run: pnpm test:db
+
   contratos:
     name: Contratos (buf)
     runs-on: ubuntu-latest

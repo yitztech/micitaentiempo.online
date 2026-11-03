@@ -534,6 +534,9 @@
     "seoTitle": "Perfil del negocio",
     "title": "Perfil público del negocio",
     "lead": "Configura la información que verán tus clientes en el directorio y al reservar citas.",
+    "preview": "Vista previa",
+    "general": "Información general",
+    "noLocations": "Aún no has registrado sedes.",
     "navLink": "Perfil del negocio",
     "status": {
       "draft": "Borrador (no visible públicamente)",
@@ -563,7 +566,9 @@
       "selectCategory": "Selecciona una categoría",
       "secondaryCategories": "Categorías secundarias (opcional, hasta 3)",
       "websiteUrl": "Sitio web (opcional)",
+      "websitePlaceholder": "https://tu-negocio.com",
       "termsUrl": "Condiciones del negocio o aviso legal (opcional)",
+      "termsPlaceholder": "https://tu-negocio.com/condiciones",
       "socialProfiles": "Redes sociales",
       "addSocial": "Añadir red social",
       "platform": "Plataforma",
@@ -597,6 +602,7 @@
       "delete": "Eliminar",
       "coverBadge": "Portada",
       "altText": "Texto alternativo (accesibilidad)",
+      "altPlaceholder": "Descripción de la foto para accesibilidad",
       "saveAlt": "Guardar",
       "noImages": "Aún no has subido imágenes."
     },

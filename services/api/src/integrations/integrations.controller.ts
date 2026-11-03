@@ -43,6 +43,7 @@ const SCOPES: Record<OAuthProvider, string> = {
   microsoft: "openid email offline_access User.Read Calendars.ReadWrite",
 };
 
+// El Apple ID puede ser un correo o un nombre de usuario heredado: identificador externo, no un campo nuestro.
 const ICloud = z
   .object({ appleId: z.string().trim().min(3).max(254), appPassword: z.string().trim().min(8).max(64) })
   .strict();

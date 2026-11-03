@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { EmailField } from "./account.ts";
 import { Country, TimeZone } from "./common.ts";
 import { freeText, Label, singleLine } from "./text.ts";
 
@@ -155,7 +156,7 @@ export type AvailabilityQuery = z.infer<typeof AvailabilityQuery>;
 
 export const Invitation = z
   .object({
-    email: z.string().trim().min(3).max(254),
+    email: EmailField,
     role: z.enum(["editor", "observer"]),
   })
   .strict();

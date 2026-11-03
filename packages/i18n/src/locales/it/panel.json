@@ -534,6 +534,9 @@
     "seoTitle": "Profilo attività",
     "title": "Profilo pubblico dell'attività",
     "lead": "Configura le informazioni che i clienti vedranno nell'elenco e durante la prenotazione.",
+    "preview": "Anteprima",
+    "general": "Informazioni generali",
+    "noLocations": "Non hai ancora registrato sedi.",
     "navLink": "Profilo attività",
     "status": {
       "draft": "Bozza (non visibile pubblicamente)",
@@ -563,7 +566,9 @@
       "selectCategory": "Seleziona una categoria",
       "secondaryCategories": "Categorie secondarie (opzionale, max 3)",
       "websiteUrl": "Sito web (opzionale)",
+      "websitePlaceholder": "https://la-tua-attivita.it",
       "termsUrl": "Termini di servizio o informativa legale (opzionale)",
+      "termsPlaceholder": "https://la-tua-attivita.it/condizioni",
       "socialProfiles": "Profili social",
       "addSocial": "Aggiungi profilo social",
       "platform": "Piattaforma",
@@ -597,6 +602,7 @@
       "delete": "Elimina",
       "coverBadge": "Copertina",
       "altText": "Testo alternativo (accessibilità)",
+      "altPlaceholder": "Descrizione della foto per l'accessibilità",
       "saveAlt": "Salva",
       "noImages": "Nessuna immagine caricata."
     },

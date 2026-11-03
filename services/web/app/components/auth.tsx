@@ -23,7 +23,7 @@ export function AuthCard({
         {lead ? <p className="mt-2 text-muted">{lead}</p> : null}
         <div className="mt-6">{children}</div>
       </Card>
-      {footer ? <p className="mt-6 text-center text-[15px] text-muted">{footer}</p> : null}
+      {footer ? <div className="mt-6 text-center text-[15px] text-muted">{footer}</div> : null}
     </>
   );
 }

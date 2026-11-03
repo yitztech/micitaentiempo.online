@@ -4,6 +4,7 @@ import { useAltcha } from "~/lib/altcha";
 import { type ApiError, errorText, postJson } from "~/lib/api-client";
 import { type Booking, calendarLinks, type PublicCalendar } from "~/lib/booking-types";
 import { customerRequest, customerSession, downloadIcs } from "~/lib/customer";
+import { isValidEmail } from "~/lib/email";
 import { cx, fmt, useRoot } from "~/lib/i18n";
 import { browserTz, formatDateTime, formatTime, tzLabel } from "~/lib/time";
 import { AltchaStatus } from "./altcha-status";
@@ -57,6 +58,7 @@ export function BookingFlow({
   const [booking, setBooking] = useState<Booking | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [refresh, setRefresh] = useState(0);
   const [now, setNow] = useState(Date.now());
@@ -98,9 +100,19 @@ export function BookingFlow({
   async function submitDetails(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!slot) return;
+    const email = person.email.trim();
+    setEmailError(null);
+    if (!email && calendar.bookingContactMode !== "phone" && calendar.bookingContactMode !== "name_only") {
+      setEmailError(b.errors.invalid_format);
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
+      if (email && !(await isValidEmail(email))) {
+        setEmailError(b.errors.invalid_format);
+        return;
+      }
       const token = await altcha.token();
       const res = await postJson<{ hold: Booking; holdToken: string }>(
         `/api/public/v1/calendars/${calendar.slug}/holds`,
@@ -361,14 +373,29 @@ export function BookingFlow({
               optional={
                 calendar.bookingContactMode === "phone" || calendar.bookingContactMode === "name_only"
               }
+              minLength={5}
               maxLength={254}
+              error={emailError ?? undefined}
               hint={
                 calendar.bookingContactMode === "phone" || calendar.bookingContactMode === "name_only"
                   ? b.details.emailOptionalHint
                   : b.details.emailHint
               }
               value={person.email}
-              onChange={(e) => setPerson({ ...person, email: e.target.value })}
+              onChange={(e) => {
+                setEmailError(null);
+                setPerson({ ...person, email: e.target.value });
+              }}
+              onBlur={(e) => {
+                const input = e.currentTarget;
+                const value = input.value.trim();
+                if (!value) return;
+                void isValidEmail(value)
+                  .then((ok) => {
+                    if (!ok && input.value.trim() === value) setEmailError(b.errors.invalid_format);
+                  })
+                  .catch(() => undefined);
+              }}
             />
             <PhoneField
               name="phone"

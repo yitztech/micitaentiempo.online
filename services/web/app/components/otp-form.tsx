@@ -1,6 +1,7 @@
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import { errorText, postJson } from "~/lib/api-client";
 import { setCustomerSession } from "~/lib/customer";
+import { isValidEmail } from "~/lib/email";
 import { fmt, useT } from "~/lib/i18n";
 import { GoogleVerify } from "./google-verify";
 import { Alert, Button, Field } from "./ui";
@@ -28,6 +29,7 @@ export function OtpForm({
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
 
   async function send(to: string) {
     setBusy(true);
@@ -71,26 +73,53 @@ export function OtpForm({
     }
   }
 
+  async function submitEmail(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const trimmed = email.trim();
+    setEmailError(null);
+    let valid: boolean;
+    try {
+      valid = await isValidEmail(trimmed);
+    } catch {
+      setError(b.errors.generic);
+      return;
+    }
+    if (!valid) {
+      setEmailError(b.errors.invalid_format);
+      return;
+    }
+    await send(trimmed);
+  }
+
   const google = <GoogleVerify email={given} onVerified={onVerified} />;
   if (!sent) {
     return (
       <>
-        <form
-          method="post"
-          onSubmit={(e) => {
-            e.preventDefault();
-            void send(email.trim());
-          }}
-          className="space-y-4"
-        >
+        <form method="post" onSubmit={submitEmail} className="space-y-4">
           {given ? null : (
             <Field
               label={b.details.email}
               type="email"
               autoComplete="email"
               required
+              minLength={5}
+              maxLength={254}
+              error={emailError ?? undefined}
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmailError(null);
+                setEmail(e.target.value);
+              }}
+              onBlur={(e) => {
+                const input = e.currentTarget;
+                const value = input.value.trim();
+                if (!value) return;
+                void isValidEmail(value)
+                  .then((ok) => {
+                    if (!ok && input.value.trim() === value) setEmailError(b.errors.invalid_format);
+                  })
+                  .catch(() => undefined);
+              }}
             />
           )}
           {error ? <Alert tone="danger">{error}</Alert> : null}
@@ -112,6 +141,7 @@ export function OtpForm({
           inputMode="numeric"
           autoComplete="one-time-code"
           pattern="\d{6}"
+          minLength={6}
           maxLength={6}
           required
           className="max-w-48"

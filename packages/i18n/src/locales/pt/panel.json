@@ -534,6 +534,9 @@
     "seoTitle": "Perfil da Empresa",
     "title": "Perfil Público da Empresa",
     "lead": "Configure as informações que seus clientes verão no diretório e ao agendar horários.",
+    "preview": "Pré-visualização",
+    "general": "Informações gerais",
+    "noLocations": "Você ainda não cadastrou nenhum local.",
     "navLink": "Perfil da empresa",
     "status": {
       "draft": "Rascunho (não visível publicamente)",
@@ -563,7 +566,9 @@
       "selectCategory": "Selecione uma categoria",
       "secondaryCategories": "Categorias secundárias (opcional, até 3)",
       "websiteUrl": "Site (opcional)",
+      "websitePlaceholder": "https://seu-negocio.com",
       "termsUrl": "Termos de uso ou aviso legal (opcional)",
+      "termsPlaceholder": "https://seu-negocio.com/termos",
       "socialProfiles": "Redes sociais",
       "addSocial": "Adicionar rede social",
       "platform": "Plataforma",
@@ -597,6 +602,7 @@
       "delete": "Excluir",
       "coverBadge": "Capa",
       "altText": "Texto alternativo (acessibilidade)",
+      "altPlaceholder": "Descrição da foto para acessibilidade",
       "saveAlt": "Salvar",
       "noImages": "Nenhuma imagem enviada ainda."
     },

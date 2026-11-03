@@ -54,7 +54,14 @@
     "or": "or",
     "sending": "Sending…",
     "comingSoon": "Coming soon",
-    "invalidText": "Check the length and remove control characters or tags."
+    "invalidText": "Check the length and remove control characters or tags.",
+    "invalidEmail": "Enter a valid email, for example name@domain.com.",
+    "cancel": "Cancel"
+  },
+  "phone": {
+    "countryLabel": "Country and dialing code",
+    "countrySelector": "Country selector",
+    "placeholder": "5551234567"
   },
   "errors": {
     "notFoundTitle": "Page not found",

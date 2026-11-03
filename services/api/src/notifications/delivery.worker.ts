@@ -329,8 +329,7 @@ export class DeliveryWorker implements OnModuleInit, OnModuleDestroy {
         .getEvent({ id: rem.eventId }, SYSTEM)
         .catch(() => undefined);
       if (
-        !ev ||
-        ev.status !== "confirmed" ||
+        ev?.status !== "confirmed" ||
         !ev.start ||
         timestampDate(ev.start).getTime() !== rem.startAt.getTime()
       )

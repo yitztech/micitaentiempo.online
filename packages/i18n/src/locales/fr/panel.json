@@ -534,6 +534,9 @@
     "seoTitle": "Profil d'entreprise",
     "title": "Profil public de l'entreprise",
     "lead": "Configurez les informations visibles par vos clients dans l'annuaire et lors de la réservation.",
+    "preview": "Aperçu",
+    "general": "Informations générales",
+    "noLocations": "Vous n'avez pas encore ajouté de lieu.",
     "navLink": "Profil d'entreprise",
     "status": {
       "draft": "Brouillon (non visible publiquement)",
@@ -563,7 +566,9 @@
       "selectCategory": "Sélectionnez une catégorie",
       "secondaryCategories": "Catégories secondaires (optionnel, max 3)",
       "websiteUrl": "Site web (optionnel)",
+      "websitePlaceholder": "https://votre-entreprise.fr",
       "termsUrl": "Conditions de vente ou mentions légales (optionnel)",
+      "termsPlaceholder": "https://votre-entreprise.fr/conditions",
       "socialProfiles": "Réseaux sociaux",
       "addSocial": "Ajouter un réseau",
       "platform": "Plateforme",
@@ -597,6 +602,7 @@
       "delete": "Supprimer",
       "coverBadge": "Couverture",
       "altText": "Texte alternatif (accessibilité)",
+      "altPlaceholder": "Description de la photo pour l'accessibilité",
       "saveAlt": "Enregistrer",
       "noImages": "Aucune photo téléchargée."
     },

@@ -1,3 +1,4 @@
+import { EmailField } from "@mcet/schemas";
 import { CalendarSync, RefreshCw } from "lucide-react";
 import { type FormEvent, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router";
@@ -49,6 +50,7 @@ export function ConnectedCalendars({
   const [feeds, setFeeds] = useState<Feed[]>([]);
   const [created, setCreated] = useState<{ url: string; webcal: string } | null>(null);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
   const [icloud, setIcloud] = useState(false);
   const [busy, setBusy] = useState(false);
   const base = `/api/v1/calendars/${calendarId}`;
@@ -77,10 +79,16 @@ export function ConnectedCalendars({
   async function connectICloud(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
+    const appleId = String(f.get("appleId") ?? "").trim();
+    setEmailError(null);
+    if (!EmailField.safeParse(appleId).success) {
+      setEmailError(t.auth.errors.invalid_format);
+      return;
+    }
     setBusy(true);
     await run(() =>
       apiRequest("POST", `${base}/integrations/icloud`, {
-        appleId: String(f.get("appleId")),
+        appleId,
         appPassword: String(f.get("appPassword")),
       }),
     );
@@ -213,13 +221,30 @@ export function ConnectedCalendars({
         ) : null}
         {icloud ? (
           <form method="post" onSubmit={connectICloud} className="grid gap-4 sm:grid-cols-2">
-            <Field label={s.appleId} name="appleId" type="email" autoComplete="username" required />
+            <Field
+              label={s.appleId}
+              name="appleId"
+              type="email"
+              autoComplete="username"
+              required
+              minLength={5}
+              maxLength={254}
+              error={emailError ?? undefined}
+              onInput={() => setEmailError(null)}
+              onBlur={(e) => {
+                const val = e.currentTarget.value.trim();
+                if (val && !EmailField.safeParse(val).success) {
+                  setEmailError(t.auth.errors.invalid_format);
+                }
+              }}
+            />
             <Field
               label={s.appPassword}
               name="appPassword"
               type="password"
               autoComplete="off"
               required
+              maxLength={128}
               hint={s.appPasswordHint}
             />
             <div className="sm:col-span-2">

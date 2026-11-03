@@ -18,12 +18,14 @@ export default function ForgotPassword() {
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const email = String(new FormData(e.currentTarget).get("email") ?? "").trim();
+    setEmailError(null);
     if (!EmailField.safeParse(email).success) {
-      setError(t.auth.errors.invalid_format);
+      setEmailError(t.auth.errors.invalid_format);
       return;
     }
     setBusy(true);
@@ -57,7 +59,7 @@ export default function ForgotPassword() {
       {sent ? (
         <Alert tone="success">{s.sent}</Alert>
       ) : (
-        <form method="post" onSubmit={onSubmit} className="space-y-5">
+        <form noValidate method="post" onSubmit={onSubmit} className="space-y-5">
           <Field
             label={t.auth.fields.email}
             name="email"
@@ -66,6 +68,14 @@ export default function ForgotPassword() {
             required
             minLength={5}
             maxLength={254}
+            error={emailError ?? undefined}
+            onInput={() => setEmailError(null)}
+            onBlur={(e) => {
+              const val = e.currentTarget.value.trim();
+              if (val && !EmailField.safeParse(val).success) {
+                setEmailError(t.auth.errors.invalid_format);
+              }
+            }}
           />
           {error ? <Alert tone="danger">{error}</Alert> : null}
           <Button type="submit" size="lg" className="w-full" loading={busy}>

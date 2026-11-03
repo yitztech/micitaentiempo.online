@@ -181,8 +181,19 @@ p {
   border-radius: 6px;
 }
 
+[aria-invalid="true"]:focus-visible,
+:focus-visible[aria-invalid="true"] {
+  outline-color: var(--danger);
+}
+
 .tabular {
   font-variant-numeric: tabular-nums;
+}
+
+/* Oculta el botón nativo de Edge/IE para no duplicar el botón personalizado de mostrar/ocultar contraseña */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
 }
 
 /* Texto largo de Markdown (legales y créditos). */
@@ -225,9 +236,13 @@ p {
   *,
   *::before,
   *::after {
+    /* biome-ignore lint/complexity/noImportantStyles: debe anular cualquier animación de la app */
     animation-duration: 0.01ms !important;
+    /* biome-ignore lint/complexity/noImportantStyles: debe anular cualquier animación de la app */
     animation-iteration-count: 1 !important;
+    /* biome-ignore lint/complexity/noImportantStyles: debe anular cualquier transición de la app */
     transition-duration: 0.01ms !important;
+    /* biome-ignore lint/complexity/noImportantStyles: debe anular el desplazamiento suave de la app */
     scroll-behavior: auto !important;
   }
 }

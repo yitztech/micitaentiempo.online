@@ -17,6 +17,8 @@ When("cambia su nombre a {string}", async ({ page }, nuevo: string) => {
 });
 
 When("exporta sus datos", async ({ page, estado }) => {
+  const tab = page.getByRole("tab", { name: /datos|data/i });
+  if (await tab.isVisible().catch(() => false)) await tab.click();
   const descarga = page.waitForEvent("download");
   await page.getByRole("button", { name: "Exportar mis datos" }).click();
   estado.descarga = await (await descarga).path();
@@ -27,6 +29,8 @@ Then("el archivo descargado incluye {string}", async ({ estado }, texto: string)
 });
 
 When("borra su cuenta escribiendo {string}", async ({ page }, palabra: string) => {
+  const tab = page.getByRole("tab", { name: /datos|data/i });
+  if (await tab.isVisible().catch(() => false)) await tab.click();
   await page.getByRole("button", { name: "Borrar mi cuenta" }).click();
   const dialogo = page.getByRole("dialog");
   await dialogo.getByLabel(palabra).fill(palabra);
@@ -55,6 +59,8 @@ function totp(secret: string, at = Date.now()): string {
 }
 
 When("activa la verificación en dos pasos", async ({ page, estado }) => {
+  const tab = page.getByRole("tab", { name: /dos pasos|two-step|verificación|verification/i });
+  if (await tab.isVisible().catch(() => false)) await tab.click();
   await page.getByRole("button", { name: "Activar", exact: true }).click();
   await page.getByLabel("Confirma tu contraseña").fill(CLAVE);
   await page.getByRole("button", { name: "Activar", exact: true }).click();
@@ -110,6 +116,8 @@ Then("está en su panel", async ({ estado }) => {
 });
 
 When("cierra su negocio escribiendo su nombre", async ({ page, estado }) => {
+  const tab = page.getByRole("tab", { name: /datos|data/i });
+  if (await tab.isVisible().catch(() => false)) await tab.click();
   const nombre = `Negocio de ${String(estado.propietario)}`;
   await page.getByRole("button", { name: "Cerrar el negocio" }).click();
   const dialogo = page.getByRole("dialog");

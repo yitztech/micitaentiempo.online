@@ -14,7 +14,7 @@ RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
 
 # Desarrollo local (compose.yml): servidor con recarga; Compose Watch sincroniza el código.
 FROM deps AS dev
-RUN pnpm --filter "@mcet/api^..." build
+RUN pnpm --filter "@mcet/api..." build
 WORKDIR /repo/services/api
 CMD ["pnpm", "dev"]
 

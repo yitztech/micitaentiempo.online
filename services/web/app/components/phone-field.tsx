@@ -68,6 +68,7 @@ export function PhoneField({
   const id = useId();
   const t = useT();
   const { site } = useRoot();
+  const regionNames = new Intl.DisplayNames([site.lang], { type: "region" });
 
   // Elegir país por defecto según el idioma del sitio
   const defaultCountry =
@@ -144,18 +145,18 @@ export function PhoneField({
         {/* Selector de país */}
         <div className="relative shrink-0">
           <label htmlFor={`${id}-country`} className="sr-only">
-            País e indicativo telefónico
+            {t.common.phone.countryLabel}
           </label>
           <select
             id={`${id}-country`}
             value={selectedCountryCode}
             onChange={handleCountryChange}
-            aria-label="Selector de país"
+            aria-label={t.common.phone.countrySelector}
             className="flex min-h-11 cursor-pointer appearance-none items-center rounded-[var(--radius-field)] border border-border-field bg-surface py-2 pl-3 pr-8 text-[15px] text-text hover:bg-surface-2 focus:border-primary focus:outline-none focus-visible:outline-3 focus-visible:outline-primary"
           >
             {COUNTRIES.map((c) => (
               <option key={c.code} value={c.code}>
-                {c.flag} {c.dialCode} ({c.name})
+                {c.flag} {c.dialCode} ({regionNames.of(c.code) ?? c.name})
               </option>
             ))}
           </select>
@@ -179,10 +180,10 @@ export function PhoneField({
             onChange={handleNumberChange}
             onKeyDown={handleKeyDown}
             required={required}
-            placeholder="612345678"
+            placeholder={t.common.phone.placeholder}
             aria-invalid={error ? true : undefined}
             aria-describedby={describedBy}
-            className="block min-h-11 w-full rounded-[var(--radius-field)] border border-border-field bg-surface px-3 text-base text-text placeholder:text-muted/60 focus:border-primary focus:outline-none focus-visible:outline-3 focus-visible:outline-primary aria-[invalid=true]:border-danger"
+            className="block min-h-11 w-full rounded-[var(--radius-field)] border border-border-field bg-surface px-3 text-base text-text placeholder:text-muted/60 focus:border-primary focus:outline-none focus-visible:outline-3 focus-visible:outline-primary aria-[invalid=true]:border-danger aria-[invalid=true]:bg-danger-soft/20 aria-[invalid=true]:ring-1 aria-[invalid=true]:ring-danger aria-[invalid=true]:focus:border-danger aria-[invalid=true]:focus:ring-2 aria-[invalid=true]:focus:ring-danger aria-[invalid=true]:focus-visible:outline-danger"
           />
         </div>
       </div>

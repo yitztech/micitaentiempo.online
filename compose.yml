@@ -60,6 +60,7 @@ services:
       RPC_SECRET_CALENDAR_TO_API: ${RPC_SECRET_CALENDAR_TO_API:-dev-rpc-calendar-to-api-000000000000000000}
       TEST_MODE: "1"
       LOG_LEVEL: debug
+      NODE_OPTIONS: "--max-old-space-size=1024"
     volumes:
       - uploads-dev:/uploads
     env_file: [{ path: .env, required: false }]
@@ -129,7 +130,7 @@ services:
 
   mailpit:
     image: axllent/mailpit:v1.31.4
-    ports: ["8025:8025"]
+    ports: ["${MAILPIT_PORT:-8025}:8025"]
     environment:
       MP_SMTP_AUTH_ACCEPT_ANY: "1"
       MP_SMTP_AUTH_ALLOW_INSECURE: "1"

@@ -534,6 +534,9 @@
     "seoTitle": "Unternehmensprofil",
     "title": "Öffentliches Unternehmensprofil",
     "lead": "Legen Sie fest, wie sich Ihr Unternehmen im Verzeichnis und bei Buchungen präsentiert.",
+    "preview": "Vorschau",
+    "general": "Allgemeine Informationen",
+    "noLocations": "Du hast noch keine Standorte angelegt.",
     "navLink": "Unternehmensprofil",
     "status": {
       "draft": "Entwurf (nicht öffentlich sichtbar)",
@@ -563,7 +566,9 @@
       "selectCategory": "Kategorie auswählen",
       "secondaryCategories": "Sekundäre Kategorien (optional, bis zu 3)",
       "websiteUrl": "Website (optional)",
+      "websitePlaceholder": "https://ihr-unternehmen.de",
       "termsUrl": "Geschäftsbedingungen oder Impressum (optional)",
+      "termsPlaceholder": "https://ihr-unternehmen.de/agb",
       "socialProfiles": "Soziale Profile",
       "addSocial": "Profil hinzufügen",
       "platform": "Plattform",
@@ -597,6 +602,7 @@
       "delete": "Löschen",
       "coverBadge": "Titelbild",
       "altText": "Alternativtext (Barrierefreiheit)",
+      "altPlaceholder": "Bildbeschreibung für die Barrierefreiheit",
       "saveAlt": "Speichern",
       "noImages": "Noch keine Bilder hochgeladen."
     },

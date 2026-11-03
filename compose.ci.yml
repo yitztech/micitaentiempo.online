@@ -71,6 +71,8 @@ services:
   mailpit:
     image: axllent/mailpit:v1.31.4
     mem_limit: 64m
+    labels:
+      mcet.solo-pruebas: "true"
     environment:
       MP_SMTP_AUTH_ACCEPT_ANY: "1"
       MP_SMTP_AUTH_ALLOW_INSECURE: "1"
@@ -80,6 +82,8 @@ services:
   captura:
     image: node:24.22.0-alpine3.24
     mem_limit: 64m
+    labels:
+      mcet.solo-pruebas: "true"
     command: ["node", "/app/captura.mjs"]
     volumes: ["./tests/fakes:/app:ro"]
     ports: ["4010:4010"]
@@ -92,6 +96,8 @@ services:
   radicale:
     image: tomsquest/docker-radicale:3.8.1.1
     mem_limit: 96m
+    labels:
+      mcet.solo-pruebas: "true"
     volumes: ["./tests/fakes/radicale.conf:/config/config:ro"]
     tmpfs: [/data]
     ports: ["5232:5232"]

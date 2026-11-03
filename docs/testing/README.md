@@ -18,6 +18,31 @@ pnpm test:env:up
 
 El entorno `mcet-tests` usa exclusivamente datos sintéticos y `.env.ci`. Levanta las imágenes del código actual, PostgreSQL, Mailpit y dobles HTTP de proveedores. Ocupa los puertos 8080, 8025, 4010 y 5232; comprueba que están libres antes de levantarlo. No reutilices bases ni credenciales de producción. Las suites SQL crean otros PostgreSQL efímeros mediante Testcontainers y los eliminan al terminar. No aceptan un DSN de producción.
 
+### Si un puerto está ocupado
+
+Los puertos publicados son 8080 (gateway), 8025 (Mailpit), 4010 (dobles de proveedores) y 5232 (CalDAV). Si otro proyecto local ya usa alguno, remáplalo con un archivo de *override* en lugar de detener el entorno ajeno:
+
+```sh
+cat > /tmp/mcet-ports-override.yml <<'YAML'
+services:
+  mailpit:
+    ports: !override
+      - "18025:8025"
+YAML
+
+docker compose -f compose.prod.yml -f compose.ci.yml -f /tmp/mcet-ports-override.yml \
+  --env-file .env.ci -p mcet-tests up -d --build --wait
+```
+
+Si cambias el puerto de Mailpit, **las suites tienen que saberlo**: el fixture lee `MAILPIT_URL` (`http://localhost:8025` por defecto). Si no coincide, consulta el Mailpit de otro proyecto y cada escenario falla con «No llegó ningún correo» aunque el correo se haya enviado y esté en el buzón correcto:
+
+```sh
+MAILPIT_URL=http://localhost:18025 pnpm test:frontend
+MAILPIT_URL=http://localhost:18025 pnpm test:behavior
+```
+
+Lo mismo aplica a `scripts/test-native-mobile.mjs`. Si cambias el puerto del gateway, exporta `ES_URL` y `EN_URL` con el nuevo puerto. Comprueba que el puerto elegido está libre con `lsof -nP -iTCP:18025 -sTCP:LISTEN`.
+
 En macOS, si Testcontainers no descubre Docker, usa las variables de conexión documentadas por tu instalación de Docker; no desactives las pruebas para ocultar el problema. Sin Docker, `test:db` falla. El modo Go `-short` omite explícitamente las pruebas SQL.
 
 Los nombres `micitaentiempo.localhost` y `myappointmentontime.localhost` deben resolver a loopback. Para otra dirección local, configura `ES_URL`, `EN_URL` y `MAILPIT_URL` según `tests/escenarios/fixtures/`; las URL públicas del entorno deben coincidir para verificar correos y cookies. No apuntes suites que escriben datos a producción.

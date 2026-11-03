@@ -534,6 +534,9 @@
     "seoTitle": "Business Profile",
     "title": "Public Business Profile",
     "lead": "Set up the details your customers will see in the directory and during booking.",
+    "preview": "Preview",
+    "general": "General information",
+    "noLocations": "You haven't added any locations yet.",
     "navLink": "Business profile",
     "status": {
       "draft": "Draft (not visible publicly)",
@@ -563,7 +566,9 @@
       "selectCategory": "Select a category",
       "secondaryCategories": "Secondary categories (optional, up to 3)",
       "websiteUrl": "Website (optional)",
+      "websitePlaceholder": "https://your-business.com",
       "termsUrl": "Business terms or legal notice (optional)",
+      "termsPlaceholder": "https://your-business.com/terms",
       "socialProfiles": "Social profiles",
       "addSocial": "Add social profile",
       "platform": "Platform",
@@ -597,6 +602,7 @@
       "delete": "Delete",
       "coverBadge": "Cover",
       "altText": "Alternative text (accessibility)",
+      "altPlaceholder": "Photo description for accessibility",
       "saveAlt": "Save",
       "noImages": "No images uploaded yet."
     },
