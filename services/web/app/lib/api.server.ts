@@ -12,7 +12,11 @@ export interface ApiResponse<T> {
  * Llama a `api` desde el servidor conservando el Host del visitante (idioma y sesión por dominio) y
  * su cookie. Usa node:http porque fetch no permite fijar Host.
  */
-export function apiGet<T>(request: Request, path: string): Promise<ApiResponse<T>> {
+export function apiGet<T>(
+  request: Request,
+  path: string,
+  refreshedCookies?: string[],
+): Promise<ApiResponse<T>> {
   const headers: Record<string, string> = {
     host: request.headers.get("host") ?? BASE.host,
     accept: "application/json",
@@ -28,6 +32,8 @@ export function apiGet<T>(request: Request, path: string): Promise<ApiResponse<T
         const chunks: Buffer[] = [];
         res.on("data", (c: Buffer) => chunks.push(c));
         res.on("end", () => {
+          const cookies = res.headers["set-cookie"];
+          if (cookies?.length && refreshedCookies) refreshedCookies.push(...cookies);
           let body: T | null = null;
           try {
             body = JSON.parse(Buffer.concat(chunks).toString("utf8")) as T;

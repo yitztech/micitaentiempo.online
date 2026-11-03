@@ -62,3 +62,15 @@ Característica: Tableros, horarios, feriados y servicios
     Y un propietario "Intrusa" con plan "personal" en el dominio "es"
     Cuando "Intrusa" consulta el tablero de "Ana"
     Entonces la respuesta tiene estado 404
+
+  @critico @seguridad
+  Escenario: Las sesiones y las operaciones de dos organizaciones están aisladas
+    Dado un propietario "Ana" con plan "personal" en el dominio "es"
+    Y "Ana" tiene el tablero "Consultas" en "America/Mexico_City" del país "MX"
+    Y un propietario "Intrusa" con plan "personal" en el dominio "es"
+    Entonces cada propietario ve únicamente los datos de su propia sesión
+    Y una petición sin sesión no puede consultar el panel privado
+    Cuando "Intrusa" intenta modificar el tablero ajeno
+    Entonces la respuesta tiene estado 404
+    Cuando "Ana" cierra su sesión
+    Entonces la sesión de "Ana" queda cerrada y la de "Intrusa" sigue activa

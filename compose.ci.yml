@@ -76,7 +76,7 @@ services:
     environment:
       MP_SMTP_AUTH_ACCEPT_ANY: "1"
       MP_SMTP_AUTH_ALLOW_INSECURE: "1"
-    ports: ["8025:8025"]
+    ports: ["${MAILPIT_PORT:-18025}:8025"]
     networks: [frontend]
   # Imita Telegram, Slack y WhatsApp (tests/fakes/captura.mjs): nada sale a terceros en las pruebas.
   captura:

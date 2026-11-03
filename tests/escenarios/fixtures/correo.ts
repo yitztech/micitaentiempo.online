@@ -1,6 +1,6 @@
 import type { APIRequestContext } from "@playwright/test";
 
-const MAILPIT = process.env.MAILPIT_URL ?? "http://localhost:8025";
+const MAILPIT = process.env.MAILPIT_URL ?? "http://localhost:18025";
 
 export interface Correo {
   id: string;

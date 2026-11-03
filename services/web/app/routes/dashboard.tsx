@@ -14,7 +14,7 @@ import type { Route } from "./+types/dashboard";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   const { lang } = context.get(siteContext);
-  const calendars = await panelGet<BoardView[]>(request, context, "/api/v1/calendars");
+  const { data: calendars } = await panelGet<BoardView[]>(request, context, "/api/v1/calendars");
   if (calendars.length === 0) {
     throw redirect(pathFor("welcome", lang));
   }
@@ -28,11 +28,11 @@ export async function loader({ request, context }: Route.LoaderArgs) {
           request,
           context,
           `/api/v1/calendars/${c.id}/events?from=${from}&to=${to}`,
-        ).catch(() => []),
+        ).catch(() => ({ data: [], cookies: [] })),
       ),
   );
   const upcoming = lists
-    .flat()
+    .flatMap((r) => r.data)
     .filter((e) => e.kind === "appointment" && e.status === "confirmed")
     .sort((a, b) => a.start.localeCompare(b.start))
     .slice(0, 12);

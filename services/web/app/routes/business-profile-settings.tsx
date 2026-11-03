@@ -20,7 +20,7 @@ import { metaFor, publicCacheHeaders } from "~/lib/seo";
 import type { Route } from "./+types/business-profile-settings";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
-  const [profile, locationsPage, calendars, categoriesRes] = await Promise.all([
+  const [{ data: profile }, { data: locationsPage }, { data: calendars }, categoriesRes] = await Promise.all([
     panelGet<PrivateBusinessProfile>(request, context, "/api/business-profile"),
     panelGet<LocationPage>(request, context, "/api/business-profile/locations?limit=50"),
     panelGet<BoardView[]>(request, context, "/api/v1/calendars"),

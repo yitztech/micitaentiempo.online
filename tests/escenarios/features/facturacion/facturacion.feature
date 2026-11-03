@@ -29,6 +29,7 @@ Característica: Planes, prueba gratuita y facturación
     Dado la facturación usa el Stripe de pruebas
     Y un propietario "Laura" con plan "personal" en el dominio "es"
     Y "Laura" tiene el tablero "Consultas" en "America/Mexico_City" del país "MX"
+    Y el tablero abre de lunes a viernes de "09:00" a "18:00" con comida de "14:00" a "15:00"
     Y el tablero tiene el servicio "Consulta general" de 30 minutos
     Y "Laura" tiene la suscripción "active" con el plan "personal"
     Cuando Stripe avisa de un pago fallido de "Laura"
@@ -37,6 +38,15 @@ Característica: Planes, prueba gratuita y facturación
     Cuando pasan 8 días
     Entonces la organización de "Laura" está "read_only" con el plan "personal"
     Y el tablero no acepta reservas
+    Y "Laura" puede consultar el tablero y la facturación en solo lectura
+    Y "Laura" no puede invitar miembros ni modificar el perfil del negocio
+    Cuando Stripe confirma la suscripción "active" de "Laura" con el plan "personal"
+    Entonces la organización de "Laura" está "active" con el plan "personal"
+    Y la fecha actual es "2026-09-14T12:00:00Z"
+    Cuando la visitante "Carla" aparta el "2026-09-15" a las "10:00"
+    Y "Carla" pide un código a su correo y lo escribe
+    Y "Carla" confirma su reserva
+    Entonces la reserva de "Carla" queda confirmada
 
   @stripe @reloj
   Escenario: La prueba vence sin suscripción

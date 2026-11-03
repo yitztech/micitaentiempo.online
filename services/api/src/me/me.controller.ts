@@ -4,6 +4,7 @@ import { and, eq, isNotNull } from "drizzle-orm";
 import { AuditService } from "../audit/audit.service.js";
 import { type AuthedRequest, CurrentUser } from "../auth/auth.guard.js";
 import { AuthRegistry, type SessionUser } from "../auth/auth.registry.js";
+import { canWriteOrganization } from "../auth/org-access.js";
 import { toHeaders } from "../common/request.js";
 import { ZodPipe } from "../common/zod.pipe.js";
 import { type Database, DB } from "../db/db.module.js";
@@ -56,7 +57,7 @@ export class MeController {
       memberships,
       capabilities: {
         canCreateBusiness: !org,
-        canManageBusinessProfile: Boolean(org && org.status !== "suspended"),
+        canManageBusinessProfile: Boolean(org && canWriteOrganization(org.status)),
         canBook: true,
         businessId: org ? org.id : null,
       },

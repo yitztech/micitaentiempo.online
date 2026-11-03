@@ -32,10 +32,12 @@ interface Invoice {
 }
 
 export async function loader({ request, context }: Route.LoaderArgs) {
-  const billing = await panelGet<Billing>(request, context, "/api/v1/billing");
-  const invoices = billing.enabled
-    ? await panelGet<Invoice[]>(request, context, "/api/v1/billing/invoices").catch(() => [])
-    : [];
+  const { data: billing } = await panelGet<Billing>(request, context, "/api/v1/billing");
+  const { data: invoices } = billing.enabled
+    ? await panelGet<Invoice[]>(request, context, "/api/v1/billing/invoices").catch(() => ({
+        data: [],
+      }))
+    : { data: [] };
   const headers = new Headers();
   if (billing.enabled) {
     // Stripe solo amplía la CSP y Permissions-Policy de esta página, y solo si está activo.

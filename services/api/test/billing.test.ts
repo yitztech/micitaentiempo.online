@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { statusFromSubscription } from "../src/billing/billing.service.js";
+import { describe, expect, it, vi } from "vitest";
+import { BillingService, statusFromSubscription } from "../src/billing/billing.service.js";
 import { planOfLookupKey, setBillingOverride, stripeConfig } from "../src/billing/stripe.config.js";
 import type { Env } from "../src/config/env.js";
 
@@ -18,6 +18,36 @@ describe("máquina de estados de la organización", () => {
     expect(planOfLookupKey("personal_monthly_usd")).toBe("personal");
     expect(planOfLookupKey("branches_monthly_usd")).toBe("branches");
     expect(planOfLookupKey("otra")).toBeNull();
+  });
+});
+
+describe("sincronización recuperable del estado de facturación", () => {
+  it("conserva el marcador si falla el motor y lo borra tras un reintento correcto", async () => {
+    const org = { id: "org-1", status: "read_only", calendarStatusPending: true, deletedAt: null };
+    const tx = {
+      select: () => ({ from: () => ({ where: () => ({ for: async () => [org] }) }) }),
+      update: () => ({
+        set: (values: { calendarStatusPending: boolean }) => ({
+          where: async () => Object.assign(org, values),
+        }),
+      }),
+    };
+    const db = { transaction: async (fn: (client: typeof tx) => Promise<void>) => fn(tx) };
+    const send = vi.fn().mockRejectedValueOnce(new Error("motor no disponible")).mockResolvedValueOnce({});
+    const rpc = { client: () => ({ setOrgStatus: send }) };
+    const billing = new BillingService(
+      db as never,
+      {} as never,
+      rpc as never,
+      {} as never,
+      {} as never,
+      {} as never,
+    );
+    await expect(billing.syncCalendarStatus(org.id)).rejects.toThrow("motor no disponible");
+    expect(org.calendarStatusPending).toBe(true);
+    await billing.syncCalendarStatus(org.id);
+    expect(org.calendarStatusPending).toBe(false);
+    expect(send).toHaveBeenLastCalledWith({ orgId: "org-1", status: "read_only" }, expect.anything());
   });
 });
 

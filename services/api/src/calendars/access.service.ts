@@ -1,9 +1,10 @@
 import { ForbiddenException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { and, eq } from "drizzle-orm";
 import type { SessionUser } from "../auth/auth.registry.js";
+import { requireOrganizationWrite } from "../auth/org-access.js";
 import { type Action, type CalendarRole, can } from "../auth/permissions.js";
 import { type Database, DB } from "../db/db.module.js";
-import { calendarMembers } from "../db/schema.js";
+import { calendarMembers, organizations } from "../db/schema.js";
 import type { ActorClaims } from "../internal-rpc/jwt.js";
 
 export interface Membership {
@@ -12,6 +13,15 @@ export interface Membership {
   role: Exclude<CalendarRole, "customer">;
   notify: boolean;
 }
+
+const READ_ACTIONS: ReadonlySet<Action> = new Set([
+  "slots.read",
+  "events.read_all",
+  "events.read_own",
+  "feeds.personal",
+  "stats.read",
+  "integrations.read",
+]);
 
 /** Rol de cada usuario en cada tablero (calendar_members) y comprobación de la matriz de permisos. */
 @Injectable()
@@ -44,6 +54,13 @@ export class CalendarAccess {
     if (!m) throw new NotFoundException({ code: "calendar_not_found", message: "Tablero no encontrado" });
     if (!can(m.role, action))
       throw new ForbiddenException({ code: "permission_denied", message: "Sin permiso" });
+    if (!READ_ACTIONS.has(action)) {
+      const [org] = await this.db
+        .select({ status: organizations.status })
+        .from(organizations)
+        .where(eq(organizations.id, m.orgId));
+      requireOrganizationWrite(org?.status);
+    }
     return m;
   }
 

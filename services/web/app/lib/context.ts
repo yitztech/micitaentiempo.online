@@ -3,3 +3,4 @@ import type { SiteContext } from "./site.server";
 
 export const siteContext = createContext<SiteContext>();
 export const nonceContext = createContext<string>();
+export const refreshedCookiesContext = createContext<string[]>();

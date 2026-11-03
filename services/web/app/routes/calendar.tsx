@@ -15,7 +15,7 @@ const BoardCalendar = lazy(() => import("~/components/board-calendar"));
 
 export async function loader({ request, context, params }: Route.LoaderArgs) {
   const id = params.id ?? "";
-  const [board, services, schedule] = await Promise.all([
+  const [{ data: board }, { data: services }, { data: schedule }] = await Promise.all([
     panelGet<BoardView>(request, context, `/api/v1/calendars/${id}`),
     panelGet<ServiceView[]>(request, context, `/api/v1/calendars/${id}/services`),
     panelGet<ScheduleView>(request, context, `/api/v1/calendars/${id}/schedule`),

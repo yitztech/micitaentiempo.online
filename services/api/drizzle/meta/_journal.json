@@ -85,6 +85,13 @@
       "when": 1793478000000,
       "tag": "0011_invitations_email_length",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1793736000000,
+      "tag": "0012_calendar_status_pending",
+      "breakpoints": true
     }
   ]
 }

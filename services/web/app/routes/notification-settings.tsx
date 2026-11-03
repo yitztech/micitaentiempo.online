@@ -22,7 +22,8 @@ interface Prefs {
 }
 
 export async function loader({ request, context }: Route.LoaderArgs) {
-  return panelGet<Prefs>(request, context, "/api/v1/notification-preferences");
+  const { data } = await panelGet<Prefs>(request, context, "/api/v1/notification-preferences");
+  return data;
 }
 
 export const meta = (args: Route.MetaArgs) =>

@@ -4,7 +4,7 @@ import { actor, actores, CLAVE, nuevoContexto } from "../fixtures/actores";
 import { enlace, esperarCorreo } from "../fixtures/correo";
 import { Given, sitio, Then, When } from "../fixtures/sitio";
 
-const MAILPIT = process.env.MAILPIT_URL ?? "http://localhost:8025";
+const MAILPIT = process.env.MAILPIT_URL ?? "http://localhost:18025";
 const CAPTURA = process.env.CAPTURA_URL ?? "http://localhost:4010";
 const SECRETO_TELEGRAM = process.env.TELEGRAM_WEBHOOK_SECRET ?? "ci-telegram-webhook-secret-00000000000000";
 

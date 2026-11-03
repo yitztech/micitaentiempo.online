@@ -9,7 +9,7 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
-import type { FastifyRequest } from "fastify";
+import type { FastifyReply, FastifyRequest } from "fastify";
 import { requestLang } from "../common/request.js";
 import { ENV } from "../config/config.module.js";
 import type { Env } from "../config/env.js";
@@ -46,9 +46,18 @@ export class SessionGuard implements CanActivate {
     const isMultipart = Boolean(
       this.reflector.getAllAndOverride<boolean>(MULTIPART_ROUTE, [ctx.getHandler(), ctx.getClass()]),
     );
-    if (MUTATING.has(req.method) && !req.headers.authorization) this.checkOrigin(req, isMultipart);
+    // Una cabecera Authorization arbitraria no debe desactivar CSRF si también llega la cookie.
+    // Los clientes nativos sin cookie sí pueden usar su token Bearer sin Origin.
+    const hasSessionCookie = /(?:^|;\s*)(?:__Secure-|__Host-)?mcet\.session_token=/.test(
+      req.headers.cookie ?? "",
+    );
+    const hasBearer = /^Bearer\s+\S+$/i.test(req.headers.authorization ?? "");
+    if (MUTATING.has(req.method) && (hasSessionCookie || !hasBearer)) this.checkOrigin(req, isMultipart);
     const res = await this.registry.session(req);
     if (!res) throw new UnauthorizedException({ code: "unauthenticated", message: "Sesión no válida" });
+    // Better Auth renueva la caducidad cada `updateAge`; sin reenviar la cookie, el navegador la
+    // borraría a los 7 días del inicio de sesión aunque la persona use la app a diario.
+    if (res.cookies.length) ctx.switchToHttp().getResponse<FastifyReply>().header("set-cookie", res.cookies);
     if (!res.user.emailVerified) {
       throw new ForbiddenException({ code: "email_not_verified", message: "Correo sin verificar" });
     }

@@ -68,6 +68,16 @@ afterAll(async () => {
 });
 
 describe("business persistence with real PostgreSQL", () => {
+  it("marca para sincronización las organizaciones existentes al aplicar la migración 0012", async () => {
+    const result = await pool.query(
+      "SELECT id, calendar_status_pending FROM app.organizations WHERE id = ANY($1::text[]) ORDER BY id",
+      [[orgA, orgB]],
+    );
+    expect(result.rows).toEqual([
+      { id: orgA, calendar_status_pending: true },
+      { id: orgB, calendar_status_pending: true },
+    ]);
+  });
   it("upgrades legacy data and backfills drafts idempotently without inventing publication", async () => {
     expect(await repository.backfillPage(null)).toEqual({ processed: 1, nextCursor: null });
     await repository.backfillPage(null);

@@ -102,7 +102,7 @@ const rpcClients = {
 /** Acceso real (matriz de permisos) con el rol del usuario fijado por la prueba. */
 class FakeAccess extends CalendarAccess {
   constructor(private readonly role: CalendarRole | null) {
-    super(undefined as never);
+    super({ select: () => ({ from: () => ({ where: async () => [{ status: "trialing" }] }) }) } as never);
   }
   override async membership(_userId: string, calendarId: string, only?: readonly string[]) {
     if (!this.role || this.role === "customer" || calendarId !== CAL) return undefined;
