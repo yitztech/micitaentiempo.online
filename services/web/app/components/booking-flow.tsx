@@ -1,5 +1,5 @@
 import { CalendarCheck2, CheckCircle2, Clock3, Download, MapPin } from "lucide-react";
-import { type FormEvent, lazy, Suspense, useEffect, useRef, useState } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 import { useAltcha } from "~/lib/altcha";
 import { type ApiError, errorText, postJson } from "~/lib/api-client";
 import { type Booking, calendarLinks, type PublicCalendar } from "~/lib/booking-types";
@@ -8,10 +8,9 @@ import { isValidEmail } from "~/lib/email";
 import { cx, fmt, useRoot } from "~/lib/i18n";
 import { browserTz, formatDateTime, formatTime, tzLabel } from "~/lib/time";
 import { AltchaStatus } from "./altcha-status";
+import { OtpForm } from "./otp-form";
 import { type Slot, SlotPicker } from "./slot-picker";
 import { Alert, Button, buttonClass, Field, PhoneField, TextArea } from "./ui";
-
-const OtpForm = lazy(() => import("./otp-form").then(({ OtpForm }) => ({ default: OtpForm })));
 
 /** Lo que dura un horario apartado (igual que el motor). */
 const HOLD_MS = 10 * 60_000;
@@ -456,15 +455,13 @@ export function BookingFlow({
             </p>
           </div>
           <div className="mt-4">
-            <Suspense fallback={<p className="text-muted">{t.common.ui.loading}</p>}>
-              <OtpForm
-                email={person.email}
-                name={person.name}
-                autoSend
-                submitLabel={b.verify.confirm}
-                onVerified={() => confirm()}
-              />
-            </Suspense>
+            <OtpForm
+              email={person.email}
+              name={person.name}
+              autoSend
+              submitLabel={b.verify.confirm}
+              onVerified={() => confirm()}
+            />
           </div>
         </section>
       ) : null}

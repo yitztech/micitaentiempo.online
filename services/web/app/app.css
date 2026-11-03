@@ -236,9 +236,13 @@ input::-ms-clear {
   *,
   *::before,
   *::after {
+    /* biome-ignore lint/complexity/noImportantStyles: debe anular cualquier animación de la app */
     animation-duration: 0.01ms !important;
+    /* biome-ignore lint/complexity/noImportantStyles: debe anular cualquier animación de la app */
     animation-iteration-count: 1 !important;
+    /* biome-ignore lint/complexity/noImportantStyles: debe anular cualquier transición de la app */
     transition-duration: 0.01ms !important;
+    /* biome-ignore lint/complexity/noImportantStyles: debe anular el desplazamiento suave de la app */
     scroll-behavior: auto !important;
   }
 }
