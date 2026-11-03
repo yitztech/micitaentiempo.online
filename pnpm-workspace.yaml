@@ -11,6 +11,13 @@ packages:
 # Cadena de suministro: no instalar versiones publicadas hace menos de 24 h.
 minimumReleaseAge: 1440
 
+# Correcciones de seguridad en dependencias transitivas (parches compatibles).
+overrides:
+  fastify: 5.12.6
+  glob: 14.0.2
+  minimatch: 11.0.1
+  zod: 4.6.7
+
 # Solo estos paquetes pueden ejecutar scripts de instalación.
 allowBuilds:
   esbuild: true

@@ -1,7 +1,7 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { BadRequestException, Inject, Injectable } from "@nestjs/common";
-import sharp from "sharp";
+import sharp, { type Metadata } from "sharp";
 import { ENV } from "../config/config.module.js";
 import type { Env } from "../config/env.js";
 
@@ -78,9 +78,9 @@ export class BusinessImageService {
   async processAndSave(orgId: string, imageId: string, inputBuffer: Buffer): Promise<ProcessedImage> {
     this.validateMagicBytes(inputBuffer);
 
-    let metadata: sharp.Metadata;
+    let metadata: Metadata;
     try {
-      metadata = await sharp(inputBuffer, { failOnError: true }).metadata();
+      metadata = await sharp(inputBuffer, { failOn: "error" }).metadata();
     } catch {
       throw new BadRequestException({ code: "invalid_image", message: "No se pudo decodificar la imagen" });
     }
