@@ -26,7 +26,7 @@ import type { BoardView, Me, Org } from "~/lib/panel-types";
 import type { Route } from "./+types/_panel";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
-  const [me, calendars, org] = await Promise.all([
+  const [{ data: me }, { data: calendars }, { data: org }] = await Promise.all([
     panelGet<Me>(request, context, "/api/v1/me"),
     panelGet<BoardView[]>(request, context, "/api/v1/calendars"),
     panelGetOptional<Org>(request, context, "/api/v1/org"),
@@ -34,10 +34,10 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   return { me, calendars, org };
 }
 
-export type PanelData = Awaited<ReturnType<typeof loader>>;
+export type PanelData = { me: Me; calendars: BoardView[]; org: Org | null };
 
 export function usePanel(): PanelData {
-  const d = useRouteLoaderData<typeof loader>("routes/_panel");
+  const d = useRouteLoaderData<PanelData>("routes/_panel");
   if (!d) throw new Error("Sin datos del panel");
   return d;
 }

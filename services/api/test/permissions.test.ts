@@ -15,6 +15,7 @@ const EXPECTED: Record<Action, CalendarRole[]> = {
   "bookings.manage_own": ["customer"],
   "settings.write": ["owner"],
   "members.manage": ["owner"],
+  "integrations.read": ["owner"],
   "integrations.calendar": ["owner"],
   "feeds.personal": ["owner", "editor", "observer", "customer"],
   "billing.manage": ["owner"],

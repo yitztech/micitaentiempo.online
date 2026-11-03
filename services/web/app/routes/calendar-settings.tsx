@@ -16,7 +16,7 @@ import type { Route } from "./+types/calendar-settings";
 
 export async function loader({ request, context, params }: Route.LoaderArgs) {
   const id = params.id ?? "";
-  const [board, services, schedule, countries] = await Promise.all([
+  const [{ data: board }, { data: services }, { data: schedule }, { data: countries }] = await Promise.all([
     panelGet<BoardView>(request, context, `/api/v1/calendars/${id}`),
     panelGet<ServiceView[]>(request, context, `/api/v1/calendars/${id}/services`),
     panelGet<ScheduleView>(request, context, `/api/v1/calendars/${id}/schedule`),

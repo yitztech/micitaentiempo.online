@@ -10,11 +10,12 @@ import { usePanel } from "./_panel";
 import type { Route } from "./+types/inbox";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
-  return panelGet<{ unread: number; items: NoticeItem[] }>(
+  const { data } = await panelGet<{ unread: number; items: NoticeItem[] }>(
     request,
     context,
     "/api/v1/notifications?limit=100",
   );
+  return data;
 }
 
 export const meta = (args: Route.MetaArgs) =>

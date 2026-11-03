@@ -26,7 +26,7 @@ interface MeFull {
 }
 
 export async function loader({ request, context }: Route.LoaderArgs) {
-  const [me, org] = await Promise.all([
+  const [{ data: me }, { data: org }] = await Promise.all([
     panelGet<MeFull>(request, context, "/api/v1/me"),
     panelGetOptional<{ id: string; name: string }>(request, context, "/api/v1/org"),
   ]);

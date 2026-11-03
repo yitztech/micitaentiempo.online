@@ -18,7 +18,7 @@ interface Members {
 
 export async function loader({ request, context, params }: Route.LoaderArgs) {
   const id = params.id ?? "";
-  const [board, members] = await Promise.all([
+  const [{ data: board }, { data: members }] = await Promise.all([
     panelGet<BoardView>(request, context, `/api/v1/calendars/${id}`),
     panelGet<Members>(request, context, `/api/v1/calendars/${id}/members`),
   ]);

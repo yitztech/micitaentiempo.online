@@ -52,15 +52,23 @@ export class AuthRegistry {
     return this.instances[requestLang(req, this.env)];
   }
 
-  /** Sesión de la petición (cookie del dominio o Bearer del embed). */
+  /**
+   * Sesión de la petición (cookie del dominio o Bearer del embed). Devuelve además las cookies que
+   * Better Auth renueva al pasar `updateAge`: el guard las reenvía al navegador para que la caducidad
+   * del navegador avance con el uso y no caiga a los 7 días desde el inicio de sesión.
+   */
   async session(
     req: Pick<FastifyRequest, "headers">,
-  ): Promise<{ user: SessionUser; sessionId: string } | null> {
-    const res = await this.forRequest(req).api.getSession({ headers: toHeaders(req.headers) });
-    if (!res) return null;
-    const u = res.user as typeof res.user & { locale?: string; timezone?: string };
+  ): Promise<{ user: SessionUser; sessionId: string; cookies: string[] } | null> {
+    const res = await this.forRequest(req).api.getSession({
+      headers: toHeaders(req.headers),
+      returnHeaders: true,
+    });
+    if (!res?.response) return null;
+    const u = res.response.user as typeof res.response.user & { locale?: string; timezone?: string };
     return {
-      sessionId: res.session.id,
+      sessionId: res.response.session.id,
+      cookies: res.headers.getSetCookie(),
       user: {
         id: u.id,
         email: u.email,

@@ -37,6 +37,8 @@ Característica: Planes, prueba gratuita y facturación
     Cuando pasan 8 días
     Entonces la organización de "Laura" está "read_only" con el plan "personal"
     Y el tablero no acepta reservas
+    Y "Laura" puede consultar el tablero y la facturación en solo lectura
+    Y "Laura" no puede invitar miembros ni modificar el perfil del negocio
 
   @stripe @reloj
   Escenario: La prueba vence sin suscripción

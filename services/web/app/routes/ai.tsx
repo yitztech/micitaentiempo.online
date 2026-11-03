@@ -36,13 +36,13 @@ interface CreatedClient {
 }
 
 export async function loader({ request, context }: Route.LoaderArgs) {
-  const [connections, org, calendars] = await Promise.all([
+  const [{ data: connections }, { data: org }, { data: calendars }] = await Promise.all([
     panelGet<Connection[]>(request, context, "/api/v1/ai/connections"),
     panelGetOptional<Org>(request, context, "/api/v1/org"),
     panelGet<BoardView[]>(request, context, "/api/v1/calendars"),
   ]);
   const staticClients = org
-    ? await panelGet<StaticClient[]>(request, context, "/api/v1/ai/static-clients")
+    ? (await panelGet<StaticClient[]>(request, context, "/api/v1/ai/static-clients")).data
     : [];
   return { connections, staticClients, owner: Boolean(org), calendars };
 }

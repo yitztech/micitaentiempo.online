@@ -15,6 +15,7 @@ import { and, count, eq, gt, isNull } from "drizzle-orm";
 import { AuditService } from "../audit/audit.service.js";
 import type { SessionUser } from "../auth/auth.registry.js";
 import { uuidv7 } from "../auth/ids.js";
+import { requireOrganizationWrite } from "../auth/org-access.js";
 import { ENV } from "../config/config.module.js";
 import type { Env } from "../config/env.js";
 import { type Database, DB } from "../db/db.module.js";
@@ -173,6 +174,11 @@ export class MembersService {
         message: "La invitación es para otro correo",
       });
     }
+    const [org] = await this.db
+      .select({ status: organizations.status })
+      .from(organizations)
+      .where(eq(organizations.id, inv.orgId));
+    requireOrganizationWrite(org?.status);
     if (inv.requiresGoogle) {
       const [google] = await this.db
         .select()

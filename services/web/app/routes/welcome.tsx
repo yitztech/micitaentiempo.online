@@ -19,7 +19,8 @@ interface Countries {
 }
 
 export async function loader({ request, context }: Route.LoaderArgs) {
-  return { countries: await panelGet<Countries>(request, context, "/api/v1/holidays/countries") };
+  const { data: countries } = await panelGet<Countries>(request, context, "/api/v1/holidays/countries");
+  return { countries };
 }
 
 export const meta = (args: Route.MetaArgs) =>

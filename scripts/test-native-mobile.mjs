@@ -293,7 +293,7 @@ if (isMain) {
   }
   const appiumUrl = process.env.APPIUM_URL ?? "http://127.0.0.1:4723";
   const apiUrl = process.env.NATIVE_API_URL ?? "http://micitaentiempo.localhost:8080";
-  const mailpitUrl = process.env.MAILPIT_URL ?? "http://localhost:8025";
+  const mailpitUrl = process.env.MAILPIT_URL ?? "http://localhost:18025";
   const screenshotDir = join(ROOT, "tests/escenarios/test-results-native");
   let failed = false;
   for (const target of targets) {

@@ -24,13 +24,13 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   const clientId = url.searchParams.get("client_id") ?? "";
   const scopes = (url.searchParams.get("scope") ?? "").split(" ").filter(Boolean);
   if (!clientId || !url.searchParams.has("sig")) return { client: null, scopes, calendars: [] };
-  const [client, calendars] = await Promise.all([
-    panelGet<ClientInfo>(request, context, `/api/v1/ai/clients/${encodeURIComponent(clientId)}`).catch(
-      () => null,
-    ),
-    panelGet<BoardView[]>(request, context, "/api/v1/calendars"),
-  ]);
-  return { client, scopes, calendars };
+  const clientRes = await panelGet<ClientInfo>(
+    request,
+    context,
+    `/api/v1/ai/clients/${encodeURIComponent(clientId)}`,
+  ).catch(() => null);
+  const { data: calendars } = await panelGet<BoardView[]>(request, context, "/api/v1/calendars");
+  return { client: clientRes?.data ?? null, scopes, calendars };
 }
 
 export const meta = (args: Route.MetaArgs) =>

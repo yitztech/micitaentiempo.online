@@ -15,9 +15,10 @@ import type { Route } from "./+types/root";
 import "./app.css";
 import { features } from "./lib/api.server";
 import { catalog } from "./lib/catalog.server";
-import { nonceContext, siteContext } from "./lib/context";
+import { nonceContext, refreshedCookiesContext, siteContext } from "./lib/context";
 import { reportError, startErrors } from "./lib/errors.client";
 import { messages } from "./lib/i18n";
+import { forwardRefreshedCookies } from "./lib/refreshed-cookies.server";
 import { newNonce } from "./lib/security.server";
 import { siteConfig, siteForRequest } from "./lib/site.server";
 
@@ -32,7 +33,9 @@ export const middleware: Route.MiddlewareFunction[] = [
     }
     context.set(siteContext, site);
     context.set(nonceContext, newNonce());
-    return next();
+    const cookies: string[] = [];
+    context.set(refreshedCookiesContext, cookies);
+    return forwardRefreshedCookies(cookies, next);
   },
 ];
 

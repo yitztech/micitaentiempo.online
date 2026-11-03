@@ -15,7 +15,8 @@ interface Customer {
 }
 
 export async function loader({ request, context }: Route.LoaderArgs) {
-  return { customers: await panelGet<Customer[]>(request, context, "/api/v1/customers") };
+  const { data: customers } = await panelGet<Customer[]>(request, context, "/api/v1/customers");
+  return { customers };
 }
 
 export const meta = (args: Route.MetaArgs) =>

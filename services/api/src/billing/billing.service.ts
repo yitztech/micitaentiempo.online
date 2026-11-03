@@ -173,12 +173,13 @@ export class BillingService {
       .set({
         ...patch,
         status,
+        calendarStatusPending: true,
         pastDueSince: status === "past_due" ? (org.pastDueSince ?? now) : null,
       })
       .where(eq(organizations.id, org.id))
       .returning();
+    await this.syncCalendarStatus(org.id);
     if (org.status !== status) {
-      await this.rpc.client(CalendarService).setOrgStatus({ orgId: org.id, status }, SYSTEM);
       await this.audit.record({
         orgId: org.id,
         via: "system",
@@ -188,6 +189,31 @@ export class BillingService {
     }
     if (notice) await this.notifyOwner(org, notice.type, notice.days);
     return updated ?? org;
+  }
+
+  /** Serializa cambios y reintentos para no aplicar un estado antiguo después de uno nuevo. */
+  async syncCalendarStatus(orgId: string): Promise<void> {
+    await this.db.transaction(async (tx) => {
+      const [org] = await tx.select().from(organizations).where(eq(organizations.id, orgId)).for("update");
+      if (!org || org.deletedAt || !org.calendarStatusPending) return;
+      await this.rpc.client(CalendarService).setOrgStatus({ orgId, status: org.status }, SYSTEM);
+      await tx.update(organizations).set({ calendarStatusPending: false }).where(eq(organizations.id, orgId));
+    });
+  }
+
+  async reconcileCalendarStatuses(): Promise<void> {
+    const pending = await this.db
+      .select({ id: organizations.id })
+      .from(organizations)
+      .where(and(eq(organizations.calendarStatusPending, true), isNull(organizations.deletedAt)))
+      .limit(100);
+    for (const org of pending) {
+      try {
+        await this.syncCalendarStatus(org.id);
+      } catch {
+        this.logger.error({ code: "calendar_status_sync_failed", orgId: org.id });
+      }
+    }
   }
 
   /** Aviso de facturación al propietario: panel y correo (esencial). */
@@ -403,6 +429,7 @@ export class BillingService {
    * Sin Stripe la prueba no vence (decisión del 2026-10-06).
    */
   async sweep(): Promise<void> {
+    await this.reconcileCalendarStatuses();
     if (!this.config.enabled) return;
     const now = this.clock.now();
     const trialing = await this.db

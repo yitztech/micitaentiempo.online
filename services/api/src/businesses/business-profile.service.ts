@@ -23,6 +23,7 @@ import {
 import { and, asc, eq, gt, isNull, sql } from "drizzle-orm";
 import { AuditService } from "../audit/audit.service.js";
 import { uuidv7 } from "../auth/ids.js";
+import { requireOrganizationWrite } from "../auth/org-access.js";
 import { type Database, DB } from "../db/db.module.js";
 import {
   businessCalendarLocations,
@@ -68,6 +69,12 @@ export class BusinessProfileService {
         message: "No tienes permiso para administrar este perfil",
       });
     }
+    return org;
+  }
+
+  private async getWritableOwnerOrg(userId: string) {
+    const org = await this.getOwnerOrg(userId);
+    requireOrganizationWrite(org.status);
     return org;
   }
 
@@ -138,7 +145,7 @@ export class BusinessProfileService {
     body: UpdateBusinessProfile,
     reqIp?: string,
   ): Promise<PrivateBusinessProfile> {
-    const org = await this.getOwnerOrg(userId);
+    const org = await this.getWritableOwnerOrg(userId);
 
     const result = await this.executeIdempotent<PrivateBusinessProfile>(
       idempotencyKey,
@@ -228,7 +235,7 @@ export class BusinessProfileService {
     body: ChangeBusinessPublication,
     reqIp?: string,
   ): Promise<PrivateBusinessProfile> {
-    const org = await this.getOwnerOrg(userId);
+    const org = await this.getWritableOwnerOrg(userId);
 
     const result = await this.executeIdempotent<PrivateBusinessProfile>(
       idempotencyKey,
@@ -302,7 +309,7 @@ export class BusinessProfileService {
     body: ChangeBusinessPublication,
     reqIp?: string,
   ): Promise<PrivateBusinessProfile> {
-    const org = await this.getOwnerOrg(userId);
+    const org = await this.getWritableOwnerOrg(userId);
 
     const result = await this.executeIdempotent<PrivateBusinessProfile>(
       idempotencyKey,
@@ -403,7 +410,7 @@ export class BusinessProfileService {
     body: CreateBusinessLocation,
     reqIp?: string,
   ): Promise<PrivateLocation> {
-    const org = await this.getOwnerOrg(userId);
+    const org = await this.getWritableOwnerOrg(userId);
 
     const result = await this.executeIdempotent<PrivateLocation>(
       idempotencyKey,
@@ -493,7 +500,7 @@ export class BusinessProfileService {
     body: CreateBusinessLocation,
     reqIp?: string,
   ): Promise<PrivateLocation> {
-    const org = await this.getOwnerOrg(userId);
+    const org = await this.getWritableOwnerOrg(userId);
 
     const result = await this.executeIdempotent<PrivateLocation>(
       idempotencyKey,
@@ -581,7 +588,7 @@ export class BusinessProfileService {
     body: ChangeBusinessPublication,
     reqIp?: string,
   ): Promise<void> {
-    const org = await this.getOwnerOrg(userId);
+    const org = await this.getWritableOwnerOrg(userId);
 
     await this.executeIdempotent<null>(
       idempotencyKey,
@@ -665,7 +672,7 @@ export class BusinessProfileService {
     body: AssignBusinessCalendar,
     reqIp?: string,
   ): Promise<PrivateBusinessProfile> {
-    const org = await this.getOwnerOrg(userId);
+    const org = await this.getWritableOwnerOrg(userId);
 
     const result = await this.executeIdempotent<PrivateBusinessProfile>(
       idempotencyKey,
@@ -887,7 +894,7 @@ export class BusinessProfileService {
     payload: { expectedVersion: number; alt: string; fileBuffer: Buffer },
     ip?: string,
   ): Promise<{ id: string; location: string }> {
-    const org = await this.getOwnerOrg(userId);
+    const org = await this.getWritableOwnerOrg(userId);
     const fileHash = createHash("sha256").update(payload.fileBuffer).digest("hex");
     const result = await this.executeIdempotent<{ id: string; location: string }>(
       idempotencyKey,
@@ -994,7 +1001,7 @@ export class BusinessProfileService {
     body: UpdateBusinessImages,
     ip?: string,
   ): Promise<PrivateBusinessProfile> {
-    const org = await this.getOwnerOrg(userId);
+    const org = await this.getWritableOwnerOrg(userId);
     const result = await this.executeIdempotent<PrivateBusinessProfile>(
       idempotencyKey,
       userId,
@@ -1084,7 +1091,7 @@ export class BusinessProfileService {
     body: ChangeBusinessPublication,
     ip?: string,
   ): Promise<void> {
-    const org = await this.getOwnerOrg(userId);
+    const org = await this.getWritableOwnerOrg(userId);
     await this.executeIdempotent<void>(
       idempotencyKey,
       userId,

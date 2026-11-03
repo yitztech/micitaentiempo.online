@@ -558,7 +558,7 @@ export const TOOLS = [
     input: CalendarArg,
     output: z.object({ connections: z.array(z.record(z.string(), z.unknown())) }),
     async run(a, c, d) {
-      await d.access.require(c.user, a.calendar_id, "integrations.calendar");
+      await d.access.require(c.user, a.calendar_id, "integrations.read");
       const cal = await calendarOf(d, c, a.calendar_id);
       const res = await d.integrations.list(c.user, a.calendar_id);
       return {

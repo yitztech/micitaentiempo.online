@@ -168,6 +168,7 @@ export const organizations = app.table(
     status: text("status", { enum: ["trialing", "active", "past_due", "read_only", "suspended"] })
       .notNull()
       .default("trialing"),
+    calendarStatusPending: boolean("calendar_status_pending").notNull().default(true),
     trialEndsAt: timestamp("trial_ends_at", { withTimezone: true }),
     stripeCustomerId: text("stripe_customer_id"),
     stripeSubscriptionId: text("stripe_subscription_id"),
