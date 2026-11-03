@@ -16,6 +16,11 @@ Característica: Contrato con la plataforma
     Entonces la respuesta tiene estado 200
     Y la respuesta JSON tiene el campo "revision"
 
+  Escenario: La API informa su salud para la monitorización
+    Cuando se consulta "/api/health" en el dominio "es"
+    Entonces la respuesta tiene estado 200
+    Y la respuesta JSON tiene el campo "status"
+
   Escenario: Los puertos internos no se publican por el gateway
     Cuando se consulta "/readyz" en el dominio "es"
     Entonces la respuesta tiene estado 404
