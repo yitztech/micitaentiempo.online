@@ -180,6 +180,12 @@ jobs:
       - run: pnpm --filter "@mcet/escenarios^..." build
       - name: Backend y frontend - catálogo Gherkin completo en escritorio
         run: pnpm test:behavior -- --shard=${{ matrix.shard }}/4
+      - name: Recuperación de la sincronización con el motor
+        if: matrix.shard == 1
+        run: MCET_TEST_PROJECT=ci node tests/integration/calendar-status.mjs
+      - name: Renovación y aislamiento de sesiones SSR
+        if: matrix.shard == 1
+        run: MCET_TEST_PROJECT=ci node tests/escenarios/integration/session-ssr.mjs
       # ZAP pasivo en cada PR (AUDITORIA SEG-08), solo en el shard más corto y con el mismo entorno:
       # falla con cualquier aviso nuevo. Las excepciones, con su motivo, en tests/security/zap-reglas.tsv.
       # El Nocturno lo repite tras el catálogo completo.
