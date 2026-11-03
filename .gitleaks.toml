@@ -1,0 +1,6 @@
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Credenciales simuladas del escenario de sesión SSR"
+paths = ['''^tests/escenarios/integration/session-ssr\.mjs$''']
