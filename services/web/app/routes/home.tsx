@@ -150,7 +150,7 @@ function HeroPreview() {
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-bold text-text">{h.previewProvider}</span>
-                <span className="inline-block size-2 rounded-full bg-success" title="En línea" />
+                <span className="inline-block size-2 rounded-full bg-success" title={h.previewOnline} />
               </div>
               <p className="text-xs text-muted">{h.previewService}</p>
             </div>

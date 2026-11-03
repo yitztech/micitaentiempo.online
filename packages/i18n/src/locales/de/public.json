@@ -13,6 +13,7 @@
     "previewLabel": "Ejemplo de la página de reserva",
     "previewProvider": "Dr. Carlos Mendoza",
     "previewService": "Consulta general · 30 min",
+    "previewOnline": "Online",
     "previewDay": "martes 15",
     "previewTimezone": "Zona horaria: America/Mexico_City",
     "previewTimes": ["9:00", "9:30", "10:30", "11:00", "12:30", "16:00"],

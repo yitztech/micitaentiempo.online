@@ -267,9 +267,10 @@ export default function BusinessProfileSettingsPage({ loaderData }: Route.Compon
             variant="secondary"
             className="text-sm"
             target="_blank"
+            rel="noopener"
           >
             <Eye aria-hidden className="size-4" />
-            Vista previa
+            {bp.preview}
             <ExternalLink aria-hidden className="size-3" />
           </LinkButton>
 
@@ -319,7 +320,7 @@ export default function BusinessProfileSettingsPage({ loaderData }: Route.Compon
         {/* Columna Izquierda: Información básica */}
         <div className="flex flex-col gap-6">
           <Card className="p-6">
-            <h2 className="text-lg font-semibold tracking-tight text-text">Información general</h2>
+            <h2 className="text-lg font-semibold tracking-tight text-text">{bp.general}</h2>
             <form onSubmit={onSaveBasic} className="mt-5 flex flex-col gap-4">
               <Field
                 label={bp.fields.displayName}
@@ -358,7 +359,7 @@ export default function BusinessProfileSettingsPage({ loaderData }: Route.Compon
                 name="websiteUrl"
                 type="url"
                 defaultValue={profile.content.websiteUrl ?? ""}
-                placeholder="https://tu-negocio.com"
+                placeholder={bp.fields.websitePlaceholder}
                 maxLength={2048}
                 optional
               />
@@ -368,7 +369,7 @@ export default function BusinessProfileSettingsPage({ loaderData }: Route.Compon
                 name="termsUrl"
                 type="url"
                 defaultValue={profile.content.termsUrl ?? ""}
-                placeholder="https://tu-negocio.com/condiciones"
+                placeholder={bp.fields.termsPlaceholder}
                 maxLength={2048}
                 optional
               />
@@ -485,7 +486,7 @@ export default function BusinessProfileSettingsPage({ loaderData }: Route.Compon
                     onClick={() => setAddingLocation(false)}
                     className="text-sm"
                   >
-                    Cancelar
+                    {t.common.ui.cancel}
                   </Button>
                   <Button
                     type="submit"
@@ -502,7 +503,7 @@ export default function BusinessProfileSettingsPage({ loaderData }: Route.Compon
             {/* Listado de sedes existentes */}
             <div className="mt-4 flex flex-col divide-y divide-border/60">
               {locations.length === 0 ? (
-                <p className="py-4 text-sm text-muted">Aún no has registrado sedes.</p>
+                <p className="py-4 text-sm text-muted">{bp.noLocations}</p>
               ) : (
                 locations.map((loc) => (
                   <div key={loc.id} className="py-3 flex items-start justify-between gap-3">
@@ -553,7 +554,7 @@ export default function BusinessProfileSettingsPage({ loaderData }: Route.Compon
                 <Field
                   label={bp.images.altText}
                   name="alt"
-                  placeholder="Descripción de la foto para accesibilidad"
+                  placeholder={bp.images.altPlaceholder}
                   maxLength={120}
                   optional
                 />

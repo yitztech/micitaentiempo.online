@@ -13,6 +13,7 @@
     "previewLabel": "Example of the booking page",
     "previewProvider": "Dr. Charles Miller",
     "previewService": "General consultation · 30 min",
+    "previewOnline": "Online",
     "previewDay": "Tuesday 15",
     "previewTimezone": "Timezone: America/New_York",
     "previewTimes": ["9:00 AM", "9:30 AM", "10:30 AM", "11:00 AM", "12:30 PM", "4:00 PM"],

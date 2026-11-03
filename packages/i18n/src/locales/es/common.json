@@ -55,7 +55,13 @@
     "sending": "Enviando…",
     "comingSoon": "Disponible pronto",
     "invalidText": "Revisa la longitud y elimina caracteres de control o etiquetas.",
-    "invalidEmail": "Escribe un correo válido, por ejemplo nombre@dominio.com."
+    "invalidEmail": "Escribe un correo válido, por ejemplo nombre@dominio.com.",
+    "cancel": "Cancelar"
+  },
+  "phone": {
+    "countryLabel": "País e indicativo telefónico",
+    "countrySelector": "Selector de país",
+    "placeholder": "612345678"
   },
   "errors": {
     "notFoundTitle": "Página no encontrada",

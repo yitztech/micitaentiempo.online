@@ -55,7 +55,13 @@
     "sending": "Wird gesendet…",
     "comingSoon": "Demnächst verfügbar",
     "invalidText": "Überprüfen Sie die Länge und entfernen Sie Steuerzeichen oder Tags.",
-    "invalidEmail": "Geben Sie eine gültige E-Mail-Adresse ein, z. B. name@domain.com."
+    "invalidEmail": "Geben Sie eine gültige E-Mail-Adresse ein, z. B. name@domain.com.",
+    "cancel": "Abbrechen"
+  },
+  "phone": {
+    "countryLabel": "Land und Ländervorwahl",
+    "countrySelector": "Länderauswahl",
+    "placeholder": "15123456789"
   },
   "errors": {
     "notFoundTitle": "Seite nicht gefunden",
