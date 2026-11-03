@@ -37,6 +37,10 @@ Variables que la plataforma pasa al compose (se usan las que haga falta):
 | `UMAMI_SCRIPT_URL`, `UMAMI_WEBSITE_ID` | Analítica |
 | `TRUSTED_PROXY_CIDR` | Subred del proxy: solo de ahí se acepta `X-Forwarded-For` |
 
+El APK de Android no se versiona en el repositorio: `/app.apk` redirige al activo del release
+[`apk-v1`](https://github.com/yitztech/micitaentiempo.online/releases/tag/apk-v1). Para apuntar a otro
+binario (por ejemplo, uno recién compilado), se define `APK_URL` en el servicio `web`.
+
 Otros secretos (base de datos, claves de la app) se piden a la plataforma: los genera y los pasa como variables.
 
 ## Dos dominios, uno por idioma

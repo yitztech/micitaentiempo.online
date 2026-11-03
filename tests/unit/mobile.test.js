@@ -113,6 +113,13 @@ describe("contratos de autenticación y endpoints móviles", () => {
   it("sirve el APK de la app móvil con las cabeceras de descarga correctas", async () => {
     const { loader } = await import("../../services/web/app/routes/app-apk.ts");
     const res = await loader({ request: new Request("https://micitaentiempo.online/app.apk") });
+    // En el repositorio no se versiona el APK: si no hay copia local, se redirige al activo del release.
+    if (res.status === 302) {
+      expect(res.headers.get("Location")).toMatch(
+        /^https:\/\/github\.com\/.+\/releases\/download\/.+\/micitaentiempo\.apk$/,
+      );
+      return;
+    }
     expect(res.status).toBe(200);
     expect(res.headers.get("Content-Type")).toBe("application/vnd.android.package-archive");
     expect(res.headers.get("Content-Disposition")).toContain("micitaentiempo.apk");
