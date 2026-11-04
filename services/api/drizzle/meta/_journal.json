@@ -99,6 +99,13 @@
       "when": 1793740000000,
       "tag": "0013_user_restrictions",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1793750000000,
+      "tag": "0014_sync_changes",
+      "breakpoints": true
     }
   ]
 }

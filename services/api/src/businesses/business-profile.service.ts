@@ -147,6 +147,15 @@ export class BusinessProfileService {
     return this.assemblePrivateProfile(profile, org.id, this.db);
   }
 
+  /**
+   * Lectura pura (no crea el borrador) del perfil privado de una organización, para el feed offline.
+   * `null` si la fila ya no existe.
+   */
+  async readPrivateProfile(orgId: string): Promise<PrivateBusinessProfile | null> {
+    const [profile] = await this.db.select().from(businessProfiles).where(eq(businessProfiles.orgId, orgId));
+    return profile ? this.assemblePrivateProfile(profile, orgId, this.db) : null;
+  }
+
   async updateProfile(
     userId: string,
     idempotencyKey: string,

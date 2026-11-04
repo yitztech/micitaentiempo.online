@@ -29,7 +29,7 @@ beforeAll(async () => {
   await runMigrations(pool, { log() {} });
 
   db = drizzle(pool, { schema });
-  controller = new OfflineController(db);
+  controller = new OfflineController(db, {} as never);
 
   await pool.query(
     "INSERT INTO app.users(id,name,email) VALUES ('user-a','Ana','a@example.com'),('user-b','Bea','b@example.com')",
@@ -107,12 +107,19 @@ describe("API Offline de operaciones y recibos (C8b)", () => {
     await expect(controller.getOperation(userA, opExpired, mockReply())).rejects.toThrow(GoneException);
   });
 
-  it("permite consultar cambios incrementales del actor", async () => {
-    const changes = await controller.getChanges(userA, { limit: 10 }, mockReply());
-    expect(changes).toMatchObject({
-      items: [],
-      nextCursor: null,
-      serverTime: expect.any(String),
-    });
+  it("delega la descarga incremental en el actor autenticado, nunca devuelve un vacío fijo con cursor nulo", async () => {
+    const calls: unknown[][] = [];
+    const page = { items: [], nextCursor: "c.firmado", hasMore: false };
+    const wired = new OfflineController(db, {
+      page: async (...args: unknown[]) => {
+        calls.push(args);
+        return page;
+      },
+    } as never);
+    const reply = mockReply();
+    const changes = await wired.getChanges(userA, { cursor: "abc", limit: 10 }, reply);
+    expect(calls).toEqual([[userA.id, "abc", 10]]);
+    expect(changes).toBe(page);
+    expect(changes.nextCursor).not.toBeNull();
   });
 });

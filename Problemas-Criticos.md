@@ -613,10 +613,10 @@ Todo el plan está pendiente al añadirse. Las verificaciones históricas del in
 | M04 | GPT-6 Luna | High | verificada (unitaria) | Cuota separada del historial y compactación segura; 8 pruebas. Falta reinicio/transacción nativa (V01). Véase registro M04. | M03 |
 | M05 | GPT-6.1 Sol | High | verificada (unitaria) | Barrera de salida por cuenta con drenaje de la sincronización, descarte de escrituras tardías y token ligado a la sincronización; 8 pruebas deterministas. Falta nativo (V01). Véase registro M05. | M03–M04 |
 | M06 | GPT-6 Luna | High | verificada (unitaria) | Confirmación ante pendientes, contador de todos los estados no confirmados y textos en 6 idiomas; 7 pruebas. Falta interacción nativa (V01). Véase registro M06. | M05 |
-| C01 | GPT-6.1 Sol | High | pendiente | — | I01, M03 |
-| C02a | GPT-6.1 Sol | High | pendiente | — | Contrato C01 |
-| C02b | GPT-6.1 Sol | High | pendiente | — | C02a |
-| C03 | GPT-6 Luna | High | pendiente | — | C02a–C02b |
+| C01 | GPT-6.1 Sol | High | verificada | ADR 0020 con recursos, permisos, orden por `xid8`, cursor firmado, retención y ejemplos. Véase registro C01. | I01, M03 |
+| C02a | GPT-6.1 Sol | High | verificada | Migración 0014: `app.sync_changes` y triggers transaccionales; 4 pruebas con PostgreSQL real. Véase registro C02. | Contrato C01 |
+| C02b | GPT-6.1 Sol | High | verificada | Endpoint paginado con snapshot, cursor firmado y autorización por página; 12 pruebas con PostgreSQL real. Véase registro C02. | C02a |
+| C03 | GPT-6 Luna | High | verificada (unitaria + contrato HTTP) | Aplicación atómica de páginas, bajas y cursor en el móvil con transacción multi-clave; 13 pruebas y 2 escenarios contra la API real. Falta nativo/SQLCipher (V01). Véase registro C03. | C02a–C02b |
 | R01 | GPT-6 Luna | High | pendiente | — | M02 |
 | R02 | GPT-6.1 Sol | High | pendiente | — | R01, contrato de reserva |
 | V01 | GPT-6.1 Sol | High | pendiente | — | Integración de todas las anteriores |
@@ -858,3 +858,42 @@ Las claves se consultan únicamente en `https://www.googleapis.com/oauth2/v3/cer
 **Pruebas (+7 en `mobile-session-exit.test.js`):** cero pendientes sin preguntar; cuenta de los seis estados; cancelar conserva todo; confirmar borra privados de la cuenta sin tocar directorio/perfiles públicos ni la cuenta B; fallo de purga; fallo de lectura; los seis idiomas tienen los textos, con `{count}`. **Verificaciones:** M1 (76 pruebas), M2, `pnpm i18n:check`, `pnpm lint`.
 
 **Límite:** no se ejercitó el diálogo en un dispositivo; sin librería de pruebas de interacción nueva.
+
+### Registro de ejecución — C01 (2026-11-03)
+
+**Estado:** verificada (diseño). **Siguiente tarea:** C02a.
+
+**Entrega:** [ADR 0020](docs/adr/0020-sincronizacion-incremental-offline.md): recursos sincronizados (`business_profile`, `business_location`) y no soportados (`calendar_locations`, `images`, `bookings`, `agenda`, `public_profiles`, declarados en cada respuesta); registro de cambios por triggers en la misma transacción, sin datos privados; orden entre transacciones que confirman en distinto orden mediante `xid8` + `pg_snapshot_xmin` (el lector solo entrega transacciones terminadas); cursor opaco firmado ligado a actor, ámbito autorizado, versión y caducidad de 30 días; `400 invalid_cursor` / `410 sync_cursor_expired`; snapshot paginado con marca de agua y `reset`; retención de 31 días; aplicación atómica en el móvil. Incluye ejemplos de página inicial/intermedia/final, baja, pérdida de permisos, cursor de otra cuenta, cursor caducado y commits desordenados. Contrato en `packages/schemas/src/offline.ts` (`OfflineChangesPage`).
+
+**Hallazgo de diseño:** el trigger de cuotas existente (`guard_business_child`) ya serializa por organización con `FOR UPDATE` sobre el perfil, de modo que el desorden de commits solo se produce entre organizaciones; el horizonte por `xmin` cubre ambos casos. No se diseñó infraestructura de mensajería.
+
+### Registro de ejecución — C02a y C02b (2026-11-03)
+
+**Estado:** verificadas con PostgreSQL real. **Siguiente tarea:** C03.
+
+**C02a:** `services/api/drizzle/0014_sync_changes.sql` (+ journal): `app.sync_changes(seq, txid xid8, org_id, resource, resource_id, op, created_at)` con índices; función `SECURITY DEFINER` y triggers `AFTER INSERT/UPDATE/DELETE` sobre `business_profiles` y `business_locations`; siembra un cambio inicial por cada fila existente. Cubre servicio, cascada de borrado de organización y SQL directo; un rollback no publica nada.
+
+**C02b:** `offline-cursor.ts` (HMAC-SHA256 con clave derivada de `BETTER_AUTH_SECRET`, `timingSafeEqual`), `offline-sync.service.ts` (snapshot, cambios, colapso por recurso, contenido materializado al leer con el mismo DTO del panel, `pruneChanges` horaria), `offline.controller.ts` (`GET /api/offline/changes` delega en el actor autenticado), `business-profile.service.ts#readPrivateProfile` (lectura pura, sin crear borradores). Schemas: `OfflineChangesPage`, `OFFLINE_RESOURCES`, `OFFLINE_UNSUPPORTED`.
+
+**Pruebas (`test/database/offline-changes.int.test.ts`, 16):** altas/cambios/bajas, rollback, cascada, ruta real del servicio; snapshot inicial/intermedio/final y repetición de cursor; modificación y baja; colapso; transacciones desordenadas (el horizonte retiene lo posterior); paginación sin pérdidas ni repeticiones; cuenta B sin acceso a A y cursor ajeno → 400; cursores falsificados (6 variantes) → 400; caducado → 410; pérdida de permiso → 410 y snapshot sin el negocio; cuenta restringida; retención. El test antiguo que fijaba `items: []`/`nextCursor: null` se sustituyó por uno del contrato real. **Verificaciones:** BD 10 archivos y 100 pruebas, API 303, `test:schemas` 136, typecheck y Biome aprobados.
+
+**Límites:** la siembra de la migración sobre una base con datos reales no se ejercitó (las migraciones de prueba parten de vacío); el cursor no incluye identificador de instalación (el contrato no lo transporta). Sin despliegue.
+
+### Registro de ejecución — C03 (2026-11-03)
+
+**Estado:** verificada con pruebas unitarias y el contrato HTTP real; transacción SQLite/SQLCipher y reinicio en dispositivo en V01. **Siguiente tarea:** R01.
+
+**Subtarea previa (atomicidad entre claves):** `StorageBackend` no permitía transacciones multi-clave. Se añadió `transaction(operations, maxBytes)`: en `native-storage.ts` usa `withExclusiveTransactionAsync` y comprueba la cuota total del resultado (si falla, no se aplica nada); en el almacenamiento en memoria se cifra y valida la cuota antes de tocar nada y se aplica sin esperas intermedias. `applyChangesPage` no usa `set` independientes.
+
+**Cambios:**
+
+- `storage.ts`: `applyChangesPage` aplica en UNA transacción datos (perfil, sedes), bajas, cursor y marcas sobre la cola. Idempotente por revisión por recurso (una página repetida o un upsert antiguo no duplica, retrocede ni revive una baja). `reset` limpia la caché de los recursos declarados pero nunca la cola ni los pendientes. Una edición local sin resolver se conserva; si el servidor ya tiene una versión posterior, se marca `conflict` (`profile_conflict`). Una baja marca los pendientes de ese recurso como `failed` (`resource_removed`) para que un pendiente antiguo no lo resucite; las `sending` se dejan al sincronizador. `loadLocations`, `loadSyncCursor`, `clearSyncCursor`.
+- `sync.ts#pull`: pagina hasta quedar al día, aplica cada página con su cursor; `410 sync_cursor_expired` o `400 invalid_cursor` reinician con un snapshot una sola vez (sin tocar la cola); 401 → `auth_required`; transporte → `offline`; cuota → `storage_error` sin avanzar el cursor; cierre de cuenta o cambio de token → `interrupted` sin aplicar; una sola ejecución por cuenta.
+- `index.ts#getOfflineChanges` valida la respuesta con `OfflineChangesPage` (el contrato antiguo `nextCursor: null` ya no se acepta como descarga válida). `request-errors.ts` (módulo hoja) evita un ciclo de imports. `App.tsx`: tras enviar la cola, se descarga y se refresca el perfil.
+- Backend: `tests/escenarios/features/offline/descarga-incremental.feature` + `steps/offline.steps.ts`: snapshot con reinicio y recursos declarados, cambio y descarga con el cursor anterior, repetición sin elementos nuevos, cursor de otra cuenta y manipulado → 400 `invalid_cursor`, sin filtrar datos.
+
+**Pruebas:** `tests/unit/mobile-pull.test.js` (13): snapshot paginado y cursor persistido con una sola transacción por página; interrupción sin avance parcial; bajas y no resurrección; `reset` conserva la cola; conflicto sin sobrescribir; pendiente de recurso dado de baja; cursor vencido/inválido; 401, red y almacenamiento lleno; aislamiento entre cuentas y página tardía tras salir; cambio de token; ejecución única; todo-o-nada en memoria. **Verificaciones:** M1 (89 pruebas), M2, Biome, `pnpm --filter @mcet/escenarios typecheck`, `playwright --project backend` con la imagen `api` reconstruida (migración 0014 aplicada).
+
+**Descubierto:** el borrador del perfil se crea de forma perezosa al abrirlo (`ensureOwnerDraft`); hasta entonces el feed no tiene nada que entregar, y el cambio llega cuando se crea.
+
+**Límites:** no se ejecutó en dispositivo ni con SQLCipher real; el feed no cubre citas, agenda ni imágenes (declarados en `unsupported`).

@@ -1,6 +1,12 @@
 import { OFFLINE_LIMITS, OfflineOperationMetadata } from "../../../packages/schemas/dist/index.js";
 import type { createMobileClient } from "./index.ts";
-import type { EncryptedStorage, OfflineQueuedOperation } from "./storage.ts";
+import { isTransportError } from "./request-errors.ts";
+import {
+  AccountClosedError,
+  type EncryptedStorage,
+  type OfflineQueuedOperation,
+  StorageQuotaExceededError,
+} from "./storage.ts";
 
 export interface SyncEngineOptions {
   client: ReturnType<typeof createMobileClient>;
@@ -46,6 +52,26 @@ type Reconciled =
   | { outcome: "gone" }
   | { outcome: "absent" }
   | { outcome: "retry"; authRequired: boolean };
+
+export type PullStatus =
+  | "up_to_date"
+  | "interrupted"
+  | "auth_required"
+  | "offline"
+  | "storage_error"
+  | "failed";
+
+export interface PullResult {
+  status: PullStatus;
+  pages: number;
+  /** Elementos nuevos aplicados (los repetidos no cuentan). */
+  applied: number;
+  /** Veces que hubo que empezar un snapshot por cursor inválido o vencido. */
+  restarts: number;
+  interruptedBy?: "exit" | "session_changed";
+}
+
+const activePulls = new WeakMap<object, Map<string, Promise<PullResult>>>();
 
 const activeSyncs = new WeakMap<object, Map<string, Promise<SyncResult>>>();
 
@@ -423,6 +449,78 @@ export function createSyncEngine(options: SyncEngineOptions) {
           lastError: null,
         });
       }
+    },
+
+    /**
+     * Descarga incremental (ADR 0020): pide páginas hasta quedar al día y aplica cada una de forma atómica con su
+     * cursor. Un cursor vencido o inválido reinicia con un snapshot una sola vez, sin tocar la cola. Se detiene sin
+     * aplicar nada si la cuenta se cierra o cambia la sesión, y no avanza el cursor si el almacenamiento falla.
+     */
+    pull({ maxPages = 200 }: { maxPages?: number } = {}): Promise<PullResult> {
+      let active = activePulls.get(storage.syncLockScope);
+      if (!active) {
+        active = new Map();
+        activePulls.set(storage.syncLockScope, active);
+      }
+      const lockKey = `${storage.syncLockNamespace}::${accountId}`;
+      const existing = active.get(lockKey);
+      if (existing) return existing;
+      const pulls = active;
+      const run = (async (): Promise<PullResult> => {
+        const result: PullResult = { status: "up_to_date", pages: 0, applied: 0, restarts: 0 };
+        const startToken = client.getToken?.();
+        const interruption = (): PullResult["interruptedBy"] => {
+          if (storage.accountState(accountId) !== "open") return "exit";
+          if (client.getToken?.() !== startToken) return "session_changed";
+          return undefined;
+        };
+        while (result.pages < maxPages) {
+          let stopped = interruption();
+          if (stopped) return { ...result, status: "interrupted", interruptedBy: stopped };
+          const cursor = (await storage.loadSyncCursor(accountId))?.cursor;
+          let page: Awaited<ReturnType<typeof client.getOfflineChanges>>;
+          try {
+            page = await client.getOfflineChanges(cursor ? { cursor } : {});
+          } catch (error: unknown) {
+            const { status, code } = error as { status?: number; code?: string };
+            if (status === 410 || (status === 400 && code === "invalid_cursor")) {
+              if (result.restarts >= 1) return { ...result, status: "failed" };
+              result.restarts++;
+              try {
+                await storage.clearSyncCursor(accountId);
+              } catch (clearError) {
+                if (clearError instanceof AccountClosedError) {
+                  return { ...result, status: "interrupted", interruptedBy: "exit" };
+                }
+                return { ...result, status: "storage_error" };
+              }
+              continue;
+            }
+            if (status === 401) return { ...result, status: "auth_required" };
+            if (isTransportError(error)) return { ...result, status: "offline" };
+            return { ...result, status: "failed" };
+          }
+          // Una página pedida mientras cambiaba la sesión no pertenece a esta cuenta: se descarta.
+          stopped = interruption();
+          if (stopped) return { ...result, status: "interrupted", interruptedBy: stopped };
+          try {
+            const applied = await storage.applyChangesPage(accountId, page);
+            result.applied += applied.applied;
+          } catch (error: unknown) {
+            if (error instanceof AccountClosedError) {
+              return { ...result, status: "interrupted", interruptedBy: "exit" };
+            }
+            if (error instanceof StorageQuotaExceededError) return { ...result, status: "storage_error" };
+            return { ...result, status: "failed" };
+          }
+          result.pages++;
+          if (!page.hasMore) return result;
+        }
+        return { ...result, status: "failed" };
+      })();
+      const tracked = run.finally(() => pulls.delete(lockKey));
+      active.set(lockKey, tracked);
+      return tracked;
     },
   };
 }

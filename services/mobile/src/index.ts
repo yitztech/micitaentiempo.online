@@ -42,14 +42,17 @@ import type {
   PublicBusinessSummary,
   PublicHold,
 } from "../../../packages/schemas/dist/index.js";
+import { OfflineChangesPage } from "../../../packages/schemas/dist/index.js";
 import { validateRequest } from "../../web/app/lib/validation.ts";
 import appJson from "../app.json" with { type: "json" };
+import { isTransportError, type MobileRequestError } from "./request-errors.ts";
 
 export type {
   PrivateBusinessProfile,
   PublicBusinessProfile,
   PublicBusinessSummary,
 } from "../../../packages/schemas/dist/index.js";
+export * from "./request-errors.ts";
 
 export type MobilePlatform = "android" | "ios";
 export type MobileLang = "es" | "en" | "fr" | "pt" | "de" | "it";
@@ -465,27 +468,6 @@ export interface MobilePanelSummary {
 /** Plazo por defecto de cada petición: pasado ese tiempo se cancela y se trata como fallo de transporte. */
 export const DEFAULT_REQUEST_TIMEOUT_MS = 15_000;
 
-/** Error que lanza el cliente. `status` 0 = no hubo respuesta HTTP (red, DNS, plazo o cancelación). */
-export interface MobileRequestError {
-  status: number;
-  code: string;
-  body: Record<string, unknown>;
-}
-
-const UNAVAILABLE_STATUSES = new Set([502, 503, 504]);
-
-/**
- * ¿La petición no llegó a un servidor que pueda responder? Cubre red caída, DNS, plazo vencido y los 502/503/504
- * del gateway con la API caída. Un 401, 403, 409 o 422 son respuestas del servidor: nunca cuentan como falta de red.
- * Una cancelación pedida por quien llama (`aborted`) tampoco lo es.
- */
-export function isTransportError(error: unknown): boolean {
-  if (typeof error !== "object" || error === null) return false;
-  const { status, code } = error as Partial<MobileRequestError>;
-  if (code === "aborted") return false;
-  return status === 0 || (typeof status === "number" && UNAVAILABLE_STATUSES.has(status));
-}
-
 /** Cliente HTTP de las apps móviles Expo (Android e iOS) conectado al backend de Mi Cita en Tiempo. */
 export function createMobileClient({
   baseUrl,
@@ -718,6 +700,27 @@ export function createMobileClient({
         { locationId, expectedVersion },
         { "idempotency-key": idempKey },
       ),
+    /**
+     * Descarga incremental (ADR 0020). Sin `cursor`: snapshot paginado. Responde 400 `invalid_cursor` o 410
+     * `sync_cursor_expired` si el cursor no sirve; quien llama debe reiniciar con un snapshot.
+     */
+    getOfflineChanges: async (params: { cursor?: string; limit?: number } = {}, signal?: AbortSignal) => {
+      const q = new URLSearchParams();
+      if (params.cursor) q.set("cursor", params.cursor);
+      if (params.limit !== undefined) q.set("limit", String(params.limit));
+      const qs = q.toString();
+      const raw = await request<unknown>(
+        "GET",
+        `/api/offline/changes${qs ? `?${qs}` : ""}`,
+        undefined,
+        {},
+        signal,
+      );
+      const parsed = OfflineChangesPage.safeParse(raw);
+      if (!parsed.success)
+        throw { status: 200, code: "invalid_response", body: {} } satisfies MobileRequestError;
+      return parsed.data;
+    },
     getOperationReceipt: (operationId: string) =>
       request<{
         operationId: string;

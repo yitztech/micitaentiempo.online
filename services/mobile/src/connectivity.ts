@@ -1,4 +1,4 @@
-import { isTransportError } from "./index.ts";
+import { isTransportError } from "./request-errors.ts";
 
 export type ConnState = "connecting" | "connected" | "offline";
 

@@ -275,18 +275,24 @@ export default function App() {
     };
   }, [client, storage]);
 
-  // Sincronizar cola durable al conectar
+  // Al conectar: primero se envía la cola durable y después se descargan los cambios del servidor (ADR 0020).
   useEffect(() => {
-    if (conn === "connected" && summary?.user?.id) {
-      const syncEngine = createSyncEngine({
-        client,
-        storage,
-        accountId: summary.user.id,
+    if (conn !== "connected" || !summary?.user?.id) return;
+    const accountId = summary.user.id;
+    const syncEngine = createSyncEngine({ client, storage, accountId });
+    void syncEngine
+      .sync()
+      .then(() => syncEngine.pull())
+      .then(async (pulled) => {
+        await refreshPendingCount();
+        if (pulled.applied > 0) {
+          const cached = await storage.loadOwnerProfile(accountId);
+          if (cached) setOwnerProfile(cached.data as PrivateBusinessProfile);
+        }
+      })
+      .catch(() => {
+        // Un fallo de almacenamiento o red no debe romper la pantalla: el siguiente ciclo lo reintenta.
       });
-      void syncEngine.sync().then(() => {
-        void refreshPendingCount();
-      });
-    }
   }, [conn, client, storage, summary?.user?.id, refreshPendingCount]);
 
   const loadSession = useCallback(async () => {

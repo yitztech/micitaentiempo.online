@@ -59,6 +59,27 @@ export const nativeStorageBackend: StorageBackend = {
       );
     });
   },
+  async transaction(operations, maxBytes) {
+    const db = await getDatabase();
+    // Transacción exclusiva de SQLite: si algo lanza (incluida la cuota total), no se aplica ninguna operación.
+    await db.withExclusiveTransactionAsync(async (tx) => {
+      for (const op of operations) {
+        if (op.type === "set") {
+          await tx.runAsync(
+            "INSERT INTO offline_items (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+            op.key,
+            op.value,
+          );
+        } else {
+          await tx.runAsync("DELETE FROM offline_items WHERE key = ?", op.key);
+        }
+      }
+      const total = await tx.getFirstAsync<{ bytes: number }>(
+        "SELECT COALESCE(SUM(length(CAST(value AS BLOB))), 0) AS bytes FROM offline_items",
+      );
+      if ((total?.bytes ?? 0) > maxBytes) throw new StorageQuotaExceededError();
+    });
+  },
   async remove(key) {
     const db = await getDatabase();
     await db.runAsync("DELETE FROM offline_items WHERE key = ?", key);

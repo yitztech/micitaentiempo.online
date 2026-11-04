@@ -1,4 +1,9 @@
-import { OFFLINE_LIMITS } from "../../../packages/schemas/dist/index.js";
+import {
+  OFFLINE_LIMITS,
+  type OfflineChangesPage,
+  type PrivateBusinessProfile,
+  type PrivateLocation,
+} from "../../../packages/schemas/dist/index.js";
 import type { MobileAuthSession } from "./index.ts";
 
 export class StorageQuotaExceededError extends Error {
@@ -95,11 +100,34 @@ export interface StorageOptions {
   backend?: StorageBackend;
 }
 
+export type BackendOperation = { type: "set"; key: string; value: string } | { type: "remove"; key: string };
+
 export interface StorageBackend {
   get(key: string): Promise<string | null>;
   set(key: string, value: string, maxBytes: number): Promise<void>;
   remove(key: string): Promise<void>;
   removePrefix(prefix: string): Promise<void>;
+  /**
+   * Aplica varias escrituras/borrados como una unidad: o se guardan todas o ninguna (y la cuota total se
+   * comprueba sobre el resultado). Es lo que permite avanzar el cursor de descarga junto con los datos.
+   */
+  transaction(operations: BackendOperation[], maxBytes: number): Promise<void>;
+}
+
+/** Cursor de la descarga incremental y revisión aplicada de cada recurso (ADR 0020). */
+export interface SyncCursorRecord {
+  cursor: string;
+  /** `false` mientras un snapshot está a medias: la caché de los recursos declarados aún no es completa. */
+  snapshotComplete: boolean;
+  revisions: Record<string, number>;
+  updatedAt: string;
+}
+
+export interface ApplyChangesResult {
+  applied: number;
+  skipped: number;
+  conflictsFlagged: number;
+  removedFlagged: number;
 }
 
 /** Operaciones confirmadas que se conservan como historial (por recibo/trazabilidad) además de las referenciadas. */
@@ -209,7 +237,7 @@ export function createEncryptedStorage(options: StorageOptions) {
   async function getItem<T>(
     scope: string,
     itemKey: string,
-    maxHours = OFFLINE_LIMITS.privateAccessHours,
+    maxHours: number = OFFLINE_LIMITS.privateAccessHours,
     strict = false,
   ): Promise<{ data: T; cachedAt: string; ageMinutes: number; isStale: boolean } | null> {
     const key = buildStorageKey(scope, itemKey);
@@ -248,6 +276,52 @@ export function createEncryptedStorage(options: StorageOptions) {
     const key = buildStorageKey(scope, itemKey);
     if (options.backend) await options.backend.remove(key);
     rawStore.delete(key);
+  }
+
+  type Entry = { scope: string; itemKey: string; data?: unknown; remove?: boolean };
+
+  /** Guarda varias claves como una sola unidad (backend transaccional o aplicación en memoria sin interrupciones). */
+  async function commitAll(entries: Entry[]): Promise<void> {
+    if (simulatedDiskFull) throw new StorageQuotaExceededError();
+    const cachedAt = new Date().toISOString();
+    const keyOf = (e: Entry) => buildStorageKey(e.scope, e.itemKey);
+    if (options.backend) {
+      await options.backend.transaction(
+        entries.map((e) =>
+          e.remove
+            ? ({ type: "remove", key: keyOf(e) } as const)
+            : ({ type: "set", key: keyOf(e), value: JSON.stringify({ data: e.data, cachedAt }) } as const),
+        ),
+        maxBytes,
+      );
+      return;
+    }
+    // En memoria: se cifra todo y se comprueba la cuota ANTES de tocar nada; después se aplica sin esperas.
+    const touched = new Set(entries.map(keyOf));
+    let bytes = 0;
+    for (const [key, val] of rawStore) {
+      if (!touched.has(key)) bytes += (val.cipherHex.length + val.ivHex.length) / 2;
+    }
+    const prepared: Array<{ key: string; encrypted?: EncryptedPayload }> = [];
+    for (const e of entries) {
+      if (e.remove) {
+        prepared.push({ key: keyOf(e) });
+        continue;
+      }
+      const envelope = { data: e.data, cachedAt };
+      const encrypted = await encryptData(
+        envelope,
+        await deriveAesKey(`${baseUrl}::${environment}::${e.scope}`, deviceSecret),
+      );
+      bytes += (encrypted.cipherHex.length + encrypted.ivHex.length) / 2;
+      prepared.push({ key: keyOf(e), encrypted });
+    }
+    if (bytes > maxBytes)
+      throw new StorageQuotaExceededError("Espacio de almacenamiento local lleno (cuota excedida).");
+    for (const p of prepared) {
+      if (p.encrypted) rawStore.set(p.key, p.encrypted);
+      else rawStore.delete(p.key);
+    }
   }
 
   return {
@@ -336,6 +410,115 @@ export function createEncryptedStorage(options: StorageOptions) {
     },
     async loadOwnerProfile(accountId: string) {
       return getItem<unknown>(`account_${accountId}`, "owner_profile", OFFLINE_LIMITS.privateAccessHours);
+    },
+
+    // 5b. Descarga incremental (ADR 0020): sedes, cursor y aplicación atómica de cada página
+    async loadLocations(accountId: string) {
+      return getItem<Record<string, PrivateLocation>>(
+        `account_${accountId}`,
+        "business_locations",
+        OFFLINE_LIMITS.privateAccessHours,
+      );
+    },
+    async loadSyncCursor(accountId: string): Promise<SyncCursorRecord | null> {
+      return (
+        (await getItem<SyncCursorRecord>(`account_${accountId}`, "sync_cursor", Number.MAX_SAFE_INTEGER))
+          ?.data ?? null
+      );
+    },
+    /** Olvida el cursor (cursor vencido o inválido): la siguiente descarga empieza por un snapshot. La cola no se toca. */
+    async clearSyncCursor(accountId: string): Promise<void> {
+      return withAccountLock(accountId, async () => {
+        if (accountStates.has(accountId)) throw new AccountClosedError();
+        await commitAll([{ scope: `account_${accountId}`, itemKey: "sync_cursor", remove: true }]);
+      });
+    },
+    /**
+     * Aplica una página de `GET /api/offline/changes`: datos, bajas, cursor y marcas sobre la cola, en UNA transacción.
+     * - Es idempotente: un elemento con revisión ya aplicada se ignora (repetir una página no duplica ni retrocede).
+     * - `reset` descarta la caché de los recursos declarados (sedes y perfil) pero NUNCA la cola ni los pendientes.
+     * - No sobrescribe una edición local sin resolver: la operación pendiente se conserva y, si el servidor ya tiene
+     *   una versión posterior, se marca `conflict` para que la persona decida.
+     * - Una baja nunca se deshace con un pendiente antiguo: los pendientes de ese recurso pasan a `failed`
+     *   (`resource_removed`) y no se reenvían. Las operaciones `sending` no se tocan: las reconcilia el sincronizador.
+     */
+    async applyChangesPage(accountId: string, page: OfflineChangesPage): Promise<ApplyChangesResult> {
+      return withAccountLock(accountId, async () => {
+        if (accountStates.has(accountId)) throw new AccountClosedError();
+        const scope = `account_${accountId}`;
+        const previous = await this.loadSyncCursor(accountId);
+        const revisions: Record<string, number> = page.reset ? {} : { ...(previous?.revisions ?? {}) };
+        let profile: PrivateBusinessProfile | null = page.reset
+          ? null
+          : ((await getItem<PrivateBusinessProfile>(scope, "owner_profile"))?.data ?? null);
+        const locations: Record<string, PrivateLocation> = page.reset
+          ? {}
+          : {
+              ...((await getItem<Record<string, PrivateLocation>>(scope, "business_locations"))?.data ?? {}),
+            };
+        let queue = await this.getQueue(accountId);
+        const result: ApplyChangesResult = { applied: 0, skipped: 0, conflictsFlagged: 0, removedFlagged: 0 };
+        let queueChanged = false;
+
+        const settable = (op: OfflineQueuedOperation) =>
+          op.state === "pending" || op.state === "conflict" || op.state === "authentication_required";
+        for (const item of page.items) {
+          const key = `${item.resource}:${item.id}`;
+          if ((revisions[key] ?? 0) >= item.revision) {
+            result.skipped++;
+            continue;
+          }
+          revisions[key] = item.revision;
+          result.applied++;
+          const touchesResource = (op: OfflineQueuedOperation) =>
+            item.resource === "business_profile"
+              ? op.resourceId === item.id || op.businessId === item.id
+              : op.resourceId === item.id;
+          if (item.op === "upsert") {
+            if (item.resource === "business_profile") {
+              profile = item.data;
+              const serverVersion = item.data.version;
+              queue = queue.map((op) => {
+                if (op.state !== "pending" || !touchesResource(op) || op.baseVersion === null) return op;
+                if (op.baseVersion >= serverVersion) return op;
+                result.conflictsFlagged++;
+                queueChanged = true;
+                return { ...op, state: "conflict", lastError: "profile_conflict" };
+              });
+            } else {
+              locations[item.id] = item.data;
+            }
+            continue;
+          }
+          if (item.resource === "business_profile") profile = null;
+          else delete locations[item.id];
+          queue = queue.map((op) => {
+            if (!settable(op) || !touchesResource(op)) return op;
+            result.removedFlagged++;
+            queueChanged = true;
+            return { ...op, state: "failed", lastError: "resource_removed" };
+          });
+        }
+
+        const record: SyncCursorRecord = {
+          cursor: page.nextCursor,
+          snapshotComplete: page.mode === "changes" ? true : page.snapshotComplete,
+          revisions,
+          updatedAt: new Date().toISOString(),
+        };
+        const entries: Entry[] = [
+          profile
+            ? { scope, itemKey: "owner_profile", data: profile }
+            : { scope, itemKey: "owner_profile", remove: true },
+          Object.keys(locations).length > 0
+            ? { scope, itemKey: "business_locations", data: locations }
+            : { scope, itemKey: "business_locations", remove: true },
+          { scope, itemKey: "sync_cursor", data: record },
+        ];
+        if (queueChanged) entries.push({ scope, itemKey: "offline_queue", data: queue });
+        await commitAll(entries);
+        return result;
+      });
     },
 
     // 6. Cola durable de operaciones offline (aislada por accountId)
