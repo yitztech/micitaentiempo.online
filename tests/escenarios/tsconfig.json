@@ -4,7 +4,9 @@
     "types": ["node"],
     "lib": ["es2024", "dom"],
     "module": "preserve",
-    "moduleResolution": "bundler"
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "noEmit": true
   },
   "include": ["**/*.ts"],
   "exclude": ["node_modules", ".features-gen"]

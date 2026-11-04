@@ -954,3 +954,17 @@ Las claves se consultan únicamente en `https://www.googleapis.com/oauth2/v3/cer
 **Fallo intermitente de las pruebas de base de datos:** el CI de `8c3d785` falló con las 103 pruebas aprobadas, por 5 errores `57P01` sin manejar nacidos en `mobile-auth-limiter.int.test.ts`. `pool.end()` resuelve antes de que los clientes cierren su socket y parar el contenedor en ese momento los corta; esa prueba abre más conexiones que las demás por su caso de concurrencia. `test/helpers/database.ts#stopDatabase` espera a los eventos `remove` antes de parar el contenedor, en todas las suites. No se reproduce de forma aislada en local (0 de 8 antes del cambio), así que la evidencia es el código de `pg-pool` y los CI posteriores.
 
 **Sigue abierto:** no hay evidencia en dispositivo (N1); la corrección de SQLCipher se probó con la librería, no en un binario Expo. Falta la prueba HTTP real del 429 (S08) y el contrato contra la API real (M01). `reconciliation_required` no tiene forma de limpiarse sin SQL manual: hay que decidir entre una acción en el panel o un procedimiento documentado.
+
+### Cierre de pendientes (2026-11-04)
+
+**Fallo intermitente del recordatorio — causa y corrección:** `syncReminders` descartaba un recordatorio vencido comparando con la hora de llegada del evento, que es asíncrona. En la traza fallida la cita se confirmó 190 ms antes de saltar el reloj y el evento llegó después. En producción, un retraso de la cola perdía el recordatorio. Ahora compara con `occurredAt`. `test/database/reminders.int.test.ts` falla sin la corrección y pasa con ella.
+
+**Fallo `57P01` al cerrar:** `stopDatabase` espera a que cierren las conexiones antes de parar PostgreSQL.
+
+**`reconciliation_required`:** resuelto con una acción en el panel (ADR 0021). La prueba con PostgreSQL real detectó que `transaction()` convertía el error 404 en 503; corregido. No tiene escenario: la pila de escenarios no puede crear una suspensión histórica sin SQL.
+
+**`bookingUrl: /c/<slug>`:** la web redirige al enlace de reserva del dominio, conservando la consulta. La API no cambia. Escenario en `idiomas/dominios.feature`.
+
+**S08:** `test/database/mobile-auth-http.int.test.ts` prueba por HTTP el 429 con `Retry-After`, Fastify, `ProblemFilter` y PostgreSQL reales, con los límites activos.
+
+**M01:** `movil/sedes-cliente.feature` usa `createMobileClient` contra la API real para crear, asignar y borrar una sede.
