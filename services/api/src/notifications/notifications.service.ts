@@ -1,3 +1,4 @@
+import { timestampDate } from "@bufbuild/protobuf/wkt";
 import type { DomainEvent } from "@mcet/contracts/mcet/api/v1/event_ingress_pb";
 import { CalendarService } from "@mcet/contracts/mcet/calendar/v1/calendar_pb";
 import { ServiceCatalogService } from "@mcet/contracts/mcet/calendar/v1/services_pb";
@@ -302,9 +303,13 @@ export class NotificationsService implements OnModuleInit {
       return;
     const start = new Date(subject.start);
     const now = this.clock.now();
+    if (start <= now) return;
+    // Aplica el recordatorio que seguía por delante al reservar, no al recibir el evento: la entrega es asíncrona y
+    // un retraso no debe perderlo. Si ya venció, el worker lo envía en su siguiente pasada.
+    const bookedAt = event.occurredAt ? timestampDate(event.occurredAt) : now;
     for (const offset of REMINDER_OFFSETS) {
       const due = new Date(start.getTime() - offset * 60_000);
-      if (due <= now) continue;
+      if (due <= bookedAt) continue;
       await this.db
         .insert(reminders)
         .values({
