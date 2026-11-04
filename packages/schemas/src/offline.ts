@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { BusinessVersion } from "./business.ts";
+import { BusinessVersion, PrivateBusinessProfile, PrivateLocation } from "./business.ts";
 
 /** Product bounds to be applied by storage and server, not a claim of implemented offline support. */
 export const OFFLINE_LIMITS = {
@@ -69,3 +69,67 @@ export const OfflineChangesQuery = z
     limit: z.coerce.number().int().min(1).max(OFFLINE_LIMITS.pullPage).default(100),
   })
   .strict();
+
+/** Recursos que `GET /api/offline/changes` sincroniza de verdad (ADR 0020). */
+export const OFFLINE_RESOURCES = ["business_profile", "business_location"] as const;
+/** Recursos del catálogo offline que todavía NO se sincronizan por este canal: nunca se presentan como «sin cambios». */
+export const OFFLINE_UNSUPPORTED = [
+  "calendar_locations",
+  "images",
+  "bookings",
+  "agenda",
+  "public_profiles",
+] as const;
+export type OfflineResource = (typeof OFFLINE_RESOURCES)[number];
+
+const Revision = z.number().int().min(1);
+const ResourceId = z.string().min(1).max(64);
+export const OfflineChangeItem = z.union([
+  z
+    .object({
+      resource: z.literal("business_profile"),
+      id: ResourceId,
+      op: z.literal("upsert"),
+      revision: Revision,
+      data: PrivateBusinessProfile,
+    })
+    .strict(),
+  z
+    .object({
+      resource: z.literal("business_location"),
+      id: ResourceId,
+      op: z.literal("upsert"),
+      revision: Revision,
+      data: PrivateLocation,
+    })
+    .strict(),
+  z
+    .object({
+      resource: z.enum(OFFLINE_RESOURCES),
+      id: ResourceId,
+      op: z.literal("delete"),
+      revision: Revision,
+    })
+    .strict(),
+]);
+export type OfflineChangeItem = z.infer<typeof OfflineChangeItem>;
+
+/**
+ * Página de `GET /api/offline/changes`. Sin cursor es un snapshot paginado (`mode: "snapshot"`); la primera página
+ * lleva `reset: true` y el cliente descarta antes su caché de `resources`. `nextCursor` es siempre una cadena.
+ */
+export const OfflineChangesPage = z
+  .object({
+    mode: z.enum(["snapshot", "changes"]),
+    reset: z.boolean(),
+    /** En snapshot, `true` en la última página; en cambios siempre `true`. */
+    snapshotComplete: z.boolean(),
+    items: z.array(OfflineChangeItem).max(OFFLINE_LIMITS.pullPage),
+    nextCursor: z.string().min(1).max(OFFLINE_LIMITS.cursor),
+    hasMore: z.boolean(),
+    serverTime: z.iso.datetime(),
+    resources: z.array(z.enum(OFFLINE_RESOURCES)),
+    unsupported: z.array(z.enum(OFFLINE_UNSUPPORTED)),
+  })
+  .strict();
+export type OfflineChangesPage = z.infer<typeof OfflineChangesPage>;

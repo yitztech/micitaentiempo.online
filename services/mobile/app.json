@@ -48,6 +48,11 @@
         }
       ]
     },
-    "plugins": ["expo-status-bar", "expo-web-browser"]
+    "plugins": [
+      "expo-status-bar",
+      "expo-web-browser",
+      "expo-secure-store",
+      ["expo-sqlite", { "useSQLCipher": true }]
+    ]
   }
 }

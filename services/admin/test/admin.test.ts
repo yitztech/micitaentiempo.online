@@ -1,20 +1,28 @@
+import { randomBytes } from "node:crypto";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { FastifyInstance } from "fastify";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { loadConfig } from "../src/config.js";
 import { AdminDatabase, verifyPassword } from "../src/db/admin-db.js";
-import { PlatformDatabase } from "../src/db/platform-db.js";
+import {
+  PlatformDatabase,
+  PlatformDatabaseUnavailableError,
+  PlatformRestrictionNotFoundError,
+} from "../src/db/platform-db.js";
 import { buildAdminApp } from "../src/index.js";
 
 describe("Panel de Administración — Autenticación y Almacén Aislado", () => {
   let app: FastifyInstance;
   let adminDb: AdminDatabase;
   let platformDb: PlatformDatabase;
-  // Construido dinámicamente para pruebas sin activar escáneres estáticos
-  const testPassword = ["Password", "Password", "1!"].join(".");
+  let testPassword: string;
 
   beforeEach(async () => {
+    testPassword = randomBytes(24).toString("base64url");
+    vi.stubEnv("ADMIN_INITIAL_USER", "yunerkis");
+    vi.stubEnv("ADMIN_INITIAL_PASSWORD", testPassword);
     // Base de datos SQLite en memoria para pruebas
     adminDb = new AdminDatabase(":memory:", "yunerkis", testPassword);
     platformDb = new PlatformDatabase({
@@ -37,6 +45,61 @@ describe("Panel de Administración — Autenticación y Almacén Aislado", () =>
     await app.close();
     adminDb.close();
     await platformDb.close();
+    vi.unstubAllEnvs();
+  });
+
+  it("falla antes de iniciar cuando falta una credencial inicial", () => {
+    vi.stubEnv("ADMIN_INITIAL_USER", "");
+    expect(() => loadConfig()).toThrow("ADMIN_INITIAL_USER es obligatoria");
+    vi.stubEnv("ADMIN_INITIAL_USER", "yunerkis");
+    vi.stubEnv("ADMIN_INITIAL_PASSWORD", "");
+    expect(() => loadConfig()).toThrow("ADMIN_INITIAL_PASSWORD es obligatoria");
+  });
+
+  it("exige la contraseña de PostgreSQL si hay servidor configurado, sin valor de respaldo", () => {
+    vi.stubEnv("DB_PASSWORD", "");
+    vi.stubEnv("API_DB_PASSWORD", "");
+    vi.stubEnv("DB_HOST", "postgres");
+    expect(() => loadConfig()).toThrow("DB_PASSWORD es obligatoria");
+    vi.stubEnv("DB_HOST", "");
+    expect(loadConfig().pg.password).toBe("");
+    vi.stubEnv("DB_HOST", "postgres");
+    vi.stubEnv("API_DB_PASSWORD", "secreto-efimero");
+    expect(loadConfig().pg.password).toBe("secreto-efimero");
+  });
+
+  it("carga credenciales iniciales explícitas y limita sus longitudes", () => {
+    const config = loadConfig();
+    expect(config.initialAdminUser).toBe("yunerkis");
+    expect(config.initialAdminPassword).toBe(testPassword);
+
+    vi.stubEnv("ADMIN_INITIAL_USER", "u".repeat(101));
+    expect(() => loadConfig()).toThrow("ADMIN_INITIAL_USER no puede superar 100 caracteres");
+    vi.stubEnv("ADMIN_INITIAL_USER", "Admin");
+    expect(() => loadConfig()).toThrow("ADMIN_INITIAL_USER debe estar en minúsculas");
+    vi.stubEnv("ADMIN_INITIAL_USER", "yunerkis");
+    vi.stubEnv("ADMIN_INITIAL_PASSWORD", "p".repeat(129));
+    expect(() => loadConfig()).toThrow("ADMIN_INITIAL_PASSWORD no puede superar 128 caracteres");
+  });
+
+  it("no cambia el hash de una cuenta SQLite existente al reiniciar con otro valor inicial", () => {
+    const dataDir = mkdtempSync(join(tmpdir(), "admin-initial-credentials-"));
+    const databasePath = join(dataDir, "admin.sqlite");
+    const nextPassword = randomBytes(24).toString("base64url");
+    try {
+      const firstStart = new AdminDatabase(databasePath, "yunerkis", testPassword);
+      const originalHash = firstStart.getUserByUsername("yunerkis")?.password_hash;
+      firstStart.close();
+
+      const restart = new AdminDatabase(databasePath, "yunerkis", nextPassword);
+      const storedHash = restart.getUserByUsername("yunerkis")?.password_hash;
+      expect(storedHash).toBe(originalHash);
+      expect(verifyPassword(testPassword, storedHash ?? "")).toBe(true);
+      expect(verifyPassword(nextPassword, storedHash ?? "")).toBe(false);
+      restart.close();
+    } finally {
+      rmSync(dataDir, { recursive: true, force: true });
+    }
   });
 
   it("inicializa el usuario yunerkis con hash seguro en SQLite", () => {
@@ -106,6 +169,37 @@ describe("Panel de Administración — Autenticación y Almacén Aislado", () =>
   });
 
   it("bloquea y desbloquea usuarios aislando el estado en su propia base de datos", async () => {
+    const blockedAt = new Date().toISOString();
+    vi.spyOn(platformDb, "setUserRestriction").mockResolvedValue({
+      userId: "usr-test-123",
+      email: "spammer@example.com",
+      reason: "Spam masivo de citas",
+      blockedAt,
+      blockedBy: "yunerkis",
+      reconciliationRequired: false,
+      changed: true,
+      calendarStatusPending: false,
+    });
+    vi.spyOn(platformDb, "getBlockedUsers").mockResolvedValue([
+      {
+        user_id: "usr-test-123",
+        email: "spammer@example.com",
+        reason: "Spam masivo de citas",
+        blocked_at: blockedAt,
+        blocked_by: "yunerkis",
+        reconciliation_required: false,
+      },
+    ]);
+    vi.spyOn(platformDb, "removeUserRestriction").mockResolvedValue({
+      userId: "usr-test-123",
+      email: "spammer@example.com",
+      reason: "Spam masivo de citas",
+      blockedAt,
+      blockedBy: "yunerkis",
+      reconciliationRequired: false,
+      changed: true,
+      calendarStatusPending: false,
+    });
     // Login
     const loginRes = await app.inject({
       method: "POST",
@@ -123,6 +217,13 @@ describe("Panel de Administración — Autenticación y Almacén Aislado", () =>
     });
     expect(blockRes.statusCode).toBe(200);
     expect(adminDb.isUserBlocked("usr-test-123")).toBe(true);
+    const retryBlock = await app.inject({
+      method: "POST",
+      url: "/api/users/usr-test-123/block",
+      headers: { Authorization: `Bearer ${token}` },
+      payload: { reason: "Spam masivo de citas" },
+    });
+    expect(retryBlock.statusCode).toBe(200);
 
     // 2. Verificar lista de bloqueados
     const blockedRes = await app.inject({
@@ -147,6 +248,7 @@ describe("Panel de Administración — Autenticación y Almacén Aislado", () =>
     const blockLog = logs.find((l: { action: string }) => l.action === "USER_BLOCKED");
     expect(blockLog).toBeDefined();
     expect(blockLog.target_id).toBe("usr-test-123");
+    expect(logs.filter((l: { action: string }) => l.action === "USER_BLOCKED")).toHaveLength(1);
 
     // 4. Desbloquear usuario
     const unblockRes = await app.inject({
@@ -156,6 +258,73 @@ describe("Panel de Administración — Autenticación y Almacén Aislado", () =>
     });
     expect(unblockRes.statusCode).toBe(200);
     expect(adminDb.isUserBlocked("usr-test-123")).toBe(false);
+    const retryUnblock = await app.inject({
+      method: "POST",
+      url: "/api/users/usr-test-123/unblock",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    expect(retryUnblock.statusCode).toBe(200);
+    expect(
+      adminDb.getAuditLogs().filter((l) => l.action === "USER_UNBLOCKED" && l.target_id === "usr-test-123"),
+    ).toHaveLength(1);
+  });
+
+  it("no registra como bloqueado en SQLite si PostgreSQL no confirma la restricción", async () => {
+    vi.spyOn(platformDb, "setUserRestriction").mockRejectedValue(new PlatformDatabaseUnavailableError());
+    const login = await app.inject({
+      method: "POST",
+      url: "/api/auth/login",
+      payload: { username: "yunerkis", password: testPassword },
+    });
+    const response = await app.inject({
+      method: "POST",
+      url: "/api/users/usr-test-123/block",
+      headers: { Authorization: `Bearer ${login.json().token}` },
+      payload: { reason: "Abuso" },
+    });
+    expect(response.statusCode).toBe(503);
+    expect(adminDb.isUserBlocked("usr-test-123")).toBe(false);
+  });
+
+  it("concilia una suspensión histórica y valida la entrada", async () => {
+    const reconcile = vi.spyOn(platformDb, "reconcileRestriction").mockResolvedValue({
+      userId: "usr-test-123",
+      email: "historica@example.com",
+      changed: true,
+      organizationIds: ["org-1"],
+      calendarStatusPending: true,
+    });
+    const login = await app.inject({
+      method: "POST",
+      url: "/api/auth/login",
+      payload: { username: "yunerkis", password: testPassword },
+    });
+    const post = (payload: Record<string, unknown>) =>
+      app.inject({
+        method: "POST",
+        url: "/api/users/usr-test-123/reconcile",
+        headers: { Authorization: `Bearer ${login.json().token}` },
+        payload,
+      });
+
+    const suspended = await post({ economicStatus: "suspended", reason: "Revisado" });
+    expect(suspended.statusCode).toBe(422);
+    expect(suspended.json().code).toBe("invalid_economic_status");
+    const noReason = await post({ economicStatus: "active", reason: "   " });
+    expect(noReason.statusCode).toBe(422);
+    expect(noReason.json().code).toBe("invalid_reconciliation_reason");
+    expect(reconcile).not.toHaveBeenCalled();
+
+    const accepted = await post({ economicStatus: "active", reason: " Revisado en Stripe " });
+    expect(accepted.statusCode).toBe(202);
+    expect(accepted.json()).toMatchObject({ reconciled: true, code: "restriction_sync_pending" });
+    expect(reconcile).toHaveBeenCalledWith("usr-test-123", "active", "Revisado en Stripe", "yunerkis");
+    expect(adminDb.getAuditLogs().filter((l) => l.action === "USER_RESTRICTION_RECONCILED")).toHaveLength(1);
+
+    reconcile.mockRejectedValue(new PlatformRestrictionNotFoundError());
+    const missing = await post({ economicStatus: "active", reason: "Revisado" });
+    expect(missing.statusCode).toBe(404);
+    expect(missing.json().code).toBe("restriction_not_found");
   });
 
   it("responde a healthz y version.json correctamente", async () => {

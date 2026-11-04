@@ -1,7 +1,7 @@
 import { ForbiddenException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { and, eq } from "drizzle-orm";
 import type { SessionUser } from "../auth/auth.registry.js";
-import { requireOrganizationWrite } from "../auth/org-access.js";
+import { requireOrganizationWrite, resolveEffectiveOrganizationStatus } from "../auth/org-access.js";
 import { type Action, type CalendarRole, can } from "../auth/permissions.js";
 import { type Database, DB } from "../db/db.module.js";
 import { calendarMembers, organizations } from "../db/schema.js";
@@ -56,10 +56,11 @@ export class CalendarAccess {
       throw new ForbiddenException({ code: "permission_denied", message: "Sin permiso" });
     if (!READ_ACTIONS.has(action)) {
       const [org] = await this.db
-        .select({ status: organizations.status })
+        .select({ status: organizations.status, ownerUserId: organizations.ownerUserId })
         .from(organizations)
         .where(eq(organizations.id, m.orgId));
-      requireOrganizationWrite(org?.status);
+      const resolved = org ? await resolveEffectiveOrganizationStatus(this.db, org) : undefined;
+      requireOrganizationWrite(resolved?.effectiveStatus, resolved?.ownerRestricted);
     }
     return m;
   }

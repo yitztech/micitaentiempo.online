@@ -15,7 +15,7 @@ import { and, count, eq, gt, isNull } from "drizzle-orm";
 import { AuditService } from "../audit/audit.service.js";
 import type { SessionUser } from "../auth/auth.registry.js";
 import { uuidv7 } from "../auth/ids.js";
-import { requireOrganizationWrite } from "../auth/org-access.js";
+import { requireOrganizationWrite, resolveEffectiveOrganizationStatus } from "../auth/org-access.js";
 import { ENV } from "../config/config.module.js";
 import type { Env } from "../config/env.js";
 import { type Database, DB } from "../db/db.module.js";
@@ -175,10 +175,11 @@ export class MembersService {
       });
     }
     const [org] = await this.db
-      .select({ status: organizations.status })
+      .select({ status: organizations.status, ownerUserId: organizations.ownerUserId })
       .from(organizations)
       .where(eq(organizations.id, inv.orgId));
-    requireOrganizationWrite(org?.status);
+    const resolved = org ? await resolveEffectiveOrganizationStatus(this.db, org) : undefined;
+    requireOrganizationWrite(resolved?.effectiveStatus, resolved?.ownerRestricted);
     if (inv.requiresGoogle) {
       const [google] = await this.db
         .select()

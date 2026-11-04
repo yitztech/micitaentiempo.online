@@ -118,7 +118,7 @@ Abrir, matar el proceso y abrir de nuevo sin red debe conservar lo permitido sin
    y exige elección; 422 marca error editable; 429 respeta Retry-After; red/503 reintenta con backoff y
    jitter, máximo cinco intentos por ciclo, luego ofrece reintento manual. Orden por recurso y
    dependencias; una sola ejecución por operación incluso al alternar primer plano/conectividad.
-7. Descarga propuesta `GET /api/offline/changes?cursor=&limit=100`: cursor opaco por actor, permisos,
+7. Descarga (detallada y fijada en [ADR 0020](0020-sincronizacion-incremental-offline.md)) `GET /api/offline/changes?cursor=&limit=100`: cursor opaco por actor, permisos,
    instalación y versión de esquema; hasta 100 cambios + nextCursor y serverTime. Upserts/bajas con
    revisión monótona y DTO mínimo del recurso. Persistir página y cursor atómicamente. Cursor vencido:
    410 `sync_cursor_expired`; reconstrucción de snapshot paginado consistente con watermark, sin perder

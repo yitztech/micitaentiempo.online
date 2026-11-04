@@ -21,6 +21,15 @@ Característica: El idioma lo decide el dominio
     Cuando un visitante con el navegador en inglés abre la página "/" del dominio "es"
     Entonces el documento tiene lang="es"
 
+  Esquema del escenario: El enlace corto que publica la API lleva a la reserva del dominio
+    Cuando se consulta "/c/consultas?origen=qr" en el dominio "<dominio>"
+    Entonces la respuesta redirige a "<destino>"
+
+    Ejemplos:
+      | dominio | destino                       |
+      | es      | /reservar/consultas?origen=qr |
+      | en      | /book/consultas?origen=qr     |
+
   Escenario: Cada dominio publica su sitemap y su robots.txt
     Cuando se consulta "/sitemap.xml" en el dominio "en"
     Entonces la respuesta tiene estado 200

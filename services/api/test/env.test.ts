@@ -22,6 +22,17 @@ const base = {
 };
 
 describe("loadEnv", () => {
+  it("solo permite las claves del doble de Google en TEST_MODE con dominios de prueba", () => {
+    const GOOGLE_JWKS_FAKE_URL = "http://captura:4010/google/jwks";
+    expect(() => loadEnv({ ...base, GOOGLE_JWKS_FAKE_URL })).toThrow(/TEST_MODE/);
+    expect(() => loadEnv({ ...base, GOOGLE_JWKS_FAKE_URL, TEST_MODE: "1" })).not.toThrow();
+    expect(() =>
+      loadEnv({ ...base, GOOGLE_JWKS_FAKE_URL, TEST_MODE: "1", SITE_URL: "https://micitaentiempo.online" }),
+    ).toThrow(/TEST_MODE/);
+    expect(() => loadEnv({ ...base, GOOGLE_JWKS_FAKE_URL: "not-url", TEST_MODE: "1" })).toThrow(
+      /GOOGLE_JWKS_FAKE_URL/,
+    );
+  });
   it("acepta la configuración mínima y deriva los dominios", () => {
     const env = loadEnv(base);
     expect(env.PORT).toBe(3000);

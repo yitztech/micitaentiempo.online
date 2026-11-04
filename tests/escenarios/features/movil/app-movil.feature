@@ -36,6 +36,16 @@ Característica: Aplicaciones móviles (Android e iOS) en teléfonos y tablets c
     Cuando la app móvil inicia sesión con Google usando un idToken para "clienta-idtoken@escenarios.test"
     Entonces recibe un token Bearer móvil válido para "clienta-idtoken@escenarios.test"
 
+  @backend @movil @seguridad
+  Esquema del escenario: Google rechaza identidad falsificada en "<ruta>" sin emitir sesión
+    Cuando presenta una identidad Google falsificada en "<ruta>"
+    Entonces Google rechaza la identidad sin emitir una sesión
+
+    Ejemplos:
+      | ruta                              |
+      | /api/public/v1/mobile/auth/google |
+      | /api/public/v1/google/verify      |
+
   @backend @movil @validacion
   Esquema del escenario: Los endpoints móviles rechazan nombres inválidos (<caso>)
     Dado una persona nueva con correo único "movil-val" en el dominio "es"

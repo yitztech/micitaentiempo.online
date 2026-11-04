@@ -6,6 +6,7 @@ import { BusinessProfileController } from "./business-profile.controller.js";
 import { BusinessProfileRepository } from "./business-profile.repository.js";
 import { BusinessProfileService } from "./business-profile.service.js";
 import { OfflineController } from "./offline.controller.js";
+import { OfflineSyncService } from "./offline-sync.service.js";
 import { PublicBusinessController } from "./public-business.controller.js";
 import { PublicBusinessService } from "./public-business.service.js";
 
@@ -19,6 +20,7 @@ import { PublicBusinessService } from "./public-business.service.js";
     BusinessProfileService,
     PublicBusinessService,
     BusinessImageService,
+    OfflineSyncService,
     AuditService,
   ],
   exports: [
@@ -27,6 +29,7 @@ import { PublicBusinessService } from "./public-business.service.js";
     BusinessProfileService,
     PublicBusinessService,
     BusinessImageService,
+    OfflineSyncService,
   ],
 })
 export class BusinessesModule {}

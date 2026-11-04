@@ -14,6 +14,7 @@ import { otpEmail, resetPasswordEmail, verifyEmail } from "../mail/templates/ema
 import { cimdFetch, MCP_DEFAULT_SCOPES, MCP_SCOPES, mcpResource } from "../mcp/mcp.config.js";
 import { checkEmail, type EmailProblem } from "../security/email-validation.js";
 import { uuidv7 } from "./ids.js";
+import { isEmailRestricted, isUserRestricted } from "./org-access.js";
 import { hashPassword, verifyPassword } from "./password.js";
 
 export interface AuthDeps {
@@ -74,6 +75,24 @@ const EMAIL_PATHS = new Set([
   "/request-password-reset",
   "/forget-password",
 ]);
+
+const RESTRICTED_EMAIL_PATHS = new Set([
+  "/sign-in/email",
+  "/email-otp/send-verification-otp",
+  "/sign-in/email-otp",
+  "/send-verification-email",
+  "/request-password-reset",
+  "/forget-password",
+]);
+
+function shouldCheckActiveSessionRestriction(path: string | undefined): boolean {
+  if (!path) return true;
+  if (path === "/sign-out") return false;
+  if (path.startsWith("/sign-in/") || path.startsWith("/sign-up/") || path.startsWith("/callback/")) {
+    return false;
+  }
+  return true;
+}
 
 /**
  * Muchos clientes MCP de escritorio y CLI se registran (DCR) con retorno loopback o esquema propio
@@ -222,6 +241,30 @@ export function createAuth(lang: Lang, { env, db, mail }: AuthDeps) {
           },
         },
       },
+      session: {
+        create: {
+          before: async (session) => {
+            if (await isUserRestricted(db, session.userId)) {
+              throw new APIError("UNAUTHORIZED", {
+                code: "UNAUTHENTICATED",
+                message: "Sesión no válida",
+              });
+            }
+            return { data: session };
+          },
+        },
+        update: {
+          before: async (session) => {
+            if (session.userId && (await isUserRestricted(db, session.userId))) {
+              throw new APIError("UNAUTHORIZED", {
+                code: "UNAUTHENTICATED",
+                message: "Sesión no válida",
+              });
+            }
+            return { data: session };
+          },
+        },
+      },
     },
     hooks: {
       before: createAuthMiddleware(async (ctx) => {
@@ -249,6 +292,12 @@ export function createAuth(lang: Lang, { env, db, mail }: AuthDeps) {
           });
         }
         body.email = check.normalized;
+        if (RESTRICTED_EMAIL_PATHS.has(ctx.path) && (await isEmailRestricted(db, check.normalized))) {
+          throw new APIError("UNAUTHORIZED", {
+            code: "UNAUTHENTICATED",
+            message: "Sesión no válida",
+          });
+        }
       }),
     },
     plugins: [
@@ -281,6 +330,28 @@ export function createAuth(lang: Lang, { env, db, mail }: AuthDeps) {
         accessTokenExpiresIn: 15 * 60,
         refreshTokenExpiresIn: 30 * 24 * 60 * 60,
         refreshTokenReuseInterval: 30,
+        customAccessTokenClaims: async ({ user }) => {
+          if (user?.id && (await isUserRestricted(db, user.id))) {
+            throw new APIError("UNAUTHORIZED", {
+              error: "invalid_grant",
+              error_description: "Sesión no válida",
+              code: "UNAUTHENTICATED",
+              message: "Sesión no válida",
+            });
+          }
+          return {};
+        },
+        customUserInfoClaims: async ({ user }) => {
+          if (user?.id && (await isUserRestricted(db, user.id))) {
+            throw new APIError("UNAUTHORIZED", {
+              error: "invalid_token",
+              error_description: "Sesión no válida",
+              code: "UNAUTHENTICATED",
+              message: "Sesión no válida",
+            });
+          }
+          return {};
+        },
         // Crear equivale al registro dinámico (abierto); leer, cambiar o borrar clientes con la sesión,
         // nunca: las conexiones se gestionan en Panel → IA.
         clientPrivileges: ({ action }) => action === "create",
@@ -289,6 +360,29 @@ export function createAuth(lang: Lang, { env, db, mail }: AuthDeps) {
         fetchClientMetadataResource: cimdFetch(env),
         metadataProfile: "mcp-2026-07-28",
       }),
+      {
+        id: "user-restriction-guard",
+        hooks: {
+          before: [
+            {
+              matcher: (context) => shouldCheckActiveSessionRestriction(context.path),
+              handler: createAuthMiddleware(async (ctx) => {
+                const cookieName = ctx.context.authCookies?.sessionToken?.name;
+                if (!cookieName) return;
+                const token = await ctx.getSignedCookie(cookieName, ctx.context.secret);
+                if (!token) return;
+                const found = await ctx.context.internalAdapter.findSession(token);
+                if (found?.user?.id && (await isUserRestricted(db, found.user.id))) {
+                  throw new APIError("UNAUTHORIZED", {
+                    code: "UNAUTHENTICATED",
+                    message: "Sesión no válida",
+                  });
+                }
+              }),
+            },
+          ],
+        },
+      },
     ],
   });
 }

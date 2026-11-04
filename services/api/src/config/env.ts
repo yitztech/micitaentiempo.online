@@ -45,6 +45,8 @@ const EnvSchema = z.object({
   ALTCHA_HMAC_KEY: z.string().min(32, "debe tener al menos 32 caracteres"),
   GOOGLE_CLIENT_ID: optional,
   GOOGLE_CLIENT_SECRET: optional,
+  /** Solo pruebas: JWKS del doble de Google, con firmas reales y claves efímeras. */
+  GOOGLE_JWKS_FAKE_URL: z.url().optional(),
   // Integraciones opcionales: sin valor, la función queda desactivada (05-negocio-api.md §5.9).
   MS_CLIENT_ID: optional,
   MS_CLIENT_SECRET: optional,
@@ -97,6 +99,9 @@ export function loadEnv(source: Record<string, string | undefined> = process.env
     throw new Error(`Configuración inválida: ${issues}`);
   }
   const env = parsed.data;
+  if (env.GOOGLE_JWKS_FAKE_URL && !env.TEST_MODE) {
+    throw new Error("GOOGLE_JWKS_FAKE_URL requiere TEST_MODE");
+  }
   const site = siteConfigFromEnv(source);
   const stripeKeys = [env.STRIPE_SECRET_KEY, env.STRIPE_WEBHOOK_SECRET, env.STRIPE_PUBLISHABLE_KEY].filter(
     Boolean,

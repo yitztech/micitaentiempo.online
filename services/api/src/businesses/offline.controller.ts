@@ -19,6 +19,7 @@ import type { SessionUser } from "../auth/auth.registry.js";
 import { ZodPipe } from "../common/zod.pipe.js";
 import { type Database, DB } from "../db/db.module.js";
 import { offlineOperations } from "../db/schema.js";
+import { OfflineSyncService } from "./offline-sync.service.js";
 
 function requireUuidParam(val: string, paramName: string): string {
   const parsed = z.uuid().safeParse(val);
@@ -33,7 +34,10 @@ function requireUuidParam(val: string, paramName: string): string {
 
 @Controller("offline")
 export class OfflineController {
-  constructor(@Inject(DB) private readonly db: Database) {}
+  constructor(
+    @Inject(DB) private readonly db: Database,
+    private readonly sync: OfflineSyncService,
+  ) {}
 
   @Get("operations/:operationId")
   async getOperation(
@@ -81,18 +85,17 @@ export class OfflineController {
     };
   }
 
+  /**
+   * Descarga incremental (ADR 0020). Sin `cursor`: snapshot paginado con `reset: true` en la primera página.
+   * Con `cursor`: cambios y bajas posteriores. `400 invalid_cursor`; `410 sync_cursor_expired` ⇒ pedir snapshot.
+   */
   @Get("changes")
   async getChanges(
-    @CurrentUser() _user: SessionUser,
-    @Query(new ZodPipe(OfflineChangesQuery)) _query: z.infer<typeof OfflineChangesQuery>,
+    @CurrentUser() user: SessionUser,
+    @Query(new ZodPipe(OfflineChangesQuery)) query: z.infer<typeof OfflineChangesQuery>,
     @Res({ passthrough: true }) res: FastifyReply,
   ) {
     res.header("Cache-Control", "private, no-cache, no-store");
-    // Streams changes for the authenticated actor/organization
-    return {
-      items: [],
-      nextCursor: null,
-      serverTime: new Date().toISOString(),
-    };
+    return this.sync.page(user.id, query.cursor, query.limit);
   }
 }

@@ -36,6 +36,12 @@ Variables que la plataforma pasa al compose (se usan las que haga falta):
 | `LISTMONK_URL`, `LISTMONK_LIST_UUID` | Alta en la newsletter |
 | `UMAMI_SCRIPT_URL`, `UMAMI_WEBSITE_ID` | Analítica |
 | `TRUSTED_PROXY_CIDR` | Subred del proxy: solo de ahí se acepta `X-Forwarded-For` |
+| `ADMIN_INITIAL_USER`, `ADMIN_INITIAL_PASSWORD` | Cuenta que se crea al inicializar un volumen SQLite vacío del panel; se configuran como secretos/variables del entorno |
+
+El panel exige estas dos variables para arrancar. Al crear la cuenta, guarda el hash en SQLite y no reemplaza
+una cuenta existente en reinicios. Cambiar `ADMIN_INITIAL_PASSWORD` en el entorno **no rota** el hash guardado
+ni invalida sesiones existentes. La rotación de la contraseña almacenada y la revocación de sesiones requieren
+una acción operativa explícita; quedan pendientes de autorización y procedimiento.
 
 El APK de Android no se versiona en el repositorio: `/app.apk` redirige al activo del release
 [`apk-v1`](https://github.com/yitztech/micitaentiempo.online/releases/tag/apk-v1). Para apuntar a otro
@@ -79,7 +85,7 @@ Requisitos: Node 24 (o ≥ 22.22), pnpm 12, Go 1.27 y Docker con Compose v5.
 
 ```bash
 pnpm install
-cp .env.example .env            # valores ficticios; .env nunca se sube
+cp .env.example .env            # añade ADMIN_INITIAL_USER y una contraseña aleatoria generada por un gestor seguro
 docker compose up --watch       # todo el sistema con recarga en caliente
 ```
 

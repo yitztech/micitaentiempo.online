@@ -280,3 +280,98 @@ describe("apps móviles Expo (Android e iOS, teléfonos y tablets)", () => {
     expect(es?.dialCode).toBe("+34");
   });
 });
+
+describe("contrato de sedes del cliente móvil con el servidor", async () => {
+  const schemas = await import("../../packages/schemas/dist/index.js");
+  const LOCATION = {
+    name: "Sede Centro",
+    address: "Calle 1",
+    locality: "Madrid",
+    region: "Madrid",
+    country: "ES",
+    postalCode: "28001",
+    addressVisibility: "public",
+    latitude: null,
+    longitude: null,
+  };
+  const LOCATION_ID = "019a0000-0000-7000-8000-000000000042";
+  const CALENDAR_ID = "019a0000-0000-7000-8000-000000000043";
+
+  function setup(response = { status: 200, body: {} }) {
+    const calls = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url, init = {}) => {
+        calls.push({ url: String(url), method: init.method, headers: init.headers, body: init.body });
+        if (response.status === 204) return new Response(null, { status: 204 });
+        return new Response(JSON.stringify(response.body), { status: response.status });
+      }),
+    );
+    return {
+      calls,
+      client: createMobileClient({
+        baseUrl: "https://api.example.test",
+        platform: "android",
+        initialToken: "t",
+      }),
+    };
+  }
+
+  it("crea una sede con { location, expectedVersion } e Idempotency-Key, y recibe una sede tipada", async () => {
+    const created = { id: LOCATION_ID, version: 1, location: LOCATION };
+    const { client, calls } = setup({ status: 201, body: created });
+    const result = await client.addBusinessLocation(LOCATION, 3, "op-1");
+    expect(result).toEqual(created);
+    expect(calls).toHaveLength(1);
+    expect(calls[0].method).toBe("POST");
+    expect(calls[0].url).toBe("https://api.example.test/api/business-profile/locations");
+    expect(calls[0].headers["idempotency-key"]).toBe("op-1");
+    const body = JSON.parse(calls[0].body);
+    expect(schemas.CreateBusinessLocation.safeParse(body).success).toBe(true);
+    expect(body).toEqual({ location: LOCATION, expectedVersion: 3 });
+    expect(schemas.PrivateLocation.safeParse(result).success).toBe(true);
+  });
+
+  it("rechaza antes del fetch una sede inválida o una versión inválida", async () => {
+    const { client, calls } = setup();
+    await expect(client.addBusinessLocation({ ...LOCATION, name: 5 }, 1, "op")).rejects.toBeDefined();
+    await expect(client.addBusinessLocation(LOCATION, 0, "op")).rejects.toBeDefined();
+    expect(calls).toHaveLength(0);
+  });
+
+  it("borra una sede con cuerpo { expectedVersion } e Idempotency-Key y acepta 204", async () => {
+    const { client, calls } = setup({ status: 204 });
+    await expect(client.deleteBusinessLocation(LOCATION_ID, 4, "op-2")).resolves.toEqual({});
+    expect(calls[0].method).toBe("DELETE");
+    expect(calls[0].url).toBe(`https://api.example.test/api/business-profile/locations/${LOCATION_ID}`);
+    expect(calls[0].headers["idempotency-key"]).toBe("op-2");
+    const body = JSON.parse(calls[0].body);
+    expect(schemas.ChangeBusinessPublication.safeParse(body).success).toBe(true);
+    expect(body).toEqual({ expectedVersion: 4 });
+  });
+
+  it("asigna (y desasigna) la sede de un calendario con Idempotency-Key", async () => {
+    const { client, calls } = setup({ status: 200, body: {} });
+    await client.assignCalendarLocation(CALENDAR_ID, LOCATION_ID, 5, "op-3");
+    await client.assignCalendarLocation(CALENDAR_ID, null, 6, "op-4");
+    for (const call of calls) {
+      expect(call.method).toBe("PUT");
+      expect(call.url).toBe(
+        `https://api.example.test/api/business-profile/calendar-locations/${CALENDAR_ID}`,
+      );
+      expect(schemas.AssignBusinessCalendar.safeParse(JSON.parse(call.body)).success).toBe(true);
+    }
+    expect(calls.map((c) => c.headers["idempotency-key"])).toEqual(["op-3", "op-4"]);
+    expect(JSON.parse(calls[1].body)).toEqual({ locationId: null, expectedVersion: 6 });
+  });
+
+  it("publica, despublica y actualiza el perfil con Idempotency-Key", async () => {
+    const { client, calls } = setup({ status: 200, body: {} });
+    await client.publishBusiness(2, "op-5");
+    await client.unpublishBusiness(3, "op-6");
+    expect(calls.map((c) => c.headers["idempotency-key"])).toEqual(["op-5", "op-6"]);
+    for (const call of calls) {
+      expect(schemas.ChangeBusinessPublication.safeParse(JSON.parse(call.body)).success).toBe(true);
+    }
+  });
+});

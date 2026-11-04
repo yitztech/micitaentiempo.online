@@ -79,6 +79,25 @@ export const user = app.table(
   ],
 );
 
+/** Restricción administrativa activa; no sustituye el estado económico de la organización. */
+export const userRestriction = app.table(
+  "user_restrictions",
+  {
+    userId: text("user_id")
+      .primaryKey()
+      .references(() => user.id, { onDelete: "cascade" }),
+    reason: text("reason").notNull(),
+    blockedAt: timestamp("blocked_at", { withTimezone: true }).notNull().defaultNow(),
+    blockedBy: text("blocked_by").notNull(),
+    reconciliationRequired: boolean("reconciliation_required").notNull().default(false),
+  },
+  (t) => [
+    check("user_restrictions_reason_length", sql`char_length(${t.reason}) BETWEEN 1 AND 2000`),
+    check("user_restrictions_actor_length", sql`char_length(${t.blockedBy}) BETWEEN 1 AND 100`),
+    index("user_restrictions_blocked_at").on(t.blockedAt),
+  ],
+);
+
 export const session = app.table(
   "sessions",
   {

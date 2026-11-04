@@ -4,7 +4,7 @@ import { and, eq, isNotNull } from "drizzle-orm";
 import { AuditService } from "../audit/audit.service.js";
 import { type AuthedRequest, CurrentUser } from "../auth/auth.guard.js";
 import { AuthRegistry, type SessionUser } from "../auth/auth.registry.js";
-import { canWriteOrganization } from "../auth/org-access.js";
+import { canWriteOrganization, resolveEffectiveOrganizationStatus } from "../auth/org-access.js";
 import { toHeaders } from "../common/request.js";
 import { ZodPipe } from "../common/zod.pipe.js";
 import { type Database, DB } from "../db/db.module.js";
@@ -35,6 +35,8 @@ export class MeController {
   async me(@CurrentUser() current: SessionUser) {
     const [u] = await this.db.select().from(users).where(eq(users.id, current.id));
     const org = await this.orgs.findByOwner(current.id);
+    const resolved = org ? await resolveEffectiveOrganizationStatus(this.db, org) : undefined;
+    const effectiveStatus = resolved?.effectiveStatus ?? org?.status;
     const memberships = await this.db
       .select({
         calendarId: calendarMembers.calendarId,
@@ -53,11 +55,15 @@ export class MeController {
       weekStart: u?.weekStart,
       country: u?.country,
       twoFactorEnabled: u?.twoFactorEnabled ?? false,
-      organization: org ? { id: org.id, name: org.name, plan: org.plan, status: org.status } : null,
+      organization: org
+        ? { id: org.id, name: org.name, plan: org.plan, status: effectiveStatus ?? org.status }
+        : null,
       memberships,
       capabilities: {
         canCreateBusiness: !org,
-        canManageBusinessProfile: Boolean(org && canWriteOrganization(org.status)),
+        canManageBusinessProfile: Boolean(
+          org && canWriteOrganization(effectiveStatus, resolved?.ownerRestricted),
+        ),
         canBook: true,
         businessId: org ? org.id : null,
       },

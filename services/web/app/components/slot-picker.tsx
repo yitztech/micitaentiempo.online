@@ -249,7 +249,7 @@ export function SlotPicker({
               onChange={(e) => onTzChange(e.target.value)}
               className="mt-1 block min-h-11 w-full rounded-[var(--radius-field)] border border-border-field bg-surface px-3 text-base text-text"
             >
-              {allTimeZones().map((z) => (
+              {allTimeZones(tz).map((z) => (
                 <option key={z} value={z}>
                   {z.replaceAll("_", " ")}
                 </option>

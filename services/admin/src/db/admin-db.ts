@@ -124,7 +124,7 @@ export class AdminDatabase {
         "ADMIN_USER_INITIALIZED",
         "admin_user",
         username,
-        "Usuario administrador predeterminado creado",
+        "Cuenta inicial de administración creada",
         "system",
       );
     }
@@ -169,6 +169,7 @@ export class AdminDatabase {
   }
 
   blockUser(userId: string, email: string, reason: string, adminUser: string): BlockedUser {
+    const existing = this.db.prepare("SELECT user_id FROM admin_blocked_users WHERE user_id = ?").get(userId);
     const now = new Date().toISOString();
     const record: BlockedUser = {
       user_id: userId,
@@ -187,13 +188,15 @@ export class AdminDatabase {
            blocked_by = excluded.blocked_by`,
       )
       .run(record.user_id, record.email, record.reason, record.blocked_at, record.blocked_by);
-    this.addAuditLog(
-      "USER_BLOCKED",
-      "user",
-      userId,
-      `Usuario ${email} bloqueado. Motivo: ${record.reason}`,
-      adminUser,
-    );
+    if (!existing) {
+      this.addAuditLog(
+        "USER_BLOCKED",
+        "user",
+        userId,
+        `Usuario ${email} bloqueado. Motivo: ${record.reason}`,
+        adminUser,
+      );
+    }
     return record;
   }
 
@@ -201,10 +204,25 @@ export class AdminDatabase {
     const user = this.db
       .prepare("SELECT * FROM admin_blocked_users WHERE user_id = ?")
       .get(userId) as unknown as BlockedUser | undefined;
-    if (!user) return false;
-    this.db.prepare("DELETE FROM admin_blocked_users WHERE user_id = ?").run(userId);
-    this.addAuditLog("USER_UNBLOCKED", "user", userId, `Usuario ${user.email} desbloqueado`, adminUser);
-    return true;
+    if (user) this.db.prepare("DELETE FROM admin_blocked_users WHERE user_id = ?").run(userId);
+    else {
+      const latest = this.db
+        .prepare(
+          "SELECT action FROM admin_audit_logs WHERE target_type = 'user' AND target_id = ? ORDER BY created_at DESC LIMIT 1",
+        )
+        .get(userId) as { action: string } | undefined;
+      if (latest?.action === "USER_UNBLOCKED") return false;
+    }
+    // PostgreSQL is authoritative; SQLite may have lost its mirror row after a
+    // restore. Keep a local audit record for every committed platform change.
+    this.addAuditLog(
+      "USER_UNBLOCKED",
+      "user",
+      userId,
+      user ? `Usuario ${user.email} desbloqueado` : "Restricción eliminada en la plataforma",
+      adminUser,
+    );
+    return Boolean(user);
   }
 
   getBlockedUsers(): BlockedUser[] {

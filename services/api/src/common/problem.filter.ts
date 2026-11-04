@@ -41,6 +41,10 @@ export class ProblemFilter implements ExceptionFilter {
     const appLocale = req.headers["x-app-locale"];
     const lang: Lang = typeof appLocale === "string" && isLang(appLocale) ? appLocale : "es";
     reply.header("Content-Language", lang);
+    if (status === HttpStatus.TOO_MANY_REQUESTS) {
+      const retryAfter = (details.headers as Record<string, unknown> | undefined)?.["Retry-After"];
+      if (typeof retryAfter === "string") reply.header("Retry-After", retryAfter);
+    }
 
     const code = typeof details.code === "string" ? details.code : String(HttpStatus[status]).toLowerCase();
     const catalog = ERROR_CATALOGS[lang];

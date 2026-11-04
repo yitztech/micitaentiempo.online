@@ -185,7 +185,7 @@ export default function AccountPage({ loaderData }: Route.ComponentProps) {
                 <option value="en">{a.languages.en}</option>
               </Select>
               <Select label={a.timezone} name="timezone" defaultValue={me.timezone}>
-                {allTimeZones().map((z) => (
+                {allTimeZones(me.timezone).map((z) => (
                   <option key={z} value={z}>
                     {z}
                   </option>

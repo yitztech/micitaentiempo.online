@@ -12,11 +12,14 @@ Requisitos: Node >=22.22, pnpm 12.9.1, Go según `services/calendar/go.mod`, Doc
 
 ```sh
 pnpm install --frozen-lockfile
+npm ci --prefix services/mobile --ignore-scripts   # la app móvil está fuera del workspace; `pnpm typecheck` la necesita
 pnpm --filter @mcet/escenarios exec playwright install chromium webkit
 pnpm test:env:up
 ```
 
 El entorno `mcet-tests` usa exclusivamente datos sintéticos y `.env.ci`. Levanta las imágenes del código actual, PostgreSQL, Mailpit y dobles HTTP de proveedores. Ocupa los puertos 8080, 18025, 4010 y 5232; comprueba que están libres antes de levantarlo. No reutilices bases ni credenciales de producción. Las suites SQL crean otros PostgreSQL efímeros mediante Testcontainers y los eliminan al terminar. No aceptan un DSN de producción.
+
+Google usa firmas RS256 reales con claves efímeras del servidor de captura. `GOOGLE_JWKS_FAKE_URL`, configurada solo en `compose.ci.yml`, requiere `TEST_MODE` y dominios de prueba; no se permite activarla con configuración productiva. Sin esa configuración, la API obtiene exclusivamente el JWKS oficial de Google. Tanto el login directo como el canje de código verifican la firma y la caducidad; no se admiten tokens de prueba con firmas ficticias.
 
 ### Si un puerto está ocupado
 
@@ -35,6 +38,15 @@ MAILPIT_URL=http://localhost:18026 pnpm test:behavior
 ```
 
 Lo mismo aplica a `scripts/test-native-mobile.mjs`. Si cambias el puerto del gateway, exporta `ES_URL` y `EN_URL` con el nuevo puerto. Comprueba que el puerto elegido está libre con `lsof -nP -iTCP:18025 -sTCP:LISTEN`.
+
+### Recorrido nativo
+
+1. Con `pnpm test:env:up` en marcha, genera los proyectos con `expo prebuild`; así incluyen `useSQLCipher`.
+2. Compila. En Android, `./gradlew assembleDebug` con `JAVA_HOME` en el JBR de Android Studio. En iOS, `xcodebuild` para el simulador con `CODE_SIGN_IDENTITY=-`. Con `CODE_SIGNING_ALLOWED=NO` la app se queda sin llavero y no guarda nada.
+3. Arranca Metro (`npx expo start --port 8081`) y Appium desde `services/mobile`, con `ANDROID_HOME` y `ANDROID_SDK_ROOT` exportadas. `npm run appium:setup` instala los dos controladores.
+4. Ejecuta `pnpm test:native:<destino>` con `ANDROID_APP_PATH` o `IOS_APP_PATH`.
+
+Variables opcionales: `IOS_PLATFORM_VERSION` fija el iOS del simulador si difiere del de Xcode. `NATIVE_GATEWAY_CONTAINER=mcet-tests-gateway-1` añade la comprobación sin servidor: para ese contenedor, reabre la app y lo arranca de nuevo.
 
 En macOS, si Testcontainers no descubre Docker, usa las variables de conexión documentadas por tu instalación de Docker; no desactives las pruebas para ocultar el problema. Sin Docker, `test:db` falla. El modo Go `-short` omite explícitamente las pruebas SQL.
 

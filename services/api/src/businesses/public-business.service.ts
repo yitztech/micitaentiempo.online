@@ -126,6 +126,7 @@ export class PublicBusinessService {
         WHERE bp.status = 'published'
           AND org.status <> 'suspended'
           AND org.deleted_at IS NULL
+          AND NOT EXISTS (SELECT 1 FROM app.user_restrictions ur WHERE ur.user_id = org.owner_user_id)
           AND loc.country = ${country}
           AND (
             loc.locality_key LIKE ${`%${normalizedQ}%`}
@@ -357,6 +358,7 @@ export class PublicBusinessService {
       WHERE bp.status = 'published'
         AND org.status <> 'suspended'
         AND org.deleted_at IS NULL
+        AND NOT EXISTS (SELECT 1 FROM app.user_restrictions ur WHERE ur.user_id = org.owner_user_id)
         AND EXISTS (
           SELECT 1 FROM app.business_calendar_projection bcp
           WHERE bcp.org_id = bp.org_id AND bcp.state = 'active' AND bcp.has_active_services = true
@@ -545,6 +547,7 @@ export class PublicBusinessService {
         AND bp.status = 'published'
         AND org.status <> 'suspended'
         AND org.deleted_at IS NULL
+        AND NOT EXISTS (SELECT 1 FROM app.user_restrictions ur WHERE ur.user_id = org.owner_user_id)
     `);
 
     const rows = res.rows as unknown as Array<{

@@ -1,9 +1,10 @@
 import { provideHttpClient, withInterceptors } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { TestBed } from "@angular/core/testing";
+import { vi } from "vitest";
 import { App } from "./app";
 import { authInterceptor } from "./auth.interceptor";
-import type { User } from "./models";
+import type { BlockedUser, User } from "./models";
 
 describe("Panel de administración", () => {
   let http: HttpTestingController;
@@ -109,6 +110,33 @@ describe("Panel de administración", () => {
 
     app.selectReasonPreset("Otro motivo especificado manualmente");
     expect(app.blockReason()).toBe("Fallo reiterado de cobro de suscripción");
+  });
+
+  it("exige el estado real antes de conciliar y refresca la lista al terminar", () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance;
+    const blocked: BlockedUser = {
+      user_id: "u1",
+      email: "historica@example.com",
+      reason: "Suspensión histórica",
+      blocked_at: "2026-11-01T12:00:00.000Z",
+      blocked_by: "legacy",
+      reconciliation_required: true,
+    };
+    const ask = vi.spyOn(window, "prompt").mockReturnValue(" Revisé Stripe ");
+
+    app.reconcileUser(blocked, "");
+    expect(ask).not.toHaveBeenCalled();
+    http.expectNone("/api/users/u1/reconcile");
+
+    app.isLoggedIn.set(true);
+    app.currentTab.set("blocked");
+    app.reconcileUser(blocked, "read_only");
+    const request = http.expectOne("/api/users/u1/reconcile");
+    expect(request.request.body).toEqual({ economicStatus: "read_only", reason: "Revisé Stripe" });
+    request.flush({ ok: true, reconciled: true, calendarStatusPending: false });
+    http.expectOne("/api/blocked-users").flush({ blocked: [] });
+    ask.mockRestore();
   });
 });
 

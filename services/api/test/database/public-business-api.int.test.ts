@@ -12,6 +12,7 @@ import type { Env } from "../../src/config/env.js";
 import { runMigrations } from "../../src/db/migrate.js";
 import * as schema from "../../src/db/schema.js";
 import type { CalendarClients } from "../../src/internal-rpc/calendar-client.js";
+import { stopDatabase } from "../helpers/database.js";
 
 let container: StartedPostgreSqlContainer;
 let pool: pg.Pool;
@@ -163,8 +164,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await pool?.end();
-  await container?.stop();
+  await stopDatabase(pool, container);
 });
 
 describe("C4 — Public Directory API, Categories & Locality Search", () => {
@@ -545,6 +545,34 @@ describe("C4 — Detail Profile & EXPLAIN ANALYZE Performance", () => {
     await expect(
       controller.getBusinessProfile("019a0000-0000-7000-8000-000000000999", req, res),
     ).rejects.toThrow(NotFoundException);
+  });
+
+  it("oculta del directorio, localidades y perfil público un negocio cuyo propietario está en app.user_restrictions aunque organizations.status sea active", async () => {
+    const req = { headers: { host: "micitaentiempo.online" } } as unknown as FastifyRequest;
+    const res = createMockReply();
+
+    await pool.query(
+      "INSERT INTO app.user_restrictions(user_id, reason, blocked_by) VALUES ('user-1', 'Bloqueo S06', 'admin-ci')",
+    );
+    try {
+      await expect(controller.getBusinessProfile(orgPub1, req, res)).rejects.toThrow(NotFoundException);
+      const searchRestricted = await publicService.searchBusinesses(
+        { country: "ES", locality: "Madrid", sort: "name", limit: 20 },
+        "es",
+      );
+      expect(searchRestricted.items).toHaveLength(0);
+      const localitiesRestricted = await publicService.listLocalities({
+        country: "ES",
+        q: "Madrid",
+        limit: 20,
+      });
+      expect(localitiesRestricted.items.map((l) => l.locality)).not.toContain("Madrid");
+    } finally {
+      await pool.query("DELETE FROM app.user_restrictions WHERE user_id = 'user-1'");
+    }
+
+    const restored = await controller.getBusinessProfile(orgPub1, req, res);
+    expect(restored.businessId).toBe(orgPub1);
   });
 
   it("C5 Benchmark: EXPLAIN ANALYZE confirms efficient execution and plan on PostgreSQL", async () => {

@@ -66,6 +66,12 @@ services:
     env_file: [{ path: .env, required: false }]
     depends_on:
       postgres: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:3000/api/healthz"]
+      interval: 10s
+      start_period: 10s
+      timeout: 5s
+      retries: 10
     develop:
       watch:
         - { path: services/api/src, target: /repo/services/api/src, action: sync }
@@ -116,10 +122,13 @@ services:
       DB_HOST: postgres
       DB_PASSWORD: ${API_DB_PASSWORD:-dev-api}
       ADMIN_DATA_DIR: /data
+      ADMIN_INITIAL_USER: ${ADMIN_INITIAL_USER:?Define ADMIN_INITIAL_USER}
+      ADMIN_INITIAL_PASSWORD: ${ADMIN_INITIAL_PASSWORD:?Define ADMIN_INITIAL_PASSWORD}
     volumes:
       - admin-dev:/data
     depends_on:
       postgres: { condition: service_healthy }
+      api: { condition: service_healthy }
     develop:
       watch:
         - { path: services/admin/src, target: /repo/services/admin/src, action: sync }

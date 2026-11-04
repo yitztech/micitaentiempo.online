@@ -527,9 +527,26 @@
                       <td>{{ b.blocked_at | date: "medium" }}</td>
                       <td><span class="badge badge-subtle">{{ b.blocked_by }}</span></td>
                       <td>
-                        <button type="button" class="btn btn-success btn-xs" (click)="unblockDirect(b.user_id)">
-                          Desbloquear
-                        </button>
+                        @if (b.reconciliation_required) {
+                          <span class="badge badge-subtle">Suspensión histórica</span>
+                          <select #estado aria-label="Estado económico real" class="input">
+                            <option value="">Estado económico real…</option>
+                            @for (option of economicStatuses; track option.value) {
+                              <option [value]="option.value">{{ option.label }}</option>
+                            }
+                          </select>
+                          <button
+                            type="button"
+                            class="btn btn-success btn-xs"
+                            (click)="reconcileUser(b, estado.value)"
+                          >
+                            Conciliar
+                          </button>
+                        } @else {
+                          <button type="button" class="btn btn-success btn-xs" (click)="unblockDirect(b.user_id)">
+                            Desbloquear
+                          </button>
+                        }
                       </td>
                     </tr>
                   } @empty {

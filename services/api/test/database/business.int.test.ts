@@ -19,6 +19,7 @@ import { runMigrations } from "../../src/db/migrate.js";
 import * as schema from "../../src/db/schema.js";
 import type { CalendarClients } from "../../src/internal-rpc/calendar-client.js";
 import { OrgsService } from "../../src/orgs/orgs.service.js";
+import { stopDatabase } from "../helpers/database.js";
 
 let container: StartedPostgreSqlContainer;
 let pool: pg.Pool;
@@ -45,12 +46,16 @@ beforeAll(async () => {
       );
     await migrate(drizzle(pool), { migrationsFolder: previous, migrationsSchema: "app" });
     await pool.query(
-      "INSERT INTO app.users(id,name,email) VALUES ('owner-a','Ana','a@example.com'),('owner-b','Bea','b@example.com')",
+      "INSERT INTO app.users(id,name,email) VALUES ('owner-a','Ana','a@example.com'),('owner-b','Bea','b@example.com'),('legacy-owner','Legacy','legacy@example.com'),('closed-owner','Closed','closed@example.com')",
     );
     await pool.query(
       "INSERT INTO app.organizations(id,name,owner_user_id,plan) VALUES ($1,'Clínica 24','owner-a','branches'),($2,'Estudio Bea','owner-b','branches')",
       [orgA, orgB],
     );
+    await pool.query(
+      "INSERT INTO app.organizations(id,name,owner_user_id,plan,status) VALUES ('019a0000-0000-7000-8000-000000000004','Legacy','legacy-owner','branches','suspended'),('019a0000-0000-7000-8000-000000000005','Closed','closed-owner','branches','suspended')",
+    );
+    await pool.query("UPDATE app.organizations SET deleted_at=now() WHERE owner_user_id='closed-owner'");
     await pool.query(
       "INSERT INTO app.calendar_members(calendar_id,org_id,user_id,role,added_by,notify) VALUES ($1,$2,'owner-a','owner','owner-a',true)",
       [calendar, orgA],
@@ -63,11 +68,51 @@ beforeAll(async () => {
   repository = new BusinessProfileRepository(drizzle(pool, { schema }));
 });
 afterAll(async () => {
-  await pool?.end();
-  await container?.stop();
+  await stopDatabase(pool, container);
 });
 
 describe("business persistence with real PostgreSQL", () => {
+  it("applies all migrations from an empty database", async () => {
+    const emptyContainer = await new PostgreSqlContainer("postgres:18.6-alpine3.24").start();
+    const emptyPool = new pg.Pool({ connectionString: emptyContainer.getConnectionUri() });
+    try {
+      await runMigrations(emptyPool, { log() {} });
+      const restrictionTable = await emptyPool.query(
+        "SELECT to_regclass('app.user_restrictions') AS table_name",
+      );
+      expect(restrictionTable.rows[0].table_name).toBe("app.user_restrictions");
+      expect((await emptyPool.query("SELECT count(*) FROM app.user_restrictions")).rows[0].count).toBe("0");
+    } finally {
+      await emptyPool.end();
+      await emptyContainer.stop();
+    }
+  });
+
+  it("migra suspensiones históricas a restricciones revisables sin reactivar organizaciones", async () => {
+    const legacy = await pool.query(
+      "SELECT reason, blocked_by, reconciliation_required FROM app.user_restrictions WHERE user_id='legacy-owner'",
+    );
+    expect(legacy.rows).toEqual([
+      expect.objectContaining({ blocked_by: "system:legacy-reconciliation", reconciliation_required: true }),
+    ]);
+    expect(String(legacy.rows[0].reason)).toContain("Suspensión histórica");
+    const organizations = await pool.query(
+      "SELECT status, calendar_status_pending FROM app.organizations WHERE owner_user_id='legacy-owner'",
+    );
+    expect(organizations.rows).toEqual([{ status: "suspended", calendar_status_pending: true }]);
+    expect(
+      (await pool.query("SELECT count(*) FROM app.user_restrictions WHERE user_id='closed-owner'")).rows[0]
+        .count,
+    ).toBe("0");
+    expect(
+      (
+        await pool.query(
+          "SELECT count(*) FROM app.audit_log WHERE action='user.restriction.legacy_quarantined' AND target='legacy-owner'",
+        )
+      ).rows[0].count,
+    ).toBe("1");
+  });
+
   it("marca para sincronización las organizaciones existentes al aplicar la migración 0012", async () => {
     const result = await pool.query(
       "SELECT id, calendar_status_pending FROM app.organizations WHERE id = ANY($1::text[]) ORDER BY id",

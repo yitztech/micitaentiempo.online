@@ -12,6 +12,7 @@ import {
 import { and, eq, isNull, lte } from "drizzle-orm";
 import type Stripe from "stripe";
 import { AuditService } from "../audit/audit.service.js";
+import { resolveEffectiveOrganizationStatus } from "../auth/org-access.js";
 import { AppClock } from "../common/clock.js";
 import { ENV } from "../config/config.module.js";
 import type { Env } from "../config/env.js";
@@ -178,7 +179,10 @@ export class BillingService {
       })
       .where(eq(organizations.id, org.id))
       .returning();
-    await this.syncCalendarStatus(org.id);
+    // El estado económico ya está guardado; si el motor no responde, el marcador pendiente lo reintenta.
+    await this.syncCalendarStatus(org.id).catch(() =>
+      this.logger.error({ code: "calendar_status_sync_failed", orgId: org.id }),
+    );
     if (org.status !== status) {
       await this.audit.record({
         orgId: org.id,
@@ -191,12 +195,17 @@ export class BillingService {
     return updated ?? org;
   }
 
-  /** Serializa cambios y reintentos para no aplicar un estado antiguo después de uno nuevo. */
+  /**
+   * Proyecta al motor el estado efectivo (`suspended` si el propietario tiene una restricción; si no, el
+   * económico). Serializa cambios y reintentos con `FOR UPDATE` para no aplicar un estado antiguo después de
+   * uno nuevo; ante un fallo del RPC la transacción termina y el marcador pendiente se conserva.
+   */
   async syncCalendarStatus(orgId: string): Promise<void> {
     await this.db.transaction(async (tx) => {
       const [org] = await tx.select().from(organizations).where(eq(organizations.id, orgId)).for("update");
       if (!org || org.deletedAt || !org.calendarStatusPending) return;
-      await this.rpc.client(CalendarService).setOrgStatus({ orgId, status: org.status }, SYSTEM);
+      const { effectiveStatus } = await resolveEffectiveOrganizationStatus(tx, org);
+      await this.rpc.client(CalendarService).setOrgStatus({ orgId, status: effectiveStatus }, SYSTEM);
       await tx.update(organizations).set({ calendarStatusPending: false }).where(eq(organizations.id, orgId));
     });
   }

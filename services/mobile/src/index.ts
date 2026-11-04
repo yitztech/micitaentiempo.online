@@ -37,12 +37,22 @@ import type {
   MobileSignIn,
   MobileSignUp,
   PrivateBusinessProfile,
+  PrivateLocation,
   PublicBusinessProfile,
   PublicBusinessSummary,
   PublicHold,
 } from "../../../packages/schemas/dist/index.js";
+import { OfflineChangesPage } from "../../../packages/schemas/dist/index.js";
 import { validateRequest } from "../../web/app/lib/validation.ts";
 import appJson from "../app.json" with { type: "json" };
+import { isTransportError, type MobileRequestError } from "./request-errors.ts";
+
+export type {
+  PrivateBusinessProfile,
+  PublicBusinessProfile,
+  PublicBusinessSummary,
+} from "../../../packages/schemas/dist/index.js";
+export * from "./request-errors.ts";
 
 export type MobilePlatform = "android" | "ios";
 export type MobileLang = "es" | "en" | "fr" | "pt" | "de" | "it";
@@ -161,6 +171,20 @@ export const MOBILE_STRINGS: Record<
     offlinePending: string;
     syncConflict: string;
     quotaError: string;
+    signOutPendingTitle: string;
+    /** Lleva `{count}`: número de cambios sin sincronizar que se perderán. */
+    signOutPendingBody: string;
+    signOutDiscard: string;
+    signOutCancel: string;
+    signOutUnrevoked: string;
+    signOutFailed: string;
+    bookingOffline: string;
+    bookingUnavailable: string;
+    bookingInvalidLink: string;
+    bookingBrowserError: string;
+    bookingConfirmed: string;
+    bookingNotConfirmed: string;
+    bookingUnknown: string;
   }
 > = {
   es: {
@@ -187,6 +211,22 @@ export const MOBILE_STRINGS: Record<
     offlinePending: "operación(es) pendiente(s)",
     syncConflict: "Conflicto al sincronizar. Revisa los cambios.",
     quotaError: "Espacio de almacenamiento local lleno.",
+    signOutPendingTitle: "Cambios sin sincronizar",
+    signOutPendingBody:
+      "Tienes {count} cambio(s) sin sincronizar. Si sales ahora, se borrarán de este dispositivo.",
+    signOutDiscard: "Descartar y salir",
+    signOutCancel: "Cancelar",
+    signOutUnrevoked:
+      "Saliste de este dispositivo, pero no pudimos cerrar la sesión en el servidor. Se cerrará sola al caducar.",
+    signOutFailed: "No pudimos completar la salida de forma segura. Inténtalo de nuevo.",
+    bookingOffline: "Necesitas conexión para reservar.",
+    bookingUnavailable: "Este calendario no admite reservas por ahora.",
+    bookingInvalidLink: "No se puede abrir este enlace de reserva.",
+    bookingBrowserError: "No pudimos abrir la página de reserva.",
+    bookingConfirmed: "El servidor confirmó tu cita. La encuentras en «Mis citas».",
+    bookingNotConfirmed:
+      "No vemos ninguna cita nueva. Si no terminaste la reserva, puedes intentarlo de nuevo.",
+    bookingUnknown: "Revisa «Mis citas» o tu correo para comprobar si la reserva se completó.",
   },
   en: {
     connecting: "Connecting to server…",
@@ -212,6 +252,21 @@ export const MOBILE_STRINGS: Record<
     offlinePending: "pending operation(s)",
     syncConflict: "Sync conflict. Review changes.",
     quotaError: "Local storage quota exceeded.",
+    signOutPendingTitle: "Unsynced changes",
+    signOutPendingBody:
+      "You have {count} unsynced change(s). If you sign out now, they will be deleted from this device.",
+    signOutDiscard: "Discard and sign out",
+    signOutCancel: "Cancel",
+    signOutUnrevoked:
+      "You signed out on this device, but we could not end the session on the server. It will expire on its own.",
+    signOutFailed: "We could not complete the sign-out safely. Please try again.",
+    bookingOffline: "You need a connection to book.",
+    bookingUnavailable: "This calendar is not accepting bookings right now.",
+    bookingInvalidLink: "This booking link cannot be opened.",
+    bookingBrowserError: "We could not open the booking page.",
+    bookingConfirmed: "The server confirmed your appointment. You can find it in “My appointments”.",
+    bookingNotConfirmed: "We do not see a new appointment. If you did not finish booking, you can try again.",
+    bookingUnknown: "Check “My appointments” or your email to see whether the booking was completed.",
   },
   fr: {
     connecting: "Connexion au serveur…",
@@ -237,6 +292,22 @@ export const MOBILE_STRINGS: Record<
     offlinePending: "opération(s) en attente",
     syncConflict: "Conflit de synchronisation. Vérifiez les modifications.",
     quotaError: "Espace de stockage local plein.",
+    signOutPendingTitle: "Modifications non synchronisées",
+    signOutPendingBody:
+      "Vous avez {count} modification(s) non synchronisée(s). Si vous vous déconnectez maintenant, elles seront supprimées de cet appareil.",
+    signOutDiscard: "Supprimer et se déconnecter",
+    signOutCancel: "Annuler",
+    signOutUnrevoked:
+      "Vous êtes déconnecté de cet appareil, mais la session n’a pas pu être fermée sur le serveur. Elle expirera d’elle-même.",
+    signOutFailed: "Impossible de terminer la déconnexion en toute sécurité. Veuillez réessayer.",
+    bookingOffline: "Une connexion est nécessaire pour réserver.",
+    bookingUnavailable: "Ce calendrier n’accepte pas de réservations pour le moment.",
+    bookingInvalidLink: "Ce lien de réservation ne peut pas être ouvert.",
+    bookingBrowserError: "Impossible d’ouvrir la page de réservation.",
+    bookingConfirmed: "Le serveur a confirmé votre rendez-vous. Vous le trouverez dans « Mes rendez-vous ».",
+    bookingNotConfirmed:
+      "Aucun nouveau rendez-vous n’apparaît. Si vous n’avez pas terminé la réservation, vous pouvez réessayer.",
+    bookingUnknown: "Consultez « Mes rendez-vous » ou votre e-mail pour vérifier si la réservation a abouti.",
   },
   pt: {
     connecting: "Conectando ao servidor…",
@@ -262,6 +333,21 @@ export const MOBILE_STRINGS: Record<
     offlinePending: "operação(ões) pendente(s)",
     syncConflict: "Conflito de sincronização. Revise as alterações.",
     quotaError: "Espaço de armazenamento local cheio.",
+    signOutPendingTitle: "Alterações não sincronizadas",
+    signOutPendingBody:
+      "Você tem {count} alteração(ões) não sincronizada(s). Se sair agora, elas serão apagadas deste dispositivo.",
+    signOutDiscard: "Descartar e sair",
+    signOutCancel: "Cancelar",
+    signOutUnrevoked:
+      "Você saiu deste dispositivo, mas não foi possível encerrar a sessão no servidor. Ela expirará sozinha.",
+    signOutFailed: "Não foi possível concluir a saída com segurança. Tente novamente.",
+    bookingOffline: "Você precisa de conexão para agendar.",
+    bookingUnavailable: "Este calendário não aceita agendamentos no momento.",
+    bookingInvalidLink: "Este link de agendamento não pode ser aberto.",
+    bookingBrowserError: "Não foi possível abrir a página de agendamento.",
+    bookingConfirmed: "O servidor confirmou o seu agendamento. Você o encontra em «Meus agendamentos».",
+    bookingNotConfirmed: "Não vemos nenhum agendamento novo. Se você não terminou, pode tentar de novo.",
+    bookingUnknown: "Confira «Meus agendamentos» ou o seu e-mail para ver se o agendamento foi concluído.",
   },
   de: {
     connecting: "Verbindung zum Server wird hergestellt…",
@@ -287,6 +373,22 @@ export const MOBILE_STRINGS: Record<
     offlinePending: "ausstehende Operation(en)",
     syncConflict: "Synchronisierungskonflikt. Überprüfen Sie die Änderungen.",
     quotaError: "Lokaler Speicherplatz voll.",
+    signOutPendingTitle: "Nicht synchronisierte Änderungen",
+    signOutPendingBody:
+      "Sie haben {count} nicht synchronisierte Änderung(en). Wenn Sie sich jetzt abmelden, werden sie von diesem Gerät gelöscht.",
+    signOutDiscard: "Verwerfen und abmelden",
+    signOutCancel: "Abbrechen",
+    signOutUnrevoked:
+      "Sie wurden auf diesem Gerät abgemeldet, aber die Sitzung konnte auf dem Server nicht beendet werden. Sie läuft von selbst ab.",
+    signOutFailed: "Die Abmeldung konnte nicht sicher abgeschlossen werden. Bitte versuchen Sie es erneut.",
+    bookingOffline: "Zum Buchen ist eine Verbindung erforderlich.",
+    bookingUnavailable: "Dieser Kalender nimmt derzeit keine Buchungen an.",
+    bookingInvalidLink: "Dieser Buchungslink kann nicht geöffnet werden.",
+    bookingBrowserError: "Die Buchungsseite konnte nicht geöffnet werden.",
+    bookingConfirmed: "Der Server hat Ihren Termin bestätigt. Sie finden ihn unter „Meine Termine“.",
+    bookingNotConfirmed:
+      "Wir sehen keinen neuen Termin. Wenn Sie die Buchung nicht abgeschlossen haben, können Sie es erneut versuchen.",
+    bookingUnknown: "Prüfen Sie „Meine Termine“ oder Ihre E-Mails, ob die Buchung abgeschlossen wurde.",
   },
   it: {
     connecting: "Connessione al server in corso…",
@@ -312,6 +414,23 @@ export const MOBILE_STRINGS: Record<
     offlinePending: "operazione/i in sospeso",
     syncConflict: "Conflitto di sincronizzazione. Controlla le modifiche.",
     quotaError: "Spazio di archiviazione locale pieno.",
+    signOutPendingTitle: "Modifiche non sincronizzate",
+    signOutPendingBody:
+      "Hai {count} modifica/modifiche non sincronizzata/e. Se esci ora, verranno eliminate da questo dispositivo.",
+    signOutDiscard: "Elimina ed esci",
+    signOutCancel: "Annulla",
+    signOutUnrevoked:
+      "Sei uscito da questo dispositivo, ma non è stato possibile chiudere la sessione sul server. Scadrà da sola.",
+    signOutFailed: "Impossibile completare l’uscita in modo sicuro. Riprova.",
+    bookingOffline: "Per prenotare serve una connessione.",
+    bookingUnavailable: "Questo calendario al momento non accetta prenotazioni.",
+    bookingInvalidLink: "Questo link di prenotazione non può essere aperto.",
+    bookingBrowserError: "Impossibile aprire la pagina di prenotazione.",
+    bookingConfirmed: "Il server ha confermato il tuo appuntamento. Lo trovi in «I miei appuntamenti».",
+    bookingNotConfirmed:
+      "Non vediamo nessun nuovo appuntamento. Se non hai completato la prenotazione, puoi riprovare.",
+    bookingUnknown:
+      "Controlla «I miei appuntamenti» o la tua e-mail per vedere se la prenotazione è stata completata.",
   },
 };
 
@@ -400,15 +519,23 @@ export interface MobilePanelSummary {
   calendars: Array<{ id: string; slug: string; name: string; timezone: string }>;
 }
 
+/** Plazo por defecto de cada petición: pasado ese tiempo se cancela y se trata como fallo de transporte. */
+export const DEFAULT_REQUEST_TIMEOUT_MS = 15_000;
+
 /** Cliente HTTP de las apps móviles Expo (Android e iOS) conectado al backend de Mi Cita en Tiempo. */
 export function createMobileClient({
   baseUrl,
   platform,
   initialToken = null,
+  timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS,
+  onTransportError,
 }: {
   baseUrl: string;
   platform: MobilePlatform;
   initialToken?: string | null;
+  timeoutMs?: number;
+  /** Se invoca cuando una petición falla por transporte (véase `isTransportError`), para actualizar el estado de conexión. */
+  onTransportError?: (error: MobileRequestError) => void;
 }) {
   let token: string | null = initialToken;
   const cleanBase = baseUrl.replace(/\/$/, "");
@@ -418,6 +545,7 @@ export function createMobileClient({
     path: string,
     body?: unknown,
     extraHeaders: Record<string, string> = {},
+    signal?: AbortSignal,
   ): Promise<T> {
     const validated = body === undefined ? undefined : validateRequest(method, path, body);
     const headers: Record<string, string> = {
@@ -427,22 +555,60 @@ export function createMobileClient({
       ...(token ? { authorization: `Bearer ${token}` } : {}),
       ...extraHeaders,
     };
-    const res = await fetch(`${cleanBase}${path}`, {
-      method,
-      headers,
-      body: validated === undefined ? undefined : JSON.stringify(validated),
-    });
-    if (res.status === 204) return {} as T;
-    const text = await res.text();
-    const data = text ? (JSON.parse(text) as Record<string, unknown>) : {};
-    if (!res.ok) {
-      throw {
-        status: res.status,
-        code: typeof data.code === "string" ? data.code.toLowerCase() : "generic",
-        body: data,
-      };
+    // Plazo y cancelación externa comparten un solo AbortController; el plazo cubre también la lectura del cuerpo.
+    const controller = new AbortController();
+    let timedOut = false;
+    const timer = setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, timeoutMs);
+    const onAbort = () => controller.abort();
+    if (signal?.aborted) controller.abort();
+    else signal?.addEventListener("abort", onAbort, { once: true });
+    try {
+      let res: Response;
+      let text: string;
+      try {
+        res = await fetch(`${cleanBase}${path}`, {
+          method,
+          headers,
+          body: validated === undefined ? undefined : JSON.stringify(validated),
+          signal: controller.signal,
+        });
+        text = res.status === 204 ? "" : await res.text();
+      } catch {
+        const failure: MobileRequestError = {
+          status: 0,
+          code: timedOut ? "timeout" : signal?.aborted ? "aborted" : "network",
+          body: {},
+        };
+        if (isTransportError(failure)) onTransportError?.(failure);
+        throw failure;
+      }
+      if (res.status === 204) return {} as T;
+      let data: Record<string, unknown> = {};
+      let invalidBody = false;
+      try {
+        data = text ? (JSON.parse(text) as Record<string, unknown>) : {};
+      } catch {
+        // Cuerpo no JSON (p. ej. página de error de un proxy): sin detalle; un éxito así no es fiable.
+        invalidBody = true;
+      }
+      if (res.ok && invalidBody) throw { status: res.status, code: "invalid_response", body: {} };
+      if (!res.ok) {
+        const failure: MobileRequestError = {
+          status: res.status,
+          code: typeof data.code === "string" ? data.code.toLowerCase() : "generic",
+          body: data,
+        };
+        if (isTransportError(failure)) onTransportError?.(failure);
+        throw failure;
+      }
+      return data as T;
+    } finally {
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", onAbort);
     }
-    return data as T;
   }
 
   return {
@@ -450,7 +616,8 @@ export function createMobileClient({
     setToken: (next: string | null) => {
       token = next;
     },
-    bootstrap: () => request<MobileBootstrapResponse>("GET", "/api/public/v1/mobile/bootstrap"),
+    bootstrap: (signal?: AbortSignal) =>
+      request<MobileBootstrapResponse>("GET", "/api/public/v1/mobile/bootstrap", undefined, {}, signal),
     signUp: (input: MobileSignUp, altcha?: string) =>
       request<{ user: { id: string; email: string; name: string } }>(
         "POST",
@@ -559,24 +726,55 @@ export function createMobileClient({
         { expectedVersion },
         { "idempotency-key": idempKey },
       ),
-    addBusinessLocation: (body: BusinessLocationContent, expectedVersion: number, idempKey: string) =>
-      request<PrivateBusinessProfile>(
+    /** POST /api/business-profile/locations: cuerpo `{ location, expectedVersion }`; responde la sede creada. */
+    addBusinessLocation: (location: BusinessLocationContent, expectedVersion: number, idempKey: string) =>
+      request<PrivateLocation>(
         "POST",
         "/api/business-profile/locations",
-        { ...body, expectedVersion },
+        { location, expectedVersion },
         { "idempotency-key": idempKey },
       ),
-    deleteBusinessLocation: (locationId: string, expectedVersion: number) =>
-      request<PrivateBusinessProfile>(
+    /** DELETE de una sede: el servidor exige `{ expectedVersion }` en el cuerpo e `Idempotency-Key`; responde 204. */
+    deleteBusinessLocation: (locationId: string, expectedVersion: number, idempKey: string) =>
+      request<Record<string, never>>(
         "DELETE",
-        `/api/business-profile/locations/${encodeURIComponent(locationId)}?expectedVersion=${expectedVersion}`,
+        `/api/business-profile/locations/${encodeURIComponent(locationId)}`,
+        { expectedVersion },
+        { "idempotency-key": idempKey },
       ),
-    assignCalendarLocation: (calendarId: string, locationId: string | null, expectedVersion: number) =>
+    assignCalendarLocation: (
+      calendarId: string,
+      locationId: string | null,
+      expectedVersion: number,
+      idempKey: string,
+    ) =>
       request<PrivateBusinessProfile>(
         "PUT",
         `/api/business-profile/calendar-locations/${encodeURIComponent(calendarId)}`,
         { locationId, expectedVersion },
+        { "idempotency-key": idempKey },
       ),
+    /**
+     * Descarga incremental (ADR 0020). Sin `cursor`: snapshot paginado. Responde 400 `invalid_cursor` o 410
+     * `sync_cursor_expired` si el cursor no sirve; quien llama debe reiniciar con un snapshot.
+     */
+    getOfflineChanges: async (params: { cursor?: string; limit?: number } = {}, signal?: AbortSignal) => {
+      const q = new URLSearchParams();
+      if (params.cursor) q.set("cursor", params.cursor);
+      if (params.limit !== undefined) q.set("limit", String(params.limit));
+      const qs = q.toString();
+      const raw = await request<unknown>(
+        "GET",
+        `/api/offline/changes${qs ? `?${qs}` : ""}`,
+        undefined,
+        {},
+        signal,
+      );
+      const parsed = OfflineChangesPage.safeParse(raw);
+      if (!parsed.success)
+        throw { status: 200, code: "invalid_response", body: {} } satisfies MobileRequestError;
+      return parsed.data;
+    },
     getOperationReceipt: (operationId: string) =>
       request<{
         operationId: string;
@@ -643,5 +841,7 @@ export function renderMobileInterfaceSnapshot({
   };
 }
 
+export * from "./booking-flow.ts";
+export * from "./session-exit.ts";
 export * from "./storage.ts";
 export * from "./sync.ts";

@@ -10,6 +10,7 @@ import {
 import { and, eq, inArray, isNull, lt, or, sql } from "drizzle-orm";
 import { AuditService } from "../audit/audit.service.js";
 import { AuthRegistry, type SessionUser } from "../auth/auth.registry.js";
+import { isUserRestricted } from "../auth/org-access.js";
 import { CalendarAccess } from "../calendars/access.service.js";
 import { ENV } from "../config/config.module.js";
 import type { Env } from "../config/env.js";
@@ -77,6 +78,8 @@ export class McpService {
    */
   async caller(auth: AuthInfo, lang: Lang): Promise<McpCaller | null> {
     const userId = String(auth.extra?.userId ?? "");
+    if (!userId) return null;
+    if (await isUserRestricted(this.db, userId)) return null;
     const [grant] = await this.db
       .select()
       .from(mcpGrants)

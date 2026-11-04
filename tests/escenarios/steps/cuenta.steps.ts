@@ -16,6 +16,19 @@ When("cambia su nombre a {string}", async ({ page }, nuevo: string) => {
   await page.getByRole("button", { name: "Guardar" }).click();
 });
 
+Then("su zona horaria es {string}", async ({ page }, zona: string) => {
+  await expect(page.getByLabel("Zona horaria")).toHaveValue(zona);
+});
+
+Then(
+  "la API guarda la zona horaria {string} de {string}",
+  async ({ estado }, zona: string, nombre: string) => {
+    const res = await actor(estado, nombre).api.get("/api/v1/me");
+    expect(res.status(), await res.text()).toBe(200);
+    expect(await res.json()).toMatchObject({ timezone: zona });
+  },
+);
+
 When("exporta sus datos", async ({ page, estado }) => {
   const tab = page.getByRole("tab", { name: /datos|data/i });
   if (await tab.isVisible().catch(() => false)) await tab.click();
