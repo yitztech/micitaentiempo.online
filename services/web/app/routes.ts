@@ -61,6 +61,7 @@ export default [
   ]),
   ...page("booking", "routes/booking.tsx"),
   ...page("myAppointments", "routes/my-appointments.tsx"),
+  route("c/:slug", "routes/booking-link.ts"),
   route("embed/:slug", "routes/embed.tsx"),
   route("embed.js", "routes/embed-js.ts"),
   route("app.apk", "routes/app-apk.ts"),
