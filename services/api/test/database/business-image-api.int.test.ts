@@ -22,6 +22,7 @@ import { BusinessProfileService } from "../../src/businesses/business-profile.se
 import type { Env } from "../../src/config/env.js";
 import { runMigrations } from "../../src/db/migrate.js";
 import * as schema from "../../src/db/schema.js";
+import { stopDatabase } from "../helpers/database.js";
 
 let container: StartedPostgreSqlContainer;
 let pool: pg.Pool;
@@ -63,8 +64,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await fs.rm(tempUploadsDir, { recursive: true, force: true }).catch(() => {});
-  await pool.end();
-  await container.stop();
+  await stopDatabase(pool, container);
 });
 
 describe("BusinessImageService and Image Processing (C3)", () => {

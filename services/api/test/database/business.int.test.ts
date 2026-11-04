@@ -19,6 +19,7 @@ import { runMigrations } from "../../src/db/migrate.js";
 import * as schema from "../../src/db/schema.js";
 import type { CalendarClients } from "../../src/internal-rpc/calendar-client.js";
 import { OrgsService } from "../../src/orgs/orgs.service.js";
+import { stopDatabase } from "../helpers/database.js";
 
 let container: StartedPostgreSqlContainer;
 let pool: pg.Pool;
@@ -67,8 +68,7 @@ beforeAll(async () => {
   repository = new BusinessProfileRepository(drizzle(pool, { schema }));
 });
 afterAll(async () => {
-  await pool?.end();
-  await container?.stop();
+  await stopDatabase(pool, container);
 });
 
 describe("business persistence with real PostgreSQL", () => {

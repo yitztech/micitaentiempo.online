@@ -7,6 +7,7 @@ import type { Env } from "../../src/config/env.js";
 import { runMigrations } from "../../src/db/migrate.js";
 import * as schema from "../../src/db/schema.js";
 import { MOBILE_AUTH_RULES, MobileAuthLimiter } from "../../src/mobile/mobile-auth-limiter.js";
+import { stopDatabase } from "../helpers/database.js";
 
 let container: StartedPostgreSqlContainer;
 let pool: pg.Pool;
@@ -30,8 +31,7 @@ beforeEach(async () => {
 });
 
 afterAll(async () => {
-  await pool?.end();
-  await container?.stop();
+  await stopDatabase(pool, container);
 });
 
 async function rejection(promise: Promise<void>): Promise<HttpException | null> {

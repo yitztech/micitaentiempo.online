@@ -12,6 +12,7 @@ import type { Env } from "../../src/config/env.js";
 import { runMigrations } from "../../src/db/migrate.js";
 import * as schema from "../../src/db/schema.js";
 import type { CalendarClients } from "../../src/internal-rpc/calendar-client.js";
+import { stopDatabase } from "../helpers/database.js";
 
 let container: StartedPostgreSqlContainer;
 let pool: pg.Pool;
@@ -163,8 +164,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await pool?.end();
-  await container?.stop();
+  await stopDatabase(pool, container);
 });
 
 describe("C4 — Public Directory API, Categories & Locality Search", () => {

@@ -8,6 +8,7 @@ import type { SessionUser } from "../../src/auth/auth.registry.js";
 import { OfflineController } from "../../src/businesses/offline.controller.js";
 import { runMigrations } from "../../src/db/migrate.js";
 import * as schema from "../../src/db/schema.js";
+import { stopDatabase } from "../helpers/database.js";
 
 let container: StartedPostgreSqlContainer;
 let pool: pg.Pool;
@@ -55,8 +56,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await pool?.end();
-  await container?.stop();
+  await stopDatabase(pool, container);
 });
 
 describe("API Offline de operaciones y recibos (C8b)", () => {

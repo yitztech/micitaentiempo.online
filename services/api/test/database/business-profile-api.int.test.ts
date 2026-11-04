@@ -19,6 +19,7 @@ import type { CalendarClients } from "../../src/internal-rpc/calendar-client.js"
 import { MeController } from "../../src/me/me.controller.js";
 import type { NotificationsService } from "../../src/notifications/notifications.service.js";
 import { OrgsService } from "../../src/orgs/orgs.service.js";
+import { stopDatabase } from "../helpers/database.js";
 
 let container: StartedPostgreSqlContainer;
 let pool: pg.Pool;
@@ -60,8 +61,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await pool?.end();
-  await container?.stop();
+  await stopDatabase(pool, container);
 });
 
 describe("C2 — Private Business Profile API with real PostgreSQL", () => {

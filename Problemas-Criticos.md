@@ -951,4 +951,6 @@ Las claves se consultan únicamente en `https://www.googleapis.com/oauth2/v3/cer
 
 **Verificaciones:** `pnpm lint`, `pnpm i18n:check`, `pnpm typecheck`, `npm --prefix services/mobile run typecheck`, `pnpm test:unit` (exit 0), base de datos con PostgreSQL real 103 aprobadas, Metro Android e iOS. Los escenarios se validan en el CI de este commit.
 
+**Fallo intermitente de las pruebas de base de datos:** el CI de `8c3d785` falló con las 103 pruebas aprobadas, por 5 errores `57P01` sin manejar nacidos en `mobile-auth-limiter.int.test.ts`. `pool.end()` resuelve antes de que los clientes cierren su socket y parar el contenedor en ese momento los corta; esa prueba abre más conexiones que las demás por su caso de concurrencia. `test/helpers/database.ts#stopDatabase` espera a los eventos `remove` antes de parar el contenedor, en todas las suites. No se reproduce de forma aislada en local (0 de 8 antes del cambio), así que la evidencia es el código de `pg-pool` y los CI posteriores.
+
 **Sigue abierto:** no hay evidencia en dispositivo (N1); la corrección de SQLCipher se probó con la librería, no en un binario Expo. Falta la prueba HTTP real del 429 (S08) y el contrato contra la API real (M01). `reconciliation_required` no tiene forma de limpiarse sin SQL manual: hay que decidir entre una acción en el panel o un procedimiento documentado.
