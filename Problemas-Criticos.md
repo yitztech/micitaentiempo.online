@@ -617,9 +617,9 @@ Todo el plan está pendiente al añadirse. Las verificaciones históricas del in
 | C02a | GPT-6.1 Sol | High | verificada | Migración 0014: `app.sync_changes` y triggers transaccionales; 4 pruebas con PostgreSQL real. Véase registro C02. | Contrato C01 |
 | C02b | GPT-6.1 Sol | High | verificada | Endpoint paginado con snapshot, cursor firmado y autorización por página; 12 pruebas con PostgreSQL real. Véase registro C02. | C02a |
 | C03 | GPT-6 Luna | High | verificada (unitaria + contrato HTTP) | Aplicación atómica de páginas, bajas y cursor en el móvil con transacción multi-clave; 13 pruebas y 2 escenarios contra la API real. Falta nativo/SQLCipher (V01). Véase registro C03. | C02a–C02b |
-| R01 | GPT-6 Luna | High | pendiente | — | M02 |
-| R02 | GPT-6.1 Sol | High | pendiente | — | R01, contrato de reserva |
-| V01 | GPT-6.1 Sol | High | pendiente | — | Integración de todas las anteriores |
+| R01 | GPT-6 Luna | High | verificada (unitaria) | Intención de reserva validada contra el sitio configurado y las rutas del proyecto; 5 pruebas de validación. Véase registro R01–R02. | M02 |
+| R02 | GPT-6.1 Sol | High | implementada, validación pendiente | Adaptador de navegador seguro con reconciliación por el servidor; 9 pruebas. Falta el recorrido nativo y una cuenta de prueba (V01). Véase registro R01–R02. | R01, contrato de reserva |
+| V01 | GPT-6.1 Sol | High | bloqueada (parte nativa) | Integración verificada en todo lo ejecutable aquí; faltan Appium, binarios nativos con SQLCipher y dispositivos. Véase registro V01. | Integración de todas las anteriores |
 
 ### Registro de ejecución — S01 (2026-11-03)
 
@@ -897,3 +897,36 @@ Las claves se consultan únicamente en `https://www.googleapis.com/oauth2/v3/cer
 **Descubierto:** el borrador del perfil se crea de forma perezosa al abrirlo (`ensureOwnerDraft`); hasta entonces el feed no tiene nada que entregar, y el cambio llega cuando se crea.
 
 **Límites:** no se ejecutó en dispositivo ni con SQLCipher real; el feed no cubre citas, agenda ni imágenes (declarados en `unsupported`).
+
+### Registro de ejecución — R01 y R02 (2026-11-03)
+
+**Estado:** R01 verificada en pruebas unitarias; R02 **implementada, validación pendiente** (el recorrido real en dispositivo y contra el sitio es de V01). **Siguiente tarea:** V01.
+
+**Contrato de reserva inspeccionado:** `POST /api/public/v1/calendars/:slug/holds` exige ALTCHA + `Idempotency-Key` y el hold dura diez minutos; la confirmación pide verificación de contacto. La app no tiene pantalla nativa de reserva. Decisión (la que prevé el plan): **reutilizar la página de reserva del proyecto en el navegador seguro del sistema** (`expo-web-browser`, ya instalado), sin copiar el motor de reserva ni pasar tokens por la URL. Esto no equivale a reserva nativa offline: sin conexión no se reserva.
+
+**R01 (`src/booking-flow.ts`):** `resolveBookingUrl` valida el destino y devuelve la URL canónica construida solo con el `slug` (formato de la API) y la ruta traducida real del idioma de la app (`pathFor("booking", lang, { slug })`: `/reservar/:slug`, `/book/:slug`…) sobre el `siteUrl` del bootstrap. `bookingUrl` solo puede coincidir, nunca decidir: se rechazan otros hosts, subdominios-trampa, credenciales (`@`), `//`, `\`, consulta, fragmento, puerto distinto, esquemas distintos de http(s) (`javascript:`, `data:`, `intent:`, `file:`, esquemas propios), http fuera de localhost, slugs inválidos y rutas ajenas. Análisis manual: el `URL` de React Native está incompleto. `createBookingFlow`: la intención (`businessId`, `calendarId`, `locationId`, `slug`, `url`) nunca contiene contraseñas, OTP, tokens ni holds; elegir otro destino la sustituye; uno no reservable o con enlace inválido no deja intención.
+
+**R02:** `open()` comprueba la conexión, anota las citas del servidor, abre el navegador y, al volver, vuelve a leerlas: `confirmed` solo si aparece una cita nueva; `not_confirmed` si no (abandono o plaza ocupada, que la página decide); `unknown` sin sesión en la app o si falla la consulta; `offline` y `browser_error` explícitos. Una sola ejecución a la vez. Volver atrás conserva el destino. `App.tsx`: el botón por destino llama a `onBook`, se desactiva si no es reservable (con `accessibilityState`) y muestra mensajes en los seis idiomas (siete claves nuevas); ya no se limita a cambiar de pestaña.
+
+**Pruebas (`tests/unit/mobile-booking.test.js`, 14):** URL canónica por idioma; absoluta del propio sitio; local con puerto; 20 enlaces maliciosos y 9 slugs / 5 sitios mal formados rechazados; dos destinos distintos mantienen el correcto; no reservable e inválido; sin conexión; confirmación solo con cita nueva del servidor; sin sesión / fallo al volver; navegador no disponible; ninguna credencial en la URL; pulsación repetida; textos en seis idiomas. **Verificaciones:** M1 (suite móvil completa), M2, `pnpm lint`, `pnpm i18n:check`.
+
+**Decisión de contrato pendiente (no se tocó el servidor):** la API publica `bookingUrl: "/c/<slug>"` (`public-business.service.ts:445,667`), pero el sitio web **no registra ninguna ruta `/c/:slug`**: la página de reserva es `booking` (`/reservar/:slug`, `/book/:slug`…). El panel web también muestra `/c/{slug}` como URL pública (`business-profile-settings.tsx`). La app es independiente de ese valor (usa el slug y la tabla de rutas), pero la URL publicada es un enlace muerto para otros consumidores. Hay que decidir entre (a) añadir una redirección `/c/:slug` → ruta de reserva en el idioma del dominio, o (b) que la API publique la ruta traducida. Cambiarlo altera un contrato público y su conjunto de pruebas, por eso queda para decisión.
+
+**Límites:** el recorrido no se probó en dispositivo ni contra el sitio con un calendario real; "plaza ocupada" lo muestra la página web, la app solo informa de que no hay cita nueva. La reserva de un cliente sin sesión en la app se confirma por correo o en «Mis citas» al entrar.
+
+### Registro de ejecución — V01 (2026-11-03)
+
+**Estado:** integración verificada en todo lo que este entorno puede ejecutar; **la evidencia nativa (N1) queda bloqueada**. No se despliega.
+
+**Ejecutado y aprobado:**
+
+- `pnpm lint` (502 archivos), `pnpm typecheck` (incluye el `tsc` de la app móvil vía web), `pnpm i18n:check`, `npm --prefix services/mobile run typecheck`.
+- Builds: API, admin y web. Empaquetado Metro de la app completa para **Android (830 módulos) e iOS (832)** con `expo export`; `expo config` resuelve los plugins `expo-secure-store` y `expo-sqlite` con `useSQLCipher: true`.
+- `pnpm test:unit` (schemas 136 + OpenAPI, móvil 103, API 303, admin 14…), `go test -short -race ./...`, `pnpm test:db` (10 archivos, 100 pruebas con PostgreSQL real + Go engine/outbox).
+- Escenarios con imágenes reconstruidas (`api`, `admin`): `backend` 88, `reloj` 8, `frontend` 112.
+
+**Fallo ajeno al plan (no corregido):** `pnpm test:mobile` (Playwright emulado, no cuenta como evidencia nativa): 110 aprobados y **2 fallidos** en el proyecto `android`, `panel/cuenta.feature` («Cambiar el nombre, exportar los datos y borrar la cuenta» y «Un propietario cierra su negocio…»): el clic en «Guardar» expira porque otro `<form>` intercepta el puntero en el viewport Android (la captura muestra la página desplazada). Reproducible aislado. `services/web` no cambió desde `b16d89a` y el proyecto `frontend` de escritorio pasa esos escenarios, así que parece un defecto de maquetación preexistente en `account.tsx`. Pendiente de revisión por separado.
+
+**Pendiente (N1) — exactamente lo que falta:** no hay `appium` ni `adb` en el PATH, ni binarios compilados. Matriz mínima sin ejecutar: abrir con red → descargar → cortar red → editar → matar proceso → reabrir → recuperar red → comprobar servidor; respuesta perdida tras commit; API caída; sesión vencida; cambios concurrentes; cursor vencido; baja; disco lleno; cambio de cuenta; recorrido de reserva con navegador seguro; diálogo de cierre de sesión; SQLCipher presente en el binario y rechazo de guardar privados sin él; todo en teléfono y tableta, Android e iOS, en secuencia. Comandos: compilar con `expo prebuild` + build nativo (JDK/Xcode), levantar `pnpm test:env:up`, Appium con una cuenta de prueba y luego `pnpm test:native:mobile`.
+
+**Resumen del plan:** S01–S08 e I01 verificadas; M01–M06 y C01–C03 verificadas en pruebas unitarias/integración (nativo pendiente); R01 verificada; R02 implementada, validación pendiente; V01 bloqueada en lo nativo. **Decisiones/operaciones pendientes:** rotar la cuenta de admin y revocar sesiones en instalaciones existentes, inventario de suspensiones legacy, y la decisión sobre `bookingUrl: /c/<slug>` (ruta inexistente en la web).

@@ -18,6 +18,7 @@ import {
   View,
 } from "react-native";
 import { AUTH_NAME_ALLOWED, AUTH_NAME_MAX, AuthName, EmailField } from "../../packages/schemas/dist/index.js";
+import { type BookingTarget, createBookingFlow } from "./src/booking-flow.ts";
 import { type ConnState, createConnectivityController, submitOrQueue } from "./src/connectivity.ts";
 import {
   COUNTRIES,
@@ -138,6 +139,26 @@ export default function App() {
   const lang: MobileLang = userLang ?? boot?.lang ?? "es";
   const t = getCatalog(lang);
   const s = MOBILE_STRINGS[lang] ?? MOBILE_STRINGS.es;
+
+  // Recorrido de reserva: la intención (destino elegido) vive aquí y sobrevive a re-renderizados y al acceso.
+  const bookingContext = useRef({
+    siteUrl: "",
+    lang: "es" as MobileLang,
+    isOnline: (): boolean => false,
+    openBrowser: async (_url: string): Promise<void> => {},
+    listBookings: async (): Promise<Array<{ id: string }> | null> => null,
+  });
+  bookingContext.current = {
+    siteUrl: boot?.siteUrl ?? "",
+    lang,
+    isOnline: () => connectivityRef.current?.state() === "connected",
+    // Navegador seguro del sistema; la sesión de la app no viaja en la URL.
+    openBrowser: async (url) => {
+      await WebBrowser.openBrowserAsync(url);
+    },
+    listBookings: async () => (summary?.user?.id ? await client.myBookings(false) : null),
+  };
+  const bookingFlow = useMemo(() => createBookingFlow(() => bookingContext.current), []);
 
   // Actualizar contador de operaciones pendientes
   const refreshPendingCount = useCallback(async () => {
@@ -961,6 +982,35 @@ export default function App() {
     </View>
   );
 
+  const onBook = async (target: BookingTarget) => {
+    if (!selectedBusiness) return;
+    setError(null);
+    setInfoMessage(null);
+    const picked = bookingFlow.select(selectedBusiness.businessId, target);
+    if (!picked.ok) {
+      setError(picked.reason === "unavailable" ? s.bookingUnavailable : s.bookingInvalidLink);
+      return;
+    }
+    setBusy(true);
+    try {
+      const result = await bookingFlow.open();
+      if (result.status === "offline") setError(s.bookingOffline);
+      else if (result.status === "browser_error") setError(s.bookingBrowserError);
+      else if (result.status === "not_confirmed") setInfoMessage(s.bookingNotConfirmed);
+      else if (result.status === "unknown") setInfoMessage(s.bookingUnknown);
+      else if (result.status === "confirmed") {
+        // Confirmada por el servidor: se vuelven a leer sus citas antes de mostrarlas.
+        setBookings(await client.myBookings(false));
+        setInfoMessage(s.bookingConfirmed);
+        setNavTab("appointments");
+      }
+    } catch {
+      setError(s.bookingBrowserError);
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const directoryCard = (
     <View style={styles.card}>
       {selectedBusiness ? (
@@ -996,10 +1046,12 @@ export default function App() {
                 <Text style={styles.targetName}>{target.slug}</Text>
                 <Pressable
                   testID={MOBILE_SELECTORS.businessProfileBookButton}
-                  style={[styles.button, styles.primary]}
-                  onPress={() => {
-                    setNavTab("appointments");
-                  }}
+                  style={[styles.button, styles.primary, (busy || !target.reservable) && styles.disabled]}
+                  disabled={busy || !target.reservable}
+                  accessibilityRole="button"
+                  accessibilityState={{ disabled: busy || !target.reservable }}
+                  accessibilityLabel={`${t.public.businessProfile.bookService} ${target.slug}`}
+                  onPress={() => void onBook(target)}
                 >
                   <Text style={styles.primaryText}>{t.public.businessProfile.bookService}</Text>
                 </Pressable>

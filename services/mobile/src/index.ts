@@ -178,6 +178,13 @@ export const MOBILE_STRINGS: Record<
     signOutCancel: string;
     signOutUnrevoked: string;
     signOutFailed: string;
+    bookingOffline: string;
+    bookingUnavailable: string;
+    bookingInvalidLink: string;
+    bookingBrowserError: string;
+    bookingConfirmed: string;
+    bookingNotConfirmed: string;
+    bookingUnknown: string;
   }
 > = {
   es: {
@@ -212,6 +219,14 @@ export const MOBILE_STRINGS: Record<
     signOutUnrevoked:
       "Saliste de este dispositivo, pero no pudimos cerrar la sesión en el servidor. Se cerrará sola al caducar.",
     signOutFailed: "No pudimos completar la salida de forma segura. Inténtalo de nuevo.",
+    bookingOffline: "Necesitas conexión para reservar.",
+    bookingUnavailable: "Este calendario no admite reservas por ahora.",
+    bookingInvalidLink: "No se puede abrir este enlace de reserva.",
+    bookingBrowserError: "No pudimos abrir la página de reserva.",
+    bookingConfirmed: "El servidor confirmó tu cita. La encuentras en «Mis citas».",
+    bookingNotConfirmed:
+      "No vemos ninguna cita nueva. Si no terminaste la reserva, puedes intentarlo de nuevo.",
+    bookingUnknown: "Revisa «Mis citas» o tu correo para comprobar si la reserva se completó.",
   },
   en: {
     connecting: "Connecting to server…",
@@ -245,6 +260,13 @@ export const MOBILE_STRINGS: Record<
     signOutUnrevoked:
       "You signed out on this device, but we could not end the session on the server. It will expire on its own.",
     signOutFailed: "We could not complete the sign-out safely. Please try again.",
+    bookingOffline: "You need a connection to book.",
+    bookingUnavailable: "This calendar is not accepting bookings right now.",
+    bookingInvalidLink: "This booking link cannot be opened.",
+    bookingBrowserError: "We could not open the booking page.",
+    bookingConfirmed: "The server confirmed your appointment. You can find it in “My appointments”.",
+    bookingNotConfirmed: "We do not see a new appointment. If you did not finish booking, you can try again.",
+    bookingUnknown: "Check “My appointments” or your email to see whether the booking was completed.",
   },
   fr: {
     connecting: "Connexion au serveur…",
@@ -278,6 +300,14 @@ export const MOBILE_STRINGS: Record<
     signOutUnrevoked:
       "Vous êtes déconnecté de cet appareil, mais la session n’a pas pu être fermée sur le serveur. Elle expirera d’elle-même.",
     signOutFailed: "Impossible de terminer la déconnexion en toute sécurité. Veuillez réessayer.",
+    bookingOffline: "Une connexion est nécessaire pour réserver.",
+    bookingUnavailable: "Ce calendrier n’accepte pas de réservations pour le moment.",
+    bookingInvalidLink: "Ce lien de réservation ne peut pas être ouvert.",
+    bookingBrowserError: "Impossible d’ouvrir la page de réservation.",
+    bookingConfirmed: "Le serveur a confirmé votre rendez-vous. Vous le trouverez dans « Mes rendez-vous ».",
+    bookingNotConfirmed:
+      "Aucun nouveau rendez-vous n’apparaît. Si vous n’avez pas terminé la réservation, vous pouvez réessayer.",
+    bookingUnknown: "Consultez « Mes rendez-vous » ou votre e-mail pour vérifier si la réservation a abouti.",
   },
   pt: {
     connecting: "Conectando ao servidor…",
@@ -311,6 +341,13 @@ export const MOBILE_STRINGS: Record<
     signOutUnrevoked:
       "Você saiu deste dispositivo, mas não foi possível encerrar a sessão no servidor. Ela expirará sozinha.",
     signOutFailed: "Não foi possível concluir a saída com segurança. Tente novamente.",
+    bookingOffline: "Você precisa de conexão para agendar.",
+    bookingUnavailable: "Este calendário não aceita agendamentos no momento.",
+    bookingInvalidLink: "Este link de agendamento não pode ser aberto.",
+    bookingBrowserError: "Não foi possível abrir a página de agendamento.",
+    bookingConfirmed: "O servidor confirmou o seu agendamento. Você o encontra em «Meus agendamentos».",
+    bookingNotConfirmed: "Não vemos nenhum agendamento novo. Se você não terminou, pode tentar de novo.",
+    bookingUnknown: "Confira «Meus agendamentos» ou o seu e-mail para ver se o agendamento foi concluído.",
   },
   de: {
     connecting: "Verbindung zum Server wird hergestellt…",
@@ -344,6 +381,14 @@ export const MOBILE_STRINGS: Record<
     signOutUnrevoked:
       "Sie wurden auf diesem Gerät abgemeldet, aber die Sitzung konnte auf dem Server nicht beendet werden. Sie läuft von selbst ab.",
     signOutFailed: "Die Abmeldung konnte nicht sicher abgeschlossen werden. Bitte versuchen Sie es erneut.",
+    bookingOffline: "Zum Buchen ist eine Verbindung erforderlich.",
+    bookingUnavailable: "Dieser Kalender nimmt derzeit keine Buchungen an.",
+    bookingInvalidLink: "Dieser Buchungslink kann nicht geöffnet werden.",
+    bookingBrowserError: "Die Buchungsseite konnte nicht geöffnet werden.",
+    bookingConfirmed: "Der Server hat Ihren Termin bestätigt. Sie finden ihn unter „Meine Termine“.",
+    bookingNotConfirmed:
+      "Wir sehen keinen neuen Termin. Wenn Sie die Buchung nicht abgeschlossen haben, können Sie es erneut versuchen.",
+    bookingUnknown: "Prüfen Sie „Meine Termine“ oder Ihre E-Mails, ob die Buchung abgeschlossen wurde.",
   },
   it: {
     connecting: "Connessione al server in corso…",
@@ -377,6 +422,15 @@ export const MOBILE_STRINGS: Record<
     signOutUnrevoked:
       "Sei uscito da questo dispositivo, ma non è stato possibile chiudere la sessione sul server. Scadrà da sola.",
     signOutFailed: "Impossibile completare l’uscita in modo sicuro. Riprova.",
+    bookingOffline: "Per prenotare serve una connessione.",
+    bookingUnavailable: "Questo calendario al momento non accetta prenotazioni.",
+    bookingInvalidLink: "Questo link di prenotazione non può essere aperto.",
+    bookingBrowserError: "Impossibile aprire la pagina di prenotazione.",
+    bookingConfirmed: "Il server ha confermato il tuo appuntamento. Lo trovi in «I miei appuntamenti».",
+    bookingNotConfirmed:
+      "Non vediamo nessun nuovo appuntamento. Se non hai completato la prenotazione, puoi riprovare.",
+    bookingUnknown:
+      "Controlla «I miei appuntamenti» o la tua e-mail per vedere se la prenotazione è stata completata.",
   },
 };
 
@@ -787,6 +841,7 @@ export function renderMobileInterfaceSnapshot({
   };
 }
 
+export * from "./booking-flow.ts";
 export * from "./session-exit.ts";
 export * from "./storage.ts";
 export * from "./sync.ts";
