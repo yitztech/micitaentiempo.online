@@ -4,6 +4,7 @@ import type {
   AdminUser,
   AuditLog,
   BlockedUser,
+  EconomicStatus,
   LoginResponse,
   Stats,
   Subscription,
@@ -63,6 +64,10 @@ export class AdminService {
 
   unblockUser(userId: string) {
     return this.http.post(`/api/users/${encodeURIComponent(userId)}/unblock`, {});
+  }
+
+  reconcileUser(userId: string, economicStatus: EconomicStatus, reason: string) {
+    return this.http.post(`/api/users/${encodeURIComponent(userId)}/reconcile`, { economicStatus, reason });
   }
 
   getSubscriptions() {

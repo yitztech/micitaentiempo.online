@@ -6,7 +6,11 @@ import type { FastifyInstance } from "fastify";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { loadConfig } from "../src/config.js";
 import { AdminDatabase, verifyPassword } from "../src/db/admin-db.js";
-import { PlatformDatabase, PlatformDatabaseUnavailableError } from "../src/db/platform-db.js";
+import {
+  PlatformDatabase,
+  PlatformDatabaseUnavailableError,
+  PlatformRestrictionNotFoundError,
+} from "../src/db/platform-db.js";
 import { buildAdminApp } from "../src/index.js";
 
 describe("Panel de Administración — Autenticación y Almacén Aislado", () => {
@@ -280,6 +284,47 @@ describe("Panel de Administración — Autenticación y Almacén Aislado", () =>
     });
     expect(response.statusCode).toBe(503);
     expect(adminDb.isUserBlocked("usr-test-123")).toBe(false);
+  });
+
+  it("concilia una suspensión histórica y valida la entrada", async () => {
+    const reconcile = vi.spyOn(platformDb, "reconcileRestriction").mockResolvedValue({
+      userId: "usr-test-123",
+      email: "historica@example.com",
+      changed: true,
+      organizationIds: ["org-1"],
+      calendarStatusPending: true,
+    });
+    const login = await app.inject({
+      method: "POST",
+      url: "/api/auth/login",
+      payload: { username: "yunerkis", password: testPassword },
+    });
+    const post = (payload: Record<string, unknown>) =>
+      app.inject({
+        method: "POST",
+        url: "/api/users/usr-test-123/reconcile",
+        headers: { Authorization: `Bearer ${login.json().token}` },
+        payload,
+      });
+
+    const suspended = await post({ economicStatus: "suspended", reason: "Revisado" });
+    expect(suspended.statusCode).toBe(422);
+    expect(suspended.json().code).toBe("invalid_economic_status");
+    const noReason = await post({ economicStatus: "active", reason: "   " });
+    expect(noReason.statusCode).toBe(422);
+    expect(noReason.json().code).toBe("invalid_reconciliation_reason");
+    expect(reconcile).not.toHaveBeenCalled();
+
+    const accepted = await post({ economicStatus: "active", reason: " Revisado en Stripe " });
+    expect(accepted.statusCode).toBe(202);
+    expect(accepted.json()).toMatchObject({ reconciled: true, code: "restriction_sync_pending" });
+    expect(reconcile).toHaveBeenCalledWith("usr-test-123", "active", "Revisado en Stripe", "yunerkis");
+    expect(adminDb.getAuditLogs().filter((l) => l.action === "USER_RESTRICTION_RECONCILED")).toHaveLength(1);
+
+    reconcile.mockRejectedValue(new PlatformRestrictionNotFoundError());
+    const missing = await post({ economicStatus: "active", reason: "Revisado" });
+    expect(missing.statusCode).toBe(404);
+    expect(missing.json().code).toBe("restriction_not_found");
   });
 
   it("responde a healthz y version.json correctamente", async () => {

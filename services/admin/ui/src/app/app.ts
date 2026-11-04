@@ -8,6 +8,7 @@ import type {
   AdminUser,
   AuditLog,
   BlockedUser,
+  EconomicStatus,
   Stats,
   Subscription,
   SubscriptionSummary,
@@ -20,6 +21,12 @@ const TOKEN_KEY = "admin_token";
 const USER_KEY = "admin_user";
 const DEFAULT_REASON = "Uso abusivo de reservas y spam";
 const OTHER_REASON = "Otro motivo especificado manualmente";
+const ECONOMIC_STATUS_OPTIONS: ReadonlyArray<{ value: EconomicStatus; label: string }> = [
+  { value: "trialing", label: "En prueba" },
+  { value: "active", label: "Activa" },
+  { value: "past_due", label: "Pago vencido" },
+  { value: "read_only", label: "Solo lectura" },
+];
 const REASON_PRESETS = [
   DEFAULT_REASON,
   "Violación de términos y condiciones de servicio",
@@ -35,6 +42,7 @@ const REASON_PRESETS = [
 })
 export class App {
   private readonly api = inject(AdminService);
+  readonly economicStatuses = ECONOMIC_STATUS_OPTIONS;
 
   // Sesión
   readonly loginUsername = signal("yunerkis");
@@ -212,6 +220,31 @@ export class App {
   unblockDirect(userId: string): void {
     if (!confirm("¿Deseas desbloquear a este usuario?")) return;
     this.unblock(userId, "Usuario desbloqueado con éxito", "Error al desbloquear");
+  }
+
+  /** Declara el estado económico de una suspensión histórica; la cuenta sigue bloqueada hasta desbloquearla. */
+  reconcileUser(blocked: BlockedUser, status: string): void {
+    const option = this.economicStatuses.find((candidate) => candidate.value === status);
+    if (!option) {
+      this.notify("danger", "Elige el estado económico real antes de conciliar");
+      return;
+    }
+    const reason = prompt(`¿Qué revisaste para confirmar «${option.label}» en ${blocked.email}?`)?.trim();
+    if (!reason) return;
+    this.loading.set(true);
+
+    this.api
+      .reconcileUser(blocked.user_id, option.value, reason)
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: () => {
+          this.notify("success", `Suspensión de ${blocked.email} conciliada; sigue bloqueada`);
+          this.loadCurrentTabData();
+        },
+        error: (err: HttpErrorResponse) => {
+          this.notify("danger", err.error?.error || "Error al conciliar la suspensión");
+        },
+      });
   }
 
   private restoreSession(): void {

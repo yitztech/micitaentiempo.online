@@ -2,8 +2,10 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import type { AuthService } from "../auth/auth.service.js";
 import type { AdminDatabase } from "../db/admin-db.js";
 import {
+  ECONOMIC_STATUSES,
   type PlatformDatabase,
   PlatformDatabaseUnavailableError,
+  PlatformRestrictionNotFoundError,
   PlatformUserNotFoundError,
   RestrictionReconciliationRequiredError,
 } from "../db/platform-db.js";
@@ -18,8 +20,15 @@ interface BlockUserBody {
   reason?: string;
 }
 
+interface ReconcileUserBody {
+  economicStatus?: unknown;
+  reason?: unknown;
+}
+
 function sendPlatformError(error: unknown, reply: FastifyReply): FastifyReply {
   if (error instanceof PlatformUserNotFoundError) return reply.status(404).send({ code: "user_not_found" });
+  if (error instanceof PlatformRestrictionNotFoundError)
+    return reply.status(404).send({ code: "restriction_not_found" });
   if (error instanceof RestrictionReconciliationRequiredError)
     return reply.status(409).send({ code: "restriction_reconciliation_required" });
   if (error instanceof PlatformDatabaseUnavailableError)
@@ -213,6 +222,57 @@ export function registerApiRoutes(
   });
 
   // ── Lista de Usuarios Bloqueados ──
+  // ── Reconciliar una suspensión histórica ──
+  app.post(
+    "/api/users/:id/reconcile",
+    async (
+      req: FastifyRequest<{
+        Params: { id: string };
+        Body: ReconcileUserBody;
+      }>,
+      reply: FastifyReply,
+    ) => {
+      const admin = auth.requireAuth(req, reply);
+      if (!admin) return;
+
+      const economicStatus = ECONOMIC_STATUSES.find((status) => status === req.body?.economicStatus);
+      if (!economicStatus) return reply.status(422).send({ code: "invalid_economic_status" });
+      const reason = typeof req.body?.reason === "string" ? req.body.reason.trim() : "";
+      if (!reason || Array.from(reason).length > 2000) {
+        return reply.status(422).send({ code: "invalid_reconciliation_reason" });
+      }
+
+      try {
+        const result = await platformDb.reconcileRestriction(
+          req.params.id,
+          economicStatus,
+          reason,
+          admin.username,
+        );
+        if (result.changed) {
+          adminDb.addAuditLog(
+            "USER_RESTRICTION_RECONCILED",
+            "user",
+            result.userId,
+            `Suspensión histórica de ${result.email} conciliada como ${economicStatus}. Motivo: ${reason}`,
+            admin.username,
+          );
+        }
+        const body = {
+          ok: true,
+          reconciled: result.changed,
+          calendarStatusPending: result.calendarStatusPending,
+        };
+        if (result.calendarStatusPending) {
+          return reply.status(202).send({ ...body, code: "restriction_sync_pending" });
+        }
+        return body;
+      } catch (error) {
+        return sendPlatformError(error, reply);
+      }
+    },
+  );
+
   app.get("/api/blocked-users", async (req: FastifyRequest, reply: FastifyReply) => {
     const admin = auth.requireAuth(req, reply);
     if (!admin) return;

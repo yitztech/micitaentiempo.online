@@ -60,7 +60,10 @@ export interface BlockedUser {
   reason: string;
   blocked_at: string;
   blocked_by: string;
+  reconciliation_required: boolean;
 }
+
+export type EconomicStatus = "trialing" | "active" | "past_due" | "read_only";
 
 export interface AuditLog {
   created_at: string;

@@ -39,6 +39,18 @@ export interface RestrictionChange {
   calendarStatusPending: boolean;
 }
 
+/** Estados económicos que puede declarar una reconciliación: `suspended` ya no es uno de ellos. */
+export const ECONOMIC_STATUSES = ["trialing", "active", "past_due", "read_only"] as const;
+export type EconomicStatus = (typeof ECONOMIC_STATUSES)[number];
+
+export interface RestrictionReconciliation {
+  userId: string;
+  email: string;
+  changed: boolean;
+  organizationIds: string[];
+  calendarStatusPending: boolean;
+}
+
 export class PlatformDatabaseUnavailableError extends Error {
   constructor(options?: ErrorOptions) {
     super("No se pudo completar la operación en PostgreSQL", options);
@@ -50,6 +62,13 @@ export class PlatformUserNotFoundError extends Error {
   constructor() {
     super("Usuario de plataforma no encontrado");
     this.name = "PlatformUserNotFoundError";
+  }
+}
+
+export class PlatformRestrictionNotFoundError extends Error {
+  constructor() {
+    super("El usuario no tiene ninguna restricción activa");
+    this.name = "PlatformRestrictionNotFoundError";
   }
 }
 
@@ -567,6 +586,67 @@ export class PlatformDatabase {
     });
   }
 
+  /**
+   * Cierra una suspensión histórica: `suspended` en `organizations.status` no conserva el estado económico anterior,
+   * así que lo declara quien revisó la causa. La cuenta sigue bloqueada; desbloquearla es un paso aparte. Repetir la
+   * acción no cambia nada, y una organización cerrada se queda como está.
+   */
+  async reconcileRestriction(
+    userId: string,
+    economicStatus: EconomicStatus,
+    reason: string,
+    adminUser: string,
+  ): Promise<RestrictionReconciliation> {
+    return this.transaction(async (client) => {
+      const user = await client.query<{ id: string; email: string }>(
+        "SELECT id, email FROM app.users WHERE id = $1 FOR UPDATE",
+        [userId],
+      );
+      const target = user.rows[0];
+      if (!target) throw new PlatformUserNotFoundError();
+
+      const prior = await client.query<RestrictionRow>(
+        `SELECT user_id, reason, blocked_at, blocked_by, reconciliation_required
+         FROM app.user_restrictions WHERE user_id = $1 FOR UPDATE`,
+        [userId],
+      );
+      const restriction = prior.rows[0];
+      if (!restriction) throw new PlatformRestrictionNotFoundError();
+
+      let organizationIds: string[] = [];
+      if (restriction.reconciliation_required) {
+        const updated = await client.query<{ id: string }>(
+          `UPDATE app.organizations
+           SET status = $2,
+               past_due_since = CASE WHEN $2 = 'past_due' THEN COALESCE(past_due_since, now()) ELSE NULL END,
+               calendar_status_pending = true
+           WHERE owner_user_id = $1 AND deleted_at IS NULL AND status = 'suspended'
+           RETURNING id`,
+          [userId, economicStatus],
+        );
+        organizationIds = updated.rows.map((row) => row.id);
+        await client.query(
+          "UPDATE app.user_restrictions SET reconciliation_required = false WHERE user_id = $1",
+          [userId],
+        );
+        await this.writeRestrictionAudit(client, "user.restriction.reconciled", userId, adminUser, {
+          economicStatus,
+          reason,
+          organizationIds,
+        });
+      }
+
+      const organizations = await this.ownerOrganizations(client, userId);
+      return {
+        userId,
+        email: target.email,
+        changed: restriction.reconciliation_required,
+        organizationIds,
+        calendarStatusPending: organizations.some((org) => org.calendar_status_pending),
+      };
+    });
+  }
+
   /** Importación idempotente de los bloqueos previos guardados en SQLite. */
   async importLegacyRestrictions(
     legacyRows: readonly LegacyBlockedUser[],
@@ -656,6 +736,7 @@ export class PlatformDatabase {
       if (client) await client.query("ROLLBACK").catch(() => undefined);
       if (
         error instanceof PlatformUserNotFoundError ||
+        error instanceof PlatformRestrictionNotFoundError ||
         error instanceof RestrictionReconciliationRequiredError ||
         error instanceof PlatformDatabaseUnavailableError
       ) {
