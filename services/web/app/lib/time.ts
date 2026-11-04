@@ -73,12 +73,18 @@ export function browserTz(): string {
   }
 }
 
-export function allTimeZones(): string[] {
+/**
+ * Opciones de un selector de zona. `Intl` no lista `UTC` ni los alias, que son valores guardados válidos: sin ellos,
+ * el selector mostraría la primera zona y guardar el formulario cambiaría la del usuario sin que lo pidiera.
+ */
+export function allTimeZones(current?: string | null): string[] {
+  let zones: string[] = [];
   try {
-    return Intl.supportedValuesOf("timeZone");
+    zones = Intl.supportedValuesOf("timeZone");
   } catch {
-    return ["UTC"];
+    // Sin soporte en el motor: quedan UTC y la zona actual.
   }
+  return [...new Set(["UTC", ...(current ? [current] : []), ...zones])];
 }
 
 /** Fechas "AAAA-MM-DD" del mes (año, mes 1-12). */

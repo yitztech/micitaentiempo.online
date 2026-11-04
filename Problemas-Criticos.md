@@ -982,3 +982,5 @@ Las claves se consultan únicamente en `https://www.googleapis.com/oauth2/v3/cer
 **Fallos propios del entorno, ya resueltos en el runner o en la guía:** Appium conservaba un APK viejo instalado; compilar iOS con `CODE_SIGNING_ALLOWED=NO` deja la app sin llavero; el teclado de iOS perdía letras y tapaba campos; el recorrido no abría la pestaña «Entrar».
 
 **Abierto, sin relación con este plan:** `panel/cuenta.feature` falla en el proyecto `android` de Playwright (2 de 3): el clic en «Guardar» se intercepta aunque el botón está visible. Ese proyecto no corre en CI.
+
+**Zona horaria (2026-11-04):** `Intl.supportedValuesOf` no lista `UTC`, el valor predeterminado de las cuentas, y el selector mostraba `Africa/Abidjan`. Guardar el perfil la cambiaba sin avisar. Ahora los selectores incluyen `UTC` y la zona guardada. Las cuentas que ya guardaron conservan `Africa/Abidjan`, que tiene el mismo desfase que UTC, así que no cambia ninguna hora; no se migran porque no se distinguen de quien la eligió.

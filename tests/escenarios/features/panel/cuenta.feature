@@ -14,6 +14,14 @@ Característica: Panel → Cuenta
     Cuando borra su cuenta escribiendo "BORRAR"
     Entonces la sesión de "Nora" ya no es válida
 
+  Escenario: Guardar el perfil no cambia la zona horaria predeterminada
+    Dado un usuario "Nora" registrado sin negocio en el dominio "es"
+    Cuando "Nora" abre su cuenta
+    Entonces su zona horaria es "UTC"
+    Cuando cambia su nombre a "Nora Ruiz"
+    Entonces ve «Cambios guardados.»
+    Y la API guarda la zona horaria "UTC" de "Nora"
+
   Escenario: Un propietario cierra su negocio y después borra la cuenta
     Dado un propietario "Olga" con plan "personal" en el dominio "es"
     Y "Olga" tiene el tablero "Estudio" en "America/Mexico_City" del país "MX"

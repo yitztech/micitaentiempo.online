@@ -99,7 +99,7 @@ export default function CalendarSettings({ loaderData }: Route.ComponentProps) {
         <form method="post" onSubmit={general} className="mt-4 grid gap-4 sm:grid-cols-2">
           <Field label={s.name} name="name" required maxLength={120} defaultValue={board.name} />
           <Select label={s.timezone} name="timezone" defaultValue={board.timezone}>
-            {allTimeZones().map((z) => (
+            {allTimeZones(board.timezone).map((z) => (
               <option key={z} value={z}>
                 {z.replaceAll("_", " ")}
               </option>

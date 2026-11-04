@@ -190,7 +190,7 @@ export default function Welcome({ loaderData }: Route.ComponentProps) {
             <p className="text-muted">{w.calendar.lead}</p>
             <Field label={w.calendar.name} name="name" required maxLength={120} />
             <Select label={w.calendar.timezone} value={tz} onChange={(e) => setTz(e.target.value)}>
-              {allTimeZones().map((z) => (
+              {allTimeZones(tz).map((z) => (
                 <option key={z} value={z}>
                   {z.replaceAll("_", " ")}
                 </option>
