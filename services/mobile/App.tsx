@@ -1,9 +1,12 @@
 import * as AuthSession from "expo-auth-session";
+import * as Crypto from "expo-crypto";
 import { StatusBar } from "expo-status-bar";
 import * as WebBrowser from "expo-web-browser";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
+  AppState,
   Platform,
   Pressable,
   SafeAreaView,
@@ -15,6 +18,7 @@ import {
   View,
 } from "react-native";
 import { AUTH_NAME_ALLOWED, AUTH_NAME_MAX, AuthName, EmailField } from "../../packages/schemas/dist/index.js";
+import { type ConnState, createConnectivityController, submitOrQueue } from "./src/connectivity.ts";
 import {
   COUNTRIES,
   createEncryptedStorage,
@@ -33,6 +37,8 @@ import {
   type PublicBusinessSummary,
   resolveDeviceLayout,
 } from "./src/index.ts";
+import { nativeStorageBackend } from "./src/native-storage.ts";
+import { requestSignOut, unresolvedOperations } from "./src/session-exit.ts";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -49,7 +55,6 @@ function defaultBaseUrl(platform: MobilePlatform): string {
 }
 
 type Booking = { id: string; status: string; start: string; end: string };
-type ConnState = "connecting" | "connected" | "offline";
 type AuthMode = "signIn" | "signUp" | "forgot";
 type NavTab = "directory" | "appointments" | "businessProfile" | "account";
 
@@ -62,8 +67,21 @@ export default function App() {
   const { width, height } = useWindowDimensions();
   const layout = resolveDeviceLayout({ width, height, platform });
   const [apiUrl, setApiUrl] = useState(() => defaultBaseUrl(platform));
-  const client = useMemo(() => createMobileClient({ baseUrl: apiUrl, platform }), [apiUrl, platform]);
-  const storage = useMemo(() => createEncryptedStorage({ baseUrl: apiUrl }), [apiUrl]);
+  // El controlador de conexión se crea en un efecto; el cliente le avisa de los fallos de transporte por esta referencia.
+  const connectivityRef = useRef<ReturnType<typeof createConnectivityController> | null>(null);
+  const client = useMemo(
+    () =>
+      createMobileClient({
+        baseUrl: apiUrl,
+        platform,
+        onTransportError: () => connectivityRef.current?.reportFailure(),
+      }),
+    [apiUrl, platform],
+  );
+  const storage = useMemo(
+    () => createEncryptedStorage({ baseUrl: apiUrl, backend: nativeStorageBackend }),
+    [apiUrl],
+  );
 
   const [conn, setConn] = useState<ConnState>("connecting");
   const [boot, setBoot] = useState<MobileBootstrapResponse | null>(null);
@@ -128,8 +146,8 @@ export default function App() {
       return;
     }
     const q = await storage.getQueue(summary.user.id);
-    const active = q.filter((o) => o.state === "pending" || o.state === "conflict");
-    setPendingOpsCount(active.length);
+    // Cuenta todo lo no confirmado (también en envío, fallido, caducado o esperando acceso).
+    setPendingOpsCount(unresolvedOperations(q).length);
   }, [storage, summary?.user?.id]);
 
   useEffect(() => {
@@ -139,7 +157,30 @@ export default function App() {
         const res = await client.bootstrap();
         if (!alive) return;
         setBoot(res);
-        setConn("connected");
+        connectivityRef.current?.markConnected();
+        const cachedSession = await storage.loadSession();
+        if (cachedSession && alive) {
+          client.setToken(cachedSession.session.token);
+          try {
+            const [sum, list] = await Promise.all([client.panelSummary(), client.myBookings(false)]);
+            if (sum.user.id !== cachedSession.session.user.id) throw new Error("Account mismatch");
+            if (alive) {
+              setSummary(sum);
+              setBookings(list);
+              setLastDataUpdate(new Date().toISOString());
+            }
+            await storage.saveSession({ token: cachedSession.session.token, user: sum.user });
+            await storage.saveBookings(sum.user.id, list);
+            await storage.saveSummary(sum.user.id, sum);
+          } catch (error: unknown) {
+            const status = (error as { status?: number }).status;
+            if (status === 401 || status === 403) {
+              if (status === 403) await storage.clearAccount(cachedSession.session.user.id);
+              await storage.clearSession();
+              client.setToken(null);
+            }
+          }
+        }
       } catch {
         if (platform === "android" && apiUrl.includes("10.0.2.2")) {
           try {
@@ -148,29 +189,29 @@ export default function App() {
             if (!alive) return;
             setApiUrl("http://127.0.0.1:8080");
             setBoot(res);
-            setConn("connected");
             return;
           } catch {}
         }
         if (alive) {
-          setConn("offline");
+          connectivityRef.current?.reportFailure();
           // Si estamos offline, cargar sesión previamente persistida
           const cachedSession = await storage.loadSession();
-          if (cachedSession && alive) {
+          if (cachedSession && !cachedSession.isStale && alive) {
             client.setToken(cachedSession.session.token);
-            setSummary({
-              user: cachedSession.session.user,
-              org: null,
-              calendars: [],
-            });
+            const cachedSummary = await storage.loadSummary(cachedSession.session.user.id);
+            if (cachedSummary && !cachedSummary.isStale && alive) {
+              setSummary(cachedSummary.data as MobilePanelSummary);
+            } else {
+              setSummary({ user: cachedSession.session.user, org: null, calendars: [] });
+            }
             const cachedBookings = await storage.loadBookings(cachedSession.session.user.id);
-            if (cachedBookings && alive) {
+            if (cachedBookings && !cachedBookings.isStale && alive) {
               setBookings(cachedBookings.data as Booking[]);
               setLastDataUpdate(cachedBookings.cachedAt);
             }
           }
           const cachedDir = await storage.loadDirectory();
-          if (cachedDir?.data?.businesses && alive) {
+          if (cachedDir?.data?.businesses && !cachedDir.isStale && alive) {
             setDirectoryItems(cachedDir.data.businesses as PublicBusinessSummary[]);
           }
         }
@@ -181,6 +222,58 @@ export default function App() {
       alive = false;
     };
   }, [client, apiUrl, platform, storage]);
+
+  // Estado de conexión decidido por el servidor: fallos de transporte → sin conexión; comprobación periódica y al
+  // volver a primer plano; al recuperarse se restaura la sesión guardada y se refrescan los datos.
+  useEffect(() => {
+    setConn("connecting");
+    const controller = createConnectivityController({
+      onChange: setConn,
+      probe: async (signal) => {
+        const nextBoot = await client.bootstrap(signal);
+        const cached = await storage.loadSession();
+        if (cached && !signal.aborted) {
+          client.setToken(cached.session.token);
+          try {
+            const [nextSummary, nextBookings] = await Promise.all([
+              client.panelSummary(),
+              client.myBookings(false),
+            ]);
+            if (nextSummary.user.id !== cached.session.user.id) throw new Error("Account mismatch");
+            await storage.saveSession({ token: cached.session.token, user: nextSummary.user });
+            await storage.saveBookings(nextSummary.user.id, nextBookings);
+            await storage.saveSummary(nextSummary.user.id, nextSummary);
+            if (!signal.aborted) {
+              setSummary(nextSummary);
+              setBookings(nextBookings);
+              setLastDataUpdate(new Date().toISOString());
+            }
+          } catch (error: unknown) {
+            const status = (error as { status?: number }).status;
+            // Solo 401/403 invalidan la sesión; cualquier otro fallo (red, 5xx) deja la comprobación como fallida.
+            if (status !== 401 && status !== 403) throw error;
+            if (status === 403) await storage.clearAccount(cached.session.user.id);
+            await storage.clearSession();
+            client.setToken(null);
+            if (!signal.aborted) {
+              setSummary(null);
+              setBookings(null);
+            }
+          }
+        }
+        if (!signal.aborted) setBoot(nextBoot);
+      },
+    });
+    connectivityRef.current = controller;
+    const appState = AppState.addEventListener("change", (next) => {
+      if (next === "active") void controller.checkNow();
+    });
+    return () => {
+      appState.remove();
+      controller.stop();
+      if (connectivityRef.current === controller) connectivityRef.current = null;
+    };
+  }, [client, storage]);
 
   // Sincronizar cola durable al conectar
   useEffect(() => {
@@ -198,6 +291,8 @@ export default function App() {
 
   const loadSession = useCallback(async () => {
     const [sum, list] = await Promise.all([client.panelSummary(), client.myBookings(false)]);
+    // Un inicio de sesión nuevo reabre la cuenta si se cerró antes en este dispositivo.
+    storage.openAccount(sum.user.id);
     setSummary(sum);
     setBookings(list);
     setLastDataUpdate(new Date().toISOString());
@@ -206,6 +301,7 @@ export default function App() {
     if (token) {
       await storage.saveSession({ token, user: sum.user });
       await storage.saveBookings(sum.user.id, list);
+      await storage.saveSummary(sum.user.id, sum);
     }
     await refreshPendingCount();
   }, [client, storage, refreshPendingCount]);
@@ -234,22 +330,22 @@ export default function App() {
     try {
       const p = await client.getOwnerBusinessProfile();
       setOwnerProfile(p);
-      setOwnerDisplayName(p.displayName);
-      setOwnerDescription(p.description);
-      setOwnerPrimaryCategory(p.primaryCategory);
-      setOwnerWebsiteUrl(p.websiteUrl ?? "");
-      setOwnerTermsUrl(p.termsUrl ?? "");
+      setOwnerDisplayName(p.content.displayName);
+      setOwnerDescription(p.content.description);
+      setOwnerPrimaryCategory(p.content.primaryCategory);
+      setOwnerWebsiteUrl(p.content.websiteUrl ?? "");
+      setOwnerTermsUrl(p.content.termsUrl ?? "");
       await storage.saveOwnerProfile(summary.user.id, p);
     } catch {
       const cached = await storage.loadOwnerProfile(summary.user.id);
-      if (cached?.data) {
+      if (cached?.data && !cached.isStale) {
         const p = cached.data as PrivateBusinessProfile;
         setOwnerProfile(p);
-        setOwnerDisplayName(p.displayName);
-        setOwnerDescription(p.description);
-        setOwnerPrimaryCategory(p.primaryCategory);
-        setOwnerWebsiteUrl(p.websiteUrl ?? "");
-        setOwnerTermsUrl(p.termsUrl ?? "");
+        setOwnerDisplayName(p.content.displayName);
+        setOwnerDescription(p.content.description);
+        setOwnerPrimaryCategory(p.content.primaryCategory);
+        setOwnerWebsiteUrl(p.content.websiteUrl ?? "");
+        setOwnerTermsUrl(p.content.termsUrl ?? "");
       }
     }
   }, [client, summary?.org, summary?.user?.id, storage]);
@@ -412,16 +508,55 @@ export default function App() {
   }, [boot, client, loadSession, s.googleUnavailable, s.signInError]);
 
   const onSignOut = useCallback(async () => {
-    if (summary?.user?.id) {
-      await storage.clearAccount(summary.user.id);
+    const accountId = summary?.user?.id;
+    if (!accountId) {
+      await storage.clearSession();
+      await client.signOut().catch(() => client.setToken(null));
+      return;
     }
-    storage.clearSession();
-    await client.signOut().catch(() => client.setToken(null));
-    setSummary(null);
-    setBookings(null);
-    setOwnerProfile(null);
-    setPendingOpsCount(0);
-  }, [client, storage, summary?.user?.id]);
+    setError(null);
+    setInfoMessage(null);
+    try {
+      const result = await requestSignOut({
+        accountId,
+        client,
+        storage,
+        // Avisa de los cambios sin sincronizar antes de borrarlos; cancelar conserva la sesión y los cambios.
+        confirmDiscard: (count) =>
+          new Promise<boolean>((resolve) => {
+            Alert.alert(
+              s.signOutPendingTitle,
+              s.signOutPendingBody.replace("{count}", String(count)),
+              [
+                { text: s.signOutCancel, style: "cancel", onPress: () => resolve(false) },
+                { text: s.signOutDiscard, style: "destructive", onPress: () => resolve(true) },
+              ],
+              { cancelable: true, onDismiss: () => resolve(false) },
+            );
+          }),
+      });
+      if (result.status === "cancelled") return;
+      setSummary(null);
+      setBookings(null);
+      setOwnerProfile(null);
+      setPendingOpsCount(0);
+      if (result.status === "purge_failed") setError(s.signOutFailed);
+      else if (result.status === "signed_out_unrevoked") setInfoMessage(s.signOutUnrevoked);
+    } catch {
+      // No se pudo leer o purgar el almacenamiento: no se informa de un cierre limpio.
+      setError(s.signOutFailed);
+    }
+  }, [
+    client,
+    storage,
+    summary?.user?.id,
+    s.signOutPendingTitle,
+    s.signOutPendingBody,
+    s.signOutCancel,
+    s.signOutDiscard,
+    s.signOutFailed,
+    s.signOutUnrevoked,
+  ]);
 
   const onSaveOwnerProfile = useCallback(async () => {
     if (!summary?.org || !summary?.user?.id) return;
@@ -432,30 +567,42 @@ export default function App() {
       displayName: ownerDisplayName.trim(),
       description: ownerDescription.trim(),
       primaryCategory: (ownerPrimaryCategory as never) || null,
-      secondaryCategories: [],
+      secondaryCategories: ownerProfile?.content.secondaryCategories ?? [],
       websiteUrl: ownerWebsiteUrl.trim() || null,
       termsUrl: ownerTermsUrl.trim() || null,
-      socialLinks: [],
+      socialLinks: ownerProfile?.content.socialLinks ?? [],
     };
     try {
-      if (conn === "connected") {
-        const updated = await client.updateOwnerBusinessProfile(
-          updates,
-          ownerProfile?.version ?? 1,
-          crypto.randomUUID(),
-        );
-        setOwnerProfile(updated);
-        await storage.saveOwnerProfile(summary.user.id, updated);
+      const accountId = summary.user.id;
+      const outcome = await submitOrQueue({
+        isOnline: () => connectivityRef.current?.state() === "connected",
+        operationId: Crypto.randomUUID(),
+        attempt: (operationId) =>
+          client.updateOwnerBusinessProfile(updates, ownerProfile?.version ?? 1, operationId),
+        // Sin conexión, o con un resultado incierto por fallo de red: se encola con la misma clave de idempotencia.
+        enqueue: async (operationId) => {
+          if (!ownerProfile) throw new Error("Profile not available offline");
+          const syncEngine = createSyncEngine({
+            client,
+            storage,
+            accountId,
+            createOperationId: Crypto.randomUUID,
+          });
+          await syncEngine.enqueue({
+            kind: "profile.update",
+            resourceId: ownerProfile.businessId,
+            businessId: ownerProfile.businessId,
+            baseVersion: ownerProfile?.version ?? 1,
+            payload: updates,
+            customOperationId: operationId,
+          });
+        },
+      });
+      if (outcome.status === "sent") {
+        setOwnerProfile(outcome.value);
+        await storage.saveOwnerProfile(accountId, outcome.value);
         setInfoMessage(t.panel.businessProfile.savedSuccess);
       } else {
-        const syncEngine = createSyncEngine({ client, storage, accountId: summary.user.id });
-        await syncEngine.enqueue({
-          kind: "profile.update",
-          resourceId: summary.org.id,
-          businessId: summary.org.id,
-          baseVersion: ownerProfile?.version ?? 1,
-          payload: updates,
-        });
         await refreshPendingCount();
         setInfoMessage(s.offlineSaved);
       }
@@ -473,8 +620,7 @@ export default function App() {
     ownerPrimaryCategory,
     ownerWebsiteUrl,
     ownerTermsUrl,
-    ownerProfile?.version,
-    conn,
+    ownerProfile,
     client,
     storage,
     refreshPendingCount,
@@ -487,7 +633,7 @@ export default function App() {
     setBusy(true);
     setError(null);
     try {
-      const updated = await client.publishBusiness(ownerProfile.version, crypto.randomUUID());
+      const updated = await client.publishBusiness(ownerProfile.version, Crypto.randomUUID());
       setOwnerProfile(updated);
       setInfoMessage(t.panel.businessProfile.publishedSuccess);
     } catch (err: unknown) {
@@ -503,7 +649,7 @@ export default function App() {
     setBusy(true);
     setError(null);
     try {
-      const updated = await client.unpublishBusiness(ownerProfile.version, crypto.randomUUID());
+      const updated = await client.unpublishBusiness(ownerProfile.version, Crypto.randomUUID());
       setOwnerProfile(updated);
       setInfoMessage(t.panel.businessProfile.unpublishedSuccess);
     } catch (err: unknown) {
@@ -840,8 +986,8 @@ export default function App() {
           <Text style={styles.h3}>{t.public.businessProfile.services}</Text>
           {selectedBusiness.bookingTargets && selectedBusiness.bookingTargets.length > 0 ? (
             selectedBusiness.bookingTargets.map((target) => (
-              <View key={target.calendarSlug} style={styles.targetRow}>
-                <Text style={styles.targetName}>{target.calendarName}</Text>
+              <View key={target.calendarId} style={styles.targetRow}>
+                <Text style={styles.targetName}>{target.slug}</Text>
                 <Pressable
                   testID={MOBILE_SELECTORS.businessProfileBookButton}
                   style={[styles.button, styles.primary]}
@@ -872,11 +1018,11 @@ export default function App() {
           <View style={styles.businessList}>
             {directoryItems.map((biz) => (
               <Pressable
-                key={biz.id}
+                key={biz.businessId}
                 testID={MOBILE_SELECTORS.directoryCard}
                 onPress={async () => {
                   try {
-                    const full = await client.getBusinessProfile(biz.id);
+                    const full = await client.getBusinessProfile(biz.businessId);
                     setSelectedBusiness(full);
                   } catch {}
                 }}
@@ -884,7 +1030,7 @@ export default function App() {
               >
                 <Text style={styles.businessName}>{biz.displayName}</Text>
                 <Text style={styles.businessCategory}>{biz.primaryCategory}</Text>
-                <Text style={styles.businessLocality}>{biz.locality}</Text>
+                <Text style={styles.businessLocality}>{biz.location.locality}</Text>
               </Pressable>
             ))}
           </View>

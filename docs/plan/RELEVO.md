@@ -2,6 +2,12 @@
 
 Fecha: 2026-10-27. Rama: `feat/perfiles-directorio-offline`.
 
+> Actualización 2026-11-03: este relevo es histórico. La afirmación de persistencia durable y
+> verificación móvil que sigue no estaba respaldada: el almacenamiento usado por la app era un
+> `Map` en memoria. La implementación en curso incorpora SQLite con SQLCipher y SecureStore, pero
+> todavía requiere compilar y verificar los binarios nativos y completar los flujos offline, la
+> gestión de pendientes y conflictos, y las pruebas de reinicio y sincronización en dispositivos.
+
 **Estado real: C0 a C8b implementados y verificados. C8c documentado (prerrequisitos de entorno nativo). C9 completado.**
 Todos los componentes de contratos, base de datos, motor Go, API privada y pública, procesamiento seguro de imágenes, directorio web SSR, perfil SSR, panel del propietario, soporte de 6 idiomas, cliente móvil con pantallas nativas, persistencia local cifrada AES-256-GCM y motor de sincronización offline con recibos idempotentes están implementados y verificados.
 No se hicieron push, merge ni despliegue sin autorización del usuario.

@@ -607,12 +607,12 @@ Todo el plan está pendiente al añadirse. Las verificaciones históricas del in
 | S07 | GPT-6.1 Sol | High | verificada | Estado efectivo proyectado al motor desde `syncCalendarStatus` bajo `FOR UPDATE`; 4 pruebas con PostgreSQL real, Go engine/outbox y escenario `reloj` aprobados. Véase registro S07. | S05–S06 |
 | S08 | GPT-6.1 Sol | High | verificada | Limitador atómico por IP y cuenta en los tres endpoints móviles; 8 pruebas con PostgreSQL real, límites activos. Véase registro S08. | S02; integrar tras S07 |
 | I01 | GPT-6.1 Sol | High | verificada | Lint, typecheck, i18n, unitarias (303 API, 14 admin, 81 + móvil), 76 de BD, Go y 86 escenarios backend aprobados con imágenes reconstruidas. Véase registro I01. | S01–S08 |
-| M01 | GPT-6 Luna | High | pendiente | — | Ninguna |
-| M02 | GPT-6 Luna | High | pendiente | — | M01 |
-| M03 | GPT-6.1 Sol | High | pendiente | — | M02 |
-| M04 | GPT-6 Luna | High | pendiente | — | M03 |
-| M05 | GPT-6.1 Sol | High | pendiente | — | M03–M04 |
-| M06 | GPT-6 Luna | High | pendiente | — | M05 |
+| M01 | GPT-6 Luna | High | verificada | Cliente alineado con los esquemas del servidor; 5 pruebas de contrato con los Zod reales. Véase registro M01. | Ninguna |
+| M02 | GPT-6 Luna | High | verificada (unitaria) | Plazos, clasificación de errores, controlador de conexión y guardado en línea/cola; 14 pruebas con reloj y transporte controlados. Falta prueba nativa (V01). Véase registro M02. | M01 |
+| M03 | GPT-6.1 Sol | High | verificada (unitaria) | Reconciliación de resultados inciertos antes de caducar; 13 regresiones nuevas que fallan con el código anterior. Véase registro M03. | M02 |
+| M04 | GPT-6 Luna | High | verificada (unitaria) | Cuota separada del historial y compactación segura; 8 pruebas. Falta reinicio/transacción nativa (V01). Véase registro M04. | M03 |
+| M05 | GPT-6.1 Sol | High | verificada (unitaria) | Barrera de salida por cuenta con drenaje de la sincronización, descarte de escrituras tardías y token ligado a la sincronización; 8 pruebas deterministas. Falta nativo (V01). Véase registro M05. | M03–M04 |
+| M06 | GPT-6 Luna | High | verificada (unitaria) | Confirmación ante pendientes, contador de todos los estados no confirmados y textos en 6 idiomas; 7 pruebas. Falta interacción nativa (V01). Véase registro M06. | M05 |
 | C01 | GPT-6.1 Sol | High | pendiente | — | I01, M03 |
 | C02a | GPT-6.1 Sol | High | pendiente | — | Contrato C01 |
 | C02b | GPT-6.1 Sol | High | pendiente | — | C02a |
@@ -789,3 +789,72 @@ Las claves se consultan únicamente en `https://www.googleapis.com/oauth2/v3/cer
 **Hallazgos 1–5:** 1 (Google) S01–S02; 2 (credenciales admin) S03; 3–4 (bloqueo y desbloqueo) S04–S07; 5 (límites móviles) S08. Cada uno tiene regresión ejecutada.
 
 **Pendiente operativo, no ejecutado ni autorizado:** rotar la cuenta administrativa y revocar sesiones en instalaciones existentes, inventariar filas `suspended` legacy y revisar sesiones tras el despliegue. El limitador de S08 no se ejerce en los escenarios (corren con `TEST_MODE`). Sin despliegue.
+
+### Registro de ejecución — M01 (2026-11-03)
+
+**Estado:** verificada. **Siguiente tarea:** M02.
+
+**Defectos corregidos** (`services/mobile/src/index.ts`): `addBusinessLocation` enviaba `{ ...sede, expectedVersion }` en vez de `{ location, expectedVersion }` y declaraba un perfil como respuesta (el servidor devuelve `PrivateLocation`); `deleteBusinessLocation` mandaba `expectedVersion` en la URL, sin cuerpo ni `Idempotency-Key` (el servidor exige `{ expectedVersion }` y la clave, y responde 204); `assignCalendarLocation` omitía la clave. Ahora los tres reciben `idempKey`/`location` y cuerpos conformes. No se añadieron operaciones nuevas.
+
+**Pruebas:** `tests/unit/mobile-app.test.js` («contrato de sedes»): el cliente real, con `fetch` como única frontera, genera cuerpo y cabeceras que cumplen `CreateBusinessLocation`, `ChangeBusinessPublication` y `AssignBusinessCalendar` de `@mcet/schemas` (los mismos que usa el controlador), recibe una sede que cumple `PrivateLocation`, acepta 204 y rechaza sede/versión inválidas antes del `fetch`. Publicar/despublicar también cumplen. **Verificaciones:** M1 (26 pruebas), M2 y Biome aprobados.
+
+**Límite:** el contrato se probó contra los esquemas compartidos, no contra una API desplegada con sesión de propietario.
+
+### Registro de ejecución — M02 (2026-11-03)
+
+**Estado:** verificada en pruebas unitarias; la prueba nativa de la transición pertenece a V01. **Siguiente tarea:** M03.
+
+**Cambios:**
+
+- `src/index.ts`: cada petición tiene plazo (`timeoutMs`, 15 s por defecto) que cubre también la lectura del cuerpo, y acepta una `AbortSignal`. Los fallos son `{ status: 0, code: "timeout" | "network" | "aborted" }`; `isTransportError` es cierto para status 0 (salvo cancelación pedida) y 502/503/504. 401, 403, 409, 422 y 500 son respuestas del servidor y nunca cuentan como falta de red. Un éxito con cuerpo no JSON se rechaza (`invalid_response`) y un error no JSON ya no lanza `SyntaxError`. Hook `onTransportError` del cliente.
+- `src/connectivity.ts` (nuevo): `createConnectivityController` (estado decidido por el servidor, una comprobación en vuelo, sondeo cada 30 s solo sin conexión, comprobación inmediata al volver a primer plano, `stop` que cancela y descarta resultados antiguos) y `submitOrQueue`: si el envío falla por transporte —resultado incierto— se encola con la **misma clave de idempotencia**; cualquier respuesta del servidor se propaga sin encolar.
+- `App.tsx`: el controlador se crea en un efecto (compatible con StrictMode), recibe los fallos de transporte del cliente y `AppState`; la comprobación de recuperación reutiliza la restauración de sesión y refresco de datos existente. Guardar el perfil usa `submitOrQueue`. Se eliminó el efecto que solo comprobaba cuando `conn` ya era `offline`.
+
+**Pruebas:** `tests/unit/mobile-connectivity.test.js` (14, reloj simulado y `fetch` controlado): plazo vencido, red caída, 502/503/504 vs 401/403/404/409/422/500, cancelación, cuerpos no JSON; arrancar conectado → perder red → guardar en cola → recuperar; 401 sin efecto; API caída sin solapar comprobaciones; primer plano; desmontaje; probe síncrono que lanza. **Verificaciones:** M1 (40 pruebas), M2, Biome y `pnpm lint` aprobados.
+
+**Límites:** la mutación incierta se reenvía solo vía la cola y con la misma clave; que el servidor conserve el recibo es la subdependencia de M03. Sin dependencia nueva (no se usa NetInfo). No se ejecutó en dispositivo.
+
+### Registro de ejecución — M03 (2026-11-03)
+
+**Estado:** verificada en pruebas unitarias; reinicio y dispositivo en V01. **Siguiente tarea:** M04.
+
+**Cambios (`services/mobile/src/sync.ts`):** el plazo de 24 h solo impide **nuevos** envíos. Una operación `sending`, o `pending/authentication_required` con `retryCount > 0`, tiene un resultado incierto y se reconcilia antes de declararla caducada (también aunque dependa de otra pendiente: consultar no muta). `getPendingOperations` ya no caduca operaciones con `retryCount > 0`. Resultados: recibo 2xx → `synced` sin reenviar; 404 → no se aplicó (dentro de plazo se reenvía **con la misma clave**; fuera de plazo `expired` con `lastError: "expired_unsent"` y sin enviar); 410 → resultado desconocido, `expired` con `outcome_unknown`, sin reenviar; 401 → pausa con `authRequired` y conserva la operación; red/5xx al consultar → conserva la incertidumbre; recibo con error: 409 → `conflict`, 403/422 → `failed`, otro 4xx → `failed`, 5xx no concluyente; nunca se convierte en éxito.
+
+**Subdependencia comprobada — recibos durables reales:** solo `business-profile.service.ts` escribe `app.offline_operations` (perfil, publicar, sedes, imágenes, asignación). `POST /my/bookings/:id/cancel` **ignora** `Idempotency-Key` y no guarda recibo, así que los tests anteriores que suponían un recibo de `booking.cancel` eran incorrectos. Decisión: `booking.cancel` se reconcilia **por estado** con `GET /my/bookings?includePast=true`, que no incluye citas canceladas (`status <> 'cancelled'` en el motor): cita ausente o cancelada → se aplicó (`synced`, sin reenviar); cita vigente y fuera de plazo → no se envía; vigente y dentro de plazo → se reenvía con la clave original; error de red → se conserva la incertidumbre. Limitación: una cita ausente por otra causa (borrada por el negocio) también se da por cancelada, que es el resultado que la persona buscaba. No se modificó el servidor.
+
+**Pruebas:** `tests/unit/mobile-offline.test.js` (+13; 2 existentes adaptados a `profile.update`): timeout tras commit y reapertura >24 h; 404 vencido sin mutar; caída al consultar; 401; 410; reenvío con clave original; recibos 409/422/403/500; nunca enviada y vencida; cancelación por estado (4 casos). Con el `sync.ts` anterior, las regresiones específicas de M03 fallan. **Verificaciones:** M1 (61 pruebas), M2 y Biome aprobados.
+
+### Registro de ejecución — M04 (2026-11-03)
+
+**Estado:** verificada en pruebas unitarias; transacción nativa y reinicio en V01. **Siguiente tarea:** M05.
+
+**Cambios (`services/mobile/src/storage.ts`):** la cuota de 100 cuenta solo operaciones no confirmadas (`state !== "synced"`). `compactQueue` retira únicamente `synced` y conserva: las referenciadas en `dependsOn` por alguna no confirmada (sin ellas el sincronizador bloquearía para siempre a sus dependientes), las `SYNCED_HISTORY_MAX = 20` más recientes y solo las más jóvenes que `operationReceiptDays` (90). `sending`, `pending`, `conflict`, `failed`, `expired` y `authentication_required` nunca se compactan. Compactar y añadir son una sola escritura de la cola (con el backend SQLite, una transacción exclusiva): si falla, la cola previa queda intacta. Se mantiene la cota de bytes.
+
+**Pruebas (+8):** más de 100 completadas permiten encolar; 100 pendientes siguen bloqueando; estados no terminales intactos tras 60 compactaciones; dependencia de una confirmada conservada y liberada después; el sincronizador libera al dependiente tras compactar; retención de 90 días; disco lleno no pierde la cola; escrituras simultáneas preservan ambas operaciones. **Verificaciones:** M1 (61), M2, Biome.
+
+**Límite:** `failed`/`expired` ocupan cuota hasta que la persona los descarte; su visibilidad en la interfaz es de M06.
+
+### Registro de ejecución — M05 (2026-11-03)
+
+**Estado:** verificada en pruebas deterministas con promesas controladas; nativo en V01. **Siguiente tarea:** M06.
+
+**Cambios:**
+
+- `storage.ts`: barrera por cuenta (`beginExit` → `closing`; `clearAccount` → `closed` **antes** de purgar; `openAccount`; `accountState`). Con la cuenta `closed`, `saveBookings/saveSummary/saveOwnerProfile`, `updateOperation` y `removeOperation` descartan la escritura tardía y `enqueueOperation` lanza `AccountClosedError`. Una respuesta que llega después de la purga no recrea datos privados, tampoco si la purga falla.
+- `sync.ts`: la sincronización queda ligada a la sesión con que empezó (`client.getToken()`); si la cuenta pasa a `closing/closed` o el token cambia, se detiene antes de la siguiente operación (`interruptedBy: "exit" | "session_changed"`) y también descarta una consulta de recibo hecha mientras cambiaba la sesión. Así la cola de A nunca se envía con el token de B. `awaitActiveSync` espera (con plazo) a la sincronización en vuelo sin propagar sus errores.
+- `session-exit.ts` (nuevo): `signOutAccount` = `beginExit` → drenar → `clearAccount` → revocar token → olvidar sesión local. Resultado explícito: `signed_out`, `signed_out_unrevoked` (sin red: la sesión local se cierra igualmente, el servidor puede seguir considerándola válida hasta que caduque) o `purge_failed`. No deshace mutaciones ya confirmadas.
+- `App.tsx`: `onSignOut` usa la barrera; `loadSession` reabre la cuenta al iniciar sesión.
+
+**Pruebas (`tests/unit/mobile-session-exit.test.js`, 8, estables en 3 ejecuciones):** respuesta tardía tras la purga sin recrear lecturas/colas; espera agotada; cambio de token sin enviar la cola anterior; la cuenta B no se ve afectada; red caída al revocar; 401 al revocar; fallo de purga; reapertura. **Verificaciones:** M1 (69 pruebas), M2, Biome.
+
+**Límites:** los avisos de interfaz para `signed_out_unrevoked` y `purge_failed` y la confirmación ante pendientes son de M06.
+
+### Registro de ejecución — M06 (2026-11-03)
+
+**Estado:** verificada en pruebas unitarias; interacción nativa en V01. **Siguiente tarea:** C01.
+
+**Cambios:** `session-exit.ts`: `requestSignOut` cuenta los cambios no confirmados (`unresolvedOperations` = todo salvo `synced`: pendientes, en envío, esperando acceso, con conflicto, fallidos y caducados) y pide confirmación antes de descartarlos; cancelar no toca sesión, token, cola ni cuenta; con cero pendientes sale directo; un fallo al leer la cola se propaga (no se descarta a ciegas). `App.tsx`: `Alert.alert` nativo (accesible, sin librería nueva) con «Cancelar» y «Descartar y salir» (`destructive`), `onDismiss` = cancelar; el contador del banner usa `unresolvedOperations`; `purge_failed` y los errores de lectura/purga muestran `signOutFailed` y `signed_out_unrevoked` muestra `signOutUnrevoked`, ambos con región viva accesible. `index.ts`: seis claves nuevas en es, en, fr, pt, de e it (tipadas: el compilador exige los seis idiomas).
+
+**Pruebas (+7 en `mobile-session-exit.test.js`):** cero pendientes sin preguntar; cuenta de los seis estados; cancelar conserva todo; confirmar borra privados de la cuenta sin tocar directorio/perfiles públicos ni la cuenta B; fallo de purga; fallo de lectura; los seis idiomas tienen los textos, con `{count}`. **Verificaciones:** M1 (76 pruebas), M2, `pnpm i18n:check`, `pnpm lint`.
+
+**Límite:** no se ejercitó el diálogo en un dispositivo; sin librería de pruebas de interacción nueva.
