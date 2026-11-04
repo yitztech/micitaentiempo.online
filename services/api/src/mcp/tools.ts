@@ -1210,7 +1210,7 @@ export function errorResult(err: unknown, lang: Lang): CallToolResult {
   } else if (err instanceof HttpException) {
     const body = err.getResponse() as { code?: string; message?: string };
     const status = err.getStatus();
-    if (body.code === "org_read_only") code = "read_only";
+    if (body.code === "org_read_only" || body.code === "org_suspended") code = "read_only";
     else if (status === 403) code = "permission_denied";
     else if (status === 404) code = "not_found";
     else if (status === 409) code = "conflict";

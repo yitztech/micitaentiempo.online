@@ -177,10 +177,13 @@ services:
       DB_USER: api
       DB_PASSWORD: ${API_DB_PASSWORD:?Define API_DB_PASSWORD}
       ADMIN_DATA_DIR: /data
+      ADMIN_INITIAL_USER: ${ADMIN_INITIAL_USER:?Define ADMIN_INITIAL_USER}
+      ADMIN_INITIAL_PASSWORD: ${ADMIN_INITIAL_PASSWORD:?Define ADMIN_INITIAL_PASSWORD}
     volumes:
       - admin-data:/data
     depends_on:
       postgres: { condition: service_healthy }
+      api: { condition: service_healthy }
     healthcheck:
       test: [CMD, wget, -q, -O, /dev/null, "http://127.0.0.1:3000/healthz"]
       interval: 10s

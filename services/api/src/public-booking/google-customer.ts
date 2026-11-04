@@ -1,34 +1,31 @@
 import type { Lang } from "@mcet/i18n";
-import { FullName } from "@mcet/schemas";
+import { UnauthorizedException } from "@nestjs/common";
+import { APIError } from "better-auth/api";
+import { createRemoteJWKSet, type JWTVerifyGetKey } from "jose";
 import type { Auth } from "../auth/auth.factory.js";
+import { requireUnrestrictedUser } from "../auth/org-access.js";
 import type { Env } from "../config/env.js";
-
-const GOOGLE_ISSUERS = new Set(["accounts.google.com", "https://accounts.google.com"]);
+import type { Database } from "../db/db.module.js";
+import { createGoogleIdTokenVerifier } from "./google-id-token.js";
 
 export interface GoogleIdentity {
   email: string;
   name: string;
 }
 
-/**
- * Identidad del `id_token` de Google recibido directamente de su endpoint de tokens por TLS (OIDC Core
- * §3.1.3.7 permite validar por el canal en lugar de la firma). Exige correo verificado, nuestra audiencia
- * y el emisor de Google; si no, null.
- */
-export function identityOf(idToken: unknown, clientId: string, testMode: boolean): GoogleIdentity | null {
-  if (typeof idToken !== "string") return null;
-  let p: { email?: unknown; email_verified?: unknown; aud?: unknown; iss?: unknown; name?: unknown };
-  try {
-    p = JSON.parse(Buffer.from(idToken.split(".")[1] ?? "", "base64url").toString("utf8"));
-  } catch {
-    return null;
+const testKeyResolvers = new WeakMap<Env, JWTVerifyGetKey>();
+
+function tokenVerifier(env: Env) {
+  let keys: JWTVerifyGetKey | undefined;
+  // Solo configuración del servidor en entornos de pruebas; las firmas siguen siendo obligatorias.
+  if (env.TEST_MODE && env.GOOGLE_JWKS_FAKE_URL) {
+    keys = testKeyResolvers.get(env);
+    if (!keys) {
+      keys = createRemoteJWKSet(new URL(env.GOOGLE_JWKS_FAKE_URL), { timeoutDuration: 5_000 });
+      testKeyResolvers.set(env, keys);
+    }
   }
-  if (typeof p.email !== "string" || p.email_verified !== true) return null;
-  if (p.aud !== clientId) return null;
-  if (!testMode && !GOOGLE_ISSUERS.has(String(p.iss))) return null;
-  const rawName = typeof p.name === "string" ? p.name : "";
-  const parsedName = FullName.safeParse(rawName);
-  return { email: p.email.toLowerCase(), name: parsedName.success ? parsedName.data : "" };
+  return createGoogleIdTokenVerifier(env.GOOGLE_CLIENT_ID ?? "", keys);
 }
 
 /**
@@ -58,7 +55,7 @@ export async function exchangeGoogleCode(
   }).catch(() => undefined);
   if (!res?.ok) return null;
   const data = (await res.json().catch(() => null)) as { id_token?: string } | null;
-  return identityOf(data?.id_token, env.GOOGLE_CLIENT_ID, Boolean(env.TEST_MODE));
+  return tokenVerifier(env)(data?.id_token);
 }
 
 /**
@@ -70,7 +67,7 @@ export async function resolveGoogleMobileIdentity(
 ): Promise<GoogleIdentity | null> {
   if (!env.GOOGLE_CLIENT_ID) return null;
   if (input.idToken) {
-    return identityOf(input.idToken, env.GOOGLE_CLIENT_ID, Boolean(env.TEST_MODE));
+    return tokenVerifier(env)(input.idToken);
   }
   if (input.code) {
     return exchangeGoogleCode(env, input.code, input.redirectUri ?? "postmessage", input.codeVerifier);
@@ -79,7 +76,12 @@ export async function resolveGoogleMobileIdentity(
 }
 
 /** Sesión Bearer para esa identidad (crea la cuenta, ya verificada, si no existe). */
-export async function customerSessionFor(auth: Auth, id: GoogleIdentity, lang: Lang) {
+export async function customerSessionFor(
+  auth: Auth,
+  id: GoogleIdentity,
+  lang: Lang,
+  db?: Pick<Database, "select">,
+) {
   const ctx = await auth.$context;
   const found = await ctx.internalAdapter.findUserByEmail(id.email);
   let user = found?.user;
@@ -88,10 +90,23 @@ export async function customerSessionFor(auth: Auth, id: GoogleIdentity, lang: L
       { email: id.email, name: id.name, emailVerified: true, locale: lang },
       { method: "google-customer" },
     );
-  } else if (!user.emailVerified) {
-    user = (await ctx.internalAdapter.updateUser(user.id, { emailVerified: true })) ?? user;
+  } else {
+    if (db) {
+      await requireUnrestrictedUser(db, user.id);
+    }
+    if (!user.emailVerified) {
+      user = (await ctx.internalAdapter.updateUser(user.id, { emailVerified: true })) ?? user;
+    }
   }
-  const session = await ctx.internalAdapter.createSession(user.id);
+  const session = await ctx.internalAdapter.createSession(user.id).catch((err: unknown) => {
+    if (err instanceof APIError && err.statusCode === 401) {
+      throw new UnauthorizedException({ code: "unauthenticated", message: "Sesión no válida" });
+    }
+    throw err;
+  });
+  if (!session) {
+    throw new UnauthorizedException({ code: "unauthenticated", message: "Sesión no válida" });
+  }
   const u = user as typeof user & { locale?: string; timezone?: string };
   return {
     token: session.token,

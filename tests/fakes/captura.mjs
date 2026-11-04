@@ -3,6 +3,8 @@
 //   DELETE /__requests                 → vaciar
 //   POST   /__fail {"path": "...", "status": 403} → la siguiente petición a ese prefijo falla
 //   GET    /__cimd/<dominio>/<ruta>    → documento CIMD de una «aplicación de IA» de prueba (MCP)
+
+import { generateKeyPairSync, sign } from "node:crypto";
 import { createServer } from "node:http";
 
 const PORT = Number(process.env.PORT ?? 4010);
@@ -75,8 +77,31 @@ function account(name) {
   }
   return a;
 }
-const fakeJwt = (email, aud) =>
-  `e30.${Buffer.from(JSON.stringify({ email, preferred_username: email, email_verified: true, aud, iss: "https://accounts.google.com" })).toString("base64url")}.x`;
+const googleSigningKeys = generateKeyPairSync("rsa", { modulusLength: 2048 });
+const googleJwk = {
+  ...googleSigningKeys.publicKey.export({ format: "jwk" }),
+  kid: "capture-google",
+  alg: "RS256",
+  use: "sig",
+};
+function fakeJwt(email, aud) {
+  const now = Math.floor(Date.now() / 1000);
+  const header = Buffer.from(JSON.stringify({ alg: "RS256", kid: googleJwk.kid })).toString("base64url");
+  const payload = Buffer.from(
+    JSON.stringify({
+      sub: email,
+      iat: now,
+      exp: now + 3600,
+      email,
+      preferred_username: email,
+      email_verified: true,
+      aud,
+      iss: "https://accounts.google.com",
+    }),
+  ).toString("base64url");
+  const input = `${header}.${payload}`;
+  return `${input}.${sign("RSA-SHA256", Buffer.from(input), googleSigningKeys.privateKey).toString("base64url")}`;
+}
 function authorize(url, res, prefix) {
   const name =
     url.searchParams.get("login_hint") || `${prefix}-${++prov.n}${Date.now().toString(36)}@example.com`;
@@ -116,6 +141,7 @@ function bearer(req) {
 }
 function fakeGoogle(req, url, body, res) {
   const p = url.pathname.replace("/google", "");
+  if (p === "/jwks") return json(res, 200, { keys: [googleJwk] });
   if (p === "/authorize") return authorize(url, res, "google");
   if (p === "/token") return tokenEndpoint(body, res);
   const a = bearer(req);

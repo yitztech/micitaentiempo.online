@@ -18,6 +18,8 @@ pnpm test:env:up
 
 El entorno `mcet-tests` usa exclusivamente datos sintéticos y `.env.ci`. Levanta las imágenes del código actual, PostgreSQL, Mailpit y dobles HTTP de proveedores. Ocupa los puertos 8080, 18025, 4010 y 5232; comprueba que están libres antes de levantarlo. No reutilices bases ni credenciales de producción. Las suites SQL crean otros PostgreSQL efímeros mediante Testcontainers y los eliminan al terminar. No aceptan un DSN de producción.
 
+Google usa firmas RS256 reales con claves efímeras del servidor de captura. `GOOGLE_JWKS_FAKE_URL`, configurada solo en `compose.ci.yml`, requiere `TEST_MODE` y dominios de prueba; no se permite activarla con configuración productiva. Sin esa configuración, la API obtiene exclusivamente el JWKS oficial de Google. Tanto el login directo como el canje de código verifican la firma y la caducidad; no se admiten tokens de prueba con firmas ficticias.
+
 ### Si un puerto está ocupado
 
 Los puertos publicados son 8080 (gateway), 18025 (Mailpit), 4010 (dobles de proveedores) y 5232 (CalDAV). Para cambiar Mailpit usa la misma dirección en Compose y en las pruebas:

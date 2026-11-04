@@ -36,10 +36,24 @@ const env = loadEnv({
   ALTCHA_HMAC_KEY: "e".repeat(32),
 });
 
-function setup() {
+function setup(options: { restricted?: boolean; failDb?: boolean } = {}) {
+  const select = vi.fn(() => ({
+    from: () => ({
+      where: async () => {
+        if (options.failDb) throw new Error("db_unavailable");
+        return options.restricted ? [{ id: "user-1", userId: "user-1" }] : [];
+      },
+      innerJoin: () => ({
+        where: async () => {
+          if (options.failDb) throw new Error("db_unavailable");
+          return options.restricted ? [{ id: "user-1", userId: "user-1" }] : [];
+        },
+      }),
+    }),
+  }));
   const auth = createAuth("es", {
     env,
-    db: {} as AuthDeps["db"],
+    db: { select } as unknown as AuthDeps["db"],
     mail: {} as AuthDeps["mail"],
   });
   const before = auth.options.hooks?.before;
@@ -53,6 +67,7 @@ function setup() {
         body: { name: "Ana López", email: "ana@gmail.com", password: "una-clave-bien-larga-2026" },
       } as unknown as Parameters<typeof before>[0]),
     auth,
+    select,
   };
 }
 
@@ -73,4 +88,43 @@ describe("CAPTCHA en autenticación con configuración de producción", () => {
       expect(auth.options.rateLimit?.customRules?.[path]).toEqual({ window: 3600, max: 5 });
     },
   );
+
+  it.each([
+    "/sign-in/email",
+    "/email-otp/send-verification-otp",
+    "/sign-in/email-otp",
+    "/send-verification-email",
+    "/request-password-reset",
+    "/forget-password",
+  ])("rechaza %s con 401 genérico cuando el correo pertenece a una cuenta restringida", async (path) => {
+    const { run } = setup({ restricted: true });
+    await expect(run(path)).rejects.toMatchObject({
+      status: "UNAUTHORIZED",
+      body: { code: "UNAUTHENTICATED" },
+    });
+  });
+
+  it("falla en cerrado si la consulta de restricción falla en hooks de entrada o sesión", async () => {
+    const { run, auth } = setup({ failDb: true });
+    await expect(run("/sign-in/email")).rejects.toThrow("db_unavailable");
+    const createBefore = auth.options.databaseHooks?.session?.create?.before;
+    expect(createBefore).toBeDefined();
+    await expect(createBefore?.({ userId: "user-1" } as never)).rejects.toThrow("db_unavailable");
+  });
+
+  it("impide crear o renovar sesiones de cuentas restringidas en databaseHooks", async () => {
+    const { auth } = setup({ restricted: true });
+    const createBefore = auth.options.databaseHooks?.session?.create?.before;
+    const updateBefore = auth.options.databaseHooks?.session?.update?.before;
+    expect(createBefore).toBeDefined();
+    expect(updateBefore).toBeDefined();
+    await expect(createBefore?.({ userId: "user-1" } as never)).rejects.toMatchObject({
+      status: "UNAUTHORIZED",
+      body: { code: "UNAUTHENTICATED" },
+    });
+    await expect(updateBefore?.({ userId: "user-1" } as never)).rejects.toMatchObject({
+      status: "UNAUTHORIZED",
+      body: { code: "UNAUTHENTICATED" },
+    });
+  });
 });

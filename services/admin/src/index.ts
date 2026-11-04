@@ -33,6 +33,11 @@ export async function buildAdminApp(
   const config = { ...loadConfig(), ...configOverride };
   const adminDb = adminDbOverride ?? createAdminDatabase(config);
   const platformDb = platformDbOverride ?? createPlatformDatabase(config);
+  const legacyRestrictions = adminDb.getBlockedUsers();
+  const imported = await platformDb.importLegacyRestrictions(legacyRestrictions);
+  if (imported.orphaned > 0) {
+    console.warn(`[admin] restricciones SQLite sin usuario de plataforma: ${imported.orphaned}`);
+  }
   const auth = new AuthService(adminDb, config);
 
   const app = fastify({ logger: false });

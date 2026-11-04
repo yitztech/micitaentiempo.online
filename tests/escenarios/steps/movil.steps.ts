@@ -4,6 +4,37 @@ import { idioma, sitio, Then, When } from "../fixtures/sitio";
 
 type Persona = { email: string; dominio: "es" | "en" };
 
+When("presenta una identidad Google falsificada en {string}", async ({ request, estado }, ruta: string) => {
+  const features = await request.get(`${sitio.es}/api/public/v1/features`);
+  const { googleClientId } = (await features.json()) as { googleClientId: string };
+  const payload = {
+    sub: "forged-google-user",
+    email: `forged-${randomUUID()}@escenarios.test`,
+    email_verified: true,
+    aud: googleClientId,
+    iss: "https://accounts.google.com",
+    iat: Math.floor(Date.now() / 1000) - 10,
+    exp: Math.floor(Date.now() / 1000) + 3600,
+  };
+  const idToken = `e30.${Buffer.from(JSON.stringify(payload)).toString("base64url")}.firma`;
+  const res = await request.post(`${sitio.es}${ruta}`, {
+    headers: { Origin: sitio.es },
+    data: { idToken },
+  });
+  estado.googleInvalidStatus = res.status();
+  estado.googleInvalidBody = await res.json();
+  estado.googleInvalidCookies = res.headers()["set-cookie"];
+});
+
+Then("Google rechaza la identidad sin emitir una sesión", async ({ request, estado }) => {
+  expect(estado.googleInvalidStatus).toBe(400);
+  expect(estado.googleInvalidBody).toMatchObject({ code: "google_failed" });
+  expect(estado.googleInvalidBody).not.toHaveProperty("token");
+  expect(estado.googleInvalidCookies).toBeUndefined();
+  const res = await request.get(`${sitio.es}/api/v1/mobile/summary`);
+  expect(res.status()).toBe(401);
+});
+
 function valorDeCaso(caso: string): string {
   if (caso === "vacío") return "";
   if (caso === "espacios") return "   ";
@@ -148,15 +179,14 @@ When(
   async ({ request, estado }, email: string) => {
     const featRes = await request.get(`${sitio.es}/api/public/v1/features`);
     const feat = (await featRes.json()) as { googleClientId: string };
-    const idToken = `e30.${Buffer.from(
-      JSON.stringify({
-        email,
-        name: "Clienta Móvil",
-        email_verified: true,
-        aud: feat.googleClientId,
-        iss: "https://accounts.google.com",
-      }),
-    ).toString("base64url")}.firma`;
+    const tokenRes = await request.post(
+      `${process.env.CAPTURA_URL ?? "http://localhost:4010"}/google/token`,
+      {
+        form: { code: `prueba:${email}`, client_id: feat.googleClientId, grant_type: "authorization_code" },
+      },
+    );
+    expect(tokenRes.status(), await tokenRes.text()).toBe(200);
+    const { id_token: idToken } = (await tokenRes.json()) as { id_token: string };
     const res = await request.post(`${sitio.es}/api/public/v1/mobile/auth/google`, {
       data: { idToken },
     });

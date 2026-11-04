@@ -1,5 +1,6 @@
 import { isLang, type Lang } from "@mcet/i18n";
 import { Inject, Injectable } from "@nestjs/common";
+import { APIError } from "better-auth/api";
 import type { FastifyRequest } from "fastify";
 import { requestLang, toHeaders } from "../common/request.js";
 import { ENV } from "../config/config.module.js";
@@ -7,6 +8,7 @@ import type { Env } from "../config/env.js";
 import { type Database, DB } from "../db/db.module.js";
 import { MailService } from "../mail/mail.service.js";
 import { type Auth, createAuth } from "./auth.factory.js";
+import { isUserRestricted } from "./org-access.js";
 
 export interface SessionUser {
   id: string;
@@ -28,7 +30,7 @@ export class AuthRegistry {
 
   constructor(
     @Inject(ENV) private readonly env: Env,
-    @Inject(DB) db: Database,
+    @Inject(DB) private readonly db: Database,
     mail: MailService,
   ) {
     const deps = { env, db, mail };
@@ -60,12 +62,18 @@ export class AuthRegistry {
   async session(
     req: Pick<FastifyRequest, "headers">,
   ): Promise<{ user: SessionUser; sessionId: string; cookies: string[] } | null> {
-    const res = await this.forRequest(req).api.getSession({
-      headers: toHeaders(req.headers),
-      returnHeaders: true,
-    });
+    const res = await this.forRequest(req)
+      .api.getSession({
+        headers: toHeaders(req.headers),
+        returnHeaders: true,
+      })
+      .catch((err: unknown) => {
+        if (err instanceof APIError && err.statusCode === 401) return null;
+        throw err;
+      });
     if (!res?.response) return null;
     const u = res.response.user as typeof res.response.user & { locale?: string; timezone?: string };
+    if (await isUserRestricted(this.db, u.id)) return null;
     return {
       sessionId: res.response.session.id,
       cookies: res.headers.getSetCookie(),

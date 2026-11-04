@@ -1,4 +1,5 @@
-import { Pool as PgPool, type Pool } from "pg";
+import { randomUUID } from "node:crypto";
+import { Pool as PgPool, type Pool, type PoolClient } from "pg";
 import type { AdminConfig } from "../config.js";
 
 export interface PlatformUser {
@@ -16,6 +17,63 @@ export interface PlatformUser {
   org_cancel_at_period_end: boolean | null;
   org_current_period_end: string | null;
   is_blocked?: boolean;
+}
+
+export interface PlatformBlockedUser {
+  user_id: string;
+  email: string;
+  reason: string;
+  blocked_at: string;
+  blocked_by: string;
+  reconciliation_required: boolean;
+}
+
+export interface RestrictionChange {
+  userId: string;
+  email: string;
+  reason: string;
+  blockedAt: string;
+  blockedBy: string;
+  reconciliationRequired: boolean;
+  changed: boolean;
+  calendarStatusPending: boolean;
+}
+
+export class PlatformDatabaseUnavailableError extends Error {
+  constructor(options?: ErrorOptions) {
+    super("No se pudo completar la operación en PostgreSQL", options);
+    this.name = "PlatformDatabaseUnavailableError";
+  }
+}
+
+export class PlatformUserNotFoundError extends Error {
+  constructor() {
+    super("Usuario de plataforma no encontrado");
+    this.name = "PlatformUserNotFoundError";
+  }
+}
+
+export class RestrictionReconciliationRequiredError extends Error {
+  constructor() {
+    super("La suspensión histórica requiere reconciliación antes de desbloquear");
+    this.name = "RestrictionReconciliationRequiredError";
+  }
+}
+
+export interface LegacyBlockedUser {
+  user_id: string;
+  email: string;
+  reason: string;
+  blocked_at: string;
+  blocked_by: string;
+}
+
+interface RestrictionRow {
+  user_id: string;
+  reason: string;
+  blocked_at: string | Date;
+  blocked_by: string;
+  reconciliation_required: boolean;
 }
 
 export interface PlatformSubscription {
@@ -116,8 +174,10 @@ export class PlatformDatabase {
   private pool: Pool | null = null;
   private isConnected = false;
 
-  constructor(config: AdminConfig) {
-    if (config.pg.host) {
+  constructor(config: AdminConfig, poolOverride?: Pool) {
+    if (poolOverride) {
+      this.pool = poolOverride;
+    } else if (config.pg.host) {
       try {
         this.pool = new PgPool({
           host: config.pg.host,
@@ -129,14 +189,14 @@ export class PlatformDatabase {
           max: 5,
         });
         // Intenta verificar la conexión silenciosamente
-        this.pool
-          .query("SELECT 1")
-          .then(() => {
+        void this.pool.query("SELECT 1").then(
+          () => {
             this.isConnected = true;
-          })
-          .catch(() => {
+          },
+          () => {
             this.isConnected = false;
-          });
+          },
+        );
       } catch {
         this.pool = null;
         this.isConnected = false;
@@ -144,8 +204,8 @@ export class PlatformDatabase {
     }
   }
 
-  async getStats(blockedCount: number): Promise<PlatformStats> {
-    if (this.pool && this.isConnected) {
+  async getStats(blockedCount = 0): Promise<PlatformStats> {
+    if (this.pool) {
       try {
         const usersRes = await this.pool.query(`
           SELECT
@@ -165,6 +225,7 @@ export class PlatformDatabase {
           WHERE deleted_at IS NULL
           GROUP BY status, plan, cancel_at_period_end
         `);
+        const blockedRes = await this.pool.query("SELECT count(*)::int AS count FROM app.user_restrictions");
 
         let totalEvents = 0;
         try {
@@ -215,11 +276,11 @@ export class PlatformDatabase {
           personalPlans,
           branchesPlans,
           totalAppointments: totalEvents,
-          blockedUsers: blockedCount,
+          blockedUsers: Number(blockedRes.rows[0]?.count) || 0,
           mrrEstimate: mrr,
         };
-      } catch {
-        // En caso de fallo transitorio, usa datos de respaldo
+      } catch (error) {
+        throw new PlatformDatabaseUnavailableError({ cause: error });
       }
     }
 
@@ -241,7 +302,7 @@ export class PlatformDatabase {
   }
 
   async getUsers(search?: string, filter?: string): Promise<PlatformUser[]> {
-    if (this.pool && this.isConnected) {
+    if (this.pool) {
       try {
         let query = `
           SELECT
@@ -257,9 +318,11 @@ export class PlatformDatabase {
             o.plan as org_plan,
             o.status as org_status,
             o.cancel_at_period_end as org_cancel_at_period_end,
-            o.current_period_end as org_current_period_end
+            o.current_period_end as org_current_period_end,
+            (r.user_id IS NOT NULL) AS is_blocked
           FROM app.users u
           LEFT JOIN app.organizations o ON o.owner_user_id = u.id AND o.deleted_at IS NULL
+          LEFT JOIN app.user_restrictions r ON r.user_id = u.id
           WHERE 1=1
         `;
         const params: unknown[] = [];
@@ -294,9 +357,10 @@ export class PlatformDatabase {
           org_current_period_end: r.org_current_period_end
             ? new Date(r.org_current_period_end).toISOString()
             : null,
+          is_blocked: Boolean(r.is_blocked),
         }));
-      } catch {
-        // En caso de fallo transitorio, usa datos de respaldo
+      } catch (error) {
+        throw new PlatformDatabaseUnavailableError({ cause: error });
       }
     }
 
@@ -369,30 +433,293 @@ export class PlatformDatabase {
     }));
   }
 
-  async revokeUserSessionsAndSuspendOrg(userId: string): Promise<void> {
-    if (this.pool && this.isConnected) {
-      try {
-        await this.pool.query("DELETE FROM app.sessions WHERE user_id = $1", [userId]);
-        await this.pool.query("UPDATE app.organizations SET status = 'suspended' WHERE owner_user_id = $1", [
-          userId,
-        ]);
-      } catch {
-        // Fallback no-op
-      }
+  async getBlockedUsers(): Promise<PlatformBlockedUser[]> {
+    if (!this.pool) return [];
+    try {
+      const result = await this.pool.query<PlatformBlockedUser>(`
+        SELECT
+          r.user_id,
+          u.email,
+          r.reason,
+          r.blocked_at,
+          r.blocked_by,
+          r.reconciliation_required
+        FROM app.user_restrictions r
+        JOIN app.users u ON u.id = r.user_id
+        ORDER BY r.blocked_at DESC
+      `);
+      return result.rows.map((row) => ({
+        ...row,
+        blocked_at: row.blocked_at ? new Date(row.blocked_at).toISOString() : "",
+        reconciliation_required: Boolean(row.reconciliation_required),
+      }));
+    } catch (error) {
+      throw new PlatformDatabaseUnavailableError({ cause: error });
     }
   }
 
-  async restoreUserOrg(userId: string): Promise<void> {
-    if (this.pool && this.isConnected) {
-      try {
-        await this.pool.query(
-          "UPDATE app.organizations SET status = 'active' WHERE owner_user_id = $1 AND status = 'suspended'",
+  async setUserRestriction(userId: string, reason: string, adminUser: string): Promise<RestrictionChange> {
+    const normalizedReason = reason.trim();
+    const normalizedAdmin = adminUser.trim();
+    if (!normalizedReason || Array.from(normalizedReason).length > 2000)
+      throw new Error("Motivo de bloqueo no válido");
+    if (!normalizedAdmin || Array.from(normalizedAdmin).length > 100)
+      throw new Error("Actor administrativo no válido");
+
+    return this.transaction(async (client) => {
+      const user = await client.query<{ id: string; email: string }>(
+        "SELECT id, email FROM app.users WHERE id = $1 FOR UPDATE",
+        [userId],
+      );
+      const target = user.rows[0];
+      if (!target) throw new PlatformUserNotFoundError();
+
+      const prior = await client.query<RestrictionRow>(
+        `SELECT user_id, reason, blocked_at, blocked_by, reconciliation_required
+         FROM app.user_restrictions WHERE user_id = $1 FOR UPDATE`,
+        [userId],
+      );
+      let restriction = prior.rows[0];
+      let changed = false;
+      if (!restriction) {
+        const inserted = await client.query<RestrictionRow>(
+          `INSERT INTO app.user_restrictions (user_id, reason, blocked_by, reconciliation_required)
+           VALUES ($1, $2, $3, false)
+           ON CONFLICT (user_id) DO NOTHING
+           RETURNING user_id, reason, blocked_at, blocked_by, reconciliation_required`,
+          [userId, normalizedReason, normalizedAdmin],
+        );
+        restriction = inserted.rows[0];
+        changed = Boolean(restriction);
+        if (!restriction) {
+          const concurrent = await client.query<RestrictionRow>(
+            `SELECT user_id, reason, blocked_at, blocked_by, reconciliation_required
+             FROM app.user_restrictions WHERE user_id = $1 FOR UPDATE`,
+            [userId],
+          );
+          restriction = concurrent.rows[0];
+        }
+      }
+      if (!restriction) throw new Error("No se pudo persistir la restricción");
+
+      await this.revokeSessions(client, userId);
+      const organizations = changed
+        ? await this.markOwnerOrganizationsPending(client, userId)
+        : await this.ownerOrganizations(client, userId);
+      if (changed) {
+        await this.writeRestrictionAudit(client, "user.restriction.created", userId, normalizedAdmin, {
+          reason: normalizedReason,
+        });
+      }
+      return {
+        ...this.mapRestriction(restriction),
+        email: target.email,
+        changed,
+        calendarStatusPending: organizations.some((org) => org.calendar_status_pending),
+      };
+    });
+  }
+
+  async removeUserRestriction(userId: string, adminUser: string): Promise<RestrictionChange> {
+    return this.transaction(async (client) => {
+      const user = await client.query<{ id: string; email: string }>(
+        "SELECT id, email FROM app.users WHERE id = $1 FOR UPDATE",
+        [userId],
+      );
+      const target = user.rows[0];
+      if (!target) throw new PlatformUserNotFoundError();
+
+      const prior = await client.query<RestrictionRow>(
+        `SELECT user_id, reason, blocked_at, blocked_by, reconciliation_required
+         FROM app.user_restrictions WHERE user_id = $1 FOR UPDATE`,
+        [userId],
+      );
+      const restriction = prior.rows[0];
+      if (restriction?.reconciliation_required) throw new RestrictionReconciliationRequiredError();
+
+      let changed = false;
+      if (restriction) {
+        const deleted = await client.query<RestrictionRow>(
+          `DELETE FROM app.user_restrictions WHERE user_id = $1
+           RETURNING user_id, reason, blocked_at, blocked_by, reconciliation_required`,
           [userId],
         );
-      } catch {
-        // Fallback no-op
+        changed = Boolean(deleted.rows[0]);
+        if (changed) {
+          await this.markOwnerOrganizationsPending(client, userId);
+          await this.writeRestrictionAudit(client, "user.restriction.removed", userId, adminUser, {
+            reason: restriction.reason,
+          });
+        }
       }
+
+      const organizations = await this.ownerOrganizations(client, userId);
+      return {
+        userId,
+        email: target.email,
+        reason: restriction?.reason ?? "",
+        blockedAt: restriction?.blocked_at ? new Date(restriction.blocked_at).toISOString() : "",
+        blockedBy: restriction?.blocked_by ?? adminUser,
+        reconciliationRequired: false,
+        changed,
+        calendarStatusPending: organizations.some((org) => org.calendar_status_pending),
+      };
+    });
+  }
+
+  /** Importación idempotente de los bloqueos previos guardados en SQLite. */
+  async importLegacyRestrictions(
+    legacyRows: readonly LegacyBlockedUser[],
+  ): Promise<{ imported: number; orphaned: number }> {
+    if (legacyRows.length === 0) return { imported: 0, orphaned: 0 };
+    return this.transaction(async (client) => {
+      let imported = 0;
+      let orphaned = 0;
+      for (const row of legacyRows) {
+        const user = await client.query<{ id: string; email: string }>(
+          "SELECT id, email FROM app.users WHERE id = $1 FOR UPDATE",
+          [row.user_id],
+        );
+        if (!user.rows[0]) {
+          await client.query(
+            `INSERT INTO app.audit_log (id, via, action, target, metadata)
+             VALUES ($1, 'system', 'user.restriction.legacy_orphan', $2, $3::jsonb)
+             ON CONFLICT (id) DO NOTHING`,
+            [
+              `legacy-restriction-orphan:${row.user_id}`,
+              row.user_id,
+              JSON.stringify({ source: "admin_sqlite" }),
+            ],
+          );
+          orphaned++;
+          continue;
+        }
+
+        const existing = await client.query<RestrictionRow>(
+          `SELECT user_id, reason, blocked_at, blocked_by, reconciliation_required
+           FROM app.user_restrictions WHERE user_id = $1 FOR UPDATE`,
+          [row.user_id],
+        );
+        if (existing.rows[0] && existing.rows[0].blocked_by !== "system:legacy-reconciliation") continue;
+
+        const legacyReason =
+          Array.from(row.reason || "Bloqueado por administración").length <= 2000
+            ? row.reason || "Bloqueado por administración"
+            : "Restricción histórica con motivo demasiado largo; requiere revisión";
+        const reasonNeedsReview = legacyReason !== (row.reason || "Bloqueado por administración");
+        const actor = row.blocked_by.trim().slice(0, 100) || "system:legacy-reconciliation";
+        const blockedAt = Number.isNaN(new Date(row.blocked_at).getTime())
+          ? new Date()
+          : new Date(row.blocked_at);
+        const inserted = await client.query<RestrictionRow>(
+          `INSERT INTO app.user_restrictions (user_id, reason, blocked_at, blocked_by, reconciliation_required)
+           VALUES (
+             $1, $2, $3, $4,
+             $5 OR EXISTS (
+               SELECT 1 FROM app.organizations
+               WHERE owner_user_id = $1 AND status = 'suspended' AND deleted_at IS NULL
+             )
+           )
+           ON CONFLICT (user_id) DO UPDATE SET
+             reason = EXCLUDED.reason,
+             blocked_at = EXCLUDED.blocked_at,
+             blocked_by = EXCLUDED.blocked_by,
+             reconciliation_required = user_restrictions.reconciliation_required OR EXCLUDED.reconciliation_required
+           RETURNING user_id, reason, blocked_at, blocked_by, reconciliation_required`,
+          [row.user_id, legacyReason, blockedAt, actor, reasonNeedsReview],
+        );
+        if (!inserted.rows[0]) continue;
+
+        await this.revokeSessions(client, row.user_id);
+        await this.markOwnerOrganizationsPending(client, row.user_id);
+        await this.writeRestrictionAudit(client, "user.restriction.legacy_imported", row.user_id, actor, {
+          reason: legacyReason,
+          sourceBlockedAt: blockedAt.toISOString(),
+          reconciliationRequired: Boolean(inserted.rows[0].reconciliation_required),
+        });
+        imported++;
+      }
+      return { imported, orphaned };
+    });
+  }
+
+  private async transaction<T>(work: (client: PoolClient) => Promise<T>): Promise<T> {
+    const pool = this.requirePool();
+    let client: PoolClient | undefined;
+    try {
+      client = await pool.connect();
+      await client.query("BEGIN");
+      const result = await work(client);
+      await client.query("COMMIT");
+      return result;
+    } catch (error) {
+      if (client) await client.query("ROLLBACK").catch(() => undefined);
+      if (
+        error instanceof PlatformUserNotFoundError ||
+        error instanceof RestrictionReconciliationRequiredError ||
+        error instanceof PlatformDatabaseUnavailableError
+      ) {
+        throw error;
+      }
+      throw new PlatformDatabaseUnavailableError({ cause: error });
+    } finally {
+      client?.release();
     }
+  }
+
+  private requirePool(): Pool {
+    if (!this.pool) throw new PlatformDatabaseUnavailableError();
+    return this.pool;
+  }
+
+  private async revokeSessions(client: PoolClient, userId: string): Promise<void> {
+    await client.query("DELETE FROM app.oauth_access_tokens WHERE user_id = $1", [userId]);
+    await client.query("DELETE FROM app.oauth_refresh_tokens WHERE user_id = $1", [userId]);
+    await client.query("DELETE FROM app.sessions WHERE user_id = $1", [userId]);
+  }
+
+  private async markOwnerOrganizationsPending(client: PoolClient, userId: string) {
+    const result = await client.query<{ id: string; calendar_status_pending: boolean }>(
+      `UPDATE app.organizations
+       SET calendar_status_pending = true
+       WHERE owner_user_id = $1 AND deleted_at IS NULL
+       RETURNING id, calendar_status_pending`,
+      [userId],
+    );
+    return result.rows;
+  }
+
+  private async ownerOrganizations(client: PoolClient, userId: string) {
+    const result = await client.query<{ id: string; calendar_status_pending: boolean }>(
+      `SELECT id, calendar_status_pending FROM app.organizations
+       WHERE owner_user_id = $1 AND deleted_at IS NULL`,
+      [userId],
+    );
+    return result.rows;
+  }
+
+  private async writeRestrictionAudit(
+    client: PoolClient,
+    action: string,
+    userId: string,
+    adminUser: string,
+    metadata: Record<string, unknown>,
+  ): Promise<void> {
+    await client.query(
+      `INSERT INTO app.audit_log (id, org_id, actor_user_id, via, action, target, metadata)
+       VALUES ($1, NULL, NULL, 'panel', $2, $3, $4::jsonb)`,
+      [randomUUID(), action, userId, JSON.stringify({ adminUser, ...metadata })],
+    );
+  }
+
+  private mapRestriction(row: RestrictionRow) {
+    return {
+      userId: row.user_id,
+      reason: row.reason,
+      blockedAt: new Date(row.blocked_at).toISOString(),
+      blockedBy: row.blocked_by,
+      reconciliationRequired: Boolean(row.reconciliation_required),
+    };
   }
 
   async close(): Promise<void> {

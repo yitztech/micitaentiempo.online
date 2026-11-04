@@ -51,6 +51,126 @@ describe("sincronización recuperable del estado de facturación", () => {
   });
 });
 
+describe("estado efectivo proyectado al motor", () => {
+  function setup(org: Record<string, unknown>, restricted: boolean, send = vi.fn().mockResolvedValue({})) {
+    const row: Record<string, unknown> = {
+      id: "org-1",
+      ownerUserId: "owner-1",
+      calendarStatusPending: true,
+      deletedAt: null,
+      ...org,
+    };
+    const select = vi.fn();
+    const tx = {
+      select: (...args: unknown[]) => {
+        select(...args);
+        return {
+          from: () => ({
+            // Con FOR UPDATE devuelve la organización; sin él, la consulta de app.user_restrictions.
+            where: () =>
+              Object.assign(Promise.resolve(restricted ? [{ userId: "owner-1" }] : []), {
+                for: async () => [row],
+              }),
+          }),
+        };
+      },
+      update: () => ({
+        set: (values: Record<string, unknown>) => ({ where: async () => Object.assign(row, values) }),
+      }),
+    };
+    const db = { transaction: async (fn: (client: typeof tx) => Promise<void>) => fn(tx) };
+    const rpc = { client: () => ({ setOrgStatus: send }) };
+    const billing = new BillingService(
+      db as never,
+      {} as never,
+      rpc as never,
+      {} as never,
+      {} as never,
+      {} as never,
+    );
+    return { billing, row, send };
+  }
+
+  it.each(["trialing", "active", "past_due", "read_only"])(
+    "proyecta suspended si el propietario está restringido aunque el estado económico sea %s",
+    async (status) => {
+      const { billing, row, send } = setup({ status }, true);
+      await billing.syncCalendarStatus("org-1");
+      expect(send).toHaveBeenCalledWith({ orgId: "org-1", status: "suspended" }, expect.anything());
+      expect(row.status).toBe(status);
+      expect(row.calendarStatusPending).toBe(false);
+    },
+  );
+
+  it.each(["trialing", "active", "past_due", "read_only"])(
+    "al desbloquear vuelve a proyectar el estado económico vigente (%s) sin forzar active",
+    async (status) => {
+      const { billing, send } = setup({ status }, false);
+      await billing.syncCalendarStatus("org-1");
+      expect(send).toHaveBeenCalledWith({ orgId: "org-1", status }, expect.anything());
+    },
+  );
+
+  it("un fallo de la consulta de restricción no envía un estado y conserva el marcador", async () => {
+    const send = vi.fn().mockResolvedValue({});
+    const { row } = setup({ status: "active" }, false, send);
+    let calls = 0;
+    const failing = {
+      transaction: async (fn: (client: unknown) => Promise<void>) =>
+        fn({
+          select: () => ({
+            from: () => ({
+              // La primera consulta bloquea la organización; la segunda (restricciones) falla.
+              where: () =>
+                calls++ === 0 ? { for: async () => [row] } : Promise.reject(new Error("pg caído")),
+            }),
+          }),
+          update: () => {
+            throw new Error("no debe actualizar");
+          },
+        }),
+    };
+    const broken = new BillingService(
+      failing as never,
+      {} as never,
+      { client: () => ({ setOrgStatus: send }) } as never,
+      {} as never,
+      {} as never,
+      {} as never,
+    );
+    await expect(broken.syncCalendarStatus("org-1")).rejects.toThrow("pg caído");
+    expect(send).not.toHaveBeenCalled();
+    expect(row.calendarStatusPending).toBe(true);
+  });
+
+  it("setStatus guarda el estado económico y deja el marcador si el motor no responde", async () => {
+    const stored = { id: "org-1", ownerUserId: "owner-1", status: "active", pastDueSince: null };
+    const updates: Record<string, unknown>[] = [];
+    const db = {
+      update: () => ({
+        set: (values: Record<string, unknown>) => {
+          updates.push(values);
+          return { where: () => ({ returning: async () => [{ ...stored, ...values }] }) };
+        },
+      }),
+      transaction: async () => {
+        throw new Error("motor no disponible");
+      },
+    };
+    const billing = new BillingService(
+      db as never,
+      {} as never,
+      {} as never,
+      { now: () => new Date("2026-09-14T12:00:00Z") } as never,
+      {} as never,
+      { record: vi.fn() } as never,
+    );
+    const result = await billing.setStatus(stored as never, "past_due");
+    expect(result.status).toBe("past_due");
+    expect(updates[0]).toMatchObject({ status: "past_due", calendarStatusPending: true });
+  });
+});
+
 describe("facturación apagada sin claves", () => {
   const base = { STRIPE_TAX_ENABLED: false } as unknown as Env;
   it("sin las tres claves no se cobra (decisión del 2026-10-06)", () => {

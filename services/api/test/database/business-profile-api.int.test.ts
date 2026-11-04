@@ -364,6 +364,25 @@ describe("C2 — Private Business Profile API with real PostgreSQL", () => {
     expect(exportCustomer.businessProfile).toBeNull();
   });
 
+  it("aplica estado efectivo suspendido en /api/v1/me y en perfil de negocio cuando el propietario está en app.user_restrictions", async () => {
+    await pool.query(
+      "INSERT INTO app.user_restrictions(user_id, reason, blocked_by) VALUES ('owner-a', 'Bloqueo S06', 'admin-ci')",
+    );
+    try {
+      const meRestrictedOwner = await meController.me({ id: "owner-a" } as unknown as SessionUser);
+      expect(meRestrictedOwner.organization?.status).toBe("suspended");
+      expect(meRestrictedOwner.capabilities.canManageBusinessProfile).toBe(false);
+      await expect(service.getProfile("owner-a")).rejects.toMatchObject({
+        response: { code: "permission_denied" },
+      });
+    } finally {
+      await pool.query("DELETE FROM app.user_restrictions WHERE user_id = 'owner-a'");
+    }
+    const meRestoredOwner = await meController.me({ id: "owner-a" } as unknown as SessionUser);
+    expect(meRestoredOwner.organization?.status).toBe("active");
+    expect(meRestoredOwner.capabilities.canManageBusinessProfile).toBe(true);
+  });
+
   it("BillingService.closeOrg unpublishes business profile and purges projection/locations", async () => {
     // Setup mock RPC for purgeOrg
     const mockRpc = {

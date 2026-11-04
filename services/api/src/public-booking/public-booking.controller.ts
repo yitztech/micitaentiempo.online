@@ -42,6 +42,7 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import type { z } from "zod";
 import { checkOrigin, Public } from "../auth/auth.guard.js";
 import { AuthRegistry, type SessionUser } from "../auth/auth.registry.js";
+import { getEffectiveOrganizationAccess } from "../auth/org-access.js";
 import { rpc } from "../calendars/rpc-errors.js";
 import { requestLang, toHeaders } from "../common/request.js";
 import { ZodPipe } from "../common/zod.pipe.js";
@@ -108,7 +109,32 @@ export class PublicBookingController {
       throw missing;
     });
     if (c.status !== "active" || c.orgStatus === "suspended") throw missing;
+    const orgAccess = await getEffectiveOrganizationAccess(this.db, c.orgId);
+    if (!orgAccess || orgAccess.effectiveStatus === "suspended") throw missing;
+    if (orgAccess.effectiveStatus === "read_only") {
+      c.orgStatus = "read_only";
+    }
     return c;
+  }
+
+  private async requireEventCalendarBookable(id: string): Promise<void> {
+    const sys = asActor({ actor: { role: "system", via: "system" } });
+    const ev = await rpc(this.rpcClients.client(EventService).getEvent({ id }, sys)).catch((err: unknown) => {
+      if (err instanceof NotFoundException) return null;
+      throw err;
+    });
+    if (!ev) return;
+    const c = await rpc(this.rpcClients.client(CalendarService).getCalendar({ id: ev.calendarId }, sys));
+    if (c.status !== "active" || c.orgStatus === "suspended") {
+      throw new NotFoundException({ code: "calendar_not_found", message: "Tablero no encontrado" });
+    }
+    const orgAccess = await getEffectiveOrganizationAccess(this.db, c.orgId);
+    if (!orgAccess || orgAccess.effectiveStatus === "suspended") {
+      throw new NotFoundException({ code: "calendar_not_found", message: "Tablero no encontrado" });
+    }
+    if (c.orgStatus === "read_only" || orgAccess.effectiveStatus === "read_only") {
+      throw new HttpException({ code: "calendar_unavailable", message: "Reservas pausadas" }, 409);
+    }
   }
 
   @Get("calendars/:slug")
@@ -253,9 +279,13 @@ export class PublicBookingController {
     let u: SessionUser | null = null;
     try {
       u = await this.customer(req);
-    } catch {
+    } catch (err) {
+      if (!(err instanceof UnauthorizedException) || req.headers.authorization) {
+        throw err;
+      }
       // Sin sesión autenticada de cliente
     }
+    await this.requireEventCalendarBookable(id);
     const lang = requestLang(req, this.env);
     const holder = holderId(this.env.APP_ENC_KEY, body.holdToken);
     const sub = u?.id ?? holder;
@@ -346,7 +376,7 @@ export class PublicBookingController {
     const id = await resolveGoogleMobileIdentity(this.env, body);
     if (!id)
       throw new HttpException({ code: "google_failed", message: "No se pudo verificar con Google" }, 400);
-    return customerSessionFor(this.registry.forRequest(req), id, requestLang(req, this.env));
+    return customerSessionFor(this.registry.forRequest(req), id, requestLang(req, this.env), this.db);
   }
 
   @Get("my/bookings")
@@ -417,6 +447,7 @@ export class PublicBookingController {
     @Body(new ZodPipe(Reschedule)) body: Reschedule,
   ) {
     const u = await this.customer(req);
+    await this.requireEventCalendarBookable(id);
     const ev = await rpc(
       this.rpcClients
         .client(EventService)

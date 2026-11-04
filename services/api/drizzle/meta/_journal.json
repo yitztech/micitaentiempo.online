@@ -92,6 +92,13 @@
       "when": 1793736000000,
       "tag": "0012_calendar_status_pending",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1793740000000,
+      "tag": "0013_user_restrictions",
+      "breakpoints": true
     }
   ]
 }

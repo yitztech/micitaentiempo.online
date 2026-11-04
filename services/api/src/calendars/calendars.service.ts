@@ -5,7 +5,7 @@ import { ConflictException, Inject, Injectable } from "@nestjs/common";
 import { and, eq } from "drizzle-orm";
 import { AuditService } from "../audit/audit.service.js";
 import type { SessionUser } from "../auth/auth.registry.js";
-import { requireOrganizationWrite } from "../auth/org-access.js";
+import { requireOrganizationWrite, resolveEffectiveOrganizationStatus } from "../auth/org-access.js";
 import { type Database, DB } from "../db/db.module.js";
 import { businessProfiles, calendarMembers } from "../db/schema.js";
 import { asActor, type CalendarClients } from "../internal-rpc/calendar-client.js";
@@ -50,7 +50,8 @@ export class CalendarsService {
   /** Alta de tablero: solo el propietario, respetando el límite del plan (RF-04). */
   async create(user: SessionUser, input: CreateCalendar) {
     const org = await this.orgs.requireByOwner(user.id);
-    requireOrganizationWrite(org.status);
+    const { effectiveStatus, ownerRestricted } = await resolveEffectiveOrganizationStatus(this.db, org);
+    requireOrganizationWrite(effectiveStatus, ownerRestricted);
     const actor = {
       sub: user.id,
       org: org.id,
@@ -109,7 +110,7 @@ export class CalendarsService {
       this.client.createCalendar(
         {
           orgId: org.id,
-          orgStatus: org.status,
+          orgStatus: effectiveStatus,
           name: input.name,
           slug: input.slug ?? "",
           timezone: input.timezone,

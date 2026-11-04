@@ -23,7 +23,7 @@ import {
 import { and, asc, eq, gt, isNull, sql } from "drizzle-orm";
 import { AuditService } from "../audit/audit.service.js";
 import { uuidv7 } from "../auth/ids.js";
-import { requireOrganizationWrite } from "../auth/org-access.js";
+import { requireOrganizationWrite, resolveEffectiveOrganizationStatus } from "../auth/org-access.js";
 import { type Database, DB } from "../db/db.module.js";
 import {
   businessCalendarLocations,
@@ -63,7 +63,14 @@ export class BusinessProfileService {
       .select()
       .from(organizations)
       .where(and(eq(organizations.ownerUserId, userId), isNull(organizations.deletedAt)));
-    if (!org || org.status === "suspended") {
+    if (!org) {
+      throw new ForbiddenException({
+        code: "permission_denied",
+        message: "No tienes permiso para administrar este perfil",
+      });
+    }
+    const { effectiveStatus } = await resolveEffectiveOrganizationStatus(runner, org);
+    if (effectiveStatus === "suspended") {
       throw new ForbiddenException({
         code: "permission_denied",
         message: "No tienes permiso para administrar este perfil",
@@ -74,7 +81,8 @@ export class BusinessProfileService {
 
   private async getWritableOwnerOrg(userId: string) {
     const org = await this.getOwnerOrg(userId);
-    requireOrganizationWrite(org.status);
+    const { effectiveStatus, ownerRestricted } = await resolveEffectiveOrganizationStatus(this.db, org);
+    requireOrganizationWrite(effectiveStatus, ownerRestricted);
     return org;
   }
 
@@ -1220,11 +1228,19 @@ export class BusinessProfileService {
         orgId: businessProfiles.orgId,
         status: businessProfiles.status,
         orgStatus: organizations.status,
+        ownerUserId: organizations.ownerUserId,
       })
       .from(businessProfiles)
       .innerJoin(organizations, eq(organizations.id, businessProfiles.orgId))
       .where(and(eq(businessProfiles.orgId, businessId), isNull(organizations.deletedAt)));
-    if (profile?.status !== "published" || profile?.orgStatus === "suspended") {
+    if (profile?.status !== "published") {
+      throw new NotFoundException({ code: "image_not_found", message: "Imagen no encontrada" });
+    }
+    const { effectiveStatus } = await resolveEffectiveOrganizationStatus(this.db, {
+      status: profile.orgStatus,
+      ownerUserId: profile.ownerUserId,
+    });
+    if (effectiveStatus === "suspended") {
       throw new NotFoundException({ code: "image_not_found", message: "Imagen no encontrada" });
     }
 

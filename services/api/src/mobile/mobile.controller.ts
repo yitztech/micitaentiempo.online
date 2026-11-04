@@ -15,6 +15,7 @@ import { session as sessions } from "../db/schema.js";
 import { OrgsService } from "../orgs/orgs.service.js";
 import { customerSessionFor, resolveGoogleMobileIdentity } from "../public-booking/google-customer.js";
 import { features } from "../site/site.controller.js";
+import { MobileAuthLimiter } from "./mobile-auth-limiter.js";
 
 @Public()
 @Controller("public/v1/mobile")
@@ -23,6 +24,7 @@ export class PublicMobileController {
     private readonly registry: AuthRegistry,
     @Inject(ENV) private readonly env: Env,
     @Inject(DB) private readonly db: Database,
+    private readonly limiter: MobileAuthLimiter,
   ) {}
 
   private authError(err: unknown): never {
@@ -64,6 +66,7 @@ export class PublicMobileController {
   /** Alta de cuenta desde la app móvil (mismas reglas de nombre, correo y contraseña). */
   @Post("auth/sign-up")
   async signUp(@Req() req: FastifyRequest, @Body(new ZodPipe(MobileSignUp)) body: MobileSignUp) {
+    await this.limiter.hit("sign-up", req.ip, body.email);
     const res = await this.registry
       .forRequest(req)
       .api.signUpEmail({
@@ -77,6 +80,7 @@ export class PublicMobileController {
   /** Inicio de sesión con correo y contraseña desde la app móvil; devuelve token Bearer. */
   @Post("auth/sign-in")
   async signIn(@Req() req: FastifyRequest, @Body(new ZodPipe(MobileSignIn)) body: MobileSignIn) {
+    await this.limiter.hit("sign-in", req.ip, body.email);
     const res = await this.registry
       .forRequest(req)
       .api.signInEmail({
@@ -103,6 +107,7 @@ export class PublicMobileController {
     @Req() req: FastifyRequest,
     @Body(new ZodPipe(MobileForgotPassword)) body: MobileForgotPassword,
   ) {
+    await this.limiter.hit("forgot-password", req.ip, body.email);
     const lang = requestLang(req, this.env);
     await this.registry
       .forRequest(req)
@@ -127,7 +132,7 @@ export class PublicMobileController {
     if (!id) {
       throw new HttpException({ code: "google_failed", message: "No se pudo verificar con Google" }, 400);
     }
-    return customerSessionFor(this.registry.forRequest(req), id, requestLang(req, this.env));
+    return customerSessionFor(this.registry.forRequest(req), id, requestLang(req, this.env), this.db);
   }
 
   /** Cierre de sesión móvil: revoca el token Bearer activo. */

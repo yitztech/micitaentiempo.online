@@ -19,6 +19,18 @@ export interface AdminConfig {
 }
 
 export function loadConfig(): AdminConfig {
+  const initialAdminUser = requiredInitialAdminCredential("ADMIN_INITIAL_USER");
+  const initialAdminPassword = requiredInitialAdminCredential("ADMIN_INITIAL_PASSWORD");
+  if (initialAdminUser !== initialAdminUser.trim().toLowerCase()) {
+    throw new Error("ADMIN_INITIAL_USER debe estar en minúsculas y sin espacios al inicio o al final");
+  }
+  if (Array.from(initialAdminUser).length > 100) {
+    throw new Error("ADMIN_INITIAL_USER no puede superar 100 caracteres");
+  }
+  if (Array.from(initialAdminPassword).length > 128) {
+    throw new Error("ADMIN_INITIAL_PASSWORD no puede superar 128 caracteres");
+  }
+
   const dataDir = process.env.ADMIN_DATA_DIR || resolve(process.cwd(), "data");
   return {
     port: Number(process.env.ADMIN_PORT || process.env.PORT || 3000),
@@ -26,9 +38,8 @@ export function loadConfig(): AdminConfig {
     dataDir,
     publicDir: process.env.ADMIN_PUBLIC_DIR || resolve(process.cwd(), "public"),
     sqliteFile: process.env.ADMIN_SQLITE_FILE || resolve(dataDir, "admin.sqlite"),
-    initialAdminUser: process.env.ADMIN_INITIAL_USER || "yunerkis",
-    // Construido dinámicamente para evitar falsos positivos en analizadores de secretos estáticos
-    initialAdminPassword: process.env.ADMIN_INITIAL_PASSWORD || ["Password", "Password", "1!"].join("."),
+    initialAdminUser,
+    initialAdminPassword,
     releaseSha: process.env.RELEASE_SHA || "dev",
     pg: {
       host: process.env.DB_HOST || "",
@@ -38,4 +49,12 @@ export function loadConfig(): AdminConfig {
       password: process.env.DB_PASSWORD || process.env.API_DB_PASSWORD || "dev-api",
     },
   };
+}
+
+function requiredInitialAdminCredential(name: "ADMIN_INITIAL_USER" | "ADMIN_INITIAL_PASSWORD"): string {
+  const value = process.env[name];
+  if (!value?.trim()) {
+    throw new Error(`${name} es obligatoria para iniciar el panel de administración`);
+  }
+  return value;
 }

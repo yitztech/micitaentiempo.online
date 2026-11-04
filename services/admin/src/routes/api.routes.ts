@@ -1,7 +1,12 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import type { AuthService } from "../auth/auth.service.js";
 import type { AdminDatabase } from "../db/admin-db.js";
-import type { PlatformDatabase } from "../db/platform-db.js";
+import {
+  type PlatformDatabase,
+  PlatformDatabaseUnavailableError,
+  PlatformUserNotFoundError,
+  RestrictionReconciliationRequiredError,
+} from "../db/platform-db.js";
 
 interface LoginBody {
   username?: string;
@@ -11,6 +16,15 @@ interface LoginBody {
 interface BlockUserBody {
   email?: string;
   reason?: string;
+}
+
+function sendPlatformError(error: unknown, reply: FastifyReply): FastifyReply {
+  if (error instanceof PlatformUserNotFoundError) return reply.status(404).send({ code: "user_not_found" });
+  if (error instanceof RestrictionReconciliationRequiredError)
+    return reply.status(409).send({ code: "restriction_reconciliation_required" });
+  if (error instanceof PlatformDatabaseUnavailableError)
+    return reply.status(503).send({ code: "platform_unavailable" });
+  throw error;
 }
 
 export function registerApiRoutes(
@@ -67,9 +81,11 @@ export function registerApiRoutes(
     const admin = auth.requireAuth(req, reply);
     if (!admin) return;
 
-    const blockedList = adminDb.getBlockedUsers();
-    const stats = await platformDb.getStats(blockedList.length);
-    return stats;
+    try {
+      return await platformDb.getStats();
+    } catch (error) {
+      return sendPlatformError(error, reply);
+    }
   });
 
   // ── Gestión de Usuarios ──
@@ -84,15 +100,12 @@ export function registerApiRoutes(
       const admin = auth.requireAuth(req, reply);
       if (!admin) return;
 
-      const users = await platformDb.getUsers(req.query.q, req.query.filter);
-      const blockedSet = new Set(adminDb.getBlockedUsers().map((b) => b.user_id));
-
-      const enrichedUsers = users.map((u) => ({
-        ...u,
-        is_blocked: blockedSet.has(u.id),
-      }));
-
-      return { users: enrichedUsers };
+      try {
+        const users = await platformDb.getUsers(req.query.q, req.query.filter);
+        return { users };
+      } catch (error) {
+        return sendPlatformError(error, reply);
+      }
     },
   );
 
@@ -110,15 +123,38 @@ export function registerApiRoutes(
       if (!admin) return;
 
       const userId = req.params.id;
-      const { email = "", reason = "Bloqueado por administración" } = req.body || {};
+      const reasonInput = req.body?.reason ?? "Bloqueado por administración";
+      if (
+        typeof reasonInput !== "string" ||
+        !reasonInput.trim() ||
+        Array.from(reasonInput.trim()).length > 2000
+      ) {
+        return reply.status(422).send({ code: "invalid_restriction_reason" });
+      }
+      const reason = reasonInput.trim();
 
-      // 1. Guarda en su propia base de datos SQLite (datos aislados de administración)
-      const blocked = adminDb.blockUser(userId, email, reason, admin.username);
-
-      // 2. Revoca sesiones activas y suspende organización en la plataforma
-      await platformDb.revokeUserSessionsAndSuspendOrg(userId);
-
-      return { ok: true, blocked };
+      try {
+        const restriction = await platformDb.setUserRestriction(userId, reason, admin.username);
+        // Also repairs a missing SQLite mirror if PostgreSQL committed before a prior mirror failure.
+        adminDb.blockUser(userId, restriction.email, restriction.reason, admin.username);
+        const body = {
+          ok: true,
+          blocked: {
+            user_id: restriction.userId,
+            email: restriction.email,
+            reason: restriction.reason,
+            blocked_at: restriction.blockedAt,
+            blocked_by: restriction.blockedBy,
+          },
+          calendarStatusPending: restriction.calendarStatusPending,
+        };
+        if (restriction.calendarStatusPending) {
+          return reply.status(202).send({ ...body, code: "restriction_sync_pending" });
+        }
+        return body;
+      } catch (error) {
+        return sendPlatformError(error, reply);
+      }
     },
   );
 
@@ -135,12 +171,22 @@ export function registerApiRoutes(
       if (!admin) return;
 
       const userId = req.params.id;
-      const unblocked = adminDb.unblockUser(userId, admin.username);
-
-      // Restaura la organización del usuario
-      await platformDb.restoreUserOrg(userId);
-
-      return { ok: true, unblocked };
+      try {
+        const restriction = await platformDb.removeUserRestriction(userId, admin.username);
+        // Idempotent locally, including retries after a PostgreSQL commit.
+        adminDb.unblockUser(userId, admin.username);
+        const body = {
+          ok: true,
+          unblocked: restriction.changed,
+          calendarStatusPending: restriction.calendarStatusPending,
+        };
+        if (restriction.calendarStatusPending) {
+          return reply.status(202).send({ ...body, code: "restriction_sync_pending" });
+        }
+        return body;
+      } catch (error) {
+        return sendPlatformError(error, reply);
+      }
     },
   );
 
@@ -171,8 +217,12 @@ export function registerApiRoutes(
     const admin = auth.requireAuth(req, reply);
     if (!admin) return;
 
-    const blocked = adminDb.getBlockedUsers();
-    return { blocked };
+    try {
+      const blocked = await platformDb.getBlockedUsers();
+      return { blocked };
+    } catch (error) {
+      return sendPlatformError(error, reply);
+    }
   });
 
   // ── Registro de Auditoría ──
