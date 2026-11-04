@@ -439,4 +439,27 @@ describe("aplicación de cambios y bajas en el almacenamiento móvil (C03)", () 
     expect(await storage.loadOwnerProfile("user-a")).toBeNull();
     expect(await storage.loadLocations("user-a")).toBeNull();
   });
+
+  it("no marca conflicto una operación incierta: la versión posterior puede ser la suya", async () => {
+    const { storage, engine, client } = setup([
+      page({ mode: "changes", reset: false, items: [up("business_profile", BIZ, 9, profile(2))] }),
+    ]);
+    await storage.enqueueOperation("user-a", op(1, { retryCount: 1 }));
+    await engine.pull();
+    expect((await storage.getQueue("user-a"))[0].state).toBe("pending");
+
+    // Con el recibo disponible se resuelve como éxito, sin pasar por la persona.
+    client.getOperationReceipt.mockResolvedValue({ status: 200, body: {} });
+    expect(await engine.sync()).toMatchObject({ synced: 1, conflicts: 0 });
+    expect(client.updateOwnerBusinessProfile).not.toHaveBeenCalled();
+  });
+
+  it("sí marca conflicto una edición nunca enviada frente a una versión posterior", async () => {
+    const { storage, engine } = setup([
+      page({ mode: "changes", reset: false, items: [up("business_profile", BIZ, 9, profile(2))] }),
+    ]);
+    await storage.enqueueOperation("user-a", op(1));
+    await engine.pull();
+    expect((await storage.getQueue("user-a"))[0].state).toBe("conflict");
+  });
 });

@@ -87,7 +87,9 @@ Ejemplos (negocio `B1`, sedes `L1`, `L2`):
 ### 6. Retención
 
 `sync_changes` se conserva 31 días (más que el cursor de 30). Una tarea periódica borra lo anterior. Un cursor
-nunca es válido más allá de lo retenido, así que no hay lagunas silenciosas.
+nunca es válido más allá de lo retenido, así que no hay lagunas silenciosas: los 30 días son de la posición, no de
+cada cursor. Mientras un cliente no alcanza el horizonte actual (snapshot en curso, paso de snapshot a cambios o
+página con `hasMore`), el cursor siguiente hereda el `exp` del anterior; solo una posición al día estrena plazo.
 
 ### 7. Aplicación en el móvil (C03)
 

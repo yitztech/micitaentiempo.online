@@ -52,6 +52,18 @@ describe("Panel de Administración — Autenticación y Almacén Aislado", () =>
     expect(() => loadConfig()).toThrow("ADMIN_INITIAL_PASSWORD es obligatoria");
   });
 
+  it("exige la contraseña de PostgreSQL si hay servidor configurado, sin valor de respaldo", () => {
+    vi.stubEnv("DB_PASSWORD", "");
+    vi.stubEnv("API_DB_PASSWORD", "");
+    vi.stubEnv("DB_HOST", "postgres");
+    expect(() => loadConfig()).toThrow("DB_PASSWORD es obligatoria");
+    vi.stubEnv("DB_HOST", "");
+    expect(loadConfig().pg.password).toBe("");
+    vi.stubEnv("DB_HOST", "postgres");
+    vi.stubEnv("API_DB_PASSWORD", "secreto-efimero");
+    expect(loadConfig().pg.password).toBe("secreto-efimero");
+  });
+
   it("carga credenciales iniciales explícitas y limita sus longitudes", () => {
     const config = loadConfig();
     expect(config.initialAdminUser).toBe("yunerkis");

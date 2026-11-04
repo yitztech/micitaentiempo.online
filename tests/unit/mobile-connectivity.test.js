@@ -276,4 +276,21 @@ describe("guardar en línea o encolar", () => {
     expect(result).toEqual({ status: "sent", value: "ok" });
     expect(enqueue).not.toHaveBeenCalled();
   });
+
+  it("distingue lo que nunca salió de lo que salió con resultado desconocido", async () => {
+    const enqueue = vi.fn(async () => undefined);
+    await submitOrQueue({ isOnline: () => false, attempt: vi.fn(), enqueue, operationId: "sin-red" });
+    await submitOrQueue({
+      isOnline: () => true,
+      attempt: async () => {
+        throw { status: 0, code: "timeout", body: {} };
+      },
+      enqueue,
+      operationId: "incierta",
+    });
+    expect(enqueue.mock.calls).toEqual([
+      ["sin-red", { attempted: false }],
+      ["incierta", { attempted: true }],
+    ]);
+  });
 });

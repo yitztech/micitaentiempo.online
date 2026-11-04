@@ -1,7 +1,10 @@
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import { OFFLINE_LIMITS } from "@mcet/schemas";
 
-/** Vigencia de un cursor. Menor que la retención de `app.sync_changes` (31 días), así nunca hay lagunas. */
+/**
+ * Vigencia de una posición, no de cada cursor. Menor que la retención de `app.sync_changes` (31 días): quien sigue
+ * una posición antigua hereda su `exp`, y solo una posición al día estrena plazo. Así nunca hay lagunas.
+ */
 export const CURSOR_TTL_SECONDS = 30 * 86_400;
 
 export type CursorPosition =
@@ -42,7 +45,7 @@ export function scopeHash(orgIds: string[]): string {
 
 export function encodeCursor(
   secret: string,
-  input: { actor: string; scope: string; position: CursorPosition; now: Date },
+  input: { actor: string; scope: string; position: CursorPosition; now: Date; exp?: number },
 ): string {
   const iat = Math.floor(input.now.getTime() / 1000);
   const payload: CursorPayload = {
@@ -50,7 +53,7 @@ export function encodeCursor(
     a: input.actor,
     h: input.scope,
     iat,
-    exp: iat + CURSOR_TTL_SECONDS,
+    exp: Math.min(input.exp ?? Number.POSITIVE_INFINITY, iat + CURSOR_TTL_SECONDS),
     p: input.position,
   };
   const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
@@ -67,7 +70,7 @@ export function decodeCursor(
   secret: string,
   token: string,
   expected: { actor: string; scope: string; now: Date },
-): CursorPosition {
+): { position: CursorPosition; exp: number } {
   const [body, signature, extra] = token.split(".");
   if (!body || !signature || extra !== undefined) throw new CursorError("invalid");
   const expectedSig = Buffer.from(mac(secret, body));
@@ -95,5 +98,5 @@ export function decodeCursor(
   if (!valid || payload.a !== expected.actor) throw new CursorError("invalid");
   if (Math.floor(expected.now.getTime() / 1000) >= payload.exp) throw new CursorError("expired");
   if (payload.h !== expected.scope) throw new CursorError("scope_changed");
-  return p;
+  return { position: p, exp: payload.exp };
 }

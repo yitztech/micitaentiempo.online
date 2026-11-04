@@ -31,6 +31,10 @@ export function loadConfig(): AdminConfig {
     throw new Error("ADMIN_INITIAL_PASSWORD no puede superar 128 caracteres");
   }
 
+  const dbHost = process.env.DB_HOST || "";
+  const dbPassword = process.env.DB_PASSWORD || process.env.API_DB_PASSWORD || "";
+  if (dbHost && !dbPassword) throw new Error("DB_PASSWORD es obligatoria cuando se define DB_HOST");
+
   const dataDir = process.env.ADMIN_DATA_DIR || resolve(process.cwd(), "data");
   return {
     port: Number(process.env.ADMIN_PORT || process.env.PORT || 3000),
@@ -42,11 +46,11 @@ export function loadConfig(): AdminConfig {
     initialAdminPassword,
     releaseSha: process.env.RELEASE_SHA || "dev",
     pg: {
-      host: process.env.DB_HOST || "",
+      host: dbHost,
       port: Number(process.env.DB_PORT || 5432),
       database: process.env.DB_NAME || "micita",
       user: process.env.DB_USER || "api",
-      password: process.env.DB_PASSWORD || process.env.API_DB_PASSWORD || "dev-api",
+      password: dbPassword,
     },
   };
 }

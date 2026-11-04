@@ -93,3 +93,60 @@ export async function requestSignOut({
   if (unresolved > 0 && !(await confirmDiscard(unresolved))) return { status: "cancelled", unresolved };
   return { ...(await signOutAccount({ accountId, client, storage, drainTimeoutMs })), unresolved };
 }
+
+type MobileClient = ReturnType<typeof createMobileClient>;
+
+export type SessionRefresh =
+  /** No hay sesión guardada. */
+  | { status: "none" }
+  /** La sesión guardada sigue vigente y sus datos están al día. */
+  | {
+      status: "refreshed";
+      summary: Awaited<ReturnType<MobileClient["panelSummary"]>>;
+      bookings: Awaited<ReturnType<MobileClient["myBookings"]>>;
+    }
+  /** El servidor rechazó la sesión: se olvidó. */
+  | { status: "invalidated" }
+  /** La cuenta salió, entró otra sesión o se canceló mientras tanto: el resultado se descarta sin tocar nada. */
+  | { status: "stale" };
+
+/**
+ * Restaura la sesión guardada y refresca sus datos. Una comprobación en vuelo nunca devuelve el token ni los datos de
+ * una cuenta que está saliendo, ni pisa una sesión más reciente. 401/403 invalidan la sesión; cualquier otro fallo
+ * (red, 5xx) se propaga para que quien llama lo trate como comprobación fallida.
+ */
+export async function refreshCachedSession({
+  client,
+  storage,
+  isCancelled = () => false,
+}: {
+  client: MobileClient;
+  storage: EncryptedStorage;
+  isCancelled?: () => boolean;
+}): Promise<SessionRefresh> {
+  const cached = await storage.loadSession();
+  if (!cached) return { status: "none" };
+  const { token, user } = cached.session;
+  const leaving = () => isCancelled() || storage.accountState(user.id) !== "open";
+  const active = client.getToken();
+  if (leaving() || (active && active !== token)) return { status: "stale" };
+  client.setToken(token);
+  const stale = () => leaving() || client.getToken() !== token;
+  try {
+    const [summary, bookings] = await Promise.all([client.panelSummary(), client.myBookings(false)]);
+    if (stale()) return { status: "stale" };
+    if (summary.user.id !== user.id) throw new Error("Account mismatch");
+    await storage.saveSession({ token, user: summary.user });
+    await storage.saveBookings(summary.user.id, bookings);
+    await storage.saveSummary(summary.user.id, summary);
+    return stale() ? { status: "stale" } : { status: "refreshed", summary, bookings };
+  } catch (error: unknown) {
+    if (stale()) return { status: "stale" };
+    const status = (error as { status?: number }).status;
+    if (status !== 401 && status !== 403) throw error;
+    if (status === 403) await storage.clearAccount(user.id);
+    await storage.clearSession();
+    client.setToken(null);
+    return { status: "invalidated" };
+  }
+}

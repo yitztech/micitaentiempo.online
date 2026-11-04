@@ -349,6 +349,8 @@ export function createEncryptedStorage(options: StorageOptions) {
 
     // 1. Sesión de usuario
     async saveSession(session: MobileAuthSession): Promise<void> {
+      // Una respuesta tardía no recrea la sesión de una cuenta que está saliendo o ya salió.
+      if (accountStates.has(session.user.id)) return;
       await setItem("auth", "session", session);
     },
     async loadSession(): Promise<{ session: MobileAuthSession; cachedAt: string; isStale: boolean } | null> {
@@ -438,7 +440,8 @@ export function createEncryptedStorage(options: StorageOptions) {
      * - Es idempotente: un elemento con revisión ya aplicada se ignora (repetir una página no duplica ni retrocede).
      * - `reset` descarta la caché de los recursos declarados (sedes y perfil) pero NUNCA la cola ni los pendientes.
      * - No sobrescribe una edición local sin resolver: la operación pendiente se conserva y, si el servidor ya tiene
-     *   una versión posterior, se marca `conflict` para que la persona decida.
+     *   una versión posterior, se marca `conflict` para que la persona decida. Una operación con resultado incierto no
+     *   se marca: esa versión puede ser la que ella misma creó.
      * - Una baja nunca se deshace con un pendiente antiguo: los pendientes de ese recurso pasan a `failed`
      *   (`resource_removed`) y no se reenvían. Las operaciones `sending` no se tocan: las reconcilia el sincronizador.
      */
@@ -480,6 +483,8 @@ export function createEncryptedStorage(options: StorageOptions) {
               const serverVersion = item.data.version;
               queue = queue.map((op) => {
                 if (op.state !== "pending" || !touchesResource(op) || op.baseVersion === null) return op;
+                // Con resultado incierto, esa versión posterior puede ser la suya: decide el sincronizador con el recibo.
+                if (op.retryCount > 0) return op;
                 if (op.baseVersion >= serverVersion) return op;
                 result.conflictsFlagged++;
                 queueChanged = true;

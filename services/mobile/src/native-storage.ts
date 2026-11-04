@@ -1,7 +1,8 @@
 import * as Crypto from "expo-crypto";
 import * as SecureStore from "expo-secure-store";
 import * as SQLite from "expo-sqlite";
-import { type StorageBackend, StorageQuotaExceededError } from "./storage.ts";
+import { createSqliteBackend } from "./sqlite-backend.ts";
+import type { StorageBackend } from "./storage.ts";
 
 const KEY_NAME = "offline_database_key_v1";
 let database: Promise<SQLite.SQLiteDatabase> | undefined;
@@ -34,58 +35,4 @@ function getDatabase() {
   return database;
 }
 
-export const nativeStorageBackend: StorageBackend = {
-  async get(key) {
-    const db = await getDatabase();
-    const row = await db.getFirstAsync<{ value: string }>(
-      "SELECT value FROM offline_items WHERE key = ?",
-      key,
-    );
-    return row?.value ?? null;
-  },
-  async set(key, value, maxBytes) {
-    const db = await getDatabase();
-    await db.withExclusiveTransactionAsync(async (tx) => {
-      const row = await tx.getFirstAsync<{ bytes: number }>(
-        "SELECT COALESCE(SUM(length(CAST(value AS BLOB))), 0) + length(CAST(? AS BLOB)) AS bytes FROM offline_items WHERE key != ?",
-        value,
-        key,
-      );
-      if ((row?.bytes ?? 0) > maxBytes) throw new StorageQuotaExceededError();
-      await tx.runAsync(
-        "INSERT INTO offline_items (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value",
-        key,
-        value,
-      );
-    });
-  },
-  async transaction(operations, maxBytes) {
-    const db = await getDatabase();
-    // Transacción exclusiva de SQLite: si algo lanza (incluida la cuota total), no se aplica ninguna operación.
-    await db.withExclusiveTransactionAsync(async (tx) => {
-      for (const op of operations) {
-        if (op.type === "set") {
-          await tx.runAsync(
-            "INSERT INTO offline_items (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value",
-            op.key,
-            op.value,
-          );
-        } else {
-          await tx.runAsync("DELETE FROM offline_items WHERE key = ?", op.key);
-        }
-      }
-      const total = await tx.getFirstAsync<{ bytes: number }>(
-        "SELECT COALESCE(SUM(length(CAST(value AS BLOB))), 0) AS bytes FROM offline_items",
-      );
-      if ((total?.bytes ?? 0) > maxBytes) throw new StorageQuotaExceededError();
-    });
-  },
-  async remove(key) {
-    const db = await getDatabase();
-    await db.runAsync("DELETE FROM offline_items WHERE key = ?", key);
-  },
-  async removePrefix(prefix) {
-    const db = await getDatabase();
-    await db.runAsync("DELETE FROM offline_items WHERE substr(key, 1, length(?)) = ?", prefix, prefix);
-  },
-};
+export const nativeStorageBackend: StorageBackend = createSqliteBackend(getDatabase);

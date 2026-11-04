@@ -5,6 +5,7 @@ import {
   createSyncEngine,
   MOBILE_LANGUAGES,
   MOBILE_STRINGS,
+  refreshCachedSession,
   requestSignOut,
   signOutAccount,
   unresolvedOperations,
@@ -287,5 +288,97 @@ describe("advertencia de pendientes al cerrar sesión (M06)", () => {
       if (lang !== "es")
         expect(MOBILE_STRINGS[lang].signOutDiscard).not.toBe(MOBILE_STRINGS.es.signOutDiscard);
     }
+  });
+});
+
+describe("una comprobación en vuelo no resucita la sesión (M05)", () => {
+  const USER = { id: "user-a", email: "a@example.com", name: "Ana" };
+  const SUMMARY = { user: USER, org: null, calendars: [] };
+
+  async function refreshing(overrides = {}) {
+    const { storage, client } = setup();
+    await storage.saveSession({ token: "token-a", user: USER });
+    const gate = deferred();
+    client.panelSummary = vi.fn(() => gate.promise);
+    client.myBookings = vi.fn(async () => []);
+    Object.assign(client, overrides);
+    return { storage, client, gate };
+  }
+
+  it("refresca los datos de la sesión guardada", async () => {
+    const { storage, client, gate } = await refreshing();
+    client.setToken(null);
+    const pending = refreshCachedSession({ client, storage });
+    gate.resolve(SUMMARY);
+    await expect(pending).resolves.toEqual({ status: "refreshed", summary: SUMMARY, bookings: [] });
+    expect(client.getToken()).toBe("token-a");
+    expect((await storage.loadSummary("user-a"))?.data).toEqual(SUMMARY);
+  });
+
+  it("una respuesta tardía tras salir no devuelve token, sesión ni datos", async () => {
+    const { storage, client, gate } = await refreshing();
+    const pending = refreshCachedSession({ client, storage });
+    await until(() => client.panelSummary.mock.calls.length > 0);
+    await signOutAccount({ accountId: "user-a", client, storage });
+    gate.resolve(SUMMARY);
+    await expect(pending).resolves.toEqual({ status: "stale" });
+    expect(client.getToken()).toBeNull();
+    expect(await storage.loadSession()).toBeNull();
+    expect(await storage.loadSummary("user-a")).toBeNull();
+  });
+
+  it("no restaura el token de una cuenta que empezó a salir", async () => {
+    const { storage, client } = await refreshing();
+    client.setToken(null);
+    storage.beginExit("user-a");
+    await expect(refreshCachedSession({ client, storage })).resolves.toEqual({ status: "stale" });
+    expect(client.getToken()).toBeNull();
+    expect(client.panelSummary).not.toHaveBeenCalled();
+  });
+
+  it("guardar la sesión de una cuenta cerrada se descarta hasta el siguiente acceso", async () => {
+    const { storage } = await refreshing();
+    await storage.clearSession();
+    await storage.clearAccount("user-a");
+    await storage.saveSession({ token: "token-a", user: USER });
+    expect(await storage.loadSession()).toBeNull();
+    storage.openAccount("user-a");
+    await storage.saveSession({ token: "token-a2", user: USER });
+    expect((await storage.loadSession())?.session.token).toBe("token-a2");
+  });
+
+  it("un 401 tardío de la sesión anterior no cierra la sesión nueva", async () => {
+    const { storage, client, gate } = await refreshing();
+    const pending = refreshCachedSession({ client, storage });
+    await until(() => client.panelSummary.mock.calls.length > 0);
+    client.setToken("token-b");
+    gate.reject({ status: 401 });
+    await expect(pending).resolves.toEqual({ status: "stale" });
+    expect(client.getToken()).toBe("token-b");
+    expect(await storage.loadSession()).not.toBeNull();
+  });
+
+  it("no pisa una sesión más reciente del cliente", async () => {
+    const { storage, client } = await refreshing();
+    client.setToken("token-b");
+    await expect(refreshCachedSession({ client, storage })).resolves.toEqual({ status: "stale" });
+    expect(client.getToken()).toBe("token-b");
+  });
+
+  it("401 invalida la sesión y un fallo de red se propaga sin borrarla", async () => {
+    const rejected = await refreshing();
+    const invalid = refreshCachedSession({ client: rejected.client, storage: rejected.storage });
+    await until(() => rejected.client.panelSummary.mock.calls.length > 0);
+    rejected.gate.reject({ status: 401 });
+    await expect(invalid).resolves.toEqual({ status: "invalidated" });
+    expect(rejected.client.getToken()).toBeNull();
+    expect(await rejected.storage.loadSession()).toBeNull();
+
+    const down = await refreshing();
+    const failing = refreshCachedSession({ client: down.client, storage: down.storage });
+    await until(() => down.client.panelSummary.mock.calls.length > 0);
+    down.gate.reject({ status: 0, code: "network" });
+    await expect(failing).rejects.toMatchObject({ code: "network" });
+    expect(await down.storage.loadSession()).not.toBeNull();
   });
 });

@@ -129,18 +129,19 @@ export async function submitOrQueue<T>({
 }: {
   isOnline: () => boolean;
   attempt: (operationId: string) => Promise<T>;
-  enqueue: (operationId: string) => Promise<void>;
+  /** `attempted`: la petición ya salió y su resultado se desconoce; el sincronizador debe reconciliarla antes de caducarla. */
+  enqueue: (operationId: string, options: { attempted: boolean }) => Promise<void>;
   operationId: string;
 }): Promise<OnlineOrQueueResult<T>> {
   if (!isOnline()) {
-    await enqueue(operationId);
+    await enqueue(operationId, { attempted: false });
     return { status: "queued" };
   }
   try {
     return { status: "sent", value: await attempt(operationId) };
   } catch (error) {
     if (!isTransportError(error)) throw error;
-    await enqueue(operationId);
+    await enqueue(operationId, { attempted: true });
     return { status: "queued" };
   }
 }

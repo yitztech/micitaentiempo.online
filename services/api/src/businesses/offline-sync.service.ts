@@ -93,13 +93,15 @@ export class OfflineSyncService implements OnModuleInit, OnModuleDestroy {
     const scope = scopeHash(orgs);
     const now = this.clock.now();
     const secret = this.env.BETTER_AUTH_SECRET;
-    const cursorFor = (position: CursorPosition) =>
-      encodeCursor(secret, { actor: userId, scope, position, now });
+    const cursorFor = (position: CursorPosition, exp?: number) =>
+      encodeCursor(secret, { actor: userId, scope, position, now, exp });
 
     let position: CursorPosition | null = null;
+    // Plazo de la posición recibida: se hereda mientras no se alcance el horizonte actual (ADR 0020 §6).
+    let inheritedExp: number | undefined;
     if (token !== undefined) {
       try {
-        position = decodeCursor(secret, token, { actor: userId, scope, now });
+        ({ position, exp: inheritedExp } = decodeCursor(secret, token, { actor: userId, scope, now }));
       } catch (error) {
         if (!(error instanceof CursorError)) throw error;
         if (error.kind === "invalid") {
@@ -134,6 +136,7 @@ export class OfflineSyncService implements OnModuleInit, OnModuleDestroy {
         hasMore,
         nextCursor: cursorFor(
           hasMore ? { k: "s", w: watermark, after: last } : { k: "c", t: watermark, s: 0 },
+          inheritedExp,
         ),
       };
     }
@@ -165,9 +168,10 @@ export class OfflineSyncService implements OnModuleInit, OnModuleDestroy {
       snapshotComplete: true,
       items: await this.materialize(consumed),
       hasMore,
-      nextCursor: cursorFor(
-        hasMore && lastRow ? { k: "c", t: lastRow.txid, s: Number(lastRow.seq) } : { k: "c", t: x, s: 0 },
-      ),
+      nextCursor:
+        hasMore && lastRow
+          ? cursorFor({ k: "c", t: lastRow.txid, s: Number(lastRow.seq) }, inheritedExp)
+          : cursorFor({ k: "c", t: x, s: 0 }),
     };
   }
 

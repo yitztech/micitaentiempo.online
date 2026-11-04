@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { submitOrQueue } from "../../services/mobile/src/connectivity.ts";
 import {
   compactQueue,
   createEncryptedStorage,
@@ -758,5 +759,68 @@ describe("cuota de pendientes y compactación del historial (M04)", () => {
     expect(queue.map((o) => o.operationId).sort()).toEqual([id(1), id(2), id(3)]);
     expect(queue.find((o) => o.operationId === id(1))?.retryCount).toBe(3);
     expect(queue.find((o) => o.operationId === id(2))?.state).toBe("synced");
+  });
+});
+
+describe("guardado en línea con resultado desconocido (hallazgo 7)", () => {
+  const BIZ = "019a0000-0000-7000-8000-0000000e0001";
+  const OP = "019a0000-0000-7000-8000-0000000e0002";
+
+  async function savedOnlineWithTimeout(client) {
+    const storage = createEncryptedStorage({ baseUrl: "https://x.test", environment: "test" });
+    const engine = createSyncEngine({ client, storage, accountId: "user-a" });
+    await submitOrQueue({
+      isOnline: () => true,
+      operationId: OP,
+      attempt: async () => {
+        throw { status: 0, code: "timeout", body: {} };
+      },
+      enqueue: (operationId, { attempted }) =>
+        engine.enqueue({
+          kind: "profile.update",
+          resourceId: BIZ,
+          businessId: BIZ,
+          baseVersion: 5,
+          payload: {},
+          environment: "test",
+          customOperationId: operationId,
+          attempted,
+        }),
+    });
+    return { storage, engine };
+  }
+
+  it("reabrir pasadas 24 h recupera el éxito del recibo sin reenviar", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    try {
+      const client = {
+        getToken: () => "t",
+        getOperationReceipt: vi.fn(async () => ({ status: 200, body: { version: 6 } })),
+        updateOwnerBusinessProfile: vi.fn(),
+      };
+      const { storage, engine } = await savedOnlineWithTimeout(client);
+      vi.setSystemTime(Date.now() + 25 * 3_600_000);
+      expect((await engine.getPendingOperations())[0].state).toBe("pending");
+      const result = await engine.sync();
+      expect(result).toMatchObject({ synced: 1, expired: 0 });
+      expect(client.getOperationReceipt).toHaveBeenCalledWith(OP);
+      expect(client.updateOwnerBusinessProfile).not.toHaveBeenCalled();
+      expect((await storage.getQueue("user-a"))[0].state).toBe("synced");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("dentro del plazo y sin recibo reenvía con la misma clave", async () => {
+    const client = {
+      getToken: () => "t",
+      getOperationReceipt: vi.fn(async () => {
+        throw { status: 404 };
+      }),
+      updateOwnerBusinessProfile: vi.fn(async () => ({ version: 6 })),
+    };
+    const { engine } = await savedOnlineWithTimeout(client);
+    expect(await engine.sync()).toMatchObject({ synced: 1 });
+    expect(client.updateOwnerBusinessProfile).toHaveBeenCalledWith({}, 5, OP);
   });
 });

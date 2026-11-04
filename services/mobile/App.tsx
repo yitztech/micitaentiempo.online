@@ -39,7 +39,7 @@ import {
   resolveDeviceLayout,
 } from "./src/index.ts";
 import { nativeStorageBackend } from "./src/native-storage.ts";
-import { requestSignOut, unresolvedOperations } from "./src/session-exit.ts";
+import { refreshCachedSession, requestSignOut, unresolvedOperations } from "./src/session-exit.ts";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -179,28 +179,14 @@ export default function App() {
         if (!alive) return;
         setBoot(res);
         connectivityRef.current?.markConnected();
-        const cachedSession = await storage.loadSession();
-        if (cachedSession && alive) {
-          client.setToken(cachedSession.session.token);
-          try {
-            const [sum, list] = await Promise.all([client.panelSummary(), client.myBookings(false)]);
-            if (sum.user.id !== cachedSession.session.user.id) throw new Error("Account mismatch");
-            if (alive) {
-              setSummary(sum);
-              setBookings(list);
-              setLastDataUpdate(new Date().toISOString());
-            }
-            await storage.saveSession({ token: cachedSession.session.token, user: sum.user });
-            await storage.saveBookings(sum.user.id, list);
-            await storage.saveSummary(sum.user.id, sum);
-          } catch (error: unknown) {
-            const status = (error as { status?: number }).status;
-            if (status === 401 || status === 403) {
-              if (status === 403) await storage.clearAccount(cachedSession.session.user.id);
-              await storage.clearSession();
-              client.setToken(null);
-            }
-          }
+        // Un fallo que no sea de sesión deja la pantalla como está: el controlador de conexión lo reintenta.
+        const session = await refreshCachedSession({ client, storage, isCancelled: () => !alive }).catch(
+          () => null,
+        );
+        if (session?.status === "refreshed" && alive) {
+          setSummary(session.summary);
+          setBookings(session.bookings);
+          setLastDataUpdate(new Date().toISOString());
         }
       } catch {
         if (platform === "android" && apiUrl.includes("10.0.2.2")) {
@@ -252,35 +238,18 @@ export default function App() {
       onChange: setConn,
       probe: async (signal) => {
         const nextBoot = await client.bootstrap(signal);
-        const cached = await storage.loadSession();
-        if (cached && !signal.aborted) {
-          client.setToken(cached.session.token);
-          try {
-            const [nextSummary, nextBookings] = await Promise.all([
-              client.panelSummary(),
-              client.myBookings(false),
-            ]);
-            if (nextSummary.user.id !== cached.session.user.id) throw new Error("Account mismatch");
-            await storage.saveSession({ token: cached.session.token, user: nextSummary.user });
-            await storage.saveBookings(nextSummary.user.id, nextBookings);
-            await storage.saveSummary(nextSummary.user.id, nextSummary);
-            if (!signal.aborted) {
-              setSummary(nextSummary);
-              setBookings(nextBookings);
-              setLastDataUpdate(new Date().toISOString());
-            }
-          } catch (error: unknown) {
-            const status = (error as { status?: number }).status;
-            // Solo 401/403 invalidan la sesión; cualquier otro fallo (red, 5xx) deja la comprobación como fallida.
-            if (status !== 401 && status !== 403) throw error;
-            if (status === 403) await storage.clearAccount(cached.session.user.id);
-            await storage.clearSession();
-            client.setToken(null);
-            if (!signal.aborted) {
-              setSummary(null);
-              setBookings(null);
-            }
-          }
+        const session = await refreshCachedSession({
+          client,
+          storage,
+          isCancelled: () => signal.aborted,
+        });
+        if (session.status === "refreshed" && !signal.aborted) {
+          setSummary(session.summary);
+          setBookings(session.bookings);
+          setLastDataUpdate(new Date().toISOString());
+        } else if (session.status === "invalidated" && !signal.aborted) {
+          setSummary(null);
+          setBookings(null);
         }
         if (!signal.aborted) setBoot(nextBoot);
       },
@@ -607,7 +576,7 @@ export default function App() {
         attempt: (operationId) =>
           client.updateOwnerBusinessProfile(updates, ownerProfile?.version ?? 1, operationId),
         // Sin conexión, o con un resultado incierto por fallo de red: se encola con la misma clave de idempotencia.
-        enqueue: async (operationId) => {
+        enqueue: async (operationId, { attempted }) => {
           if (!ownerProfile) throw new Error("Profile not available offline");
           const syncEngine = createSyncEngine({
             client,
@@ -622,6 +591,7 @@ export default function App() {
             baseVersion: ownerProfile?.version ?? 1,
             payload: updates,
             customOperationId: operationId,
+            attempted,
           });
         },
       });

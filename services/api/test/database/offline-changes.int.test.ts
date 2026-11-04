@@ -319,6 +319,45 @@ describe("C02b — endpoint de cambios", () => {
     expect(recovered.items.map((i) => i.id)).toEqual([ORG_A]);
   });
 
+  it("seguir un snapshot sin terminar no renueva el plazo de su marca de agua", async () => {
+    await addLocation(ORG_A, loc(901));
+    await addLocation(ORG_A, loc(902));
+    const start = Date.now();
+    const first = await page("owner-a", undefined, 1);
+    clock.set(new Date(start + 29 * 86_400_000));
+    const second = await page("owner-a", first.nextCursor, 1);
+    expect(second.hasMore).toBe(true);
+    clock.set(new Date(start + 31 * 86_400_000));
+    expect(await rejection(page("owner-a", second.nextCursor, 1))).toBeInstanceOf(GoneException);
+  });
+
+  it("el cursor final de un snapshot conserva la edad de su marca de agua", async () => {
+    await addLocation(ORG_A, loc(903));
+    const start = Date.now();
+    const first = await page("owner-a", undefined, 1);
+    clock.set(new Date(start + 29 * 86_400_000));
+    const last = await page("owner-a", first.nextCursor, 100);
+    expect(last.snapshotComplete).toBe(true);
+    clock.set(new Date(start + 31 * 86_400_000));
+    expect(await rejection(page("owner-a", last.nextCursor))).toBeInstanceOf(GoneException);
+  });
+
+  it("una página de cambios con más pendientes hereda el plazo y solo alcanzar el horizonte lo estrena", async () => {
+    const start = Date.now();
+    const { cursor } = await snapshot("owner-a");
+    await addLocation(ORG_A, loc(904));
+    await addLocation(ORG_A, loc(905));
+    clock.set(new Date(start + 29 * 86_400_000));
+    const partial = await page("owner-a", cursor, 1);
+    expect(partial.hasMore).toBe(true);
+    const current = await page("owner-a", cursor, 100);
+    expect(current.hasMore).toBe(false);
+
+    clock.set(new Date(start + 31 * 86_400_000));
+    expect(await rejection(page("owner-a", partial.nextCursor, 1))).toBeInstanceOf(GoneException);
+    await expect(page("owner-a", current.nextCursor)).resolves.toMatchObject({ mode: "changes" });
+  });
+
   it("perder el permiso invalida el cursor y el snapshot ya no contiene el negocio", async () => {
     await addLocation(ORG_A, loc(1));
     const { cursor } = await snapshot("owner-a");

@@ -609,14 +609,14 @@ Todo el plan está pendiente al añadirse. Las verificaciones históricas del in
 | I01 | GPT-6.1 Sol | High | verificada | Lint, typecheck, i18n, unitarias (303 API, 14 admin, 81 + móvil), 76 de BD, Go y 86 escenarios backend aprobados con imágenes reconstruidas. Véase registro I01. | S01–S08 |
 | M01 | GPT-6 Luna | High | verificada | Cliente alineado con los esquemas del servidor; 5 pruebas de contrato con los Zod reales. Véase registro M01. | Ninguna |
 | M02 | GPT-6 Luna | High | verificada (unitaria) | Plazos, clasificación de errores, controlador de conexión y guardado en línea/cola; 14 pruebas con reloj y transporte controlados. Falta prueba nativa (V01). Véase registro M02. | M01 |
-| M03 | GPT-6.1 Sol | High | verificada (unitaria) | Reconciliación de resultados inciertos antes de caducar; 13 regresiones nuevas que fallan con el código anterior. Véase registro M03. | M02 |
-| M04 | GPT-6 Luna | High | verificada (unitaria) | Cuota separada del historial y compactación segura; 8 pruebas. Falta reinicio/transacción nativa (V01). Véase registro M04. | M03 |
+| M03 | GPT-6.1 Sol | High | verificada (unitaria) | Reconciliación de resultados inciertos antes de caducar; 13 regresiones nuevas que fallan con el código anterior. La revisión del 2026-11-04 halló abierta la vía del guardado en línea, ya corregida. Véase registros M03 y Revisión. | M02 |
+| M04 | GPT-6 Luna | High | verificada (unitaria) | Cuota separada del historial y compactación segura; 8 pruebas. Transacción corregida en la Revisión; falta reinicio en dispositivo (V01). Véase registros M04 y Revisión. | M03 |
 | M05 | GPT-6.1 Sol | High | verificada (unitaria) | Barrera de salida por cuenta con drenaje de la sincronización, descarte de escrituras tardías y token ligado a la sincronización; 8 pruebas deterministas. Falta nativo (V01). Véase registro M05. | M03–M04 |
 | M06 | GPT-6 Luna | High | verificada (unitaria) | Confirmación ante pendientes, contador de todos los estados no confirmados y textos en 6 idiomas; 7 pruebas. Falta interacción nativa (V01). Véase registro M06. | M05 |
 | C01 | GPT-6.1 Sol | High | verificada | ADR 0020 con recursos, permisos, orden por `xid8`, cursor firmado, retención y ejemplos. Véase registro C01. | I01, M03 |
 | C02a | GPT-6.1 Sol | High | verificada | Migración 0014: `app.sync_changes` y triggers transaccionales; 4 pruebas con PostgreSQL real. Véase registro C02. | Contrato C01 |
 | C02b | GPT-6.1 Sol | High | verificada | Endpoint paginado con snapshot, cursor firmado y autorización por página; 12 pruebas con PostgreSQL real. Véase registro C02. | C02a |
-| C03 | GPT-6 Luna | High | verificada (unitaria + contrato HTTP) | Aplicación atómica de páginas, bajas y cursor en el móvil con transacción multi-clave; 13 pruebas y 2 escenarios contra la API real. Falta nativo/SQLCipher (V01). Véase registro C03. | C02a–C02b |
+| C03 | GPT-6 Luna | High | verificada (unitaria + contrato HTTP) | Aplicación atómica de páginas, bajas y cursor en el móvil con transacción multi-clave; 13 pruebas y 2 escenarios contra la API real. Transacción SQLCipher corregida en la Revisión; falta dispositivo (V01). Véase registros C03 y Revisión. | C02a–C02b |
 | R01 | GPT-6 Luna | High | verificada (unitaria) | Intención de reserva validada contra el sitio configurado y las rutas del proyecto; 5 pruebas de validación. Véase registro R01–R02. | M02 |
 | R02 | GPT-6.1 Sol | High | implementada, validación pendiente | Adaptador de navegador seguro con reconciliación por el servidor; 9 pruebas. Falta el recorrido nativo y una cuenta de prueba (V01). Véase registro R01–R02. | R01, contrato de reserva |
 | V01 | GPT-6.1 Sol | High | bloqueada (parte nativa) | Integración verificada en todo lo ejecutable aquí; faltan Appium, binarios nativos con SQLCipher y dispositivos. Véase registro V01. | Integración de todas las anteriores |
@@ -930,3 +930,25 @@ Las claves se consultan únicamente en `https://www.googleapis.com/oauth2/v3/cer
 **Pendiente (N1) — exactamente lo que falta:** no hay `appium` ni `adb` en el PATH, ni binarios compilados. Matriz mínima sin ejecutar: abrir con red → descargar → cortar red → editar → matar proceso → reabrir → recuperar red → comprobar servidor; respuesta perdida tras commit; API caída; sesión vencida; cambios concurrentes; cursor vencido; baja; disco lleno; cambio de cuenta; recorrido de reserva con navegador seguro; diálogo de cierre de sesión; SQLCipher presente en el binario y rechazo de guardar privados sin él; todo en teléfono y tableta, Android e iOS, en secuencia. Comandos: compilar con `expo prebuild` + build nativo (JDK/Xcode), levantar `pnpm test:env:up`, Appium con una cuenta de prueba y luego `pnpm test:native:mobile`.
 
 **Resumen del plan:** S01–S08 e I01 verificadas; M01–M06 y C01–C03 verificadas en pruebas unitarias/integración (nativo pendiente); R01 verificada; R02 implementada, validación pendiente; V01 bloqueada en lo nativo. **Decisiones/operaciones pendientes:** rotar la cuenta de admin y revocar sesiones en instalaciones existentes, inventario de suspensiones legacy, y la decisión sobre `bookingUrl: /c/<slug>` (ruta inexistente en la web).
+
+### Registro de ejecución — Revisión y correcciones (2026-11-04)
+
+**Motivo:** una revisión del código contra este plan encontró que el cierre de V01 era demasiado optimista. Esta sección prevalece sobre lo afirmado en los registros anteriores.
+
+**Correcciones al registro anterior:** `pnpm typecheck` solo pasaba en local; el job TypeScript del CI estaba en rojo desde `0074257` y no se había comprobado. M03 se dio por verificada con una vía abierta. Las transacciones de `native-storage.ts` no podían funcionar con SQLCipher, y las pruebas no lo veían porque usan un backend simulado.
+
+**Defectos corregidos:**
+
+1. **SQLCipher:** `withExclusiveTransactionAsync` abre una conexión nueva sin `PRAGMA key`, que falla con `file is not a database`. Nuevo `src/sqlite-backend.ts`: una sola conexión con `withTransactionAsync` y una cola que impide que otra consulta se ejecute dentro de una transacción. Evidencia: el SQLCipher 4.17.0 incluido en `expo-sqlite`, compilado aparte, reproduce el fallo y confirma que el flujo de una conexión escribe, cifra y reabre.
+2. **CI:** el job TypeScript instala las dependencias de `services/mobile` y comprueba también los tipos de la app. En una copia limpia, `pnpm typecheck` falla sin ellas (exit 1, TS2307) y pasa con ellas.
+3. **Hallazgo 7, guardado en línea:** un envío que falla por transporte se encola como intentado (`attempted`, `retryCount: 1`), de modo que se reconcilia antes de caducar. Antes, a las 25 h quedaba `expired` sin consultar el recibo.
+4. **Conflicto falso:** `applyChangesPage` no marca `conflict` en una operación con resultado incierto; decide el sincronizador con el recibo.
+5. **Sesión tras salir:** `refreshCachedSession` (`session-exit.ts`) descarta una comprobación en vuelo si la cuenta sale, cambia el token o se cancela; `saveSession` respeta la barrera. `App.tsx` lo usa al arrancar y al recuperar la conexión.
+6. **Plazo del cursor:** los 30 días son de la posición. Un snapshot en curso, su cursor final y una página con `hasMore` heredan el `exp`; solo alcanzar el horizonte lo estrena. ADR 0020 §6 actualizado.
+7. **Contraseña por defecto del admin:** eliminado `dev-api`; con `DB_HOST` definido, la contraseña es obligatoria.
+
+**Pruebas:** `tests/unit/mobile-sqlite-backend.test.js` (6, SQL real con `node:sqlite`), más regresiones en `mobile-offline`, `mobile-connectivity`, `mobile-pull`, `mobile-session-exit`, `admin.test.ts` y `offline-changes.int.test.ts` (3). Con el código anterior de cola y conexión fallan 5 de las regresiones móviles.
+
+**Verificaciones:** `pnpm lint`, `pnpm i18n:check`, `pnpm typecheck`, `npm --prefix services/mobile run typecheck`, `pnpm test:unit` (exit 0), base de datos con PostgreSQL real 103 aprobadas, Metro Android e iOS. Los escenarios se validan en el CI de este commit.
+
+**Sigue abierto:** no hay evidencia en dispositivo (N1); la corrección de SQLCipher se probó con la librería, no en un binario Expo. Falta la prueba HTTP real del 429 (S08) y el contrato contra la API real (M01). `reconciliation_required` no tiene forma de limpiarse sin SQL manual: hay que decidir entre una acción en el panel o un procedimiento documentado.

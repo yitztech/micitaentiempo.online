@@ -129,6 +129,7 @@ export function createSyncEngine(options: SyncEngineOptions) {
       payload,
       environment = "production",
       customOperationId,
+      attempted = false,
     }: {
       kind: OfflineQueuedOperation["kind"];
       resourceId: string;
@@ -138,6 +139,8 @@ export function createSyncEngine(options: SyncEngineOptions) {
       payload: Record<string, unknown>;
       environment?: "development" | "test" | "production";
       customOperationId?: string;
+      /** Ya se intentó enviar y el resultado se desconoce: cuenta como reintento para reconciliarla antes de caducar. */
+      attempted?: boolean;
     }): Promise<OfflineQueuedOperation> {
       const now = new Date();
       const expiresAt = new Date(now.getTime() + OFFLINE_LIMITS.sendWithinHours * 3600 * 1000);
@@ -156,8 +159,8 @@ export function createSyncEngine(options: SyncEngineOptions) {
         expiresAt: expiresAt.toISOString(),
         state: "pending",
         payload,
-        retryCount: 0,
-        lastError: null,
+        retryCount: attempted ? 1 : 0,
+        lastError: attempted ? "network_or_server_error" : null,
       };
 
       // Valida metadatos según esquema formal del contrato

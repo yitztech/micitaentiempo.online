@@ -12,6 +12,7 @@ Requisitos: Node >=22.22, pnpm 12.9.1, Go según `services/calendar/go.mod`, Doc
 
 ```sh
 pnpm install --frozen-lockfile
+npm ci --prefix services/mobile --ignore-scripts   # la app móvil está fuera del workspace; `pnpm typecheck` la necesita
 pnpm --filter @mcet/escenarios exec playwright install chromium webkit
 pnpm test:env:up
 ```
