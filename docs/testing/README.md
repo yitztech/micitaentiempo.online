@@ -39,6 +39,15 @@ MAILPIT_URL=http://localhost:18026 pnpm test:behavior
 
 Lo mismo aplica a `scripts/test-native-mobile.mjs`. Si cambias el puerto del gateway, exporta `ES_URL` y `EN_URL` con el nuevo puerto. Comprueba que el puerto elegido está libre con `lsof -nP -iTCP:18025 -sTCP:LISTEN`.
 
+### Recorrido nativo
+
+1. Con `pnpm test:env:up` en marcha, genera los proyectos con `expo prebuild`; así incluyen `useSQLCipher`.
+2. Compila. En Android, `./gradlew assembleDebug` con `JAVA_HOME` en el JBR de Android Studio. En iOS, `xcodebuild` para el simulador con `CODE_SIGN_IDENTITY=-`. Con `CODE_SIGNING_ALLOWED=NO` la app se queda sin llavero y no guarda nada.
+3. Arranca Metro (`npx expo start --port 8081`) y Appium desde `services/mobile`, con `ANDROID_HOME` y `ANDROID_SDK_ROOT` exportadas. `npm run appium:setup` instala los dos controladores.
+4. Ejecuta `pnpm test:native:<destino>` con `ANDROID_APP_PATH` o `IOS_APP_PATH`.
+
+Variables opcionales: `IOS_PLATFORM_VERSION` fija el iOS del simulador si difiere del de Xcode. `NATIVE_GATEWAY_CONTAINER=mcet-tests-gateway-1` añade la comprobación sin servidor: para ese contenedor, reabre la app y lo arranca de nuevo.
+
 En macOS, si Testcontainers no descubre Docker, usa las variables de conexión documentadas por tu instalación de Docker; no desactives las pruebas para ocultar el problema. Sin Docker, `test:db` falla. El modo Go `-short` omite explícitamente las pruebas SQL.
 
 Los nombres `micitaentiempo.localhost` y `myappointmentontime.localhost` deben resolver a loopback. Para otra dirección local, configura `ES_URL`, `EN_URL` y `MAILPIT_URL` según `tests/escenarios/fixtures/`; las URL públicas del entorno deben coincidir para verificar correos y cookies. No apuntes suites que escriben datos a producción.

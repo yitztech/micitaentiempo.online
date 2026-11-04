@@ -619,7 +619,7 @@ Todo el plan está pendiente al añadirse. Las verificaciones históricas del in
 | C03 | GPT-6 Luna | High | verificada (unitaria + contrato HTTP) | Aplicación atómica de páginas, bajas y cursor en el móvil con transacción multi-clave; 13 pruebas y 2 escenarios contra la API real. Transacción SQLCipher corregida en la Revisión; falta dispositivo (V01). Véase registros C03 y Revisión. | C02a–C02b |
 | R01 | GPT-6 Luna | High | verificada (unitaria) | Intención de reserva validada contra el sitio configurado y las rutas del proyecto; 5 pruebas de validación. Véase registro R01–R02. | M02 |
 | R02 | GPT-6.1 Sol | High | implementada, validación pendiente | Adaptador de navegador seguro con reconciliación por el servidor; 9 pruebas. Falta el recorrido nativo y una cuenta de prueba (V01). Véase registro R01–R02. | R01, contrato de reserva |
-| V01 | GPT-6.1 Sol | High | bloqueada (parte nativa) | Integración verificada en todo lo ejecutable aquí; faltan Appium, binarios nativos con SQLCipher y dispositivos. Véase registro V01. | Integración de todas las anteriores |
+| V01 | GPT-6.1 Sol | High | implementada, validación pendiente | Recorrido nativo aprobado en Android e iOS, teléfono y tableta, con SQLCipher. Queda parte de la matriz N1. Véase «Evidencia nativa N1». | Integración de todas las anteriores |
 
 ### Registro de ejecución — S01 (2026-11-03)
 
@@ -968,3 +968,17 @@ Las claves se consultan únicamente en `https://www.googleapis.com/oauth2/v3/cer
 **S08:** `test/database/mobile-auth-http.int.test.ts` prueba por HTTP el 429 con `Retry-After`, Fastify, `ProblemFilter` y PostgreSQL reales, con los límites activos.
 
 **M01:** `movil/sedes-cliente.feature` usa `createMobileClient` contra la API real para crear, asignar y borrar una sede.
+
+### Evidencia nativa N1 (2026-11-04)
+
+**Corrección:** N1 no estaba bloqueada por falta de herramientas: el SDK de Android, Xcode, los simuladores y Appium ya estaban en esta máquina. Los binarios del 2 de noviembre no servían porque su `prebuild` era anterior a `useSQLCipher`.
+
+**Aprobado en binarios de depuración con Metro, sobre la pila de pruebas:** Pixel_10 (Android), Medium_Tablet (Android), iPhone 17 Pro e iPad Pro 11 (iOS 26.5). En los cuatro: arranque conectado, acceso con correo y contraseña, sesión conservada al matar y reabrir la app, sesión disponible al reabrir con el gateway parado, reconexión, «Mis citas» y cierre de sesión.
+
+**SQLCipher:** en los cuatro, `mcet-offline-v1.db` existe en el dispositivo y su cabecera no es `SQLite format 3`, es decir, está cifrada.
+
+**Sin ejecutar en dispositivo:** binarios de publicación; edición sin conexión y sincronización de la cola; respuesta perdida tras el commit; sesión vencida; cambios concurrentes; cursor vencido; baja; disco lleno; cambio de cuenta; recorrido de reserva con navegador seguro; diálogo de cierre de sesión; rechazo de guardar privados sin SQLCipher. Estos casos sí tienen pruebas unitarias o de integración.
+
+**Fallos propios del entorno, ya resueltos en el runner o en la guía:** Appium conservaba un APK viejo instalado; compilar iOS con `CODE_SIGNING_ALLOWED=NO` deja la app sin llavero; el teclado de iOS perdía letras y tapaba campos; el recorrido no abría la pestaña «Entrar».
+
+**Abierto, sin relación con este plan:** `panel/cuenta.feature` falla en el proyecto `android` de Playwright (2 de 3): el clic en «Guardar» se intercepta aunque el botón está visible. Ese proyecto no corre en CI.

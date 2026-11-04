@@ -110,6 +110,18 @@ describe("runner nativo W3C WebDriver / Appium para Android e iOS (teléfonos y 
         expect(result.target).toBe(target);
         expect(result.steps).toContain("sesión cerrada");
       }
+
+      const events = [];
+      const offline = await runNativeFlowWithDriver({
+        target: "android",
+        appiumUrl: `http://127.0.0.1:${port}`,
+        appPath: __filename,
+        account: { email: "nativo@escenarios.test", password: "x", name: "Prueba Nativa" },
+        server: { stop: async () => events.push("stop"), start: async () => events.push("start") },
+      });
+      expect(events).toEqual(["stop", "start"]);
+      expect(offline.steps).toContain("sesión disponible al reabrir sin servidor");
+      expect(offline.steps).toContain("reconexión al volver el servidor");
       const clicked = actions.filter((a) => a.url?.endsWith("/click")).map((a) => a.url);
       expect(clicked.some((u) => u.includes(NATIVE_SELECTORS.submitButton))).toBe(true);
       expect(clicked.some((u) => u.includes(NATIVE_SELECTORS.signOutButton))).toBe(true);

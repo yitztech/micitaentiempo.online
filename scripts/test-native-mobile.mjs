@@ -33,7 +33,11 @@ export const NATIVE_SELECTORS = {
   panelSummaryCard: "panel-summary-card",
   myAppointmentsList: "my-appointments-list",
   signOutButton: "auth-sign-out-button",
+  tabMyAppointments: "nav-tab-my-appointments",
+  tabAccount: "nav-tab-account",
 };
+
+const APP_ID = "online.micitaentiempo.app";
 
 /** Identifica el serial (udid) del emulador Android correcto cuando hay múltiples emuladores corriendo (teléfono vs tablet). */
 export function resolveUdid(target) {
@@ -71,8 +75,16 @@ export function buildNativeCapabilities(target, appPath, options = {}) {
       : isTablet
         ? "Medium_Tablet"
         : "Pixel_10",
-    ...(isIos ? {} : { "appium:avd": isTablet ? "Medium_Tablet" : "Pixel_10" }),
+    // Sin enforceAppInstall, Appium conserva una app ya instalada con la misma versión y prueba un binario viejo.
+    ...(isIos
+      ? {}
+      : { "appium:avd": isTablet ? "Medium_Tablet" : "Pixel_10", "appium:enforceAppInstall": true }),
     ...(udid ? { "appium:udid": udid } : {}),
+    // XCUITest toma la versión de Xcode si no se indica, y el simulador instalado puede ser otro.
+    ...(isIos ? { "appium:maxTypingFrequency": 20 } : {}),
+    ...(isIos && process.env.IOS_PLATFORM_VERSION
+      ? { "appium:platformVersion": process.env.IOS_PLATFORM_VERSION }
+      : {}),
     "appium:app": appPath,
     "appium:newCommandTimeout": 120,
     "appium:autoGrantPermissions": true,
@@ -199,11 +211,29 @@ async function tap(ctx, testId) {
 
 async function type(ctx, testId, text) {
   const { elementId } = await waitFor(ctx, testId);
+  // En iOS el teclado tapa el campo siguiente y lo escrito caería en este: Intro lo cierra antes de seguir.
+  const typed = ctx.target.startsWith("ios") ? `${text}\n` : text;
   await driverRequest(ctx.appiumUrl, "POST", `/session/${ctx.sessionId}/element/${elementId}/clear`, {});
+  if (ctx.target.startsWith("ios")) {
+    // Si el teclado aún no ha subido, la primera letra se pierde.
+    await driverRequest(ctx.appiumUrl, "POST", `/session/${ctx.sessionId}/element/${elementId}/click`, {});
+    await new Promise((r) => setTimeout(r, ctx.keyboardDelayMs ?? 800));
+  }
   await driverRequest(ctx.appiumUrl, "POST", `/session/${ctx.sessionId}/element/${elementId}/value`, {
-    text,
-    value: [...text],
+    text: typed,
+    value: [...typed],
   });
+}
+
+/** Mata el proceso y vuelve a abrir la app: la sesión solo sobrevive si el almacén cifrado guardó de verdad. */
+async function restartApp(ctx) {
+  const key = ctx.target.startsWith("ios") ? "bundleId" : "appId";
+  for (const script of ["mobile: terminateApp", "mobile: activateApp"]) {
+    await driverRequest(ctx.appiumUrl, "POST", `/session/${ctx.sessionId}/execute/sync`, {
+      script,
+      args: [{ [key]: APP_ID }],
+    });
+  }
 }
 
 async function screenshot(ctx, name) {
@@ -217,9 +247,17 @@ async function screenshot(ctx, name) {
 /**
  * Recorrido nativo real sobre la app instalada en el emulador/simulador:
  * arranque conectado al backend → botón de Google visible → acceso con correo y contraseña →
- * resumen del panel con el nombre de la cuenta → «Mis citas» cargada → cierre de sesión.
+ * resumen del panel con el nombre de la cuenta → matar y reabrir conservando la sesión →
+ * reabrir sin servidor y reconectar (si se indica `server`) → «Mis citas» cargada → cierre de sesión.
  */
-export async function runNativeFlowWithDriver({ target, appiumUrl, appPath, account, screenshotDir }) {
+export async function runNativeFlowWithDriver({
+  target,
+  appiumUrl,
+  appPath,
+  account,
+  screenshotDir,
+  server,
+}) {
   await verifyNativePrerequisites({ target, appiumUrl, appPath });
   if (!account?.email || !account?.password) {
     throw new Error("Falta la cuenta de prueba (email y contraseña) para el recorrido nativo.");
@@ -250,6 +288,7 @@ export async function runNativeFlowWithDriver({ target, appiumUrl, appPath, acco
     steps.push(`arranque: ${banner.text}`);
     await screenshot(ctx, "1-inicio");
 
+    await tap(ctx, NATIVE_SELECTORS.tabAccount);
     await waitFor(ctx, NATIVE_SELECTORS.googleButton);
     steps.push("botón de Google visible");
 
@@ -263,21 +302,75 @@ export async function runNativeFlowWithDriver({ target, appiumUrl, appPath, acco
     });
     steps.push(`resumen del panel: ${summary.text}`);
 
+    await restartApp(ctx);
+    await tap(ctx, NATIVE_SELECTORS.tabAccount);
+    await waitFor(ctx, NATIVE_SELECTORS.panelSummaryCard, {
+      textMatches: (t) => t.includes(account.name ?? account.email),
+      timeoutMs: 60_000,
+    });
+    steps.push("sesión conservada tras matar y reabrir la app");
+
+    if (server) {
+      await server.stop();
+      try {
+        await restartApp(ctx);
+        await tap(ctx, NATIVE_SELECTORS.tabAccount);
+        await waitFor(ctx, NATIVE_SELECTORS.panelSummaryCard, {
+          textMatches: (t) => t.includes(account.name ?? account.email),
+          timeoutMs: 60_000,
+        });
+        await screenshot(ctx, "2-sin-servidor");
+        steps.push("sesión disponible al reabrir sin servidor");
+      } finally {
+        await server.start();
+      }
+      await restartApp(ctx);
+      await waitFor(ctx, NATIVE_SELECTORS.statusBanner, {
+        textMatches: (t) => /conectad|connected/i.test(t),
+        timeoutMs: 60_000,
+      });
+      steps.push("reconexión al volver el servidor");
+    }
+
+    await tap(ctx, NATIVE_SELECTORS.tabMyAppointments);
     const list = await waitFor(ctx, NATIVE_SELECTORS.myAppointmentsList, {
       textMatches: (t) => t.trim().length > 0,
     });
     steps.push(`mis citas: ${list.text}`);
     await screenshot(ctx, "2-sesion");
 
+    await tap(ctx, NATIVE_SELECTORS.tabAccount);
     await tap(ctx, NATIVE_SELECTORS.signOutButton);
     await waitFor(ctx, NATIVE_SELECTORS.submitButton);
     steps.push("sesión cerrada");
     await screenshot(ctx, "3-salida");
 
     return { ok: true, target, sessionId, steps };
+  } catch (error) {
+    await screenshot(ctx, "fallo").catch(() => undefined);
+    throw error;
   } finally {
     await driverRequest(appiumUrl, "DELETE", `/session/${sessionId}`).catch(() => undefined);
   }
+}
+
+/** Para y arranca el gateway de la pila de pruebas; nunca se usa fuera de ella. */
+function gatewayControl(container, apiUrl) {
+  return {
+    stop: async () => execSync(`docker stop ${container}`, { stdio: "ignore" }),
+    start: async () => {
+      execSync(`docker start ${container}`, { stdio: "ignore" });
+      const deadline = Date.now() + 30_000;
+      while (Date.now() < deadline) {
+        const ok = await fetch(`${apiUrl}/api/healthz`, { signal: AbortSignal.timeout(2000) })
+          .then((res) => res.ok)
+          .catch(() => false);
+        if (ok) return;
+        await new Promise((r) => setTimeout(r, 500));
+      }
+      throw new Error(`El gateway ${container} no volvió a responder`);
+    },
+  };
 }
 
 const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
@@ -303,7 +396,16 @@ if (isMain) {
     try {
       await verifyNativePrerequisites({ target, appiumUrl, appPath });
       const account = await prepareNativeAccount({ apiUrl, mailpitUrl });
-      const result = await runNativeFlowWithDriver({ target, appiumUrl, appPath, account, screenshotDir });
+      const container = process.env.NATIVE_GATEWAY_CONTAINER;
+      const server = container ? gatewayControl(container, apiUrl) : undefined;
+      const result = await runNativeFlowWithDriver({
+        target,
+        appiumUrl,
+        appPath,
+        account,
+        screenshotDir,
+        server,
+      });
       console.log(`✓ [${target}] recorrido nativo completo`);
       for (const step of result.steps) console.log(`    · ${step}`);
     } catch (err) {
