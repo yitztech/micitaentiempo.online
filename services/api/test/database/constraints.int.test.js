@@ -3,6 +3,7 @@ import { PostgreSqlContainer } from "@testcontainers/postgresql";
 import pg from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { runMigrations } from "../../src/db/migrate.ts";
+import { stopDatabase } from "../helpers/database.js";
 
 let container, pool;
 beforeAll(async () => {
@@ -30,8 +31,7 @@ beforeAll(async () => {
   }
 });
 afterAll(async () => {
-  await pool?.end();
-  await container?.stop();
+  await stopDatabase(pool, container);
 });
 
 let seq = 0;
