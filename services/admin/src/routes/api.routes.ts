@@ -1,5 +1,6 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import type { AuthService } from "../auth/auth.service.js";
+import { LoginLimiter } from "../auth/login-limiter.js";
 import type { AdminDatabase } from "../db/admin-db.js";
 import {
   ECONOMIC_STATUSES,
@@ -25,6 +26,12 @@ interface ReconcileUserBody {
   reason?: unknown;
 }
 
+/** `Secure` solo cuando el cliente llegó por HTTPS: en local el panel se sirve por HTTP. */
+function sessionCookie(req: FastifyRequest, value: string, maxAge: number): string {
+  const secure = req.protocol === "https" ? "; Secure" : "";
+  return `admin_token=${value}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}${secure}`;
+}
+
 function sendPlatformError(error: unknown, reply: FastifyReply): FastifyReply {
   if (error instanceof PlatformUserNotFoundError) return reply.status(404).send({ code: "user_not_found" });
   if (error instanceof PlatformRestrictionNotFoundError)
@@ -42,6 +49,8 @@ export function registerApiRoutes(
   adminDb: AdminDatabase,
   platformDb: PlatformDatabase,
 ) {
+  const limiter = new LoginLimiter(adminDb);
+
   // ── Autenticación ──
   app.post("/api/auth/login", async (req: FastifyRequest<{ Body: LoginBody }>, reply: FastifyReply) => {
     const { username, password } = req.body || {};
@@ -56,15 +65,30 @@ export function registerApiRoutes(
       return reply.status(400).send({ error: "Usuario y contraseña requeridos" });
     }
 
+    const retryAfter = limiter.retryAfter(req.ip, username);
+    if (retryAfter > 0) {
+      return reply
+        .status(429)
+        .header("Retry-After", String(retryAfter))
+        .send({ error: "Demasiados intentos fallidos. Inténtalo más tarde." });
+    }
+
     const result = auth.login(username, password);
     if (!result) {
+      if (limiter.recordFailure(req.ip, username)) {
+        adminDb.addAuditLog(
+          "LOGIN_RATE_LIMITED",
+          "admin_user",
+          username.trim().toLowerCase(),
+          `Límite de intentos alcanzado desde ${req.ip}`,
+          "system",
+        );
+      }
       return reply.status(401).send({ error: "Credenciales incorrectas" });
     }
 
-    reply.header(
-      "Set-Cookie",
-      `admin_token=${encodeURIComponent(result.token)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=604800`,
-    );
+    limiter.clear(req.ip, username);
+    reply.header("Set-Cookie", sessionCookie(req, encodeURIComponent(result.token), 604800));
     return result;
   });
 
@@ -73,7 +97,7 @@ export function registerApiRoutes(
     if (admin) {
       auth.logout(admin.token, admin.username);
     }
-    reply.header("Set-Cookie", "admin_token=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0");
+    reply.header("Set-Cookie", sessionCookie(req, "", 0));
     return { ok: true };
   });
 

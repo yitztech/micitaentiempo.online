@@ -40,7 +40,8 @@ export async function buildAdminApp(
   }
   const auth = new AuthService(adminDb, config);
 
-  const app = fastify({ logger: false });
+  // El gateway sobrescribe X-Forwarded-For con un único valor: solo se confía en ese salto.
+  const app = fastify({ logger: false, trustProxy: (_address, hop) => hop < 1 });
 
   // Rutas de salud y versión requeridas por la plataforma
   app.get("/healthz", async () => "ok");

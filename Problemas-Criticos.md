@@ -984,3 +984,11 @@ Las claves se consultan únicamente en `https://www.googleapis.com/oauth2/v3/cer
 **Abierto, sin relación con este plan:** `panel/cuenta.feature` falla en el proyecto `android` de Playwright (2 de 3): el clic en «Guardar» se intercepta aunque el botón está visible. Ese proyecto no corre en CI.
 
 **Zona horaria (2026-11-04):** `Intl.supportedValuesOf` no lista `UTC`, el valor predeterminado de las cuentas, y el selector mostraba `Africa/Abidjan`. Guardar el perfil la cambiaba sin avisar. Ahora los selectores incluyen `UTC` y la zona guardada. Las cuentas que ya guardaron conservan `Africa/Abidjan`, que tiene el mismo desfase que UTC, así que no cambia ninguna hora; no se migran porque no se distinguen de quien la eligió.
+
+### Acceso al panel y humo de producción (2026-11-04)
+
+**Humo:** el flujo de despliegue no compilaba `@mcet/schemas` y fallaba al cargar los pasos. Añadir la dependencia no bastaba: el cliente móvil importa `services/web`, que el humo no instala. Se resolvió con la dependencia y con la carga diferida del cliente en `movil-sedes.steps.ts`.
+
+**Panel:** el acceso se limita a 5 fallos por IP y 20 por cuenta cada 15 minutos, guardados en SQLite y con 429 y `Retry-After`. Solo cuentan los fallos. La cookie `admin_token` lleva `Secure` cuando el cliente llega por HTTPS. No hay escenario: los fallos bloquearían la IP que comparten todos los escenarios en paralelo.
+
+**Fallo intermitente del panel:** `admin.test.ts` fallaba 4 de 25 veces en `main`. `unblockUser` leía el último registro de auditoría ordenando solo por `created_at`, y dos registros del mismo milisegundo empataban, lo que duplicaba la auditoría al reintentar. Ahora desempata por `rowid`: 0 fallos de 40.

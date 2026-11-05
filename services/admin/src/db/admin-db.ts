@@ -108,6 +108,12 @@ export class AdminDatabase {
       );
 
       CREATE INDEX IF NOT EXISTS idx_audit_created ON admin_audit_logs(created_at DESC);
+
+      CREATE TABLE IF NOT EXISTS admin_login_failures (
+        key TEXT PRIMARY KEY,
+        failures INTEGER NOT NULL,
+        window_start INTEGER NOT NULL
+      );
     `);
   }
 
@@ -208,7 +214,7 @@ export class AdminDatabase {
     else {
       const latest = this.db
         .prepare(
-          "SELECT action FROM admin_audit_logs WHERE target_type = 'user' AND target_id = ? ORDER BY created_at DESC LIMIT 1",
+          "SELECT action FROM admin_audit_logs WHERE target_type = 'user' AND target_id = ? ORDER BY created_at DESC, rowid DESC LIMIT 1",
         )
         .get(userId) as { action: string } | undefined;
       if (latest?.action === "USER_UNBLOCKED") return false;
@@ -234,6 +240,32 @@ export class AdminDatabase {
   isUserBlocked(userId: string): boolean {
     const res = this.db.prepare("SELECT user_id FROM admin_blocked_users WHERE user_id = ?").get(userId);
     return Boolean(res);
+  }
+
+  getLoginFailures(key: string): { failures: number; window_start: number } | undefined {
+    return this.db
+      .prepare("SELECT failures, window_start FROM admin_login_failures WHERE key = ?")
+      .get(key) as { failures: number; window_start: number } | undefined;
+  }
+
+  /** Suma un fallo en la ventana activa y devuelve el total. */
+  addLoginFailure(key: string, now: number): number {
+    const row = this.db
+      .prepare(
+        `INSERT INTO admin_login_failures (key, failures, window_start) VALUES (?, 1, ?)
+         ON CONFLICT(key) DO UPDATE SET failures = failures + 1
+         RETURNING failures`,
+      )
+      .get(key, now) as { failures: number };
+    return row.failures;
+  }
+
+  deleteLoginFailures(key: string): void {
+    this.db.prepare("DELETE FROM admin_login_failures WHERE key = ?").run(key);
+  }
+
+  deleteExpiredLoginFailures(before: number): void {
+    this.db.prepare("DELETE FROM admin_login_failures WHERE window_start <= ?").run(before);
   }
 
   addAuditLog(
@@ -264,7 +296,7 @@ export class AdminDatabase {
 
   getAuditLogs(limit = 100): AuditLog[] {
     return this.db
-      .prepare("SELECT * FROM admin_audit_logs ORDER BY created_at DESC LIMIT ?")
+      .prepare("SELECT * FROM admin_audit_logs ORDER BY created_at DESC, rowid DESC LIMIT ?")
       .all(limit) as unknown as AuditLog[];
   }
 
