@@ -540,6 +540,9 @@ importers:
       '@mcet/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
+      '@mcet/schemas':
+        specifier: workspace:*
+        version: link:../../packages/schemas
       '@mcet/tsconfig':
         specifier: workspace:*
         version: link:../../packages/tsconfig
