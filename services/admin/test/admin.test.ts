@@ -1,4 +1,4 @@
-import { randomBytes } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -269,6 +269,22 @@ describe("Panel de Administración — Autenticación y Almacén Aislado", () =>
     ).toHaveLength(1);
   });
 
+  it("un reintento de desbloqueo no duplica la auditoría aunque todo ocurra en el mismo milisegundo", () => {
+    vi.useFakeTimers({ toFake: ["Date"], now: new Date("2026-11-04T12:00:00Z") });
+    try {
+      for (let i = 0; i < 40; i++) {
+        const userId = `usr-empate-${i}`;
+        adminDb.blockUser(userId, "empate@example.com", "Prueba", "yunerkis");
+        adminDb.unblockUser(userId, "yunerkis");
+        adminDb.unblockUser(userId, "yunerkis");
+      }
+      const unblocked = adminDb.getAuditLogs(200).filter((l) => l.action === "USER_UNBLOCKED");
+      expect(unblocked).toHaveLength(40);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("no registra como bloqueado en SQLite si PostgreSQL no confirma la restricción", async () => {
     vi.spyOn(platformDb, "setUserRestriction").mockRejectedValue(new PlatformDatabaseUnavailableError());
     const login = await app.inject({
@@ -325,6 +341,77 @@ describe("Panel de Administración — Autenticación y Almacén Aislado", () =>
     const missing = await post({ economicStatus: "active", reason: "Revisado" });
     expect(missing.statusCode).toBe(404);
     expect(missing.json().code).toBe("restriction_not_found");
+  });
+
+  describe("acceso al panel", () => {
+    const login = (password: string, ip = "203.0.113.5", username = "yunerkis", proto = "https") =>
+      app.inject({
+        method: "POST",
+        url: "/api/auth/login",
+        headers: { "x-forwarded-for": ip, "x-forwarded-proto": proto },
+        payload: { username, password },
+      });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("bloquea la IP tras 5 fallos, aunque después acierte, y libera al pasar la ventana", async () => {
+      vi.useFakeTimers({ toFake: ["Date"], now: new Date("2026-11-04T12:00:00Z") });
+      for (let i = 0; i < 5; i++) expect((await login("incorrecta")).statusCode).toBe(401);
+
+      const blocked = await login(testPassword);
+      expect(blocked.statusCode).toBe(429);
+      expect(Number(blocked.headers["retry-after"])).toBe(900);
+      expect(adminDb.getAuditLogs().filter((l) => l.action === "LOGIN_RATE_LIMITED")).toHaveLength(1);
+
+      expect((await login(testPassword, "198.51.100.7")).statusCode).toBe(200);
+
+      vi.setSystemTime(new Date("2026-11-04T12:15:01Z"));
+      expect((await login(testPassword)).statusCode).toBe(200);
+    });
+
+    it("limita la cuenta aunque cada intento venga de una IP distinta", async () => {
+      for (let i = 0; i < 20; i++) await login("incorrecta", `198.51.100.${i}`);
+      expect((await login(testPassword, "198.51.100.200")).statusCode).toBe(429);
+    });
+
+    it("un acceso correcto reinicia los fallos", async () => {
+      for (let i = 0; i < 4; i++) await login("incorrecta");
+      expect((await login(testPassword)).statusCode).toBe(200);
+      for (let i = 0; i < 4; i++) expect((await login("incorrecta")).statusCode).toBe(401);
+      expect((await login(testPassword)).statusCode).toBe(200);
+    });
+
+    it("los fallos sobreviven a un reinicio del servicio", async () => {
+      for (let i = 0; i < 5; i++) await login("incorrecta");
+      await app.close();
+      app = (await buildAdminApp({ releaseSha: "test-sha" }, adminDb, platformDb)).app;
+      expect((await login(testPassword)).statusCode).toBe(429);
+    });
+
+    it("no guarda en claro lo escrito como usuario", async () => {
+      await login("incorrecta", "203.0.113.5", "una-contrasena-en-el-campo-equivocado");
+      const key = createHash("sha256").update("account:una-contrasena-en-el-campo-equivocado").digest("hex");
+      expect(adminDb.getLoginFailures(key)?.failures).toBe(1);
+      expect(adminDb.getLoginFailures("account:una-contrasena-en-el-campo-equivocado")).toBeUndefined();
+    });
+
+    it("marca la cookie como Secure solo si el cliente llegó por HTTPS", async () => {
+      const https = await login(testPassword);
+      expect(https.headers["set-cookie"]).toContain("; Secure");
+      expect(https.headers["set-cookie"]).toContain("HttpOnly");
+
+      const http = await login(testPassword, "203.0.113.5", "yunerkis", "http");
+      expect(http.headers["set-cookie"]).not.toContain("Secure");
+
+      const logout = await app.inject({
+        method: "POST",
+        url: "/api/auth/logout",
+        headers: { authorization: `Bearer ${https.json().token}`, "x-forwarded-proto": "https" },
+      });
+      expect(logout.headers["set-cookie"]).toContain("Max-Age=0; Secure");
+    });
   });
 
   it("responde a healthz y version.json correctamente", async () => {

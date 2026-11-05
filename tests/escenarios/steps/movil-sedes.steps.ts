@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
+import { PrivateBusinessProfile } from "@mcet/schemas";
 import { expect } from "@playwright/test";
-import { PrivateBusinessProfile } from "../../../packages/schemas/dist/index.js";
-import { createMobileClient } from "../../../services/mobile/src/index.ts";
+import type { createMobileClient } from "../../../services/mobile/src/index.ts";
 import { actor, CLAVE } from "../fixtures/actores";
 import { sitio, Then, When } from "../fixtures/sitio";
 
@@ -30,6 +30,8 @@ async function listar(estado: Record<string, unknown>, nombre: string): Promise<
 
 When("{string} entra con el cliente móvil", async ({ estado }, nombre: string) => {
   const a = actor(estado, nombre);
+  // Carga diferida: bddgen lee todos los pasos, y el humo no instala las dependencias de services/web que usa este cliente.
+  const { createMobileClient } = await import("../../../services/mobile/src/index.ts");
   const cliente = createMobileClient({ baseUrl: sitio[a.dominio], platform: "android" });
   const sesion = await cliente.signIn({ email: a.email, password: CLAVE });
   expect(sesion.token).toBeTruthy();
